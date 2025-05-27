@@ -52,7 +52,7 @@ ip6tables -A INPUT -p tcp --dport 5555 -j DROP
 # check ttyd running
 if ! ps -ef | grep "ttyd --writable --port 1146 /system/bin/sh" | grep -v grep > /dev/null; then
     echo "[`date`] start ttyd..." >> "$LOG_FILE"
-
+    export PATH="/data/data/com.termux/files/usr/bin:$PATH"
     "$TTYD_PATH" --writable --port 1146 /system/bin/sh &
 else
     echo "[`date`] ttyd already running." >> "$LOG_FILE"

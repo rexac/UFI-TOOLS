@@ -64,9 +64,8 @@ class WebService : Service() {
                 val ADB_IP_ENABLED = sharedPrefs.getString("ADB_IP_ENABLED", "") ?: null
 
                 if (ADB_IP_ENABLED == "true") {
-
                     val ADB_IP =
-                        sharedPrefs.getString("ADB_IP", "") ?: throw Exception("没有ADMIN_IP")
+                        sharedPrefs.getString("gateway_ip", "")?.substringBefore(":") ?: throw Exception("没有ADMIN_IP")
                     val ADMIN_PWD =
                         sharedPrefs.getString("ADMIN_PWD", "") ?: throw Exception("没有ADMIN_PWD")
 

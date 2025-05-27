@@ -16,7 +16,7 @@ class KanoCURL(private val context: Context) {
         Thread {
             try {
                 Log.w("kano_ZTE_LOG_Curl", "正在执行curl命令:$command")
-                val args = KanoUtils.parseShellArgs(command.replace("curl", ""))
+                val args = KanoUtils.parseShellArgs(command.replaceFirst("curl", ""))
                 val result = ShellKano.executeShellFromAssetsSubfolderWithArgs(
                     context,
                     "shell/curl",

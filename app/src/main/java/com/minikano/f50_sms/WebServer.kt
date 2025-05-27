@@ -93,6 +93,28 @@ class WebServer(context: Context, port: Int, gatewayIp: String) : NanoHTTPD(port
             )
         }
 
+        //客户端IP
+        if(method == "GET" && uri =="/ip"){
+            return try {
+                val ip = session?.headers?.get("http-client-ip") ?: throw Exception("无法获取客户端IP地址")
+                Log.d("kano_ZTE_LOG", "获取客户端IP成功: $ip")
+                val response = newFixedLengthResponse(
+                    Response.Status.OK, "application/json", """{"ip":"${ip}"}"""
+                )
+                response.addHeader("Access-Control-Allow-Origin", "*")
+                response
+            } catch (e: Exception) {
+                Log.d("kano_ZTE_LOG", "获取客户端IP出错： ${e.message}")
+                val response = newFixedLengthResponse(
+                    Response.Status.INTERNAL_ERROR,
+                    "application/json",
+                    """{"error":"获取客户端IP失败"}"""
+                )
+                response.addHeader("Access-Control-Allow-Origin", "*")
+                response
+            }
+        }
+
         //cpu温度
         if (method == "GET" && uri == "/temp") {
             return try {
@@ -359,17 +381,15 @@ class WebServer(context: Context, port: Int, gatewayIp: String) : NanoHTTPD(port
 
                 //保存
                 if (enabled == true) {
-                    sharedPrefs.edit().putString("ADB_IP", host).putString("ADMIN_PWD", password)
+                    sharedPrefs.edit().putString("ADMIN_PWD", password)
                         .putString("ADB_IP_ENABLED", "true").apply()
                 } else {
-                    sharedPrefs.edit().remove("ADB_IP").remove("ADMIN_PWD")
+                    sharedPrefs.edit().remove("ADMIN_PWD")
                         .putString("ADB_IP_ENABLED", "false").apply()
                 }
 
                 Log.d(
-                    "kano_ZTE_LOG", "保存结果：ADB_IP:${
-                        sharedPrefs.getString("ADB_IP", "")
-                    } ADMIN_PWD:${
+                    "kano_ZTE_LOG", "ADMIN_PWD:${
                         sharedPrefs.getString("ADMIN_PWD", "")
                     }"
                 )
@@ -1201,7 +1221,7 @@ class WebServer(context: Context, port: Int, gatewayIp: String) : NanoHTTPD(port
                 // 解析 query 参数
                 val sharedPrefs =
                     context_app.getSharedPreferences("kano_ZTE_store", Context.MODE_PRIVATE)
-                val str =  sharedPrefs.getString("kano_sms_forward_enabled","0")
+                val str = sharedPrefs.getString("kano_sms_forward_enabled","0")
                 val response = newFixedLengthResponse(
                     Response.Status.OK,
                     "application/json",

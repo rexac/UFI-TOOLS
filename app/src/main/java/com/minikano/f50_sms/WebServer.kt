@@ -1142,7 +1142,7 @@ class WebServer(context: Context, port: Int, gatewayIp: String) : NanoHTTPD(port
                 }
 
                 //发送测试消息
-                val test_msg = SmsInfo("18888888888", "UFI-TOOLS TEST消息", 0)
+                val test_msg = SmsInfo("18888888888", "UFI-TOOLS TEST消息", System.currentTimeMillis())
                 SmsPoll.forwardSmsByCurl(test_msg,context_app)
 
                 json.put("curl_text", originalCurl)
@@ -1174,11 +1174,7 @@ class WebServer(context: Context, port: Int, gatewayIp: String) : NanoHTTPD(port
 
             val curl_text = sharedPrefs.getString("kano_sms_curl", "") ?: ""
 
-            val json = """
-                {
-                    "curl_text": "${curl_text.replace("\"","\\\"")}"
-                }
-            """.trimIndent()
+            val json = JSONObject(mapOf("curl_text" to curl_text)).toString()
 
             return newFixedLengthResponse(
                 Response.Status.OK,

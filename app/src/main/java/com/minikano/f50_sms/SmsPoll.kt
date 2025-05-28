@@ -58,17 +58,9 @@ object SmsPoll {
         val smsFrom = sms_data.address
         val smsTime = formatter.format(Instant.ofEpochMilli(sms_data.timestamp))
 
-//        val smsText = """${sms_data!!.body.trimStart()}
-//        📩 来自：${sms_data!!.address}
-//        ⏰ 时间：${formatter.format(Instant.ofEpochMilli(sms_data!!.timestamp))}
-//        """.trimIndent()
-//            .replace("\\", "\\\\")
-//            .replace("\"", "\\\"")
-//            .replace("\n", " ")
-//            .replace("\r", " ")
-
         //替换并发送
         val replacedCurl = originalCurl
+            .replace("\n","")
             .replace("{{sms-body}}", smsText)
             .replace("{{sms-time}}", smsTime)
             .replace("{{sms-from}}", smsFrom).trimIndent()

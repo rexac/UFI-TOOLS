@@ -10,6 +10,8 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.os.PowerManager
 import android.provider.Settings
 import android.util.Log
@@ -40,6 +42,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.TextUnit
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import kotlin.system.exitProcess
 
 class MainActivity : ComponentActivity() {
     companion object {
@@ -68,130 +71,167 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // 保持屏幕常亮
-        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        //阻止非随身WiFi安装使用
+        val isUFI_0 = KanoUtils.isAppInstalled(applicationContext,"com.zte.web")
+        val isUFI = ShellKano.runShellCommand("pm list package")
+        Log.d("kano_ZTE_LOG", "isUFI_0：${isUFI_0} isUFI:${isUFI} ")
 
-        requestNotificationPermissionIfNeeded()
+        if(!(isUFI != null && isUFI.contains("com.zte.web")) || !isUFI_0) {
 
-        // 忽略电池优化权限
-        val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
-        if (!powerManager.isIgnoringBatteryOptimizations(this.packageName)) {
-            val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
-            intent.data = Uri.parse("package:${this.packageName}")
-            this.startActivity(intent)
-        }
+            Toast.makeText(applicationContext, "App仅可在随身wifi上安装使用，手机使用请下载手机直装版，正在退出...", Toast.LENGTH_LONG).show()
+            Handler(Looper.getMainLooper()).postDelayed({
+                exitProcess(-114514)
+            }, 4600)
 
-        //用户使用量权限
-        if (!hasUsageAccessPermission(this)) {
-            val intent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            this.startActivity(intent)
-        }
-
-        val versionName = this.packageManager.getPackageInfo(this.packageName, 0).versionName
-
-        //每次启动时需要检测IP变动，适应用户ip网段更改
-        KanoUtils.adaptIPChange(applicationContext)
-
-        //防止服务重复启动
-        if (!isServiceRunning(WebService::class.java)) {
-            startForegroundService(Intent(this, WebService::class.java))
-        }
-        if (!isServiceRunning(ADBService::class.java)) {
-            startForegroundService(Intent(this, ADBService::class.java))
-        }
-
-        // 注册广播
-        registerReceiver(
-            serverStatusReceiver, IntentFilter(SERVER_INTENT),
-            Context.RECEIVER_EXPORTED
-        )
-
-        setContent {
-            val context = this@MainActivity
-            val sharedPrefs = remember {
-                context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            }
-
-            val isServerRunning by serverStatusLiveData.observeAsState(false)
-            var gatewayIp by remember {
-                mutableStateOf(
-                    sharedPrefs.getString(
-                        PREF_GATEWAY_IP,
-                        "192.168.0.1:8080"
-                    ) ?: "192.168.0.1:8080"
-                )
-            }
-
-            var loginToken by remember {
-                mutableStateOf(
-                    sharedPrefs.getString(
-                        PREF_LOGIN_TOKEN,
-                        "admin"
-                    ) ?: "admin"
-                )
-            }
-            var isTokenEnabled by remember {
-                mutableStateOf(
-                    sharedPrefs.getString(
-                        PREF_TOKEN_ENABLED,
-                        true.toString()
-                    ) ?: true.toString()
-                )
-            }
-            var isAutoIpEnabled by remember {
-                mutableStateOf(
-                    sharedPrefs.getString(
-                        PREF_AUTO_IP_ENABLED,
-                        true.toString()
-                    ) ?: true.toString()
-                )
-            }
-            if (isServerRunning) {
-                ServerUI(
-                    serverAddress = "http://${gatewayIp.substringBefore(":")}:$port",
-                    gatewayIp,
-                    versionName = versionName ?: "未知",
-                    onStopServer = {
-                        sendBroadcast(Intent(UI_INTENT).putExtra("status", false))
-                        serverStatusLiveData.postValue(false)
-                        Log.d("kano_ZTE_LOG", "user touched stop btn")
-                    }
-                )
-            } else {
-                InputUI(
-                    gatewayIp = gatewayIp,
-                    onGatewayIpChange = { gatewayIp = it },
-                    loginToken = loginToken,
-                    versionName = versionName ?: "未知",
-                    onLoginTokenChange = { loginToken = it },
-                    isTokenEnabled = isTokenEnabled == true.toString(),
-                    isAutoCheckIp = isAutoIpEnabled == true.toString(),
-                    onTokenEnableChange = { isTokenEnabled = it.toString() },
-                    onAutoCheckIpChange = {
-                        isAutoIpEnabled = it.toString()
-                        if (it.toString() == true.toString()) {
-                            KanoUtils.adaptIPChange(context,true) { newIp ->
-                                gatewayIp = newIp // 更新 Compose 状态变量，UI 立即更新
-                            }
+            setContent {
+                Card(
+                    shape = RoundedCornerShape(16.dp), // 圆角
+                    elevation = CardDefaults.cardElevation(8.dp), // 阴影
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp) // 外边距
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        repeat(10) {
+                            Text("只能在随身WiFi上安装使用!!!", fontSize = 16.sp)
                         }
-                    },
-                    onConfirm = {
-                        // 保存并重启服务器
-                        sharedPrefs.edit().putString(PREF_GATEWAY_IP, gatewayIp).apply()
-                        sharedPrefs.edit().putString(PREF_LOGIN_TOKEN, loginToken).apply()
-                        sharedPrefs.edit().putString(PREF_TOKEN_ENABLED, isTokenEnabled).apply()
-                        sharedPrefs.edit().putString(PREF_AUTO_IP_ENABLED, isAutoIpEnabled).apply()
-                        sendBroadcast(Intent(UI_INTENT).putExtra("status", true))
-                        serverStatusLiveData.postValue(true)
-                        Log.d("kano_ZTE_LOG", "user touched start btn")
-                        runADB()
                     }
-                )
+                }
             }
-        }
 
-        runADB()
+        } else {
+            // 保持屏幕常亮
+            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
+            requestNotificationPermissionIfNeeded()
+
+            // 忽略电池优化权限
+            val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
+            if (!powerManager.isIgnoringBatteryOptimizations(this.packageName)) {
+                val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
+                intent.data = Uri.parse("package:${this.packageName}")
+                this.startActivity(intent)
+            }
+
+            //用户使用量权限
+            if (!hasUsageAccessPermission(this)) {
+                val intent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                this.startActivity(intent)
+            }
+
+            val versionName = this.packageManager.getPackageInfo(this.packageName, 0).versionName
+
+            //每次启动时需要检测IP变动，适应用户ip网段更改
+            KanoUtils.adaptIPChange(applicationContext)
+
+            //防止服务重复启动
+            if (!isServiceRunning(WebService::class.java)) {
+                startForegroundService(Intent(this, WebService::class.java))
+            }
+            if (!isServiceRunning(ADBService::class.java)) {
+                startForegroundService(Intent(this, ADBService::class.java))
+            }
+
+            // 注册广播
+            registerReceiver(
+                serverStatusReceiver, IntentFilter(SERVER_INTENT),
+                Context.RECEIVER_EXPORTED
+            )
+
+            setContent {
+                val context = this@MainActivity
+                val sharedPrefs = remember {
+                    context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                }
+
+                val isServerRunning by serverStatusLiveData.observeAsState(false)
+                var gatewayIp by remember {
+                    mutableStateOf(
+                        sharedPrefs.getString(
+                            PREF_GATEWAY_IP,
+                            "192.168.0.1:8080"
+                        ) ?: "192.168.0.1:8080"
+                    )
+                }
+
+                var loginToken by remember {
+                    mutableStateOf(
+                        sharedPrefs.getString(
+                            PREF_LOGIN_TOKEN,
+                            "admin"
+                        ) ?: "admin"
+                    )
+                }
+                var isTokenEnabled by remember {
+                    mutableStateOf(
+                        sharedPrefs.getString(
+                            PREF_TOKEN_ENABLED,
+                            true.toString()
+                        ) ?: true.toString()
+                    )
+                }
+                var isAutoIpEnabled by remember {
+                    mutableStateOf(
+                        sharedPrefs.getString(
+                            PREF_AUTO_IP_ENABLED,
+                            true.toString()
+                        ) ?: true.toString()
+                    )
+                }
+                if (isServerRunning) {
+                    ServerUI(
+                        serverAddress = "http://${gatewayIp.substringBefore(":")}:$port",
+                        gatewayIp,
+                        versionName = versionName ?: "未知",
+                        onStopServer = {
+                            sendBroadcast(Intent(UI_INTENT).putExtra("status", false))
+                            serverStatusLiveData.postValue(false)
+                            Log.d("kano_ZTE_LOG", "user touched stop btn")
+                        }
+                    )
+                } else {
+                    InputUI(
+                        gatewayIp = gatewayIp,
+                        onGatewayIpChange = { gatewayIp = it },
+                        loginToken = loginToken,
+                        versionName = versionName ?: "未知",
+                        onLoginTokenChange = { loginToken = it },
+                        isTokenEnabled = isTokenEnabled == true.toString(),
+                        isAutoCheckIp = isAutoIpEnabled == true.toString(),
+                        onTokenEnableChange = { isTokenEnabled = it.toString() },
+                        onAutoCheckIpChange = {
+                            isAutoIpEnabled = it.toString()
+                            if (it.toString() == true.toString()) {
+                                KanoUtils.adaptIPChange(context, true) { newIp ->
+                                    gatewayIp = newIp // 更新 Compose 状态变量，UI 立即更新
+                                }
+                            }
+                        },
+                        onConfirm = {
+                            // 保存并重启服务器
+                            sharedPrefs.edit().putString(PREF_GATEWAY_IP, gatewayIp).apply()
+                            sharedPrefs.edit().putString(PREF_LOGIN_TOKEN, loginToken).apply()
+                            sharedPrefs.edit().putString(PREF_TOKEN_ENABLED, isTokenEnabled).apply()
+                            sharedPrefs.edit().putString(PREF_AUTO_IP_ENABLED, isAutoIpEnabled)
+                                .apply()
+                            sendBroadcast(Intent(UI_INTENT).putExtra("status", true))
+                            serverStatusLiveData.postValue(true)
+                            Log.d("kano_ZTE_LOG", "user touched start btn")
+                            runADB()
+                        }
+                    )
+                }
+            }
+
+            runADB()
+        }
     }
 
     private fun requestNotificationPermissionIfNeeded() {
@@ -416,18 +456,11 @@ fun ServerUI(
                     fontSize = 16.sp,
                     url = "http://$gatewayIP"
                 )
-                Spacer(modifier = Modifier.height(16.dp))
-                HyperlinkText(
-                    "在手机安装使用的，请点击localhost:2333跳转",
-                    "localhost:2333",
-                    fontSize = 10.sp,
-                    url = "http://localhost:2333"
-                )
                 Spacer(modifier = Modifier.height(20.dp))
                 Text("可点击停止服务更改网关和口令密码(默认admin)", fontSize = 12.sp)
                 Spacer(modifier = Modifier.height(10.dp))
                 Text(
-                    "本软件需安装在随身WiFi机内，安装在手机上会导致部分功能不可用",
+                    "本软件需安装在随身WiFi机内，请勿安装到手机上",
                     fontSize = 10.sp
                 )
                 Text("如需手机使用，请下载手机独立版", fontSize = 10.sp)
@@ -495,14 +528,8 @@ fun HyperlinkText(
                 .firstOrNull()?.let {
                     try {
                         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(it.item))
-                        val packageManager = context.packageManager
-                        if (intent.resolveActivity(packageManager) != null) {
                             context.startActivity(intent)
-                        } else {
-                            Toast.makeText(context, "无法打开链接，系统未安装浏览器", Toast.LENGTH_SHORT).show()
-                        }
                     } catch (e: Exception) {
-                        e.printStackTrace()
                         Toast.makeText(context, "打开链接失败", Toast.LENGTH_SHORT).show()
                     }
                 }

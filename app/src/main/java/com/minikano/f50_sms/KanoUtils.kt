@@ -11,6 +11,7 @@ import com.minikano.f50_sms.WebServer.MyStorageInfo
 import java.util.Calendar
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.util.Log
 import android.widget.Toast
@@ -200,8 +201,21 @@ class KanoUtils {
             return matcher.findAll(command).map {
                 val quoted = it.groups[2]?.value
                 val plain = it.groups[3]?.value
-                quoted ?: plain ?: ""
+                when {
+                    quoted != null -> quoted
+                    plain != null -> plain.replace("\\", "")
+                    else -> ""
+                }
             }.toList()
+        }
+
+        fun isAppInstalled(context: Context, packageName: String): Boolean {
+            return try {
+                context.packageManager.getPackageInfo(packageName, 0)
+                true
+            } catch (e: PackageManager.NameNotFoundException) {
+                false
+            }
         }
 
         fun adaptIPChange(context: Context,userTouched: Boolean = false, onIpChanged: ((String) -> Unit)? = null) {

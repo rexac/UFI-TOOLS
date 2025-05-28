@@ -54,16 +54,25 @@ object SmsPoll {
         Log.d("kano_ZTE_LOG", "开始转发短信...（CURL）")
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
             .withZone(ZoneId.systemDefault())
-        val smsText = """${sms_data!!.body.trimStart()}
-        📩 来自：${sms_data!!.address}
-        ⏰ 时间：${formatter.format(Instant.ofEpochMilli(sms_data!!.timestamp))}
-        """.trimIndent()
-            .replace("\\", "\\\\")
-            .replace("\"", "\\\"")
-            .replace("\n", "\\n")
+        val smsText = sms_data.body.trimStart()
+        val smsFrom = sms_data.address
+        val smsTime = formatter.format(Instant.ofEpochMilli(sms_data.timestamp))
+
+//        val smsText = """${sms_data!!.body.trimStart()}
+//        📩 来自：${sms_data!!.address}
+//        ⏰ 时间：${formatter.format(Instant.ofEpochMilli(sms_data!!.timestamp))}
+//        """.trimIndent()
+//            .replace("\\", "\\\\")
+//            .replace("\"", "\\\"")
+//            .replace("\n", " ")
+//            .replace("\r", " ")
 
         //替换并发送
-        val replacedCurl = originalCurl.replace("{{sms}}", smsText)
+        val replacedCurl = originalCurl
+            .replace("{{sms-body}}", smsText)
+            .replace("{{sms-time}}", smsTime)
+            .replace("{{sms-from}}", smsFrom).trimIndent()
+
         KanoCURL(context).send(replacedCurl)
     }
 
@@ -108,16 +117,21 @@ object SmsPoll {
 
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
             .withZone(ZoneId.systemDefault())
-        val previewText = sms_data!!.body.trimStart().let {
+        val previewText = sms_data.body.trimStart().let {
             if (it.length > 37) it.take(37) + "…" else it
         }
         smtpClient.sendEmail(
             to = smtpTo,
             subject = previewText,
-            body = """${sms_data!!.body.trimStart()}
-            📩 <b>来自：</b>${sms_data!!.address}
-            ⏰ <b>时间：</b>${formatter.format(Instant.ofEpochMilli(sms_data!!.timestamp))}
-            <div style="text-align=center"><i>Powered by <a href="">UFI-TOOLS</a></i></div>
+            body = """
+                <div>
+                    <p>${sms_data!!.body.trimStart()}</p>
+                    <p>📩 <b>来自：</b>${sms_data.address}</p>
+                    <p>⏰ <b>时间：</b>${formatter.format(Instant.ofEpochMilli(sms_data.timestamp))}</p>
+                    <div style="text-align: center;">
+                        <i>Powered by <a href="https://github.com/kanoqwq/UFI-TOOLS" target="_blank">UFI-TOOLS</a></i>
+                    </div>
+                </div>
             """.trimIndent()
         )
     }

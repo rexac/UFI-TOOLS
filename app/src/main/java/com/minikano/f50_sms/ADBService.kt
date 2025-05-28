@@ -114,7 +114,6 @@ class ADBService : Service() {
                             waited += interval
                         }
                     }
-
                     // 每 11 秒轮询一次
                     Thread.sleep(11_000)
                 }

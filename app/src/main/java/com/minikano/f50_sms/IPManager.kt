@@ -10,21 +10,6 @@ object IPManager {
      * @param context 应用上下文
      * @return 网关地址（如 192.168.1.1），获取失败返回 null
      */
-    fun getWifiGatewayIp(context: Context): String? {
-        return try {
-            val wifiManager =
-                context.applicationContext.getSystemService(Context.WIFI_SERVICE) as? android.net.wifi.WifiManager
-            val dhcpInfo = wifiManager?.dhcpInfo
-            val gatewayInt = dhcpInfo?.gateway ?: return null
-            val gatewayIp = intToIp(gatewayInt)
-
-            if (gatewayIp == "0.0.0.0") null else gatewayIp
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
-        }
-    }
-
     fun getHotspotGatewayIp(setPort:String?): String? {
         try {
             val process = Runtime.getRuntime().exec("ip route")

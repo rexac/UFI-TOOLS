@@ -15,7 +15,7 @@ class KanoSMTP(
     // 防止重复发送
     private val isSending = AtomicBoolean(false)
 
-    fun sendEmail(to: String, subject: String, body: String) {
+    fun sendEmail(to: String, subject: String, body: String,isHTML:Boolean=true) {
         // 如果已经在发送中，则直接返回
         if (!isSending.compareAndSet(false, true)) {
             Log.w("kano_ZTE_LOG", "邮件正在发送中，忽略重复发送")
@@ -42,11 +42,17 @@ class KanoSMTP(
                     }
                 })
 
+
                 val message = MimeMessage(session).apply {
                     setFrom(InternetAddress(username))
                     setRecipients(Message.RecipientType.TO, InternetAddress.parse(to))
                     setSubject(subject)
-                    setText(body)
+                    if(isHTML) {
+                        setContent(body,"text/html; charset=utf-8")
+                    }
+                    else {
+                        setText(body)
+                    }
                 }
 
                 Log.d("kano_ZTE_LOG", "开始发送邮件...")

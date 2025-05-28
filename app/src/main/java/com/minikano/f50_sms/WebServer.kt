@@ -142,11 +142,11 @@ class WebServer(context: Context, port: Int, gatewayIp: String) : NanoHTTPD(port
         if (method == "GET" && uri == "/cpu") {
             return try {
                 val stat1 =
-                    ShellKano.runShellCommand("cat /proc/stat") ?: throw Exception("stat1没有数据")
+                    runShellCommand("cat /proc/stat") ?: throw Exception("stat1没有数据")
                 val (total1, idle1) = KanoUtils.parseCpuStat(stat1)
                     ?: throw Exception("parseCpuStat执行失败")
                 val stat2 =
-                    ShellKano.runShellCommand("cat /proc/stat") ?: throw Exception("stat2没有数据")
+                    runShellCommand("cat /proc/stat") ?: throw Exception("stat2没有数据")
                 val (total2, idle2) = KanoUtils.parseCpuStat(stat2)
                     ?: throw Exception("parseCpuStat执行失败")
                 val totalDiff = total2 - total1
@@ -568,7 +568,7 @@ class WebServer(context: Context, port: Int, gatewayIp: String) : NanoHTTPD(port
                 val availableSize = (statFs.blockSizeLong * statFs.availableBlocksLong)
                 val usedSize = totalSize - availableSize
 
-                val dailyData = (KanoUtils.getTodayDataUsage(context_app))
+                val dailyData = (getCachedTodayUsage(context_app))
 
                 //外部存储
                 val ex_storage_info = KanoUtils.getRemovableStorageInfo(context_app)
@@ -1114,22 +1114,22 @@ class WebServer(context: Context, port: Int, gatewayIp: String) : NanoHTTPD(port
         //短信转发参数存入-curl
         if (method == "POST" && uri == "/sms_forward_curl") {
             return try {
-                val map = HashMap<String, String>()
-                session?.parseBody(map)
-                val body = map["postData"] ?: throw Exception("postData is null")
+                val files = HashMap<String, String>()
+                session?.parseBody(files) ?: throw Exception("Body is null")
+
+                val bodyBytes = files["postData"]?.toByteArray(Charsets.UTF_8)
+                val body = bodyBytes?.toString(Charsets.UTF_8) ?: throw Exception("postData is null")
+
                 val json = JSONObject(body)
 
-                // 替换字段值
                 val originalCurl = json.getString("curl_text")
 
                 Log.d("kano_ZTE_LOG", "是否找到{{sms}}：${originalCurl.contains("{{sms}}")}")
                 Log.d("kano_ZTE_LOG", "curl配置：${originalCurl}")
 
-                if(!originalCurl.contains("{{sms}}")) throw Exception("没有找到“{{sms}}”占位符")
-
-                //发送测试消息
-                val test_msg = SmsInfo("1010721", "UFI-TOOLS TEST消息", 0)
-                SmsPoll.forwardSmsByCurl(test_msg,context_app)
+                if(!originalCurl.contains("{{sms-body}}")) throw Exception("没有找到“{{sms-body}}”占位符")
+                if(!originalCurl.contains("{{sms-time}}")) throw Exception("没有找到“{{sms-time}}”占位符")
+                if(!originalCurl.contains("{{sms-from}}")) throw Exception("没有找到“{{sms-from}}”占位符")
 
                 // 存储到 SharedPreferences
                 val sharedPrefs =
@@ -1140,6 +1140,10 @@ class WebServer(context: Context, port: Int, gatewayIp: String) : NanoHTTPD(port
                     putString("kano_sms_curl", originalCurl)
                     apply()
                 }
+
+                //发送测试消息
+                val test_msg = SmsInfo("18888888888", "UFI-TOOLS TEST消息", 0)
+                SmsPoll.forwardSmsByCurl(test_msg,context_app)
 
                 json.put("curl_text", originalCurl)
 
@@ -1375,6 +1379,18 @@ class WebServer(context: Context, port: Int, gatewayIp: String) : NanoHTTPD(port
                 Response.Status.NOT_FOUND, "text/plain", "404 Not Found: ${e.message}"
             )
         }
+    }
+
+    private var cachedTotal = 0L
+    private var lastUpdate = 0L
+
+    fun getCachedTodayUsage(context: Context): Long {
+        val now = System.currentTimeMillis()
+        if (now - lastUpdate > 10_000) { // 每 10 秒更新一次
+            cachedTotal = KanoUtils.getTodayDataUsage(context)
+            lastUpdate = now
+        }
+        return cachedTotal
     }
 
     data class MyStorageInfo(

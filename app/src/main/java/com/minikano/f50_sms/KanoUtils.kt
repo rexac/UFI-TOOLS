@@ -53,35 +53,7 @@ class KanoUtils {
             return null
         }
 
-        //不建议使用
-        fun getMaxTemperature(): Int? {
-            val temperatures = mutableListOf<Int>()
-
-            // 遍历 zone0 到 zone30
-            for (i in 0..25) {
-                val zone = "/sys/class/thermal/thermal_zone$i/temp"
-                val temp = ShellKano.runShellCommand("cat $zone")
-
-                if (!temp.isNullOrEmpty()) {
-                    try {
-                        temperatures.add(temp.toInt())  // 添加有效的温度值到列表
-                    } catch (e: NumberFormatException) {
-                        // 如果温度值无法解析为整数，可以忽略该值
-                        continue
-                    }
-                }
-            }
-
-            // 如果没有有效的温度值，返回 null
-            if (temperatures.isEmpty()) {
-                return null
-            }
-
-            // 对温度值排序并取最大值
-            return temperatures.sortedDescending().first()
-        }
-
-         fun getStartOfDayMillis(): Long {
+        fun getStartOfDayMillis(): Long {
             val cal = Calendar.getInstance()
             cal.set(Calendar.HOUR_OF_DAY, 0)
             cal.set(Calendar.MINUTE, 0)
@@ -224,9 +196,11 @@ class KanoUtils {
         }
 
         fun parseShellArgs(command: String): List<String> {
-            val matcher = Regex("""(".*?"|\S+)""")
+            val matcher = Regex("""(["'])(.*?)(?<!\\)\1|(\S+)""") // 处理单引号/双引号/无引号的参数
             return matcher.findAll(command).map {
-                it.value.trim('"') // 去除引号
+                val quoted = it.groups[2]?.value
+                val plain = it.groups[3]?.value
+                quoted ?: plain ?: ""
             }.toList()
         }
 

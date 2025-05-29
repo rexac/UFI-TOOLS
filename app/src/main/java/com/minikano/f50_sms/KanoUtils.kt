@@ -53,6 +53,12 @@ class KanoUtils {
             return digest.digest(data)
         }
 
+        fun sha256Hex(input: String): String {
+            val bytes = input.toByteArray(Charsets.UTF_8)
+            val digest = MessageDigest.getInstance("SHA-256").digest(bytes)
+            return digest.joinToString("") { "%02x".format(it) }
+        }
+
         //获取电池电量
         fun getBatteryPercentage(context: Context): Int {
             val filter = IntentFilter(Intent.ACTION_BATTERY_CHANGED)

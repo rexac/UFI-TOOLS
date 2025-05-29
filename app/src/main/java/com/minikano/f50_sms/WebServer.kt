@@ -94,7 +94,13 @@ class WebServer(context: Context, port: Int, gatewayIp: String) : NanoHTTPD(port
             val authHeader = headers["authorization"]
 
             // 鉴权必需字段不能为空
-            if (authHeader != token || timestampStr == null || clientSignature == null) {
+            if (timestampStr == null || clientSignature == null) {
+                return unauthorized()
+            }
+            if (authHeader == null || token == null) {
+                return unauthorized()
+            }
+            if (authHeader != KanoUtils.sha256Hex(token)) {
                 return unauthorized()
             }
 

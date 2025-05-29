@@ -10,7 +10,7 @@ plugins {
 
 // 注册执行 npm 命令的任务
 val npmBuild by tasks.registering(Exec::class) {
-    workingDir = file("src/main/assets")
+    workingDir = file("frontEnd")
     doFirst {
         println("✅ 当前 workingDir: $workingDir")
         println("✅ 系统平台: ${System.getProperty("os.name")}")
@@ -50,7 +50,7 @@ android {
         targetSdk = 33
         // 动态生成 versionCode 为 yyyyMMdd 格式
         versionCode = SimpleDateFormat("yyyyMMdd").format(Date()).toInt()
-        versionName = "2.9.5_imp"
+        versionName = "2.9.6"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -75,12 +75,17 @@ android {
     }
     packaging {
         resources {
-            excludes += setOf(
-                "assets/script_orignal/**",
+            excludes += listOf(
                 "META-INF/LICENSE.md",
                 "META-INF/LICENSE",
                 "META-INF/NOTICE.md",
-                "META-INF/NOTICE"
+                "META-INF/NOTICE",
+                "assets/script_orignal/**",
+                "assets/dictionary.json",
+                "assets/node_modules/**",
+                "assets/dev-server.js",
+                "assets/package-lock.json",
+                "assets/package.json"
             )
         }
     }

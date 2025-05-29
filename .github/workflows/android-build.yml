@@ -27,12 +27,8 @@ jobs:
           node-version: '20'
 
       - name: Install Node.js dependencies
-        working-directory: app/src/main/assets
+        working-directory: app/frontEnd
         run: npm install --no-package-lock
-
-      - name: Node Build
-        working-directory: app/src/main/assets
-        run: npm run build
 
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew

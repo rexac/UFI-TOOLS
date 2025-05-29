@@ -362,7 +362,7 @@ function main_func() {
             if (isNeedToken) {
                 if (!token || !token?.trim()) return createToast('请输入token！', 'red')
             }
-            KANO_TOKEN = token.trim()
+            KANO_TOKEN = SHA256(token.trim()).toLowerCase()
             common_headers.authorization = KANO_TOKEN
             let { psw_fail_num_str, login_lock_time } = await getData(new URLSearchParams({
                 cmd: 'psw_fail_num_str,login_lock_time'
@@ -382,7 +382,7 @@ function main_func() {
             }
             createToast('登录成功！', 'green')
             localStorage.setItem('kano_sms_pwd', password.trim())
-            localStorage.setItem('kano_sms_token', token.trim())
+            localStorage.setItem('kano_sms_token', SHA256(token.trim()).toLowerCase())
             closeModal('#tokenModal')
             initRenderMethod()
         }
@@ -648,9 +648,9 @@ function main_func() {
                 wifi_access_sta_num: `${notNullOrundefinedOrIsShow(res, 'wifi_access_sta_num') ? `<strong onclick="copyText(event)"  class="blue">WIFI设备数：${res.wifi_access_sta_num}</strong>` : ''}`,
                 battery: `${notNullOrundefinedOrIsShow(res, 'battery') ? `<strong onclick="copyText(event)"  class="green">剩余电量：${res.battery} %</strong>` : ''}`,
                 rssi: `${notNullOrundefinedOrIsShow(res, 'rssi') || notNullOrundefinedOrIsShow(res, 'network_signalbar', true) ? `<strong onclick="copyText(event)"  class="green">蜂窝信号强度：${kano_getSignalEmoji(notNullOrundefinedOrIsShow(res, 'rssi') ? res.rssi : res.network_signalbar)}</strong>` : ''}`,
-                cpu_temp: `${notNullOrundefinedOrIsShow(res, 'cpu_temp') ? `<strong onclick="copyText(event)"  class="blue">CPU温度：${Number(res.cpu_temp / 1000).toFixed(2)} ℃</strong>` : ''}`,
-                cpu_usage: `${notNullOrundefinedOrIsShow(res, 'cpu_usage') ? `<strong onclick="copyText(event)"  class="blue">CPU使用率：${Number(res.cpu_usage).toFixed(2)} %</strong>` : ''}`,
-                mem_usage: `${notNullOrundefinedOrIsShow(res, 'mem_usage') ? `<strong onclick="copyText(event)"  class="blue">内存使用率：${Number(res.mem_usage).toFixed(2)} %</strong>` : ''}`,
+                cpu_temp: `${notNullOrundefinedOrIsShow(res, 'cpu_temp') ? `<strong onclick="copyText(event)"  class="blue">CPU温度：<span style="text-align:center;display:inline-block;width: 8ch;">${Number(res.cpu_temp / 1000).toFixed(2)} ℃</span></strong>` : ''}`,
+                cpu_usage: `${notNullOrundefinedOrIsShow(res, 'cpu_usage') ? `<strong onclick="copyText(event)"  class="blue">CPU使用率：<span style="text-align:center;display:inline-block;width: 8ch;">${Number(res.cpu_usage).toFixed(2)} %</span></strong>` : ''}`,
+                mem_usage: `${notNullOrundefinedOrIsShow(res, 'mem_usage') ? `<strong onclick="copyText(event)"  class="blue">内存使用率：<span style="text-align:center;display:inline-block;width: 8ch;">${Number(res.mem_usage).toFixed(2)} %</span></strong>` : ''}`,
                 realtime_time: `${notNullOrundefinedOrIsShow(res, 'realtime_time') ? `<strong onclick="copyText(event)"  class="blue">连接时长：${kano_formatTime(Number(res.realtime_time))}${res.monthly_time ? '&nbsp;<span style="color:white">/</span>&nbsp;总时长: ' + kano_formatTime(Number(res.monthly_time)) : ''}</strong>` : ''}`,
                 monthly_tx_bytes: `${notNullOrundefinedOrIsShow(res, 'monthly_tx_bytes') || notNullOrundefinedOrIsShow(res, 'monthly_rx_bytes') ? `<strong onclick="copyText(event)"  class="blue">已用流量：<span class="red">${formatBytes(Number((res.monthly_tx_bytes + res.monthly_rx_bytes)))}</span>${(res.data_volume_limit_size || res.flux_data_volume_limit_size) && (res.flux_data_volume_limit_switch == '1' || res.data_volume_limit_switch == '1') ? '&nbsp;<span style="color:white">/</span>&nbsp;总流量：' + formatBytes((() => {
                     const limit_size = res.data_volume_limit_size ? res.data_volume_limit_size : res.flux_data_volume_limit_size
@@ -660,7 +660,7 @@ function main_func() {
                 daily_data: `${notNullOrundefinedOrIsShow(res, 'daily_data') ? `<strong onclick="copyText(event)"  class="blue">当日流量：${formatBytes(res.daily_data)}</strong>` : ''}`,
                 internal_available_storage: `${notNullOrundefinedOrIsShow(res, 'internal_available_storage') || notNullOrundefinedOrIsShow(res, 'internal_total_storage') ? `<strong onclick="copyText(event)" class="blue">内部存储：${formatBytes(res.internal_used_storage)} 已用 / ${formatBytes(res.internal_total_storage)} 总容量</strong>` : ''}`,
                 external_available_storage: `${notNullOrundefinedOrIsShow(res, 'external_available_storage') || notNullOrundefinedOrIsShow(res, 'external_total_storage') ? `<strong onclick="copyText(event)" class="blue">SD卡：${formatBytes(res.external_used_storage)} 已用 / ${formatBytes(res.external_total_storage)} 总容量</strong>` : ''}`,
-                realtime_rx_thrpt: `${notNullOrundefinedOrIsShow(res, 'realtime_tx_thrpt') || notNullOrundefinedOrIsShow(res, 'realtime_rx_thrpt') ? `<strong onclick="copyText(event)" class="blue">当前网速: ⬇️ ${formatBytes(Number((res.realtime_rx_thrpt)))}/S ⬆️ ${formatBytes(Number((res.realtime_tx_thrpt)))}/S</strong>` : ''}`,
+                realtime_rx_thrpt: `${notNullOrundefinedOrIsShow(res, 'realtime_tx_thrpt') || notNullOrundefinedOrIsShow(res, 'realtime_rx_thrpt') ? `<strong onclick="copyText(event)" class="blue">当前网速: <span style="text-align:center;display:inline-block;width: 14ch;">&nbsp;⬇️&nbsp;${formatBytes(Number((res.realtime_rx_thrpt)))}/S</span>&nbsp;<span style="text-align:center;display:inline-block;width: 14ch;">⬆️&nbsp;${formatBytes(Number((res.realtime_tx_thrpt)))}/S</span></strong>` : ''}`,
             }
             let statusHtml_net = {
                 lte_rsrp: `${notNullOrundefinedOrIsShow(res, 'lte_rsrp') ? `<strong onclick="copyText(event)"  class="green">4G接收功率：${kano_parseSignalBar(res.lte_rsrp)}</strong>` : ''}`,
@@ -1816,7 +1816,16 @@ function main_func() {
                         ApBroadcastDisabledEl && (ApBroadcastDisabledEl.checked = item.ApBroadcastDisabled.toString() == '0')
                         SSIDEl && (SSIDEl.value = item.SSID)
                         // 二维码
-                        QRCodeImg.src = KANO_baseURL + item.QrImageUrl
+                        fetch(KANO_baseURL + item.QrImageUrl, {
+                            headers: common_headers
+                        }).then(async (res) => {
+                            const blob = await res.blob();
+                            const objectURL = URL.createObjectURL(blob);
+                            QRCodeImg.onload = () => {
+                                URL.revokeObjectURL(objectURL);
+                            };
+                            QRCodeImg.src = objectURL;
+                        });
                         const WIFI_FORM_SHOWABLE = document.querySelector('#WIFI_FORM_SHOWABLE')
                         AuthModeEl.value = item.AuthMode
                         AuthModeEl.selected = item.AuthMode

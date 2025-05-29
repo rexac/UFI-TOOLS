@@ -3,32 +3,9 @@ const path = require('path');
 const JavaScriptObfuscator = require('javascript-obfuscator');
 
 const isDebug = process.argv.includes('--debug');
-const inputDir = path.resolve(__dirname, 'script_orignal');
-const outputDir = path.resolve(__dirname, 'script');
-
-const firstChars = ['o', 'O'];      // 首字符合法：不能为数字
-const otherChars = ['0', 'o', 'O','p','P','m','n']; // 其余字符可自由组合
-const maxLength = 6;                // 控制生成最大长度
-const result = [];
-
-function generate(current, isFirst) {
-    if (current.length > 0) {
-        result.push(current);
-    }
-    if (current.length === maxLength) return;
-
-    const chars = isFirst ? firstChars : otherChars;
-    for (const c of chars) {
-        generate(current + c, false);
-    }
-}
-
-for (const c of firstChars) {
-    generate(c, false);
-}
-
-fs.writeFileSync('dictionary.json', JSON.stringify(result, null, 2));
-console.log(`✅ 生成 ${result.length} 个合法变量名，已写入 dictionary.json`);
+const inputDir = path.resolve(__dirname, 'public');
+const outputDir = path.resolve(__dirname, '../src/main/assets/');
+// const outputDir = path.resolve(__dirname, 'dist');
 
 const obfuscateOptions = {
     compact: true,
@@ -37,22 +14,20 @@ const obfuscateOptions = {
     deadCodeInjection: !isDebug,
     deadCodeInjectionThreshold: 1.0,
     disableConsoleOutput: !isDebug,
-    identifierNamesGenerator: 'hexadecimal',
     stringArray: true,
-    renameGlobals: false,
     stringArrayThreshold: 1.0,
     transformObjectKeys: true,
     unicodeEscapeSequence: true,
-    identifierNamesGenerator: 'dictionary',
-    identifiersDictionary: require('./dictionary.json')
+    renameGlobals: false,
 };
+// if (fs.existsSync(outputDir)) {
+//     fs.rmSync(outputDir, { recursive: true, force: true });
+//     console.log(`🧹 已删除旧的输出目录: ${outputDir}`);
+// }
 
-if (fs.existsSync(outputDir)) {
-    fs.rmSync(outputDir, { recursive: true, force: true });
-    console.log(`🧹 已删除旧的输出目录: ${outputDir}`);
+if (!fs.existsSync(outputDir)) {
+    fs.mkdirSync(outputDir, { recursive: true });
 }
-
-fs.mkdirSync(outputDir, { recursive: true });
 
 function copyOrObfuscateFile(entryPath, outPath) {
     const sourceCode = fs.readFileSync(entryPath, 'utf8');

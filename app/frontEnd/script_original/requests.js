@@ -3,37 +3,54 @@ function gsmEncode(text) { function encodeText(text) { let encoded = []; for (le
 //注意，如果是在f50本机内发起请求，请将请求端口更改为8080
 let KANO_baseURL = '/api'
 let KANO_PASSWORD = null
-let KANO_TOKEN = null
+let KANO_TOKEN = null;
 
 // 包装fetch
-const of = window.fetch;
+(() => {
+    const of = window.fetch;
 
-window.fetch = async (input, init = {}) => {
-    const headers = new Headers(init.headers || {});
-    const t = Date.now();
-    const method = (init.method || 'GET').toUpperCase();
+    function hmacSignature(secret, data) {
+        const hmacMd5 = CryptoJS.HmacMD5(data, secret);
+        const hmacMd5Bytes = CryptoJS.enc.Hex.parse(hmacMd5.toString());
 
-    // 提取纯路径（不含 query）
-    let urlPath = '';
-    try {
-        const url = new URL(input, window.location.origin);
-        urlPath = url.pathname;
-    } catch (e) {
-        console.warn('无效的URL:', input);
-        urlPath = input; // fallback
+        const mid = Math.floor(hmacMd5Bytes.sigBytes / 2);
+        const part1 = CryptoJS.lib.WordArray.create(hmacMd5Bytes.words.slice(0, mid / 4), mid);
+        const part2 = CryptoJS.lib.WordArray.create(hmacMd5Bytes.words.slice(mid / 4), mid);
+
+        const sha1 = CryptoJS.SHA256(part1);
+        const sha2 = CryptoJS.SHA256(part2);
+        const finalHash = CryptoJS.SHA256(sha1.concat(sha2));
+
+        return finalHash.toString(CryptoJS.enc.Hex);
     }
-    // 没啥用，只是起到混淆作用
-    const signature = hmacSignature('minikano_kOyXz0Ciz4V7wR0IeKmJFYFQ20jd', 'minikano' + method + urlPath + t);
 
-    headers.set('kano-t', t);
-    headers.set('kano-sign', signature);
+    window.fetch = async (input, init = {}) => {
+        const headers = new Headers(init.headers || {});
+        const t = Date.now();
+        const method = (init.method || 'GET').toUpperCase();
 
-    const newInit = {
-        ...init,
-        headers,
+        // 提取纯路径（不含 query）
+        let urlPath = '';
+        try {
+            const url = new URL(input, window.location.origin);
+            urlPath = url.pathname;
+        } catch (e) {
+            console.warn('无效的URL:', input);
+            urlPath = input; // fallback
+        }
+        // 没啥用，只是起到混淆作用
+        const signature = hmacSignature('minikano_kOyXz0Ciz4V7wR0IeKmJFYFQ20jd', 'minikano' + method + urlPath + t);
+
+        headers.set('kano-t', t);
+        headers.set('kano-sign', signature);
+
+        const newInit = {
+            ...init,
+            headers,
+        };
+        return of(input, newInit);
     };
-    return of(input, newInit);
-};
+})();
 
 //登录
 const common_headers = {

@@ -13,21 +13,6 @@ const isArray = (raw) => {
     }
 }
 
-function hmacSignature(secret, data) {
-    const hmacMd5 = CryptoJS.HmacMD5(data, secret);
-    const hmacMd5Bytes = CryptoJS.enc.Hex.parse(hmacMd5.toString());
-
-    const mid = Math.floor(hmacMd5Bytes.sigBytes / 2);
-    const part1 = CryptoJS.lib.WordArray.create(hmacMd5Bytes.words.slice(0, mid / 4), mid);
-    const part2 = CryptoJS.lib.WordArray.create(hmacMd5Bytes.words.slice(mid / 4), mid);
-
-    const sha1 = CryptoJS.SHA256(part1);
-    const sha2 = CryptoJS.SHA256(part2);
-    const finalHash = CryptoJS.SHA256(sha1.concat(sha2));
-
-    return finalHash.toString(CryptoJS.enc.Hex);
-}
-
 function requestInterval(callback, interval) {
     let lastTime = 0;
     let timeoutId = null;
@@ -364,7 +349,7 @@ const collapseGen = (btn_id, collapse_id, storName, callback = undefined) => {
         onChange: (newVal) => {
             if (collapseMenuEl && collapseMenuEl.dataset) {
                 collapseMenuEl.dataset.name = newVal ? 'open' : 'close';
-                callback?.(newVal ? 'open' : 'close');
+                callback && callback(newVal ? 'open' : 'close');
                 if (storName) {
                     localStorage.setItem(storName, collapseMenuEl.dataset.name);
                 }

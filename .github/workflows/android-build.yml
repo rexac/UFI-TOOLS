@@ -4,7 +4,7 @@ on:
   push:
     branches: [ "http-server-version" ]
     tags:
-      - 'v*'  # 匹配 v1.0.0 等 tag
+      - 'v*'
 
 jobs:
   build-release:
@@ -24,13 +24,12 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          working-directory: app/src/main/assets
           node-version: '20'
           cache: 'npm'
 
       - name: Install Node.js dependencies
         working-directory: app/src/main/assets
-        run: npm install
+        run: npm install --no-package-lock
 
       - name: Node Build
         working-directory: app/src/main/assets
@@ -40,12 +39,10 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build with tag version
-        run: |
-          ./gradlew assembleDebug 
+        run: ./gradlew assembleDebug
 
       - name: Rename APK
-        run: |
-          mv app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/debug/UFI-TOOLS_WEB_debug.apk
+        run: mv app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/debug/UFI-TOOLS_WEB_debug.apk
 
       - name: Generate tag info
         id: tag

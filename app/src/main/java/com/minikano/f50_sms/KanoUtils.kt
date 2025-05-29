@@ -12,15 +12,46 @@ import java.util.Calendar
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.util.Log
 import android.widget.Toast
+import fi.iki.elonen.NanoHTTPD
 import java.io.File
 import java.io.FileOutputStream
-import java.util.Date
+import java.security.MessageDigest
+import javax.crypto.Mac
+import javax.crypto.spec.SecretKeySpec
 
 class KanoUtils {
     companion object {
+        fun getFullUri(session: NanoHTTPD.IHTTPSession?): String {
+            val path = session?.uri ?: "/"
+            val query = session?.queryParameterString
+            return if (!query.isNullOrBlank()) "$path?$query" else path
+        }
+
+        fun HmacSignature(secret: String, data: String): String {
+            val hmacMd5Bytes = hmac("HmacMD5", secret, data)
+            val mid = hmacMd5Bytes.size / 2
+            val part1 = hmacMd5Bytes.sliceArray(0 until mid)
+            val part2 = hmacMd5Bytes.sliceArray(mid until hmacMd5Bytes.size)
+            val sha1 = sha256(part1)
+            val sha2 = sha256(part2)
+            val combined = sha1 + sha2
+            val finalHash = sha256(combined)
+            return finalHash.joinToString("") { "%02x".format(it) }
+        }
+
+        fun hmac(algorithm: String, key: String, data: String): ByteArray {
+            val mac = Mac.getInstance(algorithm)
+            val secretKeySpec = SecretKeySpec(key.toByteArray(), algorithm)
+            mac.init(secretKeySpec)
+            return mac.doFinal(data.toByteArray())
+        }
+
+        fun sha256(data: ByteArray): ByteArray {
+            val digest = MessageDigest.getInstance("SHA-256")
+            return digest.digest(data)
+        }
 
         //获取电池电量
         fun getBatteryPercentage(context: Context): Int {

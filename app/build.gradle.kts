@@ -8,6 +8,38 @@ plugins {
     alias(libs.plugins.kotlin.compose)
 }
 
+// 注册执行 npm 命令的任务
+val npmBuild by tasks.registering(Exec::class) {
+    workingDir = file("src/main/assets")
+    doFirst {
+        println("✅ 当前 workingDir: $workingDir")
+        println("✅ 系统平台: ${System.getProperty("os.name")}")
+        println("✅ 环境变量 PATH:")
+        println(System.getenv("PATH"))
+    }
+    commandLine = if (System.getProperty("os.name").startsWith("Windows")) {
+        listOf("cmd", "/c", "npm", "run", "build")
+    } else {
+        listOf("sh", "-c", "npm run build")
+    }
+    group = "build"
+    description = "Build frontend assets using npm"
+
+    doFirst {
+        println("[Gradle] 开始执行 npm run build")
+    }
+    doLast {
+        println("[Gradle] npm run build 完成")
+    }
+}
+
+// 让打包任务依赖这个 npm 构建
+tasks.configureEach {
+    if (name.startsWith("assemble") || name.startsWith("install") || name == "build") {
+        dependsOn(npmBuild)
+    }
+}
+
 android {
     namespace = "com.minikano.f50_sms"
     compileSdk = 35
@@ -44,6 +76,7 @@ android {
     packaging {
         resources {
             excludes += setOf(
+                "assets/script_orignal/**",
                 "META-INF/LICENSE.md",
                 "META-INF/LICENSE",
                 "META-INF/NOTICE.md",

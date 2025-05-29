@@ -28,7 +28,8 @@ class WebServer(context: Context, port: Int, gatewayIp: String) : NanoHTTPD(port
     private val PREFS_NAME = "kano_ZTE_store"
     private val PREF_LOGIN_TOKEN = "login_token"
     private val PREF_TOKEN_ENABLED = "login_token_enabled"
-
+    private val REQUEST_SECRET_KEY = "minikano_kOyXz0Ciz4V7wR0IeKmJFYFQ20jd"
+    private val allowedTimeSkew = 114 * 1000
     @Volatile
     var downloadInProgress = false
 
@@ -71,27 +72,65 @@ class WebServer(context: Context, port: Int, gatewayIp: String) : NanoHTTPD(port
 //    }
 
     override fun serve(session: IHTTPSession?): Response {
+        val oUri = session?.uri.orEmpty()
         val method = session?.method.toString()
-        val uri = session?.uri?.removePrefix("/api") ?: "/"
-        val sharedPrefsForToken = context_app.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        val auth_token = sharedPrefsForToken.getString(PREF_LOGIN_TOKEN, "admin")
-        val token_enabled = sharedPrefsForToken.getString(PREF_TOKEN_ENABLED, true.toString())
-        try {
-            if (token_enabled == "true") {
-                if (session?.uri != null && session.uri.contains("/api")) {
-                    // 获取请求头
-                    val headers = session.headers ?: throw Exception("401")
-                    val authHeader = headers["authorization"]
-                    if (authHeader != auth_token) {
-                        throw Exception("401")
-                    }
-                }
-            }
-        } catch (e: Exception) {
-            return newFixedLengthResponse(
-                Response.Status.UNAUTHORIZED, MIME_PLAINTEXT, "401 Unauthorized"
-            )
+
+        Log.d("kano_security_server", "Got request: ${session?.method} ${session?.uri}")
+
+        // 静态资源：不鉴权，直接返回
+        if (!oUri.startsWith("/api")) {
+            return serveStaticFile(oUri.ifEmpty { "/" })
         }
+
+        // 动态接口：需要鉴权
+        val sharedPrefs = context_app.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val token = sharedPrefs.getString(PREF_LOGIN_TOKEN, "admin")
+        val tokenEnabled = sharedPrefs.getString(PREF_TOKEN_ENABLED, "true").toBoolean()
+
+        if (tokenEnabled) {
+            val headers = session?.headers ?: return unauthorized()
+            val timestampStr = headers["kano-t"]
+            val clientSignature = headers["kano-sign"]
+            val authHeader = headers["authorization"]
+
+            // 鉴权必需字段不能为空
+            if (authHeader != token || timestampStr == null || clientSignature == null) {
+                return unauthorized()
+            }
+
+            // 验证时间戳
+            val clientTimestamp = timestampStr.toLongOrNull() ?: return unauthorized()
+//            val currentTimestamp = System.currentTimeMillis()
+//            if (kotlin.math.abs(currentTimestamp - clientTimestamp) > allowedTimeSkew) {
+//                Log.w("kano_security_server", "请求时间戳不符合范围，已拦截")
+//                return unauthorized()
+//            }
+
+            // 构造原始签名数据
+            val raw = "minikano$method$oUri$clientTimestamp"
+            val expectedSignature = KanoUtils.HmacSignature(REQUEST_SECRET_KEY, raw)
+
+            if (!expectedSignature.equals(clientSignature, ignoreCase = true)) {
+                Log.w("kano_security_server", "签名不正确，已拦截,raw:$raw")
+                return unauthorized()
+            }
+        }
+
+//        // 动态接口：需要鉴权
+//        val sharedPrefs = context_app.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+//        val token = sharedPrefs.getString(PREF_LOGIN_TOKEN, "admin")
+//        val tokenEnabled = sharedPrefs.getString(PREF_TOKEN_ENABLED, "true").toBoolean()
+//
+//        if (tokenEnabled) {
+//            val headers = session?.headers ?: return unauthorized()
+//            val authHeader = headers["authorization"]
+//            if (authHeader != token) {
+//                return unauthorized()
+//            }
+//        }
+
+        // 去掉 /api 前缀
+        val uri = oUri.removePrefix("/api")
 
         //客户端IP
         if(method == "GET" && uri =="/ip"){
@@ -1239,11 +1278,6 @@ class WebServer(context: Context, port: Int, gatewayIp: String) : NanoHTTPD(port
             }
         }
 
-        // 静态文件逻辑
-        if (!session?.uri.orEmpty().startsWith("/api")) {
-            return serveStaticFile(session?.uri ?: "/")
-        }
-
         // 获取查询参数
         val queryString = session?.queryParameterString
         val fullUrl = if (queryString.isNullOrEmpty()) {
@@ -1252,6 +1286,7 @@ class WebServer(context: Context, port: Int, gatewayIp: String) : NanoHTTPD(port
             "$targetServer$uri?$queryString"
         }
 
+        //其余的请求全都丢给zteWebProject
         // 处理 OPTIONS 请求
         if (method == "OPTIONS") {
             val response = newFixedLengthResponse(Response.Status.OK, "text/plain", "")
@@ -1346,6 +1381,14 @@ class WebServer(context: Context, port: Int, gatewayIp: String) : NanoHTTPD(port
     // 添加一个变量保存 context 的 assets
     private val assetManager = context.assets
     private val context_app = context
+
+    private fun unauthorized(): Response {
+        return newFixedLengthResponse(
+            Response.Status.UNAUTHORIZED,
+            MIME_PLAINTEXT,
+            "401 Unauthorized"
+        )
+    }
 
     fun getStatusCode(urlStr: String): Int {
         val url = URL(urlStr)

@@ -24,13 +24,14 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
+          working-directory: app/src/main/assets
           node-version: '20'
           cache: 'npm'
 
       - name: Install Node.js dependencies
         working-directory: app/src/main/assets
         run: npm install
-        
+
       - name: Node Build
         working-directory: app/src/main/assets
         run: npm run build

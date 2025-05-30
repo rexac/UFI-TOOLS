@@ -11,6 +11,7 @@
     <title id="TITLE">ZTE-UFI-TOOLS-WEB</title>
     <link rel="manifest" href="/manifest.json">
     <link rel="stylesheet" href="/style/style.css">
+    <script src="/script/polyfill.min.js"></script>
     <script src="/script/draglist.js"></script>
 </head>
 
@@ -719,37 +720,45 @@
             </div>
             <!-- 设置背景模态框 -->
             <div class="modal" id="bgSettingModal"
-                style="width: 90%;max-width: 400px; display: flex;flex-direction: column;display: none;">
+                style="overflow: hidden;;width: 90%;max-width: 400px; display: flex;flex-direction: column;display: none;">
                 <div class="title" style="margin-bottom: 4px;">主题背景设置</div>
-                <div style="text-align: left ;">
-                    <p style="font-size: 14px"><label
-                            style="display: flex;align-items: center;"><span>启用背景图片？</span><input type="checkbox"
-                                id="isCheckedBG"></label></p>
-                    <p style="font-size: 14px;">图片网址：
-                        <input placeholder="输入网址" type="text" id="BG_INPUT"
-                            style="width: 100%;max-width: 200px;padding: 6px 10px;margin: 4px 0;">
-                    </p>
-                    <label><input id="fileUploader" type="file" style="display: none;"
-                            onchange="handleFileUpload(event)">
-                        <button style="width: 100%;"
-                            onclick="document.querySelector('#fileUploader').click()">上传图片(3MB内)</button></label>
-                </div>
-                <div style="text-align: left;width: 100%;font-size: 14px;">
-                    <p>字体颜色(黑-白)</p>
-                    <input id="textColorEl" oninput="updateTextColor(event)"
-                        style="width: 100%;margin-left: 0;margin-right: 0;" min="0" max="100" type="range">
-                    <p>主题颜色(颜色、饱和度、亮度)</p>
-                    <div class="color-panel">
+                <div class="content" style="min-height: 400px;">
+                    <div style="text-align: left ;">
+                        <p style="font-size: 14px"><label
+                                style="display: flex;align-items: center;"><span>启用背景图片？</span><input type="checkbox"
+                                    id="isCheckedBG"></label></p>
+                        <p style="font-size: 14px;">图片网址：
+                            <input placeholder="输入网址" type="text" id="BG_INPUT"
+                                style="width: 100%;max-width: 200px;padding: 6px 10px;margin: 4px 0;">
+                        </p>
+                        <label><input id="fileUploader" type="file" style="display: none;"
+                                onchange="handleFileUpload(event)">
+                            <button style="width: 100%;"
+                                onclick="document.querySelector('#fileUploader').click()">上传图片(3MB内)</button></label>
                     </div>
-                    <input id="colorEl" oninput="getColorByPercent(event)"
-                        style="width: 100%;margin-left: 0;margin-right: 0;" min="0" max="100" type="range">
-                    <input id="saturationEl" oninput="getSaturationByPercent(event)"
-                        style="width: 100%;margin-left: 0;margin-right: 0;" min="0" max="100" type="range">
-                    <input id="brightEl" oninput="getValueByPercent(event)"
-                        style="width: 100%;margin-left: 0;margin-right: 0;" min="0" max="100" type="range">
-                    <p>背景透明度</p>
-                    <input id="opacityEl" oninput="getOpacityByPercent(event)"
-                        style="width: 100%;margin-left: 0;margin-right: 0;" type="range" min="0" max="100">
+                    <div style="text-align: left;width: 100%;font-size: 14px;">
+                        <p>字体颜色(黑-白)</p>
+                        <input id="textColorEl" oninput="updateTextColor(event)"
+                            style="width: 100%;margin-left: 0;margin-right: 0;" min="0" max="100" type="range">
+                        <p>主题颜色(颜色、饱和度、亮度)</p>
+                        <div class="color-panel">
+                        </div>
+                        <input id="colorEl" oninput="getColorByPercent(event)"
+                            style="width: 100%;margin-left: 0;margin-right: 0;" min="0" max="100" type="range">
+                        <input id="saturationEl" oninput="getSaturationByPercent(event)"
+                            style="width: 100%;margin-left: 0;margin-right: 0;" min="0" max="100" type="range">
+                        <input id="brightEl" oninput="getValueByPercent(event)"
+                            style="width: 100%;margin-left: 0;margin-right: 0;" min="0" max="100" type="range">
+                        <p>背景透明度</p>
+                        <input id="opacityEl" oninput="getOpacityByPercent(event)"
+                            style="width: 100%;margin-left: 0;margin-right: 0;" type="range" min="0" max="100">
+                        <p>自定义头部</p>
+                        <div class="title" style="font-style: italic;font-size: 12px;">填入的内容会放在网页head末尾(支持脚本样式和meta元素)
+                        </div>
+                        <textarea id="custom_head"
+                            style="font-size: 12px;font-family: monospace;margin: 6px 0;resize: vertical;width: 100%;box-sizing: border-box;"
+                            rows="20"></textarea>
+                    </div>
                 </div>
                 <div class="btn" style="text-align: right;margin-top: 6px;">
                     <button type="button" onclick="resetTheme(event)">重置主题</button>
@@ -968,7 +977,8 @@
                     <div class="title" style="font-size: 10px;margin-top: 10px;">
                         <div>
                             <i>软件更新功能需要启用网络ADB调试功能，如无法正常使用 ”一键更新“ 功能，可以点击 "下载安装包" 自行下载安装。</i><br>
-                            <i>使用有线网络的用户，请暂时关掉"网络ADB自启"开关，否则更新完成之后会断网</i>
+                            <i>使用有线网络的用户，请暂时关掉"网络ADB自启"开关，否则更新完成之后会断网</i><br>
+                            <i>由于Android的包管理机制，更新完成后不要直接拔电，请手动重启一次，缓存才会全部写入，以免造成数据丢失。</i>
                         </div>
                     </div>
                     <div class="speedtest" style="border-left: 6px solid pink;font-size: 12px;margin-top: 10px;"
@@ -1063,7 +1073,8 @@
                                     max-width: 400px;">
                                     <div class="title user_select" style="display:block;font-size: 12px;">
                                         注意：命令需是“一口气”输入的，不要中途按回车换行或用 \ 接续，注意参数间的空格<br>
-                                        短信内容占位符：<span onclick="copyText(event)">{{sms-body}} {{sms-time}} {{sms-from}}</span>
+                                        短信内容占位符：<span onclick="copyText(event)">{{sms-body}} {{sms-time}}
+                                            {{sms-from}}</span>
                                     </div>
                                     <div class="item" style="margin: 10px auto;">
                                         <div style="

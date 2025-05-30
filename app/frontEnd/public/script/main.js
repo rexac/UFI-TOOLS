@@ -2,7 +2,37 @@ let isNeedToken = true
 const MODEL = document.querySelector("#MODEL")
 let QORS_MESSAGE = null
 let smsSender = null
-let psw_fail_num = 0
+let psw_fail_num = 0;
+
+//customHead
+(() => {
+    getCustomHead().then((head_text) => {
+        if (head_text) {
+            try {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(head_text, 'text/html');
+
+                doc.querySelectorAll('style, link, meta').forEach(el => {
+                    document.head.appendChild(el.cloneNode(true));
+                });
+
+                doc.querySelectorAll('script').forEach(scriptEl => {
+                    const newScript = document.createElement('script');
+                    if (scriptEl.src) {
+                        newScript.src = scriptEl.src;
+                    } else {
+                        newScript.textContent = scriptEl.textContent;
+                    }
+                    if (scriptEl.type) newScript.type = scriptEl.type;
+
+                    document.head.appendChild(newScript);
+                })
+            } catch (e) {
+                alert('自定义head解析失败，请检查内容是否正确。');
+            }
+        }
+    })
+})();
 
 //ttyd
 if (!localStorage.getItem('ttyd_port')) {
@@ -648,9 +678,9 @@ function main_func() {
                 wifi_access_sta_num: `${notNullOrundefinedOrIsShow(res, 'wifi_access_sta_num') ? `<strong onclick="copyText(event)"  class="blue">WIFI设备数：${res.wifi_access_sta_num}</strong>` : ''}`,
                 battery: `${notNullOrundefinedOrIsShow(res, 'battery') ? `<strong onclick="copyText(event)"  class="green">剩余电量：${res.battery} %</strong>` : ''}`,
                 rssi: `${notNullOrundefinedOrIsShow(res, 'rssi') || notNullOrundefinedOrIsShow(res, 'network_signalbar', true) ? `<strong onclick="copyText(event)"  class="green">蜂窝信号强度：${kano_getSignalEmoji(notNullOrundefinedOrIsShow(res, 'rssi') ? res.rssi : res.network_signalbar)}</strong>` : ''}`,
-                cpu_temp: `${notNullOrundefinedOrIsShow(res, 'cpu_temp') ? `<strong onclick="copyText(event)"  class="blue">CPU温度：<span style="text-align:center;display:inline-block;width: 8ch;">${Number(res.cpu_temp / 1000).toFixed(2)} ℃</span></strong>` : ''}`,
-                cpu_usage: `${notNullOrundefinedOrIsShow(res, 'cpu_usage') ? `<strong onclick="copyText(event)"  class="blue">CPU使用率：<span style="text-align:center;display:inline-block;width: 8ch;">${Number(res.cpu_usage).toFixed(2)} %</span></strong>` : ''}`,
-                mem_usage: `${notNullOrundefinedOrIsShow(res, 'mem_usage') ? `<strong onclick="copyText(event)"  class="blue">内存使用率：<span style="text-align:center;display:inline-block;width: 8ch;">${Number(res.mem_usage).toFixed(2)} %</span></strong>` : ''}`,
+                cpu_temp: `${notNullOrundefinedOrIsShow(res, 'cpu_temp') ? `<strong onclick="copyText(event)"  class="blue">CPU温度：<span style="text-align:center;display:inline-block;width: 8ch;">${String(Number(res.cpu_temp / 1000).toFixed(2)).padStart(5, '0')} ℃</span></strong>` : ''}`,
+                cpu_usage: `${notNullOrundefinedOrIsShow(res, 'cpu_usage') ? `<strong onclick="copyText(event)"  class="blue">CPU使用率：<span style="text-align:center;display:inline-block;width: 8ch;">${String(Number(res.cpu_usage).toFixed(2)).padStart(5, '0')} %</span></strong>` : ''}`,
+                mem_usage: `${notNullOrundefinedOrIsShow(res, 'mem_usage') ? `<strong onclick="copyText(event)"  class="blue">内存使用率：<span style="text-align:center;display:inline-block;width: 8ch;">${String(Number(res.mem_usage).toFixed(2)).padStart(5, '0')} %</span></strong>` : ''}`,
                 realtime_time: `${notNullOrundefinedOrIsShow(res, 'realtime_time') ? `<strong onclick="copyText(event)"  class="blue">连接时长：${kano_formatTime(Number(res.realtime_time))}${res.monthly_time ? '&nbsp;<span style="color:white">/</span>&nbsp;总时长: ' + kano_formatTime(Number(res.monthly_time)) : ''}</strong>` : ''}`,
                 monthly_tx_bytes: `${notNullOrundefinedOrIsShow(res, 'monthly_tx_bytes') || notNullOrundefinedOrIsShow(res, 'monthly_rx_bytes') ? `<strong onclick="copyText(event)"  class="blue">已用流量：<span class="red">${formatBytes(Number((res.monthly_tx_bytes + res.monthly_rx_bytes)))}</span>${(res.data_volume_limit_size || res.flux_data_volume_limit_size) && (res.flux_data_volume_limit_switch == '1' || res.data_volume_limit_switch == '1') ? '&nbsp;<span style="color:white">/</span>&nbsp;总流量：' + formatBytes((() => {
                     const limit_size = res.data_volume_limit_size ? res.data_volume_limit_size : res.flux_data_volume_limit_size
@@ -2186,13 +2216,22 @@ function main_func() {
     //设置背景图片
     document.querySelector('#BG_SETTING').onclick = () => {
         showModal('#bgSettingModal')
+        initBG()
     }
 
     let handleSubmitBg = () => {
+        const custom_head = document.querySelector('#custom_head')
         const imgUrl = document.querySelector('#BG_INPUT')?.value
         const bg_checked = document.querySelector('#isCheckedBG')?.checked
         const BG = document.querySelector('#BG')
         const BG_OVERLAY = document.querySelector('#BG_OVERLAY')
+
+        setCustomHead(custom_head.value?.trim() || '').then(res => {
+            if (!res) {
+                createToast('自定义头部保存失败，请检查网络', 'red')
+            }
+        })
+
         if (!BG || bg_checked == undefined || !BG_OVERLAY) return
         if (!bg_checked) {
             BG.style.backgroundImage = 'unset'
@@ -2210,11 +2249,20 @@ function main_func() {
     }
 
     //初始化背景图片
-    (() => {
+    const initBG = async () => {
+        const head_text = await getCustomHead()
         const BG = document.querySelector('#BG')
         const imgUrl = localStorage.getItem('backgroundUrl')
         const isCheckedBG = document.querySelector('#isCheckedBG')
         const BG_INPUT = document.querySelector('#BG_INPUT')
+
+        if (head_text) {
+            const custom_head = document.querySelector('#custom_head')
+            if (custom_head) {
+                custom_head.value = head_text
+            }
+        }
+
         if (!BG || !isCheckedBG || !BG_INPUT) return
         isCheckedBG.checked = imgUrl ? true : false
         if (imgUrl?.length < 9999) {
@@ -2225,8 +2273,10 @@ function main_func() {
             // BG_OVERLAY && (BG_OVERLAY.style.background = 'transparent')
             return
         }
+
         BG.style.backgroundImage = `url(${imgUrl})`
-    })()
+    }
+    initBG()
 
     //重置主题
     let resetThemeBtnTimer = 1

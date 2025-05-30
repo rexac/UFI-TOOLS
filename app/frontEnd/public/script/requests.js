@@ -419,3 +419,29 @@ async function adbKeepAlive() {
     }
 
 }
+
+//自定义头部
+const getCustomHead = async () => {
+    try {
+        const { text } = await (await fetchWithTimeout(`${KANO_baseURL}/get_custom_head`, {
+            headers: { ...common_headers }
+        })).json()
+        return text || ''
+    } catch (e) {
+        return '';
+    }
+}
+const setCustomHead = async (text = "") => {
+    try {
+        const { result } = await (await fetchWithTimeout(`${KANO_baseURL}/set_custom_head`, {
+            headers: { ...common_headers },
+            method: "POST",
+            body: JSON.stringify({
+                text: text
+            })
+        })).json()
+        return result == "success"
+    } catch (e) {
+        return false
+    }
+}

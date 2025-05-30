@@ -919,3 +919,7 @@ li.dragging {
     background-color: #ff0000c0;
     transform: scale(0.8);
 }
+
+#bgSettingModal p{
+    margin: 10px 0;
+}

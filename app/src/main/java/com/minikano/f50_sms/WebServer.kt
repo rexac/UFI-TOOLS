@@ -44,32 +44,37 @@ class WebServer(context: Context, port: Int, gatewayIp: String) : NanoHTTPD(port
 
     @Volatile
     var currentDownloadingUrl: String = ""
+/*
+    init {
+        try {
+            val password = "kano123".toCharArray()
 
-//    init {
-//        try {
-//            val password = "kano123".toCharArray()
-//
-//            val assetManager = context.assets
-//            val keystoreInputStream = assetManager.open("certs/192_168_0_1_ssl.bks")
-//
-//            val ks = KeyStore.getInstance("BKS") // 改为 BKS
-//            ks.load(keystoreInputStream, password)
-//            keystoreInputStream.close()
-//
-//            val kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm())
-//            kmf.init(ks, password)
-//
-//            val sslContext = SSLContext.getInstance("TLS")
-//            sslContext.init(kmf.keyManagers, null, null)
-//
-//            makeSecure(sslContext.serverSocketFactory, null)
-//
-//            Log.i("kano_ZTE_LOG", "SSL 启用成功")
-//
-//        } catch (e: Exception) {
-//            Log.e("kano_ZTE_LOG", "SSL失败: ${e.message}", e)
-//        }
-//    }
+            val assetManager = context.assets
+            val keystoreInputStream = assetManager.open("certs/192_168_0_1_ssl.bks")
+
+            val ks = KeyStore.getInstance("BKS") // 改为 BKS
+            ks.load(keystoreInputStream, password)
+            keystoreInputStream.close()
+
+            val kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm())
+            kmf.init(ks, password)
+
+            val sslContext = SSLContext.getInstance("TLS")
+            sslContext.init(kmf.keyManagers, null, null)
+
+            makeSecure(sslContext.serverSocketFactory, null)
+
+            Log.i("kano_ZTE_LOG", "SSL 启用成功")
+
+        } catch (e: Exception) {
+            Log.e("kano_ZTE_LOG", "SSL失败: ${e.message}", e)
+        }
+    }
+ */
+
+    val apiWhiteList:List<String> = listOf(
+        "/api/get_custom_head"
+    )
 
     override fun serve(session: IHTTPSession?): Response {
         val oUri = session?.uri.orEmpty()
@@ -87,7 +92,9 @@ class WebServer(context: Context, port: Int, gatewayIp: String) : NanoHTTPD(port
         val token = sharedPrefs.getString(PREF_LOGIN_TOKEN, "admin")
         val tokenEnabled = sharedPrefs.getString(PREF_TOKEN_ENABLED, "true").toBoolean()
 
-        if (tokenEnabled) {
+        val noAuth = apiWhiteList.any { !oUri.startsWith(it) }
+
+        if (tokenEnabled && noAuth) {
             val headers = session?.headers ?: return unauthorized()
             val timestampStr = headers["kano-t"]
             val clientSignature = headers["kano-sign"]
@@ -106,12 +113,13 @@ class WebServer(context: Context, port: Int, gatewayIp: String) : NanoHTTPD(port
 
             // 验证时间戳
             val clientTimestamp = timestampStr.toLongOrNull() ?: return unauthorized()
-//            val currentTimestamp = System.currentTimeMillis()
-//            if (kotlin.math.abs(currentTimestamp - clientTimestamp) > allowedTimeSkew) {
-//                Log.w("kano_security_server", "请求时间戳不符合范围，已拦截")
-//                return unauthorized()
-//            }
-
+            /*
+            val currentTimestamp = System.currentTimeMillis()
+            if (kotlin.math.abs(currentTimestamp - clientTimestamp) > allowedTimeSkew) {
+                Log.w("kano_security_server", "请求时间戳不符合范围，已拦截")
+                return unauthorized()
+            }
+             */
             // 构造原始签名数据
             val raw = "minikano$method$oUri$clientTimestamp"
             val expectedSignature = KanoUtils.HmacSignature(REQUEST_SECRET_KEY, raw)
@@ -1283,6 +1291,68 @@ class WebServer(context: Context, port: Int, gatewayIp: String) : NanoHTTPD(port
                 response
             }
         }
+
+        //读取、保存自定义头部
+        if(method == "GET" && uri == "/get_custom_head"){
+            return try {
+                val sharedPref = context_app.getSharedPreferences("kano_ZTE_store", Context.MODE_PRIVATE)
+                val text = sharedPref.getString("kano_custom_head","")
+                val json = JSONObject(mapOf("text" to text)).toString()
+                return newFixedLengthResponse(
+                    Response.Status.OK,
+                    "application/json",
+                    json
+                )
+            }
+            catch (e: Exception) {
+                Log.d("kano_ZTE_LOG", "SMTP配置出错： ${e.message}")
+                val response = newFixedLengthResponse(
+                    Response.Status.INTERNAL_ERROR,
+                    "application/json",
+                    """{"error":"SMTP配置出错"}"""
+                )
+                response.addHeader("Access-Control-Allow-Origin", "*")
+                response
+            }
+        }
+
+        //读取、保存自定义头部
+        if(method == "POST" && uri == "/set_custom_head"){
+            return try {
+                val sharedPref = context_app.getSharedPreferences("kano_ZTE_store", Context.MODE_PRIVATE)
+                val map = HashMap<String, String>()
+                session?.parseBody(map)
+                val body = map["postData"] ?: throw Exception("postData is null")
+                val json = JSONObject(body)
+
+                val text = json.optString("text", "").trim()
+
+                sharedPref.edit().apply {
+                    //切换到curl的配置
+                    putString("kano_custom_head", text)
+                    apply()
+                }
+
+                val response = newFixedLengthResponse(
+                    Response.Status.OK,
+                    "application/json",
+                    """{"result":"success"}""".trimIndent()
+                )
+                response.addHeader("Access-Control-Allow-Origin", "*")
+                return response
+            }
+            catch (e: Exception) {
+                Log.d("kano_ZTE_LOG", "配置出错： ${e.message}")
+                val response = newFixedLengthResponse(
+                    Response.Status.INTERNAL_ERROR,
+                    "application/json",
+                    """{"error":"配置出错"}"""
+                )
+                response.addHeader("Access-Control-Allow-Origin", "*")
+                response
+            }
+        }
+
 
         // 获取查询参数
         val queryString = session?.queryParameterString

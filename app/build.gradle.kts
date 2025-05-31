@@ -50,7 +50,7 @@ android {
         targetSdk = 33
         // 动态生成 versionCode 为 yyyyMMdd 格式
         versionCode = SimpleDateFormat("yyyyMMdd").format(Date()).toInt()
-        versionName = "2.9.7"
+        versionName = "2.9.8"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 

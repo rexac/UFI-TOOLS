@@ -20,7 +20,7 @@
         <div class="container">
             <div class="title" onclick="enableTTYD()"
                 style="align-self: start;justify-self: start;margin-bottom: 10px;;margin-top: 20px">
-                <strong id="MAIN_TITLE">ZTE-UFI管理工具</strong>
+                <strong id="MAIN_TITLE">UFI-TOOLS</strong>
                 <strong id="MODEL" style="font-size: 14px;"></strong>
             </div>
             <!-- 操作按钮 -->
@@ -43,20 +43,20 @@
                     </div>
                     <button id="DataManagement" class="btn">流量管理</button>
                     <button id="SpeedTestBtn" class="btn" onclick="showModal('#speedTestModal')">内网测速</button>
-                    <button id="ClientManagement" class="btn">连接设备管理</button>
+                    <button id="ClientManagement" class="btn">连接设备</button>
                     <button id="WIFIManagement" class="btn">WIFI设置</button>
                     <button id="LANManagement" class="btn">内网设置</button>
                     <button id="AT" class="btn" onclick="createToast('请登录','red')">AT指令</button>
                     <button id="ADVANCE" class="btn" onclick="createToast('请登录','red')">高级功能</button>
-                    <button id="CECULLAR" class="btn" onclick="createToast('请登录','red')">开启蜂窝数据</button>
-                    <button id="ADB" class="btn" onclick="createToast('请登录','red')">开启USB调试</button>
-                    <button id="ADB_NET" class="btn" onclick="createToast('请登录','red')">开启网络ADB自启</button>
-                    <button id="PERF" class="btn" onclick="createToast('请登录','red')">开启性能模式</button>
-                    <button id="LIGHT" class="btn" onclick="createToast('请登录','red')">开启指示灯</button>
+                    <button id="CECULLAR" class="btn" onclick="createToast('请登录','red')">数据流量</button>
+                    <button id="ADB" class="btn" onclick="createToast('请登录','red')">USB调试</button>
+                    <button id="ADB_NET" class="btn" onclick="createToast('请登录','red')">网络ADB自启</button>
+                    <button id="PERF" class="btn" onclick="createToast('请登录','red')">性能模式</button>
+                    <button id="LIGHT" class="btn" onclick="createToast('请登录','red')">指示灯</button>
                     <button id="NFC" style="display: none;" class="btn"
-                        onclick="createToast('请登录','red')">开启NFC</button>
-                    <button id="SMB" class="btn" onclick="createToast('请登录','red')">开启SMB文件共享</button>
-                    <button id="ROAM" class="btn" onclick="createToast('请登录','red')">开启网络漫游</button>
+                        onclick="createToast('请登录','red')">NFC</button>
+                    <button id="SMB" class="btn" onclick="createToast('请登录','red')">文件共享</button>
+                    <button id="ROAM" class="btn" onclick="createToast('请登录','red')">网络漫游</button>
                     <button id="smsForward" class="btn" onclick="createToast('请登录','red')">短信转发</button>
                     <button id="OTA" class="btn" onclick="createToast('请登录','red')">软件更新</button>
                     <select class="select" id="NET_TYPE" onchange="changeNetwork(event)">
@@ -976,15 +976,15 @@
                     <div style="font-size: 12px;margin-top: 10px;" class="adb_status title"></div>
                     <div class="title" style="font-size: 10px;margin-top: 10px;">
                         <div>
-                            <i>软件更新功能需要启用网络ADB调试功能，如无法正常使用 ”一键更新“ 功能，可以点击 "下载安装包" 自行下载安装。</i><br>
-                            <i>使用有线网络的用户，请暂时关掉"网络ADB自启"开关，否则更新完成之后会断网</i><br>
-                            <i>由于Android的包管理机制，更新完成后不要直接拔电，请手动重启一次，缓存才会全部写入，以免造成数据丢失。</i>
+                            <i>软件更新需要启用USB调试+网络ADB调试功能(并重启),如无法正常使用一键更新功能,可以点击下载安装包自行下载安装。</i><br>
+                            <i>使用有线网络的用户请暂时关掉"网络ADB自启"开关,否则更新完成之后会断网</i><br>
+                            <i>由于Android的包管理机制,更新完成后不要直接拔电(会造成数据丢失);请手动重启一次,缓存才会全部写入。</i>
                         </div>
                     </div>
                     <div class="speedtest" style="border-left: 6px solid pink;font-size: 12px;margin-top: 10px;"
                         id="OTATextContent">正在检查更新...</div>
                     <div class="content" style="
-                        margin: 15px 0;overflow-y: scroll;">
+                        margin: 15px 0;overflow-y: scroll;max-height: 250px;">
                         <div class="speedtest" style="font-size: 12px;" id="ChangelogTextContent">
                         </div>
                     </div>

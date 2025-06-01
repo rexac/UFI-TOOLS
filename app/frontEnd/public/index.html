@@ -53,8 +53,7 @@
                     <button id="ADB_NET" class="btn" onclick="createToast('请登录','red')">网络ADB自启</button>
                     <button id="PERF" class="btn" onclick="createToast('请登录','red')">性能模式</button>
                     <button id="LIGHT" class="btn" onclick="createToast('请登录','red')">指示灯</button>
-                    <button id="NFC" style="display: none;" class="btn"
-                        onclick="createToast('请登录','red')">NFC</button>
+                    <button id="NFC" style="display: none;" class="btn" onclick="createToast('请登录','red')">NFC</button>
                     <button id="SMB" class="btn" onclick="createToast('请登录','red')">文件共享</button>
                     <button id="ROAM" class="btn" onclick="createToast('请登录','red')">网络漫游</button>
                     <button id="smsForward" class="btn" onclick="createToast('请登录','red')">短信转发</button>
@@ -808,11 +807,15 @@
                 <div class="modal" style="width: 90%;max-width: 800px; display: flex;flex-direction: column;">
                     <div class="title" style="margin-bottom: 4px;">AT指令</div>
                     <div class="title" style="margin-bottom: 4px;font-size: 12px;">
-                        <i style="color: yellow;">⚠️警告：执行自定义AT属于高级操作，请务必确保输入准确无误。因执行指令所引发的任何后果，需由您自行承担。</i>
+                        <div style="font-size: 10px;">
+                            <i style="color: yellow;">⚠️警告：执行自定义AT属于高级操作，请务必确保输入准确无误。因执行指令所引发的任何后果，需由您自行承担。</i><br>
+                            <i style="color: yellow;">⚠️提示：AT指令(同网络ADB)生效版本：F50:B09\B24 U30:B17\B19
+                                M3:B07 无法使用请带上你的固件版本提问，拒绝无效提问（恢复出厂设置能解决99%问题）</i>
+                        </div>
                     </div>
-                    <p style="font-size: 14px;margin-bottom: 0;margin-top:10px;">自定义AT指令</p>
-                    <div style="margin: 10px 0;">
-                        <span style="font-size: 14px;">AT执行槽位：</span>
+                    <p style="font-size: 12px;margin-bottom: 0;margin-top:10px;">自定义AT指令</p>
+                    <div style="margin: 6px 0;">
+                        <span style="font-size: 12px;">AT执行槽位：</span>
                         <select class="select" id="AT_SLOT" style="width: 100%;max-width: 100px;padding: 6px 10px;"
                             value="0">
                             <option data-value="0" value="0">0</option>
@@ -830,7 +833,7 @@
                         <div style="margin-top: 2px;margin-bottom: 10px;">
                             <div style="display: flex;flex-wrap: wrap; gap: 10px;">
                                 <div>
-                                    <p style="font-size: 14px;margin-bottom: 10px;margin-top: 8px;">快捷指令</p>
+                                    <p style="font-size: 12px;margin-bottom: 4px;margin-top: 4px;">快捷指令</p>
                                     <button class="btn"
                                         onclick="disableButtonWhenExecuteFunc(event,handleQosAT)">签约速率</button>
                                     <button class="btn"
@@ -871,7 +874,7 @@
                                         <div>
                                             <i>TTYD端口为1146(三击标题区域可更改)</i><br>
                                             <i class="user_select">如去除高级功能报错，可以在TTYD上执行 sh
-                                                /sdcard/unlock_samba.sh 重启生效</i><br>
+                                                /sdcard/unlock_samba.sh 重启生效</i>
                                             <i><br>添加高级功能包括:<br>
                                                 1.优化Samba目录(添加sd卡目录，设备根目录)<br>
                                                 2.添加TTYD，自带RootShell<br>
@@ -976,7 +979,7 @@
                     <div style="font-size: 12px;margin-top: 10px;" class="adb_status title"></div>
                     <div class="title" style="font-size: 10px;margin-top: 10px;">
                         <div>
-                            <i>软件更新需要启用USB调试+网络ADB调试功能(并重启),如无法正常使用一键更新功能,可以点击下载安装包自行下载安装。</i><br>
+                            <i>软件更新需要启用USB调试+网络ADB调试功能(重启，或者关闭开启一下USB调试),如无法正常使用一键更新功能,可以点击下载安装包自行下载安装。</i><br>
                             <i>使用有线网络的用户请暂时关掉"网络ADB自启"开关,否则更新完成之后会断网</i><br>
                             <i>由于Android的包管理机制,更新完成后不要直接拔电(会造成数据丢失);请手动重启一次,缓存才会全部写入。</i>
                         </div>
@@ -1127,7 +1130,7 @@
         </div>
     </div>
     <div class="footer">
-        <p>Made by <a href="https://github.com/kanoqwq/UFI-TOOLS" target="_blank">MiniKano</a> with love ❤️ &nbsp;<a
+        <p>Made by <a href="https://github.com/kanoqwq/UFI-TOOLS" target="_blank">MiniKano</a> with love ❤️&nbsp;<a
                 href="javascript:;" onclick="showModal('#payModal')">打赏作者</a></p>
     </div>
     <div id="toastContainer"></div>

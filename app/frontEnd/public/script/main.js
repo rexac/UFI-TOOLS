@@ -691,7 +691,7 @@ function main_func() {
                 daily_data: `${notNullOrundefinedOrIsShow(res, 'daily_data') ? `<strong onclick="copyText(event)"  class="blue">当日流量：${formatBytes(res.daily_data)}</strong>` : ''}`,
                 internal_available_storage: `${notNullOrundefinedOrIsShow(res, 'internal_available_storage') || notNullOrundefinedOrIsShow(res, 'internal_total_storage') ? `<strong onclick="copyText(event)" class="blue">内部存储：${formatBytes(res.internal_used_storage)} 已用 / ${formatBytes(res.internal_total_storage)} 总容量</strong>` : ''}`,
                 external_available_storage: `${notNullOrundefinedOrIsShow(res, 'external_available_storage') || notNullOrundefinedOrIsShow(res, 'external_total_storage') ? `<strong onclick="copyText(event)" class="blue">SD卡：${formatBytes(res.external_used_storage)} 已用 / ${formatBytes(res.external_total_storage)} 总容量</strong>` : ''}`,
-                realtime_rx_thrpt: `${notNullOrundefinedOrIsShow(res, 'realtime_tx_thrpt') || notNullOrundefinedOrIsShow(res, 'realtime_rx_thrpt') ? `<strong onclick="copyText(event)" class="blue">当前网速: <span style="text-align:center;display:inline-block;width: 14ch;">⬇️&nbsp;${formatBytes(Number((res.realtime_rx_thrpt)))}/S</span><span style="text-align:center;display:inline-block;width: 14ch;">⬆️&nbsp;${formatBytes(Number((res.realtime_tx_thrpt)))}/S</span></strong>` : ''}`,
+                realtime_rx_thrpt: `${notNullOrundefinedOrIsShow(res, 'realtime_tx_thrpt') || notNullOrundefinedOrIsShow(res, 'realtime_rx_thrpt') ? `<strong onclick="copyText(event)" class="blue">当前网速: <span style="text-align:center;display:inline-block;width: 14ch;">⬇️&nbsp;${formatBytes(Number((res.realtime_rx_thrpt)), true)}/S</span><span style="text-align:center;display:inline-block;width: 14ch;">⬆️&nbsp;${formatBytes(Number((res.realtime_tx_thrpt)))}/S</span></strong>` : ''}`,
             }
             let statusHtml_net = {
                 lte_rsrp: `${notNullOrundefinedOrIsShow(res, 'lte_rsrp') ? `<strong onclick="copyText(event)"  class="green">4G接收功率：${kano_parseSignalBar(res.lte_rsrp)}</strong>` : ''}`,
@@ -2175,7 +2175,7 @@ function main_func() {
                     out()
                     return null
                 }
-                btn.innerHTML = '正在更改...'
+                btn.innerHTML = '更改中..'
                 let res1 = await (await postData(cookie, {
                     goformId: res.ppp_status == 'ppp_disconnected' ? 'CONNECT_NETWORK' : 'DISCONNECT_NETWORK',
                 })).json()
@@ -2192,6 +2192,7 @@ function main_func() {
                 // createToast(e.message)
             }
         }
+        btn.innerHTML = '数据流量'
         btn.style.backgroundColor = res.ppp_status == 'ppp_disconnected' ? '' : '#018ad8b0'
     }
     handlerCecullarStatus()

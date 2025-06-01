@@ -135,7 +135,7 @@ class WebService : Service() {
             try {
                 webServer = WebServer(applicationContext, port, ip)
                 webServer?.start()
-                Log.d("kano_ZTE_LOG", "Web server started on http://0.0.0.0:$port")
+                Log.d("kano_ZTE_LOG", "Web server started on http://${ip.substringBefore(":")}:$port")
                 Log.d("kano_ZTE_LOG", "Web server proxy IP: $ip")
                 sendStickyBroadcast(Intent(SERVER_INTENT).putExtra("status", true))
             } catch (e:Exception){

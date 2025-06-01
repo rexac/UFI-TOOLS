@@ -21,7 +21,7 @@ import java.net.URL
 import java.util.Random
 import kotlin.concurrent.thread
 
-class WebServer(context: Context, port: Int, gatewayIp: String) : NanoHTTPD(port) {
+class WebServer(context: Context, port: Int, gatewayIp: String) : NanoHTTPD(gatewayIp.substringBefore(":"),port) {
 
     private val targetServer = "http://$gatewayIp"  // 目标服务器地址
     private val targetServerIP = gatewayIp  // 目标服务器地址

@@ -12,8 +12,8 @@ import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
+import kotlinx.coroutines.runBlocking
 
 
 class WebService : Service() {
@@ -76,18 +76,35 @@ class WebService : Service() {
                             ADMIN_PWD
                         }"
                     )
+                    try {
+                        runBlocking {
+                            val req = KanoGoformRequest("http://$ADB_IP:8080")
+                            val cookie = req.login(ADMIN_PWD)
+                            if (cookie != null) {
+                                val result1 = req.postData(
+                                    cookie, mapOf(
+                                        "goformId" to "USB_PORT_SETTING",
+                                        "usb_port_switch" to "0"
+                                    )
+                                )
+                                Log.d("kano_ZTE_LOG", "关闭ADBD结果: $result1")
+                                val result2 = req.postData(
+                                    cookie, mapOf(
+                                        "goformId" to "USB_PORT_SETTING",
+                                        "usb_port_switch" to "1"
+                                    )
+                                )
+                                Log.d("kano_ZTE_LOG", "开启ADBD结果: $result2")
+                                req.logout(cookie)
+                                if (result1?.getString("result") == "success" && result2?.getString("result") == "success") {
+                                    Log.d("kano_ZTE_LOG", "ADB_WIFI自启动执行成功")
+                                }
+                            }
 
-                    val adb_wifi = ShellKano.executeShellFromAssetsSubfolderWithArgs(
-                        applicationContext,
-                        "shell/adbPort",
-                        "-ip",
-                        ADB_IP,
-                        "-pwd",
-                        ADMIN_PWD,
-                        "-port",
-                        "5555"
-                    )
-                    Log.d("kano_ZTE_LOG", "ADB_WIFI自启动执行结果：$adb_wifi")
+                        }
+                    } catch (e:Exception){
+                        Log.e("kano_ZTE_LOG", "ADB_WIFI执行错误:${e.message}")
+                    }
                 } else {
                     Log.d("kano_ZTE_LOG", "不需要自启动ADB_WIFI")
                 }

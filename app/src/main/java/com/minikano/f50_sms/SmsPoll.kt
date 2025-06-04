@@ -24,7 +24,7 @@ object SmsPoll {
         val isNew = lastSms == null || sms != lastSms
 
         if (withinMin && isNew) {
-            Log.d("kano_ZTE_LOG", "收到新短信: ${sms.address} - ${sms.body}")
+            KanoLog.d("kano_ZTE_LOG", "收到新短信: ${sms.address} - ${sms.body}")
             lastSms = sms
             // 在这里做转发处理
             val sharedPrefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -36,7 +36,7 @@ object SmsPoll {
                 forwardSmsByCurl(lastSms,context)
             }
         } else {
-            Log.d("kano_ZTE_LOG", "无新短信，短信是否${minute}分钟内：$withinMin,短信是否为新：$isNew")
+            KanoLog.d("kano_ZTE_LOG", "无新短信，短信是否${minute}分钟内：$withinMin,短信是否为新：$isNew")
         }
     }
 
@@ -47,11 +47,11 @@ object SmsPoll {
 
         val originalCurl = sharedPrefs.getString("kano_sms_curl", null)
         if (originalCurl.isNullOrEmpty()) {
-            Log.e("kano_ZTE_LOG", "curl 配置错误：kano_sms_curl 为空")
+            KanoLog.e("kano_ZTE_LOG", "curl 配置错误：kano_sms_curl 为空")
             return
         }
 
-        Log.d("kano_ZTE_LOG", "开始转发短信...（CURL）")
+        KanoLog.d("kano_ZTE_LOG", "开始转发短信...（CURL）")
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
             .withZone(ZoneId.systemDefault())
         val smsText = sms_data.body.trimStart()
@@ -75,37 +75,37 @@ object SmsPoll {
 
         val smtpHost = sharedPrefs.getString("kano_smtp_host", null)
         if (smtpHost.isNullOrEmpty()) {
-            Log.e("kano_ZTE_LOG", "SMTP 配置错误：kano_smtp_host 为空")
+            KanoLog.e("kano_ZTE_LOG", "SMTP 配置错误：kano_smtp_host 为空")
             return
         }
 
         val smtpTo = sharedPrefs.getString("kano_smtp_to", null)
         if (smtpTo.isNullOrEmpty()) {
-            Log.e("kano_ZTE_LOG", "SMTP 配置错误：kano_smtp_to 为空")
+            KanoLog.e("kano_ZTE_LOG", "SMTP 配置错误：kano_smtp_to 为空")
             return
         }
 
         val smtpPort = sharedPrefs.getString("kano_smtp_port", null)
         if (smtpPort.isNullOrEmpty()) {
-            Log.e("kano_ZTE_LOG", "SMTP 配置错误：kano_smtp_port 为空")
+            KanoLog.e("kano_ZTE_LOG", "SMTP 配置错误：kano_smtp_port 为空")
             return
         }
 
         val username = sharedPrefs.getString("kano_smtp_username", null)
         if (username.isNullOrEmpty()) {
-            Log.e("kano_ZTE_LOG", "SMTP 配置错误：kano_smtp_username 为空")
+            KanoLog.e("kano_ZTE_LOG", "SMTP 配置错误：kano_smtp_username 为空")
             return
         }
 
         val password = sharedPrefs.getString("kano_smtp_password", null)
         if (password.isNullOrEmpty()) {
-            Log.e("kano_ZTE_LOG", "SMTP 配置错误：kano_smtp_password 为空")
+            KanoLog.e("kano_ZTE_LOG", "SMTP 配置错误：kano_smtp_password 为空")
             return
         }
 
         val smtpClient = KanoSMTP(smtpHost, smtpPort, username, password)
 
-        Log.d("kano_ZTE_LOG", "开始转发短信...(SMTP)")
+        KanoLog.d("kano_ZTE_LOG", "开始转发短信...(SMTP)")
 
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
             .withZone(ZoneId.systemDefault())
@@ -144,7 +144,7 @@ object SmsPoll {
                 } else null
             }
         } catch (e: Exception) {
-            Log.e("kano_ZTE_LOG", "没有短信权限，读不到短信呢", e)
+            KanoLog.e("kano_ZTE_LOG", "没有短信权限，读不到短信呢", e)
             null
         }
     }

@@ -35,7 +35,7 @@ object RootShell {
 
         } catch (e: IOException) {
             e.printStackTrace()
-            Log.d("kano_ZTE_LOG", "Socket Error: ${e.message}")
+            KanoLog.d("kano_ZTE_LOG", "Socket Error: ${e.message}")
             return null
         } finally {
             try {

@@ -86,7 +86,7 @@ class ShellKano {
             val cacheFile = getUiDoc(adbPath, context)
 
             val doc = cacheFile
-            Log.d("kano_ZTE_LOG", "doc 读取 结果：${doc.getElementsByTagName("node")}")
+            KanoLog.d("kano_ZTE_LOG", "doc 读取 结果：${doc.getElementsByTagName("node")}")
 
             //tap逻辑
             val nodes = doc.getElementsByTagName("node")
@@ -94,7 +94,7 @@ class ShellKano {
                 val node = nodes.item(i)
                 val attrs = node.attributes
                 val text = attrs.getNamedItem("text")?.nodeValue ?: ""
-                Log.d("kano_ZTE_LOG", "Node text: '$text'")
+                KanoLog.d("kano_ZTE_LOG", "Node text: '$text'")
                 if (text.contains(targetText)) {
                     val bounds = attrs.getNamedItem("bounds")?.nodeValue ?: continue
                     val regex = Regex("""\[(\d+),(\d+)\]\[(\d+),(\d+)\]""")
@@ -104,7 +104,7 @@ class ShellKano {
                     val tapY = (y1.toInt() + y2.toInt()) / 2
                     val result = runShellCommand("$adbPath -s localhost shell input tap $tapX $tapY", context)
                         ?: throw Exception("执行 input tap 失败")
-                    Log.d("kano_ZTE_LOG", "input tap 点击 坐标：$tapX,$tapY 结果：${result} ")
+                    KanoLog.d("kano_ZTE_LOG", "input tap 点击 坐标：$tapX,$tapY 结果：${result} ")
                     return 0
                 } else if (text.contains("AT Command:")) {
                     //说明已经在AT页面了
@@ -149,14 +149,14 @@ class ShellKano {
 
                     repeat(3) {
                         runShellCommand("$adbPath -s localhost shell input tap $tapX $tapY", context)
-                        Log.d("kano_ZTE_LOG", "点击输入框坐标：$tapX,$tapY")
+                        KanoLog.d("kano_ZTE_LOG", "点击输入框坐标：$tapX,$tapY")
                     }
 
                     // 输入文本
                     if(!useClipBoard) {
                         Thread.sleep(200) // 稍等软键盘弹出
                         runShellCommand("$adbPath -s localhost shell input text \"$escapedInput\"", context)
-                        Log.d("kano_ZTE_LOG", "输入文本：$inputText")
+                        KanoLog.d("kano_ZTE_LOG", "输入文本：$inputText")
                         inputClicked = true
                         if (escapedInput.length > 20) {
                             Thread.sleep(500) // 稍等输入完毕
@@ -164,7 +164,7 @@ class ShellKano {
                         break
                     } else {
                         runShellCommand("$adbPath -s localhost shell input keyevent KEYCODE_PASTE", context)
-                        Log.d("kano_ZTE_LOG", "读取剪贴板，输入文本：$inputText")
+                        KanoLog.d("kano_ZTE_LOG", "读取剪贴板，输入文本：$inputText")
                         inputClicked = true
                         Thread.sleep(666) // 稍等输入完毕
                         break
@@ -189,7 +189,7 @@ class ShellKano {
                         val tapX = (x1.toInt() + x2.toInt()) / 2
                         val tapY = (y1.toInt() + y2.toInt()) / 2
                         runShellCommand("$adbPath -s localhost shell input tap $tapX $tapY", context)
-                        Log.d("kano_ZTE_LOG", "点击 ${btnName.joinToString(", ")} 坐标：$tapX,$tapY")
+                        KanoLog.d("kano_ZTE_LOG", "点击 ${btnName.joinToString(", ")} 坐标：$tapX,$tapY")
                         //继续检测result
                         if (resId != "") {
                             val res = getTextFromUIByResourceId(resId, adbPath, context)
@@ -249,7 +249,7 @@ class ShellKano {
                     scriptFile.delete()
                 }
             } catch (e:Exception){
-                Log.d("kano_ZTE_LOG", "删除脚本出错：${e.message}")
+                KanoLog.d("kano_ZTE_LOG", "删除脚本出错：${e.message}")
             }
 
             // 写入内容（writeText 本身就是覆盖写入）
@@ -282,7 +282,7 @@ class ShellKano {
                 }
             }
 
-            Log.d(
+            KanoLog.d(
                 "kano_ZTE_LOG",
                 "根据：$resId 共找到${resultTexts.size}条 result_text 文本：$resultTexts"
             )
@@ -311,7 +311,7 @@ class ShellKano {
                         ?: throw Exception("cat kano_ui.xml 失败")
 
                     if (!xmlContent.trim().endsWith("</hierarchy>")) {
-                        Log.w("kano_ZTE_LOG", "UI XML 不完整，第 ${attempt + 1} 次尝试")
+                        KanoLog.w("kano_ZTE_LOG", "UI XML 不完整，第 ${attempt + 1} 次尝试")
                         Thread.sleep(200)
                         return@repeat
                     }
@@ -322,7 +322,7 @@ class ShellKano {
                     val inputStream = xmlContent.byteInputStream()
                     return builder.parse(inputStream)
                 } catch (e: Exception) {
-                    Log.e("kano_ZTE_LOG", "解析 UI XML 失败，第 ${attempt + 1} 次：${e.message}")
+                    KanoLog.e("kano_ZTE_LOG", "解析 UI XML 失败，第 ${attempt + 1} 次：${e.message}")
                     Thread.sleep(200)
                 }
             }
@@ -342,18 +342,18 @@ class ShellKano {
                         val tokens = line.trim().split(Regex("\\s+"))
                         if (tokens.size > 1) {
                             val pid = tokens[1]
-                            Log.w("kano_ZTE_LOG", "匹配到进程: $line，准备 kill -9 $pid")
+                            KanoLog.w("kano_ZTE_LOG", "匹配到进程: $line，准备 kill -9 $pid")
                             try {
                                 ProcessBuilder("kill", "-9", pid).start().waitFor()
-                                Log.w("kano_ZTE_LOG", "已 kill -9 $pid")
+                                KanoLog.w("kano_ZTE_LOG", "已 kill -9 $pid")
                             } catch (e: Exception) {
-                                Log.e("kano_ZTE_LOG", "kill -9 $pid 失败: ${e.message}")
+                                KanoLog.e("kano_ZTE_LOG", "kill -9 $pid 失败: ${e.message}")
                             }
                         }
                     }
                 }
             } catch (e: Exception) {
-                Log.e("kano_ZTE_LOG", "killProcessByName 执行失败: ${e.message}")
+                KanoLog.e("kano_ZTE_LOG", "killProcessByName 执行失败: ${e.message}")
             }
         }
 
@@ -376,9 +376,9 @@ class ShellKano {
                             input.copyTo(output)
                         }
                     }
-                    Log.d("kano_ZTE_LOG", "${outFile} 文件复制完成")
+                    KanoLog.d("kano_ZTE_LOG", "${outFile} 文件复制完成")
                 } else {
-                    Log.d("kano_ZTE_LOG", "${outFile} 文件已存在，无需复制")
+                    KanoLog.d("kano_ZTE_LOG", "${outFile} 文件已存在，无需复制")
                 }
 
                 outFile.setExecutable(true)
@@ -388,7 +388,7 @@ class ShellKano {
                     addAll(args)
                 }
 
-                Log.d("kano_ZTE_LOG", "执行命令: ${command.joinToString(" ")}")
+                KanoLog.d("kano_ZTE_LOG", "执行命令: ${command.joinToString(" ")}")
 
                 val process = ProcessBuilder(command)
                     .redirectErrorStream(true)
@@ -405,7 +405,7 @@ class ShellKano {
                             outputBuilder.appendLine(it)
                         }
                     } catch (e: Exception) {
-                        Log.w("kano_ZTE_LOG", "读取进程输出异常：${e.message}")
+                        KanoLog.w("kano_ZTE_LOG", "读取进程输出异常：${e.message}")
                     }
                 }
                 readerThread.start()
@@ -414,7 +414,7 @@ class ShellKano {
                 val finished = process.waitFor(timeoutMs, TimeUnit.MILLISECONDS)
 
                 if (!finished) {
-                    Log.w("kano_ZTE_LOG", "执行超时，强制销毁进程")
+                    KanoLog.w("kano_ZTE_LOG", "执行超时，强制销毁进程")
                     process.destroy()
 
                     // 调用回调
@@ -425,7 +425,7 @@ class ShellKano {
                 outputBuilder.toString().trim()
 
             } catch (e: Exception) {
-                Log.e("kano_ZTE_LOG", "执行异常: ${e.message}")
+                KanoLog.e("kano_ZTE_LOG", "执行异常: ${e.message}")
                 null
             }
         }
@@ -437,14 +437,14 @@ class ShellKano {
 
                 // 第一次检测
                 var result = executeShellFromAssetsSubfolderWithArgs(context, adbPath, "devices")
-                Log.d("kano_ZTE_LOG", "adb device 执行状态：$result")
+                KanoLog.d("kano_ZTE_LOG", "adb device 执行状态：$result")
 
                 if (result?.contains("localhost:5555\tdevice") == true) {
-                    Log.d("kano_ZTE_LOG", "adb存活，无需启动")
+                    KanoLog.d("kano_ZTE_LOG", "adb存活，无需启动")
                     return true
                 }
 
-                Log.w("kano_ZTE_LOG", "adb无设备或已退出，尝试启动")
+                KanoLog.w("kano_ZTE_LOG", "adb无设备或已退出，尝试启动")
 
                 // 重启 ADB server
                 executeShellFromAssetsSubfolderWithArgs(context, adbPath, "kill-server")
@@ -458,19 +458,19 @@ class ShellKano {
 
                 while (waited < maxWaitMs) {
                     result = executeShellFromAssetsSubfolderWithArgs(context, adbPath, "devices")
-                    Log.d("kano_ZTE_LOG", "等待 ADB 启动中：$result")
+                    KanoLog.d("kano_ZTE_LOG", "等待 ADB 启动中：$result")
                     if (result?.contains("localhost:5555\tdevice") == true) {
-                        Log.d("kano_ZTE_LOG", "ADB连接成功")
+                        KanoLog.d("kano_ZTE_LOG", "ADB连接成功")
                         return true
                     }
                     Thread.sleep(interval.toLong())
                     waited += interval
                 }
 
-                Log.e("kano_ZTE_LOG", "等待ADB device超时")
+                KanoLog.e("kano_ZTE_LOG", "等待ADB device超时")
                 return false
             } catch (e: Exception) {
-                Log.e("kano_ZTE_LOG", "检测/启动ADB失败: ${e.message}")
+                KanoLog.e("kano_ZTE_LOG", "检测/启动ADB失败: ${e.message}")
                 return false
             }
         }
@@ -500,7 +500,7 @@ class ShellKano {
 
                 return output
             } catch (e: Exception) {
-                Log.d("kano_ZTE_LOG", "执行出错：${e.message}")
+                KanoLog.d("kano_ZTE_LOG", "执行出错：${e.message}")
                 e.printStackTrace()
             }
 

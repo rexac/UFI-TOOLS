@@ -433,14 +433,16 @@ const getCustomHead = async () => {
 }
 const setCustomHead = async (text = "") => {
     try {
-        const { result } = await (await fetchWithTimeout(`${KANO_baseURL}/set_custom_head`, {
+        const { result, error } = await (await fetchWithTimeout(`${KANO_baseURL}/set_custom_head`, {
             headers: { ...common_headers },
             method: "POST",
             body: JSON.stringify({
                 text: text
             })
         })).json()
-        return result == "success"
+        return {
+            result, error
+        }
     } catch (e) {
         return false
     }

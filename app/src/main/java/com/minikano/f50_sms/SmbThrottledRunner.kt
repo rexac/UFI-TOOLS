@@ -13,14 +13,14 @@ object SmbThrottledRunner {
 
     fun runOnceInThread(context: Context) {
         if (running.get()) {
-            Log.d("kano_ZTE_LOG", "SMB 命令正在执行中，跳过")
+            KanoLog.d("kano_ZTE_LOG", "SMB 命令正在执行中，跳过")
             return
         }
         val sharedPrefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
         val gatewayIP = sharedPrefs.getString(PREF_GATEWAY_IP, "192.168.0.1:445")
 
-        Log.d("kano_ZTE_LOG", "SMB 命令正在执行中,IP:${gatewayIP}，跳过")
+        KanoLog.d("kano_ZTE_LOG", "SMB 命令正在执行中,IP:${gatewayIP}，跳过")
 
         val host = gatewayIP?.substringBefore(":")
 
@@ -29,21 +29,21 @@ object SmbThrottledRunner {
         Thread {
             try {
 
-                Log.d("kano_ZTE_LOG", "开始执行 SMB 命令,连接到：\"smb://$host/root/\"")
+                KanoLog.d("kano_ZTE_LOG", "开始执行 SMB 命令,连接到：\"smb://$host/root/\"")
 
                 val ctx = SingletonContext.getInstance()
                 val smbFile = SmbFile("smb://$host/root/", ctx)
 
                 if (smbFile.exists()) {
-                    Log.d("kano_ZTE_LOG", "SMB路径存在")
+                    KanoLog.d("kano_ZTE_LOG", "SMB路径存在")
                 } else {
-                    Log.d("kano_ZTE_LOG", "SMB路径不存在")
+                    KanoLog.d("kano_ZTE_LOG", "SMB路径不存在")
                 }
             } catch (e: Exception) {
-                Log.e("kano_ZTE_LOG", "SMB命令错误：${e.message}")
+                KanoLog.e("kano_ZTE_LOG", "SMB命令错误：${e.message}")
             } finally {
                 running.set(false)
-                Log.d("kano_ZTE_LOG", "SMB 命令执行完成")
+                KanoLog.d("kano_ZTE_LOG", "SMB 命令执行完成")
             }
         }.start()
     }

@@ -207,28 +207,28 @@ class KanoUtils {
 
             // 如果是追加模式且目标文件已存在，则直接返回该文件，避免干扰可执行文件的运行
             if (skipIfExists && outFile.exists()) {
-                Log.d("kano_ZTE_LOG", "文件已存在，跳过复制：${outFile.absolutePath}")
+                KanoLog.d("kano_ZTE_LOG", "文件已存在，跳过复制：${outFile.absolutePath}")
                 return outFile
             }
 
             val input = try {
                 assetManager.open(path)
             } catch (e: Exception) {
-                Log.e("kano_ZTE_LOG", "assets 中不存在文件: $path")
+                KanoLog.e("kano_ZTE_LOG", "assets 中不存在文件: $path")
                 return null
             }
 
             return try {
-                Log.d("kano_ZTE_LOG", "开始复制 $fileName 到 ${context.filesDir}（skipIfExists？：$skipIfExists）")
+                KanoLog.d("kano_ZTE_LOG", "开始复制 $fileName 到 ${context.filesDir}（skipIfExists？：$skipIfExists）")
                 input.use { ins ->
                     FileOutputStream(outFile, skipIfExists).use { out ->
                         ins.copyTo(out)
                     }
                 }
-                Log.d("kano_ZTE_LOG", "复制 $fileName 成功 -> ${outFile.absolutePath}")
+                KanoLog.d("kano_ZTE_LOG", "复制 $fileName 成功 -> ${outFile.absolutePath}")
                 outFile
             } catch (e: Exception) {
-                Log.e("kano_ZTE_LOG", "复制 $fileName 失败: ${e.message}")
+                KanoLog.e("kano_ZTE_LOG", "复制 $fileName 失败: ${e.message}")
                 null
             }
         }
@@ -262,18 +262,18 @@ class KanoUtils {
             val currentIp = IPManager.getHotspotGatewayIp("8080")
 
             if ((ip_add != null && need_auto_ip == "true") || userTouched) {
-                Log.d("kano_ZTE_LOG", "自动检测IP网关:$currentIp")
+                KanoLog.d("kano_ZTE_LOG", "自动检测IP网关:$currentIp")
                 if(currentIp == null){
-                    Log.d("kano_ZTE_LOG", "自动检测IP网关失败")
+                    KanoLog.d("kano_ZTE_LOG", "自动检测IP网关失败")
                     Toast.makeText(context, "自动检测IP网关失败...", Toast.LENGTH_SHORT).show()
                     return
                 }
                 if ((currentIp != ip_add) || userTouched) {
                     if(userTouched){
-                        Log.d("kano_ZTE_LOG", "用户点击，自动检测IP网关")
+                        KanoLog.d("kano_ZTE_LOG", "用户点击，自动检测IP网关")
                         Toast.makeText(context, "自动检测IP网关~", Toast.LENGTH_SHORT).show()
                     }else{
-                        Log.d("kano_ZTE_LOG", "检测到本地IP网关变动，自动修改IP网关为:$currentIp")
+                        KanoLog.d("kano_ZTE_LOG", "检测到本地IP网关变动，自动修改IP网关为:$currentIp")
                         Toast.makeText(context, "检测到本地IP网关变动，自动修改IP网关为:$currentIp", Toast.LENGTH_SHORT).show()
                     }
                     prefs.edit().putString("gateway_ip", currentIp).apply()
@@ -284,7 +284,7 @@ class KanoUtils {
             }else if(need_auto_ip == "true"){
                 //说明可能是第一次启动
                 prefs.edit().putString("gateway_ip", currentIp).apply()
-                Log.d("kano_ZTE_LOG", "可能是第一次启动，自动修改IP网关为:$currentIp")
+                KanoLog.d("kano_ZTE_LOG", "可能是第一次启动，自动修改IP网关为:$currentIp")
             }
         }
 
@@ -294,28 +294,28 @@ class KanoUtils {
 
             // 如果是追加模式且目标文件已存在，则直接返回该文件，避免干扰可执行文件的运行
             if (skipIfExists && outFile.exists()) {
-                Log.d("kano_ZTE_LOG", "外部文件已存在，跳过复制：${outFile.absolutePath}")
+                KanoLog.d("kano_ZTE_LOG", "外部文件已存在，跳过复制：${outFile.absolutePath}")
                 return outFile
             }
 
             val input = try {
                 context.assets.open(assetPath)
             } catch (e: Exception) {
-                Log.e("kano_ZTE_LOG", "assets 中不存在文件: $assetPath")
+                KanoLog.e("kano_ZTE_LOG", "assets 中不存在文件: $assetPath")
                 return null
             }
 
             return try {
-                Log.d("kano_ZTE_LOG", "开始复制 $fileName 到外部存储目录（skipIfExists?：$skipIfExists）")
+                KanoLog.d("kano_ZTE_LOG", "开始复制 $fileName 到外部存储目录（skipIfExists?：$skipIfExists）")
                 input.use { ins ->
                     FileOutputStream(outFile, skipIfExists).use { out ->
                         ins.copyTo(out)
                     }
                 }
-                Log.d("kano_ZTE_LOG", "复制成功 -> ${outFile.absolutePath}")
+                KanoLog.d("kano_ZTE_LOG", "复制成功 -> ${outFile.absolutePath}")
                 outFile
             } catch (e: Exception) {
-                Log.e("kano_ZTE_LOG", "复制失败: ${e.message}")
+                KanoLog.e("kano_ZTE_LOG", "复制失败: ${e.message}")
                 null
             }
         }

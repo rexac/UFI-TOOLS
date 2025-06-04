@@ -1,5 +1,4 @@
 package com.minikano.f50_sms
-import android.util.Log
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -58,19 +57,19 @@ class KanoRequest {
 
             client.newCall(request).execute().use { response ->
                 if (!response.isSuccessful) {
-                    Log.d("kano_ZTE_LOG", "Download failed: ${response.code}")
+                    KanoLog.d("kano_ZTE_LOG", "Download failed: ${response.code}")
                     return null
                 }
 
                 val body: ResponseBody? = response.body
                 if (body == null) {
-                    Log.d("kano_ZTE_LOG", "Empty response body")
+                    KanoLog.d("kano_ZTE_LOG", "Empty response body")
                     return null
                 }
 
                 val contentLength = body.contentLength()
                 if (contentLength <= 0) {
-                    Log.d("kano_ZTE_LOG", "Invalid content length")
+                    KanoLog.d("kano_ZTE_LOG", "Invalid content length")
                     return null
                 }
 
@@ -98,7 +97,7 @@ class KanoRequest {
                     }
 
                     outputStream.flush()
-                    Log.d("kano_ZTE_LOG", "Download complete: ${outputFile.absolutePath}")
+                    KanoLog.d("kano_ZTE_LOG", "Download complete: ${outputFile.absolutePath}")
                     return outputFile.absolutePath
 
                 } catch (e: Exception) {

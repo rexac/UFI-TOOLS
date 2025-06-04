@@ -484,8 +484,8 @@
                                 display: flex;
                                 align-items: center;
                             ">提醒阈值：<input style="flex: 1;width: 100%;" name="data_volume_alert_percent" value="80"
-                                        type="number" maxlength="3" min="0" max="100"
-                                        placeholder="提醒阈值(0-100%)"></label>
+                                        type="number" maxlength="3" min="0" max="100" placeholder="提醒阈值(0-100%)">&nbsp;%
+                                    (0-100%)</label>
                             </div>
                             <div class="item">
                                 <div style="display: flex;align-items: center">
@@ -752,7 +752,13 @@
                         <input id="opacityEl" oninput="getOpacityByPercent(event)"
                             style="width: 100%;margin-left: 0;margin-right: 0;" type="range" min="0" max="100">
                         <p>自定义头部</p>
-                        <div class="title" style="font-style: italic;font-size: 12px;">填入的内容会放在网页head末尾(支持脚本样式和meta元素)
+                        <div class="title" style="font-style: italic;font-size: 12px;">
+                            <i>填入的内容会放在网页head末尾(支持脚本样式和meta元素),大小不能超过1145KB</i>
+                        </div>
+                        <div>
+                            <button class="btn" style="width: 100%;margin-top: 6px;" onclick="onPluginBtn()">添加插件(.txt文件)</button>
+                            <input type="file" id="pluginFileInput" style="display: none;"
+                                onchange="handlePluginFileUpload(event)">
                         </div>
                         <textarea id="custom_head"
                             style="font-size: 12px;font-family: monospace;margin: 6px 0;resize: vertical;width: 100%;box-sizing: border-box;"

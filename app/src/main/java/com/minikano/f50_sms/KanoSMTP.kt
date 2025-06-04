@@ -18,7 +18,7 @@ class KanoSMTP(
     fun sendEmail(to: String, subject: String, body: String,isHTML:Boolean=true) {
         // 如果已经在发送中，则直接返回
         if (!isSending.compareAndSet(false, true)) {
-            Log.w("kano_ZTE_LOG", "邮件正在发送中，忽略重复发送")
+            KanoLog.w("kano_ZTE_LOG", "邮件正在发送中，忽略重复发送")
             return
         }
 
@@ -55,12 +55,12 @@ class KanoSMTP(
                     }
                 }
 
-                Log.d("kano_ZTE_LOG", "开始发送邮件...")
+                KanoLog.d("kano_ZTE_LOG", "开始发送邮件...")
                 Transport.send(message)
-                Log.d("kano_ZTE_LOG", "$username 邮件发送成功")
+                KanoLog.d("kano_ZTE_LOG", "$username 邮件发送成功")
 
             } catch (e: Exception) {
-                Log.e("kano_ZTE_LOG", "$username 邮件发送失败: ${e.message}", e)
+                KanoLog.e("kano_ZTE_LOG", "$username 邮件发送失败: ${e.message}", e)
             } finally {
                 isSending.set(false)
             }

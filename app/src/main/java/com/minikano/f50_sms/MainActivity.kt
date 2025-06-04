@@ -48,6 +48,8 @@ class MainActivity : ComponentActivity() {
     companion object {
         const val REQUEST_CODE_NOTIFICATION = 114514
         const val REQUEST_CODE_SMS = 1919810
+        @Volatile
+        var isEnableLog = false
     }
     private val port = 2333
     private val PREFS_NAME = "kano_ZTE_store"
@@ -55,6 +57,7 @@ class MainActivity : ComponentActivity() {
     private val PREF_LOGIN_TOKEN = "login_token"
     private val PREF_TOKEN_ENABLED = "login_token_enabled"
     private val PREF_AUTO_IP_ENABLED = "auto_ip_enabled"
+    private val PREF_ISDEBUG = "kano_is_debug"
     private val serverStatusLiveData = MutableLiveData<Boolean>()
     private val SERVER_INTENT = "com.minikano.f50_sms.SERVER_STATUS_CHANGED"
     private val UI_INTENT = "com.minikano.f50_sms.UI_STATUS_CHANGED"
@@ -74,7 +77,7 @@ class MainActivity : ComponentActivity() {
         //阻止非随身WiFi安装使用
         val isUFI_0 = KanoUtils.isAppInstalled(applicationContext,"com.zte.web")
         val isUFI = ShellKano.runShellCommand("pm list package")
-        Log.d("kano_ZTE_LOG", "isUFI_0：${isUFI_0} isUFI:${isUFI} ")
+        KanoLog.d("kano_ZTE_LOG", "isUFI_0：${isUFI_0} isUFI:${isUFI} ")
 
         if(!(isUFI != null && isUFI.contains("com.zte.web")) || !isUFI_0) {
 
@@ -145,6 +148,9 @@ class MainActivity : ComponentActivity() {
                 Context.RECEIVER_EXPORTED
             )
 
+            val sf = applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            isEnableLog = sf.getString(PREF_ISDEBUG,"false").equals("true")
+
             setContent {
                 val context = this@MainActivity
                 val sharedPrefs = remember {
@@ -185,6 +191,16 @@ class MainActivity : ComponentActivity() {
                         ) ?: true.toString()
                     )
                 }
+
+                var isDebugLog by remember {
+                    mutableStateOf(
+                        sharedPrefs.getString(
+                            PREF_ISDEBUG,
+                            false.toString()
+                        ) ?: false.toString()
+                    )
+                }
+
                 if (isServerRunning) {
                     ServerUI(
                         serverAddress = "http://${gatewayIp.substringBefore(":")}:$port",
@@ -193,7 +209,7 @@ class MainActivity : ComponentActivity() {
                         onStopServer = {
                             sendBroadcast(Intent(UI_INTENT).putExtra("status", false))
                             serverStatusLiveData.postValue(false)
-                            Log.d("kano_ZTE_LOG", "user touched stop btn")
+                            KanoLog.d("kano_ZTE_LOG", "user touched stop btn")
                         }
                     )
                 } else {
@@ -205,6 +221,7 @@ class MainActivity : ComponentActivity() {
                         onLoginTokenChange = { loginToken = it },
                         isTokenEnabled = isTokenEnabled == true.toString(),
                         isAutoCheckIp = isAutoIpEnabled == true.toString(),
+                        isDebug = isDebugLog == true.toString(),
                         onTokenEnableChange = { isTokenEnabled = it.toString() },
                         onAutoCheckIpChange = {
                             isAutoIpEnabled = it.toString()
@@ -213,6 +230,11 @@ class MainActivity : ComponentActivity() {
                                     gatewayIp = newIp // 更新 Compose 状态变量，UI 立即更新
                                 }
                             }
+                        },
+                        onDebugChange = {
+                            isEnableLog = it
+                            isDebugLog = it.toString()
+                            sharedPrefs.edit().putString(PREF_ISDEBUG, isEnableLog.toString()).apply()
                         },
                         onConfirm = {
                             // 保存并重启服务器
@@ -223,7 +245,7 @@ class MainActivity : ComponentActivity() {
                                 .apply()
                             sendBroadcast(Intent(UI_INTENT).putExtra("status", true))
                             serverStatusLiveData.postValue(true)
-                            Log.d("kano_ZTE_LOG", "user touched start btn")
+                            KanoLog.d("kano_ZTE_LOG", "user touched start btn")
                             runADB()
                         }
                     )
@@ -274,9 +296,9 @@ class MainActivity : ComponentActivity() {
         }
         if (requestCode == REQUEST_CODE_SMS) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Log.d("权限", "短信权限已授予")
+                KanoLog.d("权限", "短信权限已授予")
             } else {
-                Log.d("权限", "短信权限被拒绝")
+                KanoLog.d("权限", "短信权限被拒绝")
             }
         }
     }
@@ -288,14 +310,14 @@ class MainActivity : ComponentActivity() {
             try {
                 ShellKano.runShellCommand("/system/bin/setprop persist.service.adb.tcp.port 5555")
                 ShellKano.runShellCommand("/system/bin/setprop service.adb.tcp.port 5555")
-                Log.d("kano_ZTE_LOG", "网络adb调试执行成功")
+                KanoLog.d("kano_ZTE_LOG", "网络adb调试执行成功")
             } catch (e: Exception) {
                 try {
                     ShellKano.runShellCommand("/system/bin/setprop service.adb.tcp.port 5555")
                     ShellKano.runShellCommand("/system/bin/setprop persist.service.adb.tcp.port 5555")
-                    Log.d("kano_ZTE_LOG", "网络adb调试执行成功")
+                    KanoLog.d("kano_ZTE_LOG", "网络adb调试执行成功")
                 } catch (e: Exception) {
-                    Log.d("kano_ZTE_LOG", "网络adb调试出错： ${e.message}")
+                    KanoLog.d("kano_ZTE_LOG", "网络adb调试出错： ${e.message}")
                 }
             }
         }.start()
@@ -306,7 +328,7 @@ class MainActivity : ComponentActivity() {
             val action = intent?.action
             if (action == SERVER_INTENT) {
                 val isRunning = intent.getBooleanExtra("status", false) ?: false
-                Log.d("kano_ZTE_LOG", "isServerRunning is $isRunning")
+                KanoLog.d("kano_ZTE_LOG", "isServerRunning is $isRunning")
                 serverStatusLiveData.postValue(isRunning)
             }
         }
@@ -338,8 +360,10 @@ fun InputUI(
     versionName: String,
     isTokenEnabled: Boolean,
     isAutoCheckIp: Boolean,
+    isDebug:Boolean,
     onTokenEnableChange: (Boolean) -> Unit,
-    onAutoCheckIpChange: (Boolean) -> Unit
+    onAutoCheckIpChange: (Boolean) -> Unit,
+    onDebugChange:(Boolean) -> Unit
 ) {
     Surface(modifier = Modifier.fillMaxSize()) {
         Card(
@@ -398,6 +422,16 @@ fun InputUI(
                     Switch(
                         checked = isTokenEnabled,
                         onCheckedChange = onTokenEnableChange
+                    )
+                }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("启用调试日志")
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Switch(
+                        checked = isDebug,
+                        onCheckedChange = onDebugChange
                     )
                 }
 

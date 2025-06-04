@@ -1082,6 +1082,7 @@ function main_func() {
 
     //WiFi开关切换
     let changeWIFISwitch = async (e) => {
+        const selectEl = document.querySelector('#WIFI_SWITCH')
         const value = e.target.value.trim()
         if (!(await initRequestData()) || !value) {
             createToast('需要登录', 'red')
@@ -1089,6 +1090,8 @@ function main_func() {
         }
         createToast('更改中，请稍后', '#BF723F')
         try {
+            selectEl.style.backgroundColor = '#80808073'
+            selectEl.disabled = true
             const cookie = await login()
             if (!cookie) {
                 createToast('登录失败，请检查密码', 'red')
@@ -1110,13 +1113,17 @@ function main_func() {
             } else {
                 return
             }
-            if (res.result == 'success') {
-                createToast('操作成功，请重新连接WiFi！', 'green')
-                closeModal("#WIFIManagementModal")
-            } else {
-                createToast('操作失败！', 'red')
-            }
-            await initWIFISwitch()
+            setTimeout(() => {
+                if (res.result == 'success') {
+                    createToast('操作成功，请重新连接WiFi！', 'green')
+                    initWIFISwitch()
+
+                } else {
+                    createToast('操作失败！', 'red')
+                }
+                selectEl.style.backgroundColor = ''
+                selectEl.disabled = false
+            }, 1000);
         } catch (e) {
             // createToast(e.message)
         }
@@ -1725,8 +1732,8 @@ function main_func() {
                         form_data['flux_clear_date'] = value.trim()
                         break;
                     case 'data_volume_alert_percent':
-                        if (isNaN(Number(value.trim()))) {
-                            createToast('提醒阈值必须为数字', 'red')
+                        if (isNaN(Number(value.trim())) || value.trim() == '') {
+                            createToast('提醒阈值输入错误', 'red')
                             return
                         }
                         if (Number(value.trim()) < 0 || Number(value.trim()) > 100) {
@@ -2221,9 +2228,12 @@ function main_func() {
         const BG = document.querySelector('#BG')
         const BG_OVERLAY = document.querySelector('#BG_OVERLAY')
         if ((await initRequestData())) {
-            setCustomHead(custom_head.value?.trim() || '').then(async (res) => {
-                if (!res) {
-                    createToast('自定义头部保存失败，请检查网络', 'red')
+            setCustomHead(custom_head.value?.trim() || '').then(async ({ result, error }) => {
+                if (result != "success") {
+                    if (error)
+                        createToast(error, 'red')
+                    else
+                        createToast('自定义头部保存失败，请检查网络', 'red')
                 }
             })
         } else {
@@ -3825,8 +3835,39 @@ function main_func() {
         enableDHCP.value = status == 'open' ? "SERVER" : "DISABLE"
     })
 
+    //插件上传
+    const handlePluginFileUpload = (event) => {
+        return new Promise((resolve, reject) => {
+            const file = event.target.files[0];
+
+            if (file) {
+                if (file.size > 1145 * 1024) {
+                    createToast(`文件大小不能超过${1145}KB！`, 'red')
+                    reject({ msg: `文件大小不能超过${1145}KB！`, data: null })
+                } else {
+                    const reader = new FileReader();
+                    reader.readAsText(file); // 将文件读取为Data URL
+                    reader.onload = (e) => {
+                        const str = e.target.result;
+                        console.log(str);
+                        const custom_head = document.querySelector("#custom_head")
+                        custom_head && (custom_head.value += (`\n\n\n<!-- ${file.name} -->\n` + str))
+                        createToast("添加成功，提交后生效!", 'pink')
+                        resolve({ msg: 'ok' })
+                    }
+                }
+            }
+        })
+    }
+
+    const onPluginBtn = () => {
+        document.querySelector('#pluginFileInput')?.click()
+    }
+
     //挂载方法到window
     const methods = {
+        onPluginBtn,
+        handlePluginFileUpload,
         OP,
         onLANModalSubmit,
         switchSmsForwardMethodTab,

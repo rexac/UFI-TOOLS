@@ -3,7 +3,6 @@ package com.minikano.f50_sms
 import android.content.Context
 import android.os.Build
 import android.os.StatFs
-import android.util.Log
 import com.minikano.f50_sms.ShellKano.Companion.fillInputAndSend
 import com.minikano.f50_sms.ShellKano.Companion.runShellCommand
 import fi.iki.elonen.NanoHTTPD
@@ -21,7 +20,7 @@ import java.net.URL
 import java.util.Random
 import kotlin.concurrent.thread
 
-class WebServer(context: Context, port: Int, gatewayIp: String) : NanoHTTPD(gatewayIp.substringBefore(":"),port) {
+class WebServer(context: Context, port: Int, gatewayIp: String) : NanoHTTPD(port) {
 
     private val targetServer = "http://$gatewayIp"  // 目标服务器地址
     private val targetServerIP = gatewayIp  // 目标服务器地址
@@ -44,43 +43,32 @@ class WebServer(context: Context, port: Int, gatewayIp: String) : NanoHTTPD(gate
 
     @Volatile
     var currentDownloadingUrl: String = ""
-/*
-    init {
-        try {
-            val password = "kano123".toCharArray()
-
-            val assetManager = context.assets
-            val keystoreInputStream = assetManager.open("certs/192_168_0_1_ssl.bks")
-
-            val ks = KeyStore.getInstance("BKS") // 改为 BKS
-            ks.load(keystoreInputStream, password)
-            keystoreInputStream.close()
-
-            val kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm())
-            kmf.init(ks, password)
-
-            val sslContext = SSLContext.getInstance("TLS")
-            sslContext.init(kmf.keyManagers, null, null)
-
-            makeSecure(sslContext.serverSocketFactory, null)
-
-            KanoLog.i("kano_ZTE_LOG", "SSL 启用成功")
-
-        } catch (e: Exception) {
-            KanoLog.e("kano_ZTE_LOG", "SSL失败: ${e.message}", e)
-        }
-    }
- */
 
     val apiWhiteList:List<String> = listOf(
         "/api/get_custom_head"
     )
 
+    companion object {
+        @Volatile
+        var running = false
+            private set
+    }
+
+    override fun start() {
+        super.start(SOCKET_READ_TIMEOUT, false)
+        running = true
+    }
+
+    override fun stop() {
+        super.stop()
+        running = false
+    }
+
     override fun serve(session: IHTTPSession?): Response {
         val oUri = session?.uri.orEmpty()
         val method = session?.method.toString()
 
-        KanoLog.d("kano_security_server", "Got request: ${session?.method} ${session?.uri}")
+        KanoLog.d("kano_ZTE_LOG", "Got request: ${session?.method} ${session?.uri}")
 
         // 静态资源：不鉴权，直接返回
         if (!oUri.startsWith("/api")) {

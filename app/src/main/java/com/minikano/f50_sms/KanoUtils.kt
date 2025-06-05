@@ -12,7 +12,6 @@ import java.util.Calendar
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.pm.PackageManager
-import android.util.Log
 import android.widget.Toast
 import fi.iki.elonen.NanoHTTPD
 import java.io.File
@@ -317,6 +316,32 @@ class KanoUtils {
             } catch (e: Exception) {
                 KanoLog.e("kano_ZTE_LOG", "复制失败: ${e.message}")
                 null
+            }
+        }
+
+        //递归复制asset中所有的目录和文件到files中
+        fun copyAssetsRecursively(context: Context, assetPath: String = "", destDir: File = context.filesDir) {
+            val assetManager = context.assets
+            val fileList = assetManager.list(assetPath) ?: return
+
+            for (fileName in fileList) {
+                val fullAssetPath = if (assetPath.isEmpty()) fileName else "$assetPath/$fileName"
+                val outFile = File(destDir, fileName)
+
+                if ((assetManager.list(fullAssetPath)?.isNotEmpty() == true)) {
+                    // 是目录，递归复制
+                    outFile.mkdirs()
+                    copyAssetsRecursively(context, fullAssetPath, outFile)
+                } else {
+                    // 是文件，复制
+                    assetManager.open(fullAssetPath).use { input ->
+                        FileOutputStream(outFile).use { output ->
+                            input.copyTo(output)
+                        }
+                    }
+                    outFile.setExecutable(true)
+                    outFile.setReadable(true)
+                }
             }
         }
     }

@@ -1,6 +1,5 @@
 package com.minikano.f50_sms
 
-import android.util.Log
 import android.net.LocalSocket
 import android.net.LocalSocketAddress
 import java.io.*

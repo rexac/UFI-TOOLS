@@ -1,14 +1,10 @@
 package com.minikano.f50_sms
 
-import android.content.Context
-import android.util.Log
-
 object IPManager {
-
     /**
      * 获取当前 WiFi 连接的 IPv4 网关地址
      * @param context 应用上下文
-     * @return 网关地址（如 192.168.1.1），获取失败返回 null
+     * @return 网关地址（192.168.0.1），获取失败返回 null
      */
     fun getHotspotGatewayIp(setPort:String?): String? {
         try {
@@ -35,9 +31,5 @@ object IPManager {
             e.printStackTrace()
         }
         return null
-    }
-
-    private fun intToIp(ip: Int): String {
-        return "${ip and 0xFF}.${ip shr 8 and 0xFF}.${ip shr 16 and 0xFF}.${ip shr 24 and 0xFF}"
     }
 }

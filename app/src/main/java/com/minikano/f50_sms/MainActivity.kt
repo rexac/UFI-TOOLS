@@ -14,12 +14,10 @@ import android.os.Handler
 import android.os.Looper
 import android.os.PowerManager
 import android.provider.Settings
-import android.util.Log
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
@@ -435,11 +433,10 @@ fun InputUI(
                     )
                 }
 
-                Spacer(modifier = Modifier.height(32.dp))
                 Button(onClick = onConfirm) {
                     Text("启动服务")
                 }
-                Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(16.dp))
                 Text("Created by Minikano with ❤️ ver: $versionName", fontSize = 12.sp)
                 Spacer(modifier = Modifier.height(10.dp))
                 HyperlinkText(

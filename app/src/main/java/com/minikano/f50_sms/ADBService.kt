@@ -60,24 +60,12 @@ class ADBService : Service() {
         }
 
         // 复制 assets 中的所有文件
-        val assetManager = context.assets
-        val assetFiles = assetManager.list("") ?: return
-
-        for (filename in assetFiles) {
-            try {
-                val inputStream = assetManager.open(filename)
-                val outFile = File(filesDir, filename)
-                val outputStream = FileOutputStream(outFile)
-
-                inputStream.copyTo(outputStream)
-
-                inputStream.close()
-                outputStream.close()
-            } catch (e: IOException) {
-                e.printStackTrace()
-            }
+        try {
+            KanoUtils.copyAssetsRecursively(context, "shell", context.filesDir)
+            Log.d("kano_ZTE_LOG", "已初始化 files 目录")
+        }catch (e:Exception){
+            Log.e("kano_ZTE_LOG", "初始化 files 目录失败:${e.message}")
         }
-        Log.d("kano_ZTE_LOG","已初始化 files 目录")
     }
 
     private val runnableSMS = object : Runnable {

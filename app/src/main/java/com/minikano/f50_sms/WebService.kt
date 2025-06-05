@@ -15,7 +15,6 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import kotlinx.coroutines.runBlocking
 
-
 class WebService : Service() {
     private var webServer: WebServer? = null
     private val port = 2333
@@ -23,6 +22,10 @@ class WebService : Service() {
     private val UI_INTENT = "com.minikano.f50_sms.UI_STATUS_CHANGED"
     private val PREFS_NAME = "kano_ZTE_store"
     private var wakeLock: PowerManager.WakeLock? = null
+
+    @Volatile
+    private var allowAutoStart = true
+    private var allowAutoReStart = true
 
     private val statusReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -139,29 +142,52 @@ class WebService : Service() {
         // 注册广播接收器
         registerReceiver(statusReceiver, IntentFilter(UI_INTENT), Context.RECEIVER_EXPORTED)
         startForeground(114514, createNotification())
-        startWebServer()
+
+        allowAutoReStart = true
+        startWebServerMonitor() //启动WEB守护程序
+
         runADB()
         Log.d("kano_ZTE_LOG", "WebService Init Success!")
     }
 
-    private fun startWebServer() {
-        val ip = getSharedPreferences("kano_ZTE_store", Context.MODE_PRIVATE).getString(
-            "gateway_ip", "192.168.0.1:8080"
-        ) ?: "192.168.0.1:8080"
+    private fun startWebServerMonitor() {
         Thread {
+            while (allowAutoReStart) {
+                try {
+                    if (webServer == null || !WebServer.running) {
+                        Log.w("kano_ZTE_LOG", "[守护服务]WEB服务未启动，正在启动...")
+                        startWebServer()
+                    }
+                } catch (e: Exception) {
+                    Log.e("kano_ZTE_LOG", "[守护服务]程序异常: ${e.message}")
+                }
+                Thread.sleep(3000)
+            }
+        }.start()
+    }
+
+    private fun startWebServer() {
+        val prefs = getSharedPreferences("kano_ZTE_store", Context.MODE_PRIVATE)
+        Thread {
+            val currentIp = prefs.getString("gateway_ip", "192.168.0.1:8080") ?: "192.168.0.1:8080"
+            allowAutoStart = true
             try {
-                webServer = WebServer(applicationContext, port, ip)
+                Log.d("kano_ZTE_LOG", "正在启动web服务，绑定地址：http://0.0.0.0:$port")
+                webServer = WebServer(applicationContext, port, currentIp)
                 webServer?.start()
-                Log.d("kano_ZTE_LOG", "Web server started on http://${ip.substringBefore(":")}:$port")
-                Log.d("kano_ZTE_LOG", "Web server proxy IP: $ip")
                 sendStickyBroadcast(Intent(SERVER_INTENT).putExtra("status", true))
-            } catch (e:Exception){
-                Log.d("kano_ZTE_LOG", "Web server start Error:${e.message}")
+                Log.d("kano_ZTE_LOG", "启动服务成功，地址：http://0.0.0.0:$port")
+            } catch (fallbackEx: Exception) {
+                Log.e("kano_ZTE_LOG", "备用地址启动失败: ${fallbackEx.message}")
+                sendStickyBroadcast(Intent(SERVER_INTENT).putExtra("status", false))
             }
         }.start()
     }
 
     private fun stopWebServer() {
+        allowAutoStart = false  // 禁止自动重试
+        allowAutoReStart = false  // 禁止自动重启
+
         webServer?.stop()
         sendStickyBroadcast(Intent(SERVER_INTENT).putExtra("status", false))
         Log.d("kano_ZTE_LOG", "Web server stopped")
@@ -174,12 +200,10 @@ class WebService : Service() {
 
     private fun createNotification(): Notification {
         val channelId = "web_server_channel"
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                channelId, "Web Server", NotificationManager.IMPORTANCE_LOW
-            )
-            getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
-        }
+        val channel = NotificationChannel(
+            channelId, "Web Server", NotificationManager.IMPORTANCE_LOW
+        )
+        getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
 
         val builder =
             NotificationCompat.Builder(this, channelId).setContentTitle("ZTE Tools Web Server")

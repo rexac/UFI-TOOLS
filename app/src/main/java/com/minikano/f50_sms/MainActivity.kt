@@ -558,8 +558,7 @@ fun HyperlinkText(
             annotatedText.getStringAnnotations("URL", offset, offset)
                 .firstOrNull()?.let {
                     try {
-                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(it.item))
-                            context.startActivity(intent)
+                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(it.item)))
                     } catch (e: Exception) {
                         Toast.makeText(context, "打开链接失败", Toast.LENGTH_SHORT).show()
                     }

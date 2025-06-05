@@ -13,9 +13,6 @@ import android.os.HandlerThread
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.minikano.f50_sms.ShellKano.Companion.executeShellFromAssetsSubfolderWithArgs
-import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
 import java.util.concurrent.Executors
 
 class ADBService : Service() {

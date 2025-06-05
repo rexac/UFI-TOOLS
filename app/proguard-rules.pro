@@ -70,7 +70,12 @@
 # 防止类名被混淆（可选，根据你是否希望混淆这些类名）
 -keepnames class org.newsclub.net.unix.**
 
-
+-dontwarn java.beans.BeanInfo
+-dontwarn java.beans.IntrospectionException
+-dontwarn java.beans.Introspector
+-dontwarn java.beans.PropertyDescriptor
+-dontwarn java.lang.management.ManagementFactory
+-dontwarn java.lang.management.RuntimeMXBean
 -dontwarn afu.org.checkerframework.dataflow.qual.Pure
 -dontwarn afu.org.checkerframework.dataflow.qual.SideEffectFree
 -dontwarn afu.org.checkerframework.framework.qual.EnsuresQualifierIf

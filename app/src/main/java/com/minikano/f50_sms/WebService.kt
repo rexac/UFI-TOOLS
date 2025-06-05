@@ -14,9 +14,10 @@ import android.os.PowerManager
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import kotlinx.coroutines.runBlocking
+import kotlin.concurrent.thread
 
 class WebService : Service() {
-    private var webServer: WebServer? = null
+    private var webServer: KanoWebServer? = null
     private val port = 2333
     private val SERVER_INTENT = "com.minikano.f50_sms.SERVER_STATUS_CHANGED"
     private val UI_INTENT = "com.minikano.f50_sms.UI_STATUS_CHANGED"
@@ -144,26 +145,10 @@ class WebService : Service() {
         startForeground(114514, createNotification())
 
         allowAutoReStart = true
-        startWebServerMonitor() //启动WEB守护程序
+        startWebServer()
 
         runADB()
         Log.d("kano_ZTE_LOG", "WebService Init Success!")
-    }
-
-    private fun startWebServerMonitor() {
-        Thread {
-            while (allowAutoReStart) {
-                try {
-                    if (webServer == null || !WebServer.running) {
-                        Log.w("kano_ZTE_LOG", "[守护服务]WEB服务未启动，正在启动...")
-                        startWebServer()
-                    }
-                } catch (e: Exception) {
-                    Log.e("kano_ZTE_LOG", "[守护服务]程序异常: ${e.message}")
-                }
-                Thread.sleep(3000)
-            }
-        }.start()
     }
 
     private fun startWebServer() {
@@ -173,12 +158,12 @@ class WebService : Service() {
             allowAutoStart = true
             try {
                 Log.d("kano_ZTE_LOG", "正在启动web服务，绑定地址：http://0.0.0.0:$port")
-                webServer = WebServer(applicationContext, port, currentIp)
+                webServer = KanoWebServer(applicationContext,2333,currentIp)
                 webServer?.start()
                 sendStickyBroadcast(Intent(SERVER_INTENT).putExtra("status", true))
                 Log.d("kano_ZTE_LOG", "启动服务成功，地址：http://0.0.0.0:$port")
             } catch (fallbackEx: Exception) {
-                Log.e("kano_ZTE_LOG", "备用地址启动失败: ${fallbackEx.message}")
+                Log.e("kano_ZTE_LOG", "服务启动失败: ${fallbackEx.message}")
                 sendStickyBroadcast(Intent(SERVER_INTENT).putExtra("status", false))
             }
         }.start()
@@ -188,7 +173,7 @@ class WebService : Service() {
         allowAutoStart = false  // 禁止自动重试
         allowAutoReStart = false  // 禁止自动重启
 
-        webServer?.stop()
+        thread { webServer?.stop() }
         sendStickyBroadcast(Intent(SERVER_INTENT).putExtra("status", false))
         Log.d("kano_ZTE_LOG", "Web server stopped")
     }

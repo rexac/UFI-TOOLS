@@ -7,27 +7,22 @@ import android.content.IntentFilter
 import android.net.ConnectivityManager
 import android.os.BatteryManager
 import android.os.StatFs
-import com.minikano.f50_sms.WebServer.MyStorageInfo
 import java.util.Calendar
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.pm.PackageManager
 import android.widget.Toast
-import fi.iki.elonen.NanoHTTPD
+import com.minikano.f50_sms.modules.MyStorageInfo
 import java.io.File
 import java.io.FileOutputStream
+import java.net.HttpURLConnection
+import java.net.URL
 import java.security.MessageDigest
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 
 class KanoUtils {
     companion object {
-        fun getFullUri(session: NanoHTTPD.IHTTPSession?): String {
-            val path = session?.uri ?: "/"
-            val query = session?.queryParameterString
-            return if (!query.isNullOrBlank()) "$path?$query" else path
-        }
-
         fun HmacSignature(secret: String, data: String): String {
             val hmacMd5Bytes = hmac("HmacMD5", secret, data)
             val mid = hmacMd5Bytes.size / 2
@@ -344,5 +339,33 @@ class KanoUtils {
                 }
             }
         }
+
+        fun getStatusCode(urlStr: String): Int {
+            val url = URL(urlStr)
+            val connection = url.openConnection() as HttpURLConnection
+            return try {
+                connection.requestMethod = "GET"
+                connection.connect()
+                connection.responseCode // 返回状态码
+            } catch (e: Exception) {
+                e.printStackTrace()
+                -1 // 表示请求失败
+            } finally {
+                connection.disconnect()
+            }
+        }
+
+
+        private var cachedTotal = 0L
+        private var lastUpdate = 0L
+        fun getCachedTodayUsage(context: Context): Long {
+            val now = System.currentTimeMillis()
+            if (now - lastUpdate > 10_000) { // 每 10 秒更新一次
+                cachedTotal = KanoUtils.getTodayDataUsage(context)
+                lastUpdate = now
+            }
+            return cachedTotal
+        }
+
     }
 }

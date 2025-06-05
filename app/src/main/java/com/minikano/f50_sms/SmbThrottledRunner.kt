@@ -1,7 +1,6 @@
 package com.minikano.f50_sms
 
 import android.content.Context
-import android.util.Log
 import java.util.concurrent.atomic.AtomicBoolean
 import jcifs.smb.SmbFile
 import jcifs.context.SingletonContext

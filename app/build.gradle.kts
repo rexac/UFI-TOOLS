@@ -50,7 +50,7 @@ android {
         targetSdk = 33
         // 动态生成 versionCode 为 yyyyMMdd 格式
         versionCode = SimpleDateFormat("yyyyMMdd").format(Date()).toInt()
-        versionName = "2.9.9_fix"
+        versionName = "3.0.0_beta"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -80,6 +80,7 @@ android {
                 "META-INF/LICENSE",
                 "META-INF/NOTICE.md",
                 "META-INF/NOTICE",
+                "META-INF/INDEX.LIST",
                 "assets/script_orignal/**",
                 "assets/dictionary.json",
                 "assets/node_modules/**",
@@ -110,10 +111,16 @@ android {
 }
 
 dependencies {
+
+    // Ktor 核心与 CIO 引擎
+    implementation(libs.ktor.server.core)
+    implementation(libs.ktor.server.cio)
+
+    // 常用功能插件
+    implementation(libs.ktor.server.default.headers)
+
     implementation(libs.android.mail)
     implementation(libs.android.activation)
-    implementation(libs.slf4j.nop)
-    implementation(libs.nanohttpd)
     implementation(libs.jcifs.ng) {
         exclude(group = "org.slf4j")
     }

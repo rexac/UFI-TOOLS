@@ -2,6 +2,7 @@ package com.minikano.f50_sms
 
 import android.content.Context
 import com.minikano.f50_sms.modules.mainModule
+import com.minikano.f50_sms.utils.KanoLog
 import io.ktor.server.cio.CIO
 import io.ktor.server.engine.embeddedServer
 

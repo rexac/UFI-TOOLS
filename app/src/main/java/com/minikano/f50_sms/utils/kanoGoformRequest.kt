@@ -1,4 +1,4 @@
-package com.minikano.f50_sms
+package com.minikano.f50_sms.utils
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -18,7 +18,7 @@ class KanoGoformRequest(private val baseUrl: String) {
     suspend fun login(password: String): String? = withContext(Dispatchers.IO) {
         val ld = getLD()?.optString("LD") ?: return@withContext null
         val pwdHash = sha256(sha256(password) + ld)
-        KanoLog.d("kano_ZTE_LOG","登录哈希：${pwdHash}")
+        KanoLog.d("kano_ZTE_LOG", "登录哈希：${pwdHash}")
 
         val body = FormBody.Builder()
             .add("goformId", "LOGIN")
@@ -37,11 +37,11 @@ class KanoGoformRequest(private val baseUrl: String) {
         client.newCall(req).execute().use { res ->
             if (!res.isSuccessful) return@withContext null
             val bdy = res.body?.string()?.let { JSONObject(it) }
-            KanoLog.d("kano_ZTE_LOG","登录请求结果：${bdy}")
+            KanoLog.d("kano_ZTE_LOG", "登录请求结果：${bdy}")
             val resData = bdy ?: return@withContext null
             if (resData.optString("result") == "3") return@withContext null
             val header = res.header("set-cookie")?.split(";")?.firstOrNull()
-            KanoLog.d("kano_ZTE_LOG","登录Cookie：${header}")
+            KanoLog.d("kano_ZTE_LOG", "登录Cookie：${header}")
             return@withContext res.header("set-cookie")
         }
     }

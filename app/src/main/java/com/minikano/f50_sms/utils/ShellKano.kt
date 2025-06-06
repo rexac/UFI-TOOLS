@@ -1,8 +1,6 @@
-package com.minikano.f50_sms
+package com.minikano.f50_sms.utils
 
-import android.content.ComponentCallbacks
 import android.content.Context
-import android.util.Log
 import org.w3c.dom.Document
 import org.w3c.dom.NodeList
 import java.io.BufferedReader
@@ -130,7 +128,7 @@ class ShellKano {
             val nodes = doc.getElementsByTagName("node")
             val escapedInput = inputText.replace(" ", "%s")
             //复制文本到剪贴板
-            KanoUtils.copyToClipboard(context,"sambaCommand",inputText)
+            KanoUtils.copyToClipboard(context, "sambaCommand", inputText)
 
             // 寻找输入框
             var inputClicked = false
@@ -189,7 +187,10 @@ class ShellKano {
                         val tapX = (x1.toInt() + x2.toInt()) / 2
                         val tapY = (y1.toInt() + y2.toInt()) / 2
                         runShellCommand("$adbPath -s localhost shell input tap $tapX $tapY", context)
-                        KanoLog.d("kano_ZTE_LOG", "点击 ${btnName.joinToString(", ")} 坐标：$tapX,$tapY")
+                        KanoLog.d(
+                            "kano_ZTE_LOG",
+                            "点击 ${btnName.joinToString(", ")} 坐标：$tapX,$tapY"
+                        )
                         //继续检测result
                         if (resId != "") {
                             val res = getTextFromUIByResourceId(resId, adbPath, context)

@@ -1,4 +1,4 @@
-package com.minikano.f50_sms
+package com.minikano.f50_sms.configs
 
 import android.content.Context
 import android.os.Build

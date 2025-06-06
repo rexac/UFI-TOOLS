@@ -1,4 +1,4 @@
-package com.minikano.f50_sms
+package com.minikano.f50_sms.utils
 
 import android.app.usage.NetworkStatsManager
 import android.content.Context
@@ -12,7 +12,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.pm.PackageManager
 import android.widget.Toast
-import com.minikano.f50_sms.modules.MyStorageInfo
+import com.minikano.f50_sms.modules.deviceInfo.MyStorageInfo
 import java.io.File
 import java.io.FileOutputStream
 import java.net.HttpURLConnection
@@ -213,7 +213,10 @@ class KanoUtils {
             }
 
             return try {
-                KanoLog.d("kano_ZTE_LOG", "开始复制 $fileName 到 ${context.filesDir}（skipIfExists？：$skipIfExists）")
+                KanoLog.d(
+                    "kano_ZTE_LOG",
+                    "开始复制 $fileName 到 ${context.filesDir}（skipIfExists？：$skipIfExists）"
+                )
                 input.use { ins ->
                     FileOutputStream(outFile, skipIfExists).use { out ->
                         ins.copyTo(out)
@@ -267,7 +270,10 @@ class KanoUtils {
                         KanoLog.d("kano_ZTE_LOG", "用户点击，自动检测IP网关")
                         Toast.makeText(context, "自动检测IP网关~", Toast.LENGTH_SHORT).show()
                     }else{
-                        KanoLog.d("kano_ZTE_LOG", "检测到本地IP网关变动，自动修改IP网关为:$currentIp")
+                        KanoLog.d(
+                            "kano_ZTE_LOG",
+                            "检测到本地IP网关变动，自动修改IP网关为:$currentIp"
+                        )
                         Toast.makeText(context, "检测到本地IP网关变动，自动修改IP网关为:$currentIp", Toast.LENGTH_SHORT).show()
                     }
                     prefs.edit().putString("gateway_ip", currentIp).apply()
@@ -300,7 +306,10 @@ class KanoUtils {
             }
 
             return try {
-                KanoLog.d("kano_ZTE_LOG", "开始复制 $fileName 到外部存储目录（skipIfExists?：$skipIfExists）")
+                KanoLog.d(
+                    "kano_ZTE_LOG",
+                    "开始复制 $fileName 到外部存储目录（skipIfExists?：$skipIfExists）"
+                )
                 input.use { ins ->
                     FileOutputStream(outFile, skipIfExists).use { out ->
                         ins.copyTo(out)
@@ -361,7 +370,7 @@ class KanoUtils {
         fun getCachedTodayUsage(context: Context): Long {
             val now = System.currentTimeMillis()
             if (now - lastUpdate > 10_000) { // 每 10 秒更新一次
-                cachedTotal = KanoUtils.getTodayDataUsage(context)
+                cachedTotal = getTodayDataUsage(context)
                 lastUpdate = now
             }
             return cachedTotal

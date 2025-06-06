@@ -1,5 +1,4 @@
-package com.minikano.f50_sms
-import android.util.Log
+package com.minikano.f50_sms.utils
 import java.util.*
 import javax.mail.*
 import javax.mail.internet.InternetAddress

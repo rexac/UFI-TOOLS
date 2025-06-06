@@ -1,7 +1,7 @@
 package com.minikano.f50_sms.modules.auth
 
 import android.content.Context
-import com.minikano.f50_sms.KanoUtils
+import com.minikano.f50_sms.utils.KanoUtils
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.request.httpMethod
 import io.ktor.server.request.path

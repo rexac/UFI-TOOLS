@@ -51,10 +51,9 @@ if ('serviceWorker' in navigator) {
 
 //判断一下是否需要token
 const needToken = async () => {
-    //获取设备型号与电量，整合（如果有）
     try {
-        let res = await (await fetch(`${KANO_baseURL}/battery_and_model`, { headers: { ...common_headers } })).json()
-        if (!res.model) {
+        let res = await (await fetch(`${KANO_baseURL}/version_info`, { headers: { ...common_headers } })).json()
+        if (!res.app_ver) {
             isNeedToken = true
         } else {
             isNeedToken = false
@@ -88,11 +87,11 @@ function main_func() {
     const showList = _stor != null ? JSON.parse(_stor) : {
         statusShowList: [
             {
-                "name": "network_type",
+                "name": "QORS_MESSAGE",
                 "isShow": true
             },
             {
-                "name": "QORS_MESSAGE",
+                "name": "network_type",
                 "isShow": true
             },
             {
@@ -129,14 +128,6 @@ function main_func() {
             },
             {
                 "name": "daily_data",
-                "isShow": true
-            },
-            {
-                "name": "internal_available_storage",
-                "isShow": true
-            },
-            {
-                "name": "external_available_storage",
                 "isShow": true
             },
             {
@@ -256,7 +247,15 @@ function main_func() {
             {
                 "name": "msisdn",
                 "isShow": true
-            }
+            },
+            {
+                "name": "internal_available_storage",
+                "isShow": true
+            },
+            {
+                "name": "external_available_storage",
+                "isShow": true
+            },
         ]
 
     }
@@ -674,8 +673,8 @@ function main_func() {
             } catch { }
 
             let statusHtml_base = {
-                network_type: `${notNullOrundefinedOrIsShow(res, 'network_type') ? `<strong onclick="copyText(event)"  class="green">网络状态：${res.network_provider} ${res.network_type == '20' ? '5G' : res.network_type == '13' ? '4G' : res.network_type}</strong>` : ''}`,
                 QORS_MESSAGE: `${notNullOrundefinedOrIsShow(res, "QORS_MESSAGE") ? `<strong onclick="copyText(event)"  class="green">${QORS_MESSAGE}</strong>` : ''}`,
+                network_type: `${notNullOrundefinedOrIsShow(res, 'network_type') ? `<strong onclick="copyText(event)"  class="green">网络状态：${res.network_provider} ${res.network_type == '20' ? '5G' : res.network_type == '13' ? '4G' : res.network_type}</strong>` : ''}`,
                 wifi_access_sta_num: `${notNullOrundefinedOrIsShow(res, 'wifi_access_sta_num') ? `<strong onclick="copyText(event)"  class="blue">WIFI连接：${res.wifi_access_sta_num}</strong>` : ''}`,
                 battery: `${notNullOrundefinedOrIsShow(res, 'battery') ? `<strong onclick="copyText(event)"  class="green">${res.battery_charging == "1" ? "正在充电" : "剩余电量"}：${res.battery} %</strong>` : ''}`,
                 rssi: `${notNullOrundefinedOrIsShow(res, 'rssi') || notNullOrundefinedOrIsShow(res, 'network_signalbar', true) ? `<strong onclick="copyText(event)"  class="green">信号强度：${kano_getSignalEmoji(notNullOrundefinedOrIsShow(res, 'rssi') ? res.rssi : res.network_signalbar)}</strong>` : ''}`,
@@ -689,8 +688,6 @@ function main_func() {
                     return limit_size.split('_')[0] * limit_size.split('_')[1] * Math.pow(1024, 2)
                 })()) : ''}</strong>` : ''}`,
                 daily_data: `${notNullOrundefinedOrIsShow(res, 'daily_data') ? `<strong onclick="copyText(event)"  class="blue">当日流量：${formatBytes(res.daily_data)}</strong>` : ''}`,
-                internal_available_storage: `${notNullOrundefinedOrIsShow(res, 'internal_available_storage') || notNullOrundefinedOrIsShow(res, 'internal_total_storage') ? `<strong onclick="copyText(event)" class="blue">内部存储：${formatBytes(res.internal_used_storage)} 已用 / ${formatBytes(res.internal_total_storage)} 总容量</strong>` : ''}`,
-                external_available_storage: `${notNullOrundefinedOrIsShow(res, 'external_available_storage') || notNullOrundefinedOrIsShow(res, 'external_total_storage') ? `<strong onclick="copyText(event)" class="blue">SD卡：${formatBytes(res.external_used_storage)} 已用 / ${formatBytes(res.external_total_storage)} 总容量</strong>` : ''}`,
                 realtime_rx_thrpt: `${notNullOrundefinedOrIsShow(res, 'realtime_tx_thrpt') || notNullOrundefinedOrIsShow(res, 'realtime_rx_thrpt') ? `<strong onclick="copyText(event)" class="blue">当前网速: <span style="text-align:center;display:inline-block;width: 14ch;">⬇️&nbsp;${formatBytes(Number((res.realtime_rx_thrpt)), true)}/S</span><span style="text-align:center;display:inline-block;width: 14ch;">⬆️&nbsp;${formatBytes(Number((res.realtime_tx_thrpt)))}/S</span></strong>` : ''}`,
             }
             let statusHtml_net = {
@@ -725,6 +722,8 @@ function main_func() {
                 lan_ipaddr: `${notNullOrundefinedOrIsShow(res, 'lan_ipaddr') ? `<strong onclick="copyText(event)"  class="blue">本地网关：${res.lan_ipaddr}</strong>` : ''}`,
                 mac_address: `${notNullOrundefinedOrIsShow(res, 'mac_address') ? `<strong onclick="copyText(event)"  class="blue">MAC地址：${res.mac_address}</strong>` : ''}`,
                 msisdn: `${notNullOrundefinedOrIsShow(res, 'msisdn') ? `<strong onclick="copyText(event)"  class="blue">手机号：${res.msisdn}</strong>` : ''}`,
+                internal_available_storage: `${notNullOrundefinedOrIsShow(res, 'internal_available_storage') || notNullOrundefinedOrIsShow(res, 'internal_total_storage') ? `<strong onclick="copyText(event)" class="blue">内部存储：${formatBytes(res.internal_used_storage)} 已用 / ${formatBytes(res.internal_total_storage)} 总容量</strong>` : ''}`,
+                external_available_storage: `${notNullOrundefinedOrIsShow(res, 'external_available_storage') || notNullOrundefinedOrIsShow(res, 'external_total_storage') ? `<strong onclick="copyText(event)" class="blue">SD卡：${formatBytes(res.external_used_storage)} 已用 / ${formatBytes(res.external_total_storage)} 总容量</strong>` : ''}`,
             }
 
             html += `<li style="padding-top: 15px;"><p>`
@@ -2207,7 +2206,7 @@ function main_func() {
     // title
     const loadTitle = async () => {
         try {
-            const { app_ver, model } = await (await fetch(`${KANO_baseURL}/battery_and_model`, { headers: common_headers })).json()
+            const { app_ver, model } = await (await fetch(`${KANO_baseURL}/version_info`, { headers: common_headers })).json()
             MODEL.innerHTML = `设备：${model}`
             document.querySelector('#TITLE').innerHTML = `[${model}]UFI-TOOLS-WEB Ver: ${app_ver}`
             document.querySelector('#MAIN_TITLE').innerHTML = `UFI-TOOLS <span style="font-size:14px">Ver: ${app_ver}</span>`
@@ -3248,7 +3247,7 @@ function main_func() {
         try {
             const content = await queryUpdate()
             if (content) {
-                const { app_ver, app_ver_code } = await (await fetch(`${KANO_baseURL}/battery_and_model`, { headers: common_headers })).json();
+                const { app_ver, app_ver_code } = await (await fetch(`${KANO_baseURL}/version_info`, { headers: common_headers })).json();
                 const { name, base_uri, changelog } = content;
 
                 const version = name.match(/V(\d+\.\d+\.\d+)/i)?.[1];
@@ -3863,6 +3862,54 @@ function main_func() {
     const onPluginBtn = () => {
         document.querySelector('#pluginFileInput')?.click()
     }
+
+    // (() => {
+    //     const canvas = document.getElementById('kanoChart');
+    //     const ctx = canvas.getContext('2d');
+    //     const labels = ['1秒']
+    //     const data = [0]
+
+
+    //     const chart = new Chart(ctx, {
+    //         type: 'line',
+    //         data: {
+    //             labels,
+    //             datasets: [{
+    //                 label: '下载速度 (MB/s)',
+    //                 data,
+    //                 borderColor: '#40A7EC',
+    //                 tension: 0.2,
+    //             }]
+    //         },
+    //         options: {
+    //             responsive: true,
+    //             animation: {
+    //                 duration: 500,    // 0.5秒动画
+    //                 easing: 'easeOutQuad'  // 自然缓动效果
+    //             },
+    //             plugins: {
+    //                 legend: { display: false }
+    //             },
+    //             scales: {
+    //                 x: {
+    //                     grid: { display: false }
+    //                 },
+    //                 y: {
+    //                     grid: { display: false }
+    //                 }
+    //             }
+    //         }
+    //     });
+
+    //     setInterval(() => {
+    //         labels.length > 10 && labels.shift()
+    //         labels.push(Number(labels[labels.length - 1].replace('秒', '')) + 1 + '秒')
+    //         data.length > 10 && data.shift()
+    //         data.push(Math.floor(Math.random() * 1025))
+    //         chart.update()
+    //     }, 1000);
+
+    // })()
 
     //挂载方法到window
     const methods = {

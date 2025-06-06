@@ -40,6 +40,9 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.TextUnit
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.minikano.f50_sms.utils.KanoLog
+import com.minikano.f50_sms.utils.KanoUtils
+import com.minikano.f50_sms.utils.ShellKano
 import kotlin.system.exitProcess
 
 class MainActivity : ComponentActivity() {

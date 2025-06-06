@@ -1,8 +1,7 @@
-package com.minikano.f50_sms
+package com.minikano.f50_sms.utils
 
 import android.content.Context
 import android.net.Uri
-import android.util.Log
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -36,12 +35,15 @@ object SmsPoll {
                 forwardSmsByCurl(lastSms,context)
             }
         } else {
-            KanoLog.d("kano_ZTE_LOG", "无新短信，短信是否${minute}分钟内：$withinMin,短信是否为新：$isNew")
+            KanoLog.d(
+                "kano_ZTE_LOG",
+                "无新短信，短信是否${minute}分钟内：$withinMin,短信是否为新：$isNew"
+            )
         }
     }
 
     //通过curl转发
-    fun forwardSmsByCurl(sms_data:SmsInfo?,context: Context) {
+    fun forwardSmsByCurl(sms_data: SmsInfo?, context: Context) {
         if (sms_data == null) return
         val sharedPrefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
@@ -69,7 +71,7 @@ object SmsPoll {
     }
 
     //通过SMTP邮件转发
-    fun forwardByEmail(sms_data:SmsInfo?,context: Context) {
+    fun forwardByEmail(sms_data: SmsInfo?, context: Context) {
         if (sms_data == null) return
         val sharedPrefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 

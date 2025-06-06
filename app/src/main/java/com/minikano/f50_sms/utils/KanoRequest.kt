@@ -1,4 +1,4 @@
-package com.minikano.f50_sms
+package com.minikano.f50_sms.utils
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request

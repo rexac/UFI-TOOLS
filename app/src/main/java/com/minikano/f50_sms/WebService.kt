@@ -13,6 +13,9 @@ import android.os.IBinder
 import android.os.PowerManager
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import com.minikano.f50_sms.utils.KanoGoformRequest
+import com.minikano.f50_sms.utils.KanoUtils
+import com.minikano.f50_sms.utils.ShellKano
 import kotlinx.coroutines.runBlocking
 import kotlin.concurrent.thread
 

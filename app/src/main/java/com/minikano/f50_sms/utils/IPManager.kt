@@ -1,4 +1,4 @@
-package com.minikano.f50_sms
+package com.minikano.f50_sms.utils
 
 object IPManager {
     /**

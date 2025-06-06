@@ -277,63 +277,15 @@ const getUFIData = async () => {
             signal: controller.signal
         });
 
-        //获取CPU温度，整合（如果有）
-        let cpu_t = null
-        try {
-            const { temp } = await (await fetch(`${KANO_baseURL}/temp`, { headers: { ...common_headers } })).json()
-            cpu_t = temp
-        } catch {/*没有，不处理*/ }
-
-        //获取CPU使用，整合（如果有）
-        let cpu_u = null
-        try {
-            const { cpu } = await (await fetch(`${KANO_baseURL}/cpu`, { headers: { ...common_headers } })).json()
-            cpu_u = cpu
-        } catch {/*没有，不处理*/ }
-
-        //获取内存使用，整合（如果有）
-        let mem_u = null
-        try {
-            const { mem } = await (await fetch(`${KANO_baseURL}/mem`, { headers: { ...common_headers } })).json()
-            mem_u = mem
-        } catch {/*没有，不处理*/ }
-
-        //获取设备型号与电量，整合（如果有）
-        let battery = null
-        let model = null
-        try {
-            let battery_res = await (await fetch(`${KANO_baseURL}/battery_and_model`, { headers: { ...common_headers } })).json()
-            battery = battery_res.battery
-            model = battery_res.model
-        } catch {/*没有，不处理*/ }
-
-        //获取请求的客户端IP地址
-
-        let client_ip = null
-        try {
-            const { ip } = await (await fetch(`${KANO_baseURL}/ip`, { headers: common_headers })).json()
-            client_ip = ip
-        } catch {/*没有，不处理*/ }
-
-        //获取storage_and_dailyData，整合（如果有）
-        let daily_data = null
-        let internal_available_storage = null
-        let internal_used_storage = null
-        let internal_total_storage = null
-        let external_available_storage = null
-        let external_used_storage = null
-        let external_total_storage = null
-        try {
-            const res = await (await fetch(`${KANO_baseURL}/storage_and_dailyData`, { headers: { ...common_headers } })).json()
-            daily_data = res.daily_data
-            internal_available_storage = res.internal_available_storage
-            internal_total_storage = res.internal_total_storage
-            external_available_storage = res.external_available_storage
-            external_total_storage = res.external_total_storage
-            internal_used_storage = res.internal_used_storage
-            external_used_storage = res.external_used_storage
-        } catch {/*没有，不处理*/ }
         const resData = await res.json()
+
+        //获取设备基本信息
+        let deviceInfo = {}
+        try {
+            const res = await (await fetch(`${KANO_baseURL}/baseDeviceInfo`, { headers: { ...common_headers } })).json()
+            deviceInfo = res
+        } catch {/*没有，不处理*/ }
+
 
         //处理U30Air兼容
         if (!resData.msisdn) {
@@ -342,20 +294,9 @@ const getUFIData = async () => {
 
         return {
             ...resData,
-            cpu_temp: cpu_t,
-            cpu_usage: cpu_u,
-            mem_usage: mem_u,
+            ...deviceInfo,
             //U30Air电池兼容写法
             battery: resData?.battery_value ? resData.battery_value : resData?.battery_vol_percent ? resData.battery_vol_percent : battery,
-            model,
-            daily_data,
-            internal_available_storage,
-            internal_total_storage,
-            external_available_storage,
-            external_total_storage,
-            internal_used_storage,
-            external_used_storage,
-            client_ip
         }
     } catch (error) {
         if (error.name === 'AbortError') {

@@ -1,7 +1,6 @@
-package com.minikano.f50_sms
+package com.minikano.f50_sms.utils
 
 import android.content.Context
-import android.util.Log
 import java.util.concurrent.atomic.AtomicBoolean
 class KanoCURL(private val context: Context) {
     // 防止重复发送
@@ -22,7 +21,7 @@ class KanoCURL(private val context: Context) {
                     "shell/curl",
                     *args.toTypedArray(),
                     timeoutMs = 10000
-                )?: throw Exception("runShellCommand为null")
+                ) ?: throw Exception("runShellCommand为null")
                 KanoLog.w("kano_ZTE_LOG_Curl", "执行curl命令结果：$result")
             } catch (e: Exception) {
                 KanoLog.e("kano_ZTE_LOG_Curl", "curl请求失败: ${e.message}", e)

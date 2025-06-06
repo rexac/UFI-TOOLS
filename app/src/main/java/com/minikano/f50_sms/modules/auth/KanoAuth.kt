@@ -21,7 +21,8 @@ object KanoAuth {
         val method = call.request.httpMethod.value
 
         val apiWhiteList:List<String> = listOf(
-            "/api/get_custom_head"
+            "/api/get_custom_head",
+            "/api/version_info"
         )
 
         val noAuthRequired = !uri.startsWith("/api/") || apiWhiteList.any { uri.startsWith(it) }

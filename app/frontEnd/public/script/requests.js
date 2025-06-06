@@ -296,7 +296,7 @@ const getUFIData = async () => {
             ...resData,
             ...deviceInfo,
             //U30Air电池兼容写法
-            battery: resData?.battery_value ? resData.battery_value : resData?.battery_vol_percent ? resData.battery_vol_percent : battery,
+            battery: resData?.battery_value ? resData.battery_value : resData?.battery_vol_percent ? resData.battery_vol_percent : deviceInfo.battery,
         }
     } catch (error) {
         if (error.name === 'AbortError') {

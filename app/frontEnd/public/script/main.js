@@ -52,8 +52,8 @@ if ('serviceWorker' in navigator) {
 //判断一下是否需要token
 const needToken = async () => {
     try {
-        let res = await (await fetch(`${KANO_baseURL}/version_info`, { headers: { ...common_headers } })).json()
-        if (!res.app_ver) {
+        let res = await (await fetch(`${KANO_baseURL}/need_token`, { headers: { ...common_headers } })).json()
+        if (res.need_token) {
             isNeedToken = true
         } else {
             isNeedToken = false

@@ -7,6 +7,7 @@ import com.minikano.f50_sms.utils.KanoLog
 import com.minikano.f50_sms.utils.KanoUtils
 import com.minikano.f50_sms.utils.ShellKano
 import com.minikano.f50_sms.modules.BASE_TAG
+import com.minikano.f50_sms.modules.PREFS_NAME
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
@@ -222,6 +223,31 @@ fun Route.baseDeviceInfoModule(context: Context) {
             call.response.headers.append("Access-Control-Allow-Origin", "*")
             call.respondText(
                 """{"error":"获取版本信息出错"}""",
+                ContentType.Application.Json,
+                HttpStatusCode.InternalServerError
+            )
+        }
+    }
+
+    //是否需要token
+    get("/api/need_token") {
+        try {
+            val sharedPrefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            val needToken = sharedPrefs.getString("login_token_enabled", true.toString())
+
+            val jsonResult = """
+            {
+                "need_token": $needToken
+            }
+        """.trimIndent()
+
+            call.response.headers.append("Access-Control-Allow-Origin", "*")
+            call.respondText(jsonResult, ContentType.Application.Json)
+        } catch (e: Exception) {
+            KanoLog.d("kano_ZTE_LOG", "获取TOKEN信息出错：${e.message}")
+            call.response.headers.append("Access-Control-Allow-Origin", "*")
+            call.respondText(
+                """{"error":"获取TOKEN信息出错"}""",
                 ContentType.Application.Json,
                 HttpStatusCode.InternalServerError
             )

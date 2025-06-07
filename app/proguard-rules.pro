@@ -67,9 +67,8 @@
 -keep class org.newsclub.net.unix.** { *; }
 -keep class com.kohlschutter.util.** { *; }
 
-# 防止类名被混淆（可选，根据你是否希望混淆这些类名）
+# 防止类名被混淆
 -keepnames class org.newsclub.net.unix.**
-
 -dontwarn java.beans.BeanInfo
 -dontwarn java.beans.IntrospectionException
 -dontwarn java.beans.Introspector

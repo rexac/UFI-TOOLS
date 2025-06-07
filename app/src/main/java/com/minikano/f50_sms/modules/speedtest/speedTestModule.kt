@@ -3,6 +3,7 @@ package com.minikano.f50_sms.modules.speedtest
 import android.content.Context
 import com.minikano.f50_sms.utils.KanoUtils
 import com.minikano.f50_sms.modules.BASE_TAG
+import com.minikano.f50_sms.utils.KanoLog
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.server.application.call
@@ -13,7 +14,7 @@ import io.ktor.server.routing.get
 import kotlin.random.Random
 
 object SpeedTestCache {
-    val buffer = ByteArray(1024 * 1024) { 0xAB.toByte() }
+    val buffer = ByteArray(1024 * 1024) { 0x1.toByte() }
 }
 
 fun Route.speedTestModule(context: Context) {
@@ -21,6 +22,7 @@ fun Route.speedTestModule(context: Context) {
 
     //测速
     get("/api/speedtest") {
+        KanoLog.d("kano_ZTE_LOG", "当前线程数: ${Thread.currentThread().name}")
         val parms = call.request.queryParameters
         val totalChunks = KanoUtils.getChunkCount(parms["ckSize"]).coerceIn(1, 1024)
         val enableCors = parms.contains("cors")

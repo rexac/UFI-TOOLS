@@ -920,6 +920,32 @@ li.dragging {
     transform: scale(0.8);
 }
 
-#bgSettingModal p{
+#bgSettingModal p {
     margin: 10px 0;
+}
+
+.statusCard {
+    margin-bottom: 6px;
+    background-color: var(--dark-card-bg);
+    border-radius: 10px;
+    padding: 4px;
+
+}
+
+.charts {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 650px) {
+    .chart {
+        max-width: 100% !important;
+        margin: 3px;
+    }
+    .charts {
+        gap: 0;
+        display: grid !important;
+        grid-template-columns: 50% 50%;
+    }
 }

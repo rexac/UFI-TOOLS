@@ -24,7 +24,7 @@
                 <strong id="MODEL" style="font-size: 14px;"></strong>
             </div>
             <!-- 操作按钮 -->
-            <div id="collapseBtn_menu" style="align-self: start;justify-self: start;margin: 6px;margin-top: 0;">
+            <div class="title" id="collapseBtn_menu" style="align-self: start;justify-self: start;margin: 6px;margin-left: 0;margin-top: 0;">
                 <!-- <button id="CLPS">功能列表</button> -->
             </div>
             <div class="actions collapse collapse_menu" data-name="close"
@@ -77,6 +77,34 @@
                     </select>
                 </div>
             </div>
+            <!-- 设备监控 -->
+            <div style="flex-shrink:0;width: 100%;margin-top: 10px;">
+                <div class="title" style="margin: 6px 0;">
+                    <strong>设备监控</strong>
+                    <div style="display: inline-block;" id="collapse_device_mon_btn"></div>
+                </div>
+                <div class="collapse" id="collapse_device_mon">
+                    <div class="collapse_box">
+                        <div style="overflow: auto;position: relative">
+                            <div class="charts">
+                                <div class="chart statusCard" style="max-width: 200px;height: 60px;">
+                                    <canvas style="margin-left: -4px;" id="kanoCpuChart"></canvas>
+                                </div>
+                                <div class="chart statusCard" style="max-width: 200px;height: 60px;">
+                                    <canvas style="margin-left: -4px;" id="kanoMemChart"></canvas>
+                                </div>
+                                <div class="chart statusCard" style="max-width: 200px;height: 60px;">
+                                    <canvas style="margin-left: -4px;" id="kanoTempChart"></canvas>
+                                </div>
+                                <div class="chart statusCard" style="max-width: 200px;height: 60px;">
+                                    <canvas style="margin-left: -14px;" id="kanoNetChart"></canvas>
+                                </div>
+                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <!-- 状态 -->
             <div style="flex-shrink:0;width: 100%;margin-top: 10px;">
                 <div class="title" style="margin: 6px 0;">
@@ -85,7 +113,7 @@
                 </div>
                 <div class="collapse" id="collapse_status">
                     <div class="collapse_box">
-                        <div style="overflow: auto;">
+                        <div style="overflow: auto;position: relative">
                             <div class="title" style="margin-bottom: 6px;">
                                 <button id="DICTIONARY" class="btn" style="padding: 4px;margin-left: 0;">管理字段</button>
                                 <button id="REFRESH" class="btn" style="padding: 4px;margin-left: 10px;">停止刷新</button>
@@ -103,9 +131,6 @@
                     </div>
                 </div>
             </div>
-            <!-- <div class="chart" style="width: 100%;">
-                <canvas id="kanoChart"></canvas>
-            </div> -->
             <!-- TTYD -->
             <div id="TTYD" style="display: none;width: 100%;margin-top: 10px;">
                 <div class="title" style="margin: 6px 0 ;">
@@ -1144,11 +1169,11 @@
                 href="javascript:;" onclick="showModal('#payModal')">打赏作者</a></p>
     </div>
     <div id="toastContainer"></div>
-    <script src="/script/crypto.js"></script>
+    <script src="/script/lib/crypto.js"></script>
+    <script src="/script/lib/chart.js"></script>
     <script src="/script/utils.js"></script>
     <script src="/script/theme.js"></script>
     <script src="/script/requests.js"></script>
-    <script src="/script/chart.js"></script>
     <script src="/script/main.js"></script>
 </body>
 

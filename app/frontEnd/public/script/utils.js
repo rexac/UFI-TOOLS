@@ -474,3 +474,44 @@ const intToIp = (int) => {
         int & 255
     ].join('.');
 }
+
+//获取字体颜色
+const getTextColor = () => getComputedStyle(document.documentElement)
+    .getPropertyValue('--dark-text-color')
+    .trim();
+
+
+// chart.js插件合集
+const centerTextPlugin = {
+    id: 'centerText',
+    afterDatasetsDraw: (chart) => {
+        const {
+            ctx,
+            chartArea: { left, right, top, bottom }
+        } = chart;
+
+        const width = right - left;
+        const height = bottom - top;
+
+        ctx.save();
+        ctx.font = 'bold 16px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        const displayLines = chart.config.options.plugins.centerText?.text || [];
+
+        const lineHeight = 18;
+        const totalHeight = displayLines.length * lineHeight;
+        const startY = top + (height - totalHeight) / 2 + lineHeight / 2;
+
+        displayLines.forEach((lineObj, i) => {
+            const color = lineObj.color || getTextColor();
+            ctx.fillStyle = color;
+            ctx.fillText(lineObj.text, left + width / 2, startY + i * lineHeight);
+        });
+
+        ctx.restore();
+    }
+};
+
+Chart.register(centerTextPlugin);

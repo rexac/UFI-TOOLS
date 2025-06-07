@@ -82,6 +82,26 @@ needToken().finally(() => {
 })
 
 function main_func() {
+    // 初始化全局数据代理对象
+    window.UFI_DATA = new Proxy({}, {
+        set(target, prop, value) {
+            target[prop] = value;
+            if (prop === 'cpu_usage') {
+                updateCpuChart && updateCpuChart(value);
+            }
+            if (prop == 'realtime_rx_thrpt') {
+                updateNetworkChart && updateNetworkChart(value)
+            }
+            if (prop == 'cpu_temp') {
+                updateTempChart && updateTempChart(value)
+            }
+            if (prop == 'mem_usage') {
+                updateMemChart && updateMemChart(value)
+            }
+            return true;
+        }
+    });
+
     //读取展示列表
     const _stor = localStorage.getItem('showList')
     const showList = _stor != null ? JSON.parse(_stor) : {
@@ -634,7 +654,9 @@ function main_func() {
             return
         }
         if (res) {
-            window.UFI_DATA = res
+            Object.keys(res).forEach(key => {
+                window.UFI_DATA[key] = res[key];
+            });
             adbQuery()
             isNotLoginOnce = false
             const current_cell = document.querySelector('#CURRENT_CELL')
@@ -657,7 +679,6 @@ function main_func() {
             }
 
             try {
-
                 if (QORS_MESSAGE) {
                     res['QORS_MESSAGE'] = QORS_MESSAGE
                 }
@@ -669,7 +690,6 @@ function main_func() {
                     unreadEl.innerHTML = ''
                     unreadEl.style.display = 'none'
                 }
-
             } catch { }
 
             let statusHtml_base = {
@@ -3863,53 +3883,336 @@ function main_func() {
         document.querySelector('#pluginFileInput')?.click()
     }
 
-    // (() => {
-    //     const canvas = document.getElementById('kanoChart');
-    //     const ctx = canvas.getContext('2d');
-    //     const labels = ['1秒']
-    //     const data = [0]
+    //设备监控
+    collapseGen("#collapse_device_mon_btn", "#collapse_device_mon", 'collapse_device_mon', async (status) => {
+    })
+
+    //cpu占用
+    const updateCpuChart = (() => {
+        const canvas = document.getElementById('kanoCpuChart');
+        const ctx = canvas.getContext('2d');
+        const labels = ['0', '0', '0', '0', '0', '0', '0', '0', '0', '0']
+        const data = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+        Chart.register(centerTextPlugin);
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [{
+                    data,
+                    borderColor: '#40A7EC',
+                    tension: 0.5,
+                    pointRadius: 0,
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: {
+                    duration: 500,    // 0.5秒动画
+                    easing: 'easeOutQuad'  // 自然缓动效果
+                },
+                plugins: {
+                    legend: { display: false },
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: { display: false },
+                        border: { display: false }
+                    },
+                    y: {
+                        grid: { display: false },
+                        ticks: { display: false },
+                        border: { display: false },
+                        max: 100,
+                        min: -6
+                    }
+                }
+            }
+        });
+
+        return (value) => {
+            if (value != undefined || value != null) {
+                chart.options.plugins.centerText.text = [
+                    { text: `CPU: ${Math.floor(value)} %` }
+                ]
 
 
-    //     const chart = new Chart(ctx, {
-    //         type: 'line',
-    //         data: {
-    //             labels,
-    //             datasets: [{
-    //                 label: '下载速度 (MB/s)',
-    //                 data,
-    //                 borderColor: '#40A7EC',
-    //                 tension: 0.2,
-    //             }]
-    //         },
-    //         options: {
-    //             responsive: true,
-    //             animation: {
-    //                 duration: 500,    // 0.5秒动画
-    //                 easing: 'easeOutQuad'  // 自然缓动效果
-    //             },
-    //             plugins: {
-    //                 legend: { display: false }
-    //             },
-    //             scales: {
-    //                 x: {
-    //                     grid: { display: false }
-    //                 },
-    //                 y: {
-    //                     grid: { display: false }
-    //                 }
-    //             }
-    //         }
-    //     });
+                let newLabels = [...labels]
+                let newData = [...data]
 
-    //     setInterval(() => {
-    //         labels.length > 10 && labels.shift()
-    //         labels.push(Number(labels[labels.length - 1].replace('秒', '')) + 1 + '秒')
-    //         data.length > 10 && data.shift()
-    //         data.push(Math.floor(Math.random() * 1025))
-    //         chart.update()
-    //     }, 1000);
+                newLabels.push(Number(newLabels[newLabels.length - 1]) + 1)
+                newData.push(Number(value))
 
-    // })()
+                newLabels.length > 10 && newLabels.shift()
+                newData.length > 10 && newData.shift()
+
+                labels.forEach((_, index) => {
+                    labels[index] = newLabels[index]
+                })
+                data.forEach((_, index) => {
+                    data[index] = newData[index]
+                })
+
+                chart.update()
+            }
+        }
+    })()
+
+    //内存占用
+    const updateMemChart = (() => {
+        const canvas = document.getElementById('kanoMemChart');
+        const ctx = canvas.getContext('2d');
+        const labels = ['0', '0', '0', '0', '0', '0', '0', '0', '0', '0']
+        const data = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+        Chart.register(centerTextPlugin);
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [{
+                    data,
+                    borderColor: '#40A7EC',
+                    tension: 0.5,
+                    pointRadius: 0,
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: {
+                    duration: 500,    // 0.5秒动画
+                    easing: 'easeOutQuad'  // 自然缓动效果
+                },
+                plugins: {
+                    legend: { display: false },
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: { display: false },
+                        border: { display: false }
+                    },
+                    y: {
+                        grid: { display: false },
+                        ticks: { display: false },
+                        border: { display: false },
+                        max: 100,
+                        min: -6
+                    }
+                }
+            }
+        });
+
+        return (value) => {
+            if (value != undefined || value != null) {
+                chart.options.plugins.centerText.text = [
+                    { text: `MEM: ${Math.floor(value)} %` }
+                ]
+
+
+                let newLabels = [...labels]
+                let newData = [...data]
+
+                newLabels.push(Number(newLabels[newLabels.length - 1]) + 1)
+                newData.push(Number(value))
+
+                newLabels.length > 10 && newLabels.shift()
+                newData.length > 10 && newData.shift()
+
+                labels.forEach((_, index) => {
+                    labels[index] = newLabels[index]
+                })
+                data.forEach((_, index) => {
+                    data[index] = newData[index]
+                })
+
+                chart.update()
+            }
+        }
+    })()
+
+    // CPU温度图表
+    const updateTempChart = (() => {
+        const canvas = document.getElementById('kanoTempChart');
+        const ctx = canvas.getContext('2d');
+        const labels = ['0', '0', '0', '0', '0', '0', '0', '0', '0', '0']
+        const data = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+        Chart.register(centerTextPlugin);
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [{
+                    data,
+                    borderColor: '#40A7EC',
+                    tension: 0.5,
+                    pointRadius: 0,
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: {
+                    duration: 500,
+                    easing: 'easeOutQuad',
+                },
+                plugins: {
+                    legend: { display: false },
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: { display: false },
+                        border: { display: false }
+                    },
+                    y: {
+                        grid: { display: false },
+                        ticks: { display: false },
+                        border: { display: false },
+                        max: 110,
+                        min: -10
+                    }
+                }
+            }
+        });
+
+        return (value) => {
+            if (value != undefined || value != null) {
+                chart.options.plugins.centerText.text = [
+                    { text: `TEMP: ${String(Number(value / 1000).toFixed(2))}℃` }
+                ]
+                let newLabels = [...labels]
+                let newData = [...data]
+
+                newLabels.push(Number(newLabels[newLabels.length - 1]) + 1)
+                newData.push(Number(value / 1000).toFixed(2))
+
+                newLabels.length > 10 && newLabels.shift()
+                newData.length > 10 && newData.shift()
+
+                labels.forEach((_, index) => {
+                    labels[index] = newLabels[index]
+                })
+                data.forEach((_, index) => {
+                    data[index] = newData[index]
+                })
+
+                chart.update()
+            }
+        }
+    })()
+
+    //网速图表
+    const updateNetworkChart = (() => {
+        const canvas = document.getElementById('kanoNetChart');
+        const ctx = canvas.getContext('2d');
+        const labels = ['0', '0', '0', '0', '0', '0', '0', '0', '0', '0']
+        const dataDL = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        const dataUL = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+        Chart.register(centerTextPlugin);
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [{
+                    label: 'DL',
+                    data: dataDL,
+                    borderColor: '#40A7EC',
+                    tension: 0.5,
+                    pointRadius: 0,
+                    yAxisID: 'y',
+                    fill: false
+                }, {
+                    label: 'UL',
+                    data: dataUL,
+                    borderColor: '#FFA500',
+                    tension: 0.5,
+                    pointRadius: 0,
+                    yAxisID: 'y1',
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: {
+                    duration: 500,    // 0.5秒动画
+                    easing: 'easeOutQuad'  // 自然缓动效果
+                },
+                plugins: {
+                    legend: { display: false },
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: { display: false },
+                        border: { display: false }
+                    },
+                    y: {
+                        grid: { display: false },
+                        ticks: { display: false },
+                        border: { display: false },
+                        max: 38400,
+                        min: 0
+                    },
+                    y1: {
+                        grid: { display: false },
+                        ticks: { display: false },
+                        border: { display: false },
+                        max: 38400,
+                        min: 0
+                    }
+                }
+            }
+        });
+
+        return (value) => {
+            if (value != undefined || value != null) {
+                setTimeout(() => {
+                    let UL = window?.UFI_DATA?.realtime_tx_thrpt
+                    if (UL != undefined) {
+                        chart.options.plugins.centerText.text = [
+                            { text: `DL: ${formatBytes(value)}/S` },
+                            { text: `UL: ${formatBytes(UL)}/S`, color: '#FFA500' }
+                        ];
+
+                        let newLabels = [...labels]
+                        let newDataDL = [...dataDL]
+                        let newDataUL = [...dataUL]
+
+                        newLabels.push(Number(labels[labels.length - 1]) + 1)
+                        newDataDL.push(value / 1024)
+                        newDataUL.push(UL / 1024)
+
+                        newLabels.length > 10 && newLabels.shift()
+                        newDataDL.length > 10 && newDataDL.shift()
+                        newDataUL.length > 10 && newDataUL.shift()
+
+                        labels.forEach((_, index) => {
+                            labels[index] = newLabels[index]
+                        })
+                        dataDL.forEach((_, index) => {
+                            dataDL[index] = newDataDL[index]
+                        })
+                        dataUL.forEach((_, index) => {
+                            dataUL[index] = newDataUL[index]
+                        })
+
+                        chart.update()
+                    }
+                }, 1);
+            }
+        }
+    })()
 
     //挂载方法到window
     const methods = {

@@ -40,6 +40,12 @@ tasks.configureEach {
     }
 }
 
+tasks.register<Delete>("deleteDumpSymsFromApk") {
+    delete(file("${layout.buildDirectory}/intermediates/merged_assets/release/out/dump_syms"))
+    delete(file("${layout.buildDirectory}/intermediates/merged_assets/debug/out/dump_syms"))
+    delete(file("${layout.buildDirectory}/dump_syms"))
+}
+
 android {
     namespace = "com.minikano.f50_sms"
     compileSdk = 35
@@ -50,7 +56,7 @@ android {
         targetSdk = 33
         // 动态生成 versionCode 为 yyyyMMdd 格式
         versionCode = SimpleDateFormat("yyyyMMdd").format(Date()).toInt()
-        versionName = "3.0.0"
+        versionName = "3.0.2"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -81,6 +87,7 @@ android {
                 "META-INF/NOTICE.md",
                 "META-INF/NOTICE",
                 "META-INF/INDEX.LIST",
+                "dump_syms/**",
                 "assets/script_orignal/**",
                 "assets/dictionary.json",
                 "assets/node_modules/**",
@@ -118,6 +125,7 @@ dependencies {
 
     // 常用功能插件
     implementation(libs.ktor.server.default.headers)
+    implementation(libs.kotlinx.serialization.json)
 
     implementation(libs.android.mail)
     implementation(libs.android.activation)
@@ -136,7 +144,6 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.lifecycle.runtime.ktx.v262)
     implementation(libs.androidx.runtime.livedata)
-    implementation(libs.firebase.crashlytics.buildtools)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -144,4 +151,5 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    debugImplementation(libs.firebase.crashlytics.buildtools)
 }

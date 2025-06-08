@@ -24,7 +24,8 @@
                 <strong id="MODEL" style="font-size: 14px;"></strong>
             </div>
             <!-- 操作按钮 -->
-            <div class="title" id="collapseBtn_menu" style="align-self: start;justify-self: start;margin: 6px;margin-left: 0;margin-top: 0;">
+            <div class="title" id="collapseBtn_menu"
+                style="align-self: start;justify-self: start;margin: 6px;margin-left: 0;margin-top: 0;">
                 <!-- <button id="CLPS">功能列表</button> -->
             </div>
             <div class="actions collapse collapse_menu" data-name="close"
@@ -90,16 +91,28 @@
                                 <div class="chart statusCard" style="max-width: 200px;height: 60px;">
                                     <canvas style="margin-left: -4px;" id="kanoCpuChart"></canvas>
                                 </div>
-                                <div class="chart statusCard" style="max-width: 200px;height: 60px;">
+                                <div class="chart statusCard"
+                                    style="position: relative;;max-width: 200px;height: 60px;">
+                                    <span
+                                        style="position: absolute;top: 4px;left: 50%;transform: translateX(-50%);font-size: 12px;">核心使用率</span>
+                                    <canvas style="margin-left: -4px;" id="kanoCpuCoreChart"></canvas>
+                                </div>
+                                <div class="cpu-card chart statusCard">
+                                    <span
+                                        style="position: absolute;top: 4px;left: 50%;transform: translateX(-50%);font-size: 12px;">CPU占用</span>
+                                    <div class="card-inner" id="cpuFreqList">
+                                    </div>
+                                </div>
+                                <div class="chart statusCard" style="max-width: 200px;height: 60px;" onclick="showModal('#memInfoModal')">
                                     <canvas style="margin-left: -4px;" id="kanoMemChart"></canvas>
                                 </div>
                                 <div class="chart statusCard" style="max-width: 200px;height: 60px;">
                                     <canvas style="margin-left: -4px;" id="kanoTempChart"></canvas>
                                 </div>
-                                <div class="chart statusCard" style="max-width: 200px;height: 60px;">
+                                <div class="chart statusCard net-card" style="width: 200px;height: 60px;">
                                     <canvas style="margin-left: -14px;" id="kanoNetChart"></canvas>
                                 </div>
-                                
+
                             </div>
                         </div>
                     </div>
@@ -389,6 +402,17 @@
                         <button onclick="sendSMS()" style="margin-right: 6px;height: 100%;">发送</button>
                         <button onclick="closeModal('#smsList')" style="height: 100%;">关闭</button>
                     </div>
+                </div>
+            </div>
+            <!-- 内存信息模态框 -->
+            <div class="modal" id="memInfoModal" style="width: 77%;max-width: 300px;display: none">
+                <div class="title">内存信息</div>
+                <div class="content" style="padding: 15px 4px 0 4px;">
+                    <div id="memInfo" style="font-size:14px;display: flex;flex-direction: column;gap: 6px;">
+                    </div>
+                </div>
+                <div class="btn" style="text-align: right;">
+                    <button onclick="closeModal('#memInfoModal')">关闭</button>
                 </div>
             </div>
             <!-- 状态管理模态框 -->
@@ -1174,6 +1198,7 @@
     <script src="/script/utils.js"></script>
     <script src="/script/theme.js"></script>
     <script src="/script/requests.js"></script>
+    <script src="/script/charts.js"></script>
     <script src="/script/main.js"></script>
 </body>
 

@@ -494,7 +494,7 @@ const centerTextPlugin = {
         const height = bottom - top;
 
         ctx.save();
-        ctx.font = 'bold 16px Arial';
+        ctx.font = 'bold 14px Arial';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
 

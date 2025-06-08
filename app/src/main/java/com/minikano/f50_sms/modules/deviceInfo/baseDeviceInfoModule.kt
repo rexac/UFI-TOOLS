@@ -8,6 +8,7 @@ import com.minikano.f50_sms.utils.KanoUtils
 import com.minikano.f50_sms.utils.ShellKano
 import com.minikano.f50_sms.modules.BASE_TAG
 import com.minikano.f50_sms.modules.PREFS_NAME
+import com.minikano.f50_sms.utils.CpuManager
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
@@ -15,6 +16,10 @@ import io.ktor.server.plugins.origin
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.double
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 
 data class MyStorageInfo(
     val path: String, val totalBytes: Long, val availableBytes: Long
@@ -56,44 +61,39 @@ fun Route.baseDeviceInfoModule(context: Context) {
             cpuTempRes = null
         }
 
-        //cpu使用率
-        var cpuUsageRes:Float? = null
+        //cpu 内存信息
+        var cpuFreqInfo:String? = null
+        var cpuUsageInfo:String? = null
+        var memInfo:String? = null
+        var cpuUsageRes:Double? = null
+        var memUsageRes:Double? = null
+
         try {
-            val stat1 = ShellKano.runShellCommand("cat /proc/stat")
-                ?: throw Exception("stat1没有数据")
-            val (total1, idle1) = KanoUtils.parseCpuStat(stat1)
-                ?: throw Exception("parseCpuStat执行失败")
-
-            val stat2 = ShellKano.runShellCommand("cat /proc/stat")
-                ?: throw Exception("stat2没有数据")
-            val (total2, idle2) = KanoUtils.parseCpuStat(stat2)
-                ?: throw Exception("parseCpuStat执行失败")
-
-            val totalDiff = total2 - total1
-            val idleDiff = idle2 - idle1
-            val usage =
-                if (totalDiff > 0) (totalDiff - idleDiff).toFloat() / totalDiff else 0f
-
-            KanoLog.d(TAG, "CPU 使用率：%.2f%%".format(usage * 100))
-            cpuUsageRes = usage * 100
+            val freq = CpuManager.getCpuFreq()?: throw Exception("freq没有数据")
+            val usage = CpuManager.getCpuUsage()?: throw Exception("usage没有数据")
+            val mem = ShellKano.executeShellFromAssetsSubfolder(context,"shell/mem_info.sh","mem_info.sh")
+                ?: throw Exception("mem没有数据")
+            KanoLog.d(TAG, "CPU频率数据：${freq}")
+            KanoLog.d(TAG, "CPU使用数据：${usage}")
+            KanoLog.d(TAG, "Mem使用数据：${mem}")
+            cpuUsageRes = Json.parseToJsonElement(usage)
+                .jsonObject["cpu"]
+                ?.jsonPrimitive
+                ?.double
+            memUsageRes = Json.parseToJsonElement(mem)
+                .jsonObject["mem_usage_percent"]
+                ?.jsonPrimitive
+                ?.double
+            cpuFreqInfo = freq
+            cpuUsageInfo = usage
+            memInfo = mem
         } catch (e: Exception) {
-            KanoLog.d(TAG, "获取cpu使用率出错： ${e.message}")
-            cpuUsageRes = null
+            cpuFreqInfo = null
+            cpuUsageInfo = null
+            memInfo = null
+            KanoLog.d(TAG, "获取cpu内存信息出错： ${e.message}")
         }
 
-        //内存使用率
-        var memUsageRes:Float? = null
-        try {
-            val info = ShellKano.runShellCommand("cat /proc/meminfo")
-                ?: throw Exception("没有info")
-            val usage = KanoUtils.parseMeminfo(info)
-            KanoLog.d(TAG, "内存使用率：%.2f%%".format(usage * 100))
-            memUsageRes = usage * 100
-        } catch (e: Exception) {
-            KanoLog.d(TAG, "获取内存信息出错： ${e.message}")
-            memUsageRes = null
-
-        }
         //存储与日流量获取
         var dailyDataRes:Long? = null
         var availableSizeRes:Long? = null
@@ -132,7 +132,7 @@ fun Route.baseDeviceInfoModule(context: Context) {
             externalAvailableRes = externalAvailable
 
         } catch (e: Exception) {
-            KanoLog.d(TAG, "获取型号与电量信息出错： ${e.message}")
+            KanoLog.d(TAG, "存储与日流量信息出错： ${e.message}")
             dailyDataRes = null
             availableSizeRes = null
             usedSizeRes = null
@@ -187,10 +187,13 @@ fun Route.baseDeviceInfoModule(context: Context) {
                 "external_total_storage": $externalTotalRes,
                 "external_used_storage": $externalUsedRes,
                 "external_available_storage": $externalAvailableRes,
-                "mem_usage":$memUsageRes,
-                "cpu_usage":$cpuUsageRes,
                 "cpu_temp":$cpuTempRes,
-                "client_ip":"$ipRes"
+                "client_ip":"$ipRes",
+                "cpu_usage":$cpuUsageRes,
+                "mem_usage":$memUsageRes,
+                "cpuFreqInfo":$cpuFreqInfo,
+                "cpuUsageInfo":$cpuUsageInfo,
+                "memInfo":$memInfo
             }
         """.trimIndent()
         call.response.headers.append("Access-Control-Allow-Origin", "*")

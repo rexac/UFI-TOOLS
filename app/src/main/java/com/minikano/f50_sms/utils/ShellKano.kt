@@ -476,17 +476,18 @@ class ShellKano {
             }
         }
 
-        fun executeShellFromAssetsSubfolder(context: Context, assetSubPath: String): String? {
+        fun executeShellFromAssetsSubfolder(context: Context, assetSubPath: String,outFileName:String="tmp_script.sh"): String? {
             try {
                 val assetManager = context.assets
 
-                // 从 assets/shell/ 复制，比如 assetSubPath = "shell/test.sh"
                 val inputStream = assetManager.open(assetSubPath)
-                val outFile = File(context.filesDir, "temp_script.sh")
+                val outFile = File(context.filesDir, outFileName)
 
-                inputStream.use { input ->
-                    FileOutputStream(outFile).use { output ->
-                        input.copyTo(output)
+                if (!outFile.exists()) {
+                    inputStream.use { input ->
+                        FileOutputStream(outFile).use { output ->
+                            input.copyTo(output)
+                        }
                     }
                 }
 

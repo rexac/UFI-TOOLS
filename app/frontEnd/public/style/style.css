@@ -83,7 +83,7 @@ textarea::placeholder {
     display: flex;
     flex-direction: column;
     height: 100vh;
-    max-width: 1200px;
+    max-width: 1260px;
     margin: 0 auto;
     align-items: center;
     transition: all 0.5s;
@@ -928,8 +928,15 @@ li.dragging {
     margin-bottom: 6px;
     background-color: var(--dark-card-bg);
     border-radius: 10px;
-    padding: 4px;
+    padding: 6px 4px 0 0px;
+    transition: all .2s;
+    user-select: none;
+    -webkit-user-select: none;
+}
 
+.statusCard:active {
+    box-shadow: 0 0 10px var(--dark-tag-color-active);
+    transform: scale(1.02);
 }
 
 .charts {
@@ -938,11 +945,46 @@ li.dragging {
     flex-wrap: wrap;
 }
 
+.cpu-card {
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 200px;
+    height: 60px;
+    font-size: 0.62rem;
+    word-wrap: none;
+    white-space: nowrap;
+    position: relative;
+    padding-right: 0;
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
+.cpu-card .card-inner {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    /* 每列自动等分 */
+    gap: 2px;
+    box-sizing: border-box;
+    text-align: center;
+    margin-top: 10px;
+}
+
 @media (max-width: 650px) {
     .chart {
         max-width: 100% !important;
         margin: 3px;
     }
+
+    .cpu-card {
+        min-width: auto;
+    }
+
+    .net-card {
+        width: auto !important;
+    }
+
     .charts {
         gap: 0;
         display: grid !important;

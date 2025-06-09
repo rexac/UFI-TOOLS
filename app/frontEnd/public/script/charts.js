@@ -125,7 +125,7 @@ const updateCpuChart = (() => {
 const updateCpuCoreChart = (() => {
     const canvas = document.getElementById('kanoCpuCoreChart');
     const ctx = canvas.getContext('2d');
-    const labels = ['核心1','核心2','核心3','核心4','核心5','核心6','核心7','核心8']
+    const labels = ['核心1', '核心2', '核心3', '核心4', '核心5', '核心6', '核心7', '核心8']
     const data = Array(8).fill(0)
 
     Chart.register(centerTextPlugin);
@@ -173,8 +173,10 @@ const updateCpuCoreChart = (() => {
 
     return (value) => {
         if (value != undefined || value != null) {
-            for (let index = 0; value[`cpu${index}`] != undefined; index++) {
-                data[index] = Math.round(value[`cpu${index}`])
+            for (let index = 0; index < 8; index++) {
+                if (value[`cpu${index}`] != undefined) {
+                    data[index] = Math.round(value[`cpu${index}`])
+                }
             }
             chart.update()
         }
@@ -351,7 +353,7 @@ const updateNetworkChart = (() => {
                 pointRadius: 0,
                 yAxisID: 'y',
                 fill: false,
-                borderWidth:2
+                borderWidth: 2
             }, {
                 label: 'UL',
                 data: dataUL,
@@ -360,7 +362,7 @@ const updateNetworkChart = (() => {
                 pointRadius: 0,
                 yAxisID: 'y1',
                 fill: false,
-                borderWidth:2
+                borderWidth: 2
             }]
         },
         options: {

@@ -383,14 +383,14 @@ const updateNetworkChart = (() => {
                     grid: { display: false },
                     ticks: { display: false },
                     border: { display: false },
-                    max: 38400,
+                    suggestedMax: 38400,
                     min: 0
                 },
                 y1: {
                     grid: { display: false },
                     ticks: { display: false },
                     border: { display: false },
-                    max: 38400,
+                    suggestedMax: 38400,
                     min: 0
                 }
             }

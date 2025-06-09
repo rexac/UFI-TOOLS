@@ -3,12 +3,12 @@ package com.minikano.f50_sms.modules.deviceInfo
 import android.content.Context
 import android.os.Build
 import android.os.StatFs
-import com.minikano.f50_sms.utils.KanoLog
-import com.minikano.f50_sms.utils.KanoUtils
-import com.minikano.f50_sms.utils.ShellKano
 import com.minikano.f50_sms.modules.BASE_TAG
 import com.minikano.f50_sms.modules.PREFS_NAME
 import com.minikano.f50_sms.utils.CpuManager
+import com.minikano.f50_sms.utils.KanoLog
+import com.minikano.f50_sms.utils.KanoUtils
+import com.minikano.f50_sms.utils.ShellKano
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
@@ -28,9 +28,9 @@ data class MyStorageInfo(
 fun Route.baseDeviceInfoModule(context: Context) {
     val TAG = "[$BASE_TAG]_baseDeviceInfoModule"
 
-    get("/api/baseDeviceInfo"){
+    get("/api/baseDeviceInfo") {
         //客户端IP
-        var ipRes:String? = null
+        var ipRes: String? = null
         try {
             val headers = call.request.headers
 
@@ -47,14 +47,14 @@ fun Route.baseDeviceInfoModule(context: Context) {
         }
 
         //cpu温度
-        var cpuTempRes:String? = null
+        var cpuTempRes: String? = null
         try {
             val temp = ShellKano.executeShellFromAssetsSubfolder(context, "shell/temp.sh")
             val temp1 =
                 ShellKano.runShellCommand("cat /sys/class/thermal/thermal_zone1/temp")
             KanoLog.d(TAG, "获取CPU温度成功: $temp")
             cpuTempRes = temp ?: temp1
-            cpuTempRes = cpuTempRes?.replace("\n","")
+            cpuTempRes = cpuTempRes?.replace("\n", "")
 
         } catch (e: Exception) {
             KanoLog.d(TAG, "获取CPU温度出错： ${e.message}")
@@ -62,16 +62,22 @@ fun Route.baseDeviceInfoModule(context: Context) {
         }
 
         //cpu 内存信息
-        var cpuFreqInfo:String? = null
-        var cpuUsageInfo:String? = null
-        var memInfo:String? = null
-        var cpuUsageRes:Double? = null
-        var memUsageRes:Double? = null
+        var cpuFreqInfo: String? = null
+        var cpuUsageInfo: String? = null
+        var memInfo: String? = null
+        var cpuUsageRes: Double? = null
+        var memUsageRes: Double? = null
 
         try {
-            val freq = CpuManager.getCpuFreq()?: throw Exception("freq没有数据")
-            val usage = CpuManager.getCpuUsage()?: throw Exception("usage没有数据")
-            val mem = ShellKano.executeShellFromAssetsSubfolder(context,"shell/mem_info.sh","mem_info.sh")
+            //喂狗
+            CpuManager.ensureRunning(context)
+            val freq = CpuManager.getCpuFreq() ?: throw Exception("freq没有数据")
+            val usage = CpuManager.getCpuUsage() ?: throw Exception("usage没有数据")
+            val mem = ShellKano.executeShellFromAssetsSubfolder(
+                context,
+                "shell/mem_info.sh",
+                "mem_info.sh"
+            )
                 ?: throw Exception("mem没有数据")
             KanoLog.d(TAG, "CPU频率数据：${freq}")
             KanoLog.d(TAG, "CPU使用数据：${usage}")
@@ -95,13 +101,13 @@ fun Route.baseDeviceInfoModule(context: Context) {
         }
 
         //存储与日流量获取
-        var dailyDataRes:Long? = null
-        var availableSizeRes:Long? = null
-        var usedSizeRes:Long? = null
-        var totalSizeRes:Long? = null
-        var externalTotalRes:Long? = null
-        var externalUsedRes:Long? = null
-        var externalAvailableRes:Long? = null
+        var dailyDataRes: Long? = null
+        var availableSizeRes: Long? = null
+        var usedSizeRes: Long? = null
+        var totalSizeRes: Long? = null
+        var externalTotalRes: Long? = null
+        var externalUsedRes: Long? = null
+        var externalAvailableRes: Long? = null
         try {
             // 内部存储
             val internalStorage = context.filesDir
@@ -144,10 +150,10 @@ fun Route.baseDeviceInfoModule(context: Context) {
 
 
         //型号与电量获取
-        var versionNameRes:String? = null
-        var versionCodeRes:Int? = null
-        var modelRes:String? = null
-        var batteryLevelRes:Int? = null
+        var versionNameRes: String? = null
+        var versionCodeRes: Int? = null
+        var modelRes: String? = null
+        var batteryLevelRes: Int? = null
         try {
             val model = Build.MODEL
             val batteryLevel: Int = KanoUtils.getBatteryPercentage(context)

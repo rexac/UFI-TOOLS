@@ -7,7 +7,7 @@ import com.minikano.f50_sms.utils.KanoLog
 import io.ktor.server.cio.CIO
 import io.ktor.server.engine.embeddedServer
 
-class KanoWebServer(private val context: Context, port: Int,private val proxyServerIp:String) {
+class KanoWebServer(private val context: Context, port: Int, private val proxyServerIp: String) {
 
     companion object {
         @Volatile
@@ -15,17 +15,17 @@ class KanoWebServer(private val context: Context, port: Int,private val proxySer
     }
 
     private val server = embeddedServer(CIO, port = port) {
-        mainModule(context,proxyServerIp)
+        mainModule(context, proxyServerIp)
     }
 
-    fun start(){
+    fun start() {
         Thread {
             try {
                 try {
                     //启动一下前置服务
-                    CpuManager.startUpdating(context)
+                    CpuManager.ensureRunning(context)
                     KanoLog.d("kano_ZTE_LOG", "前置服务启动成功")
-                } catch (e:Exception){
+                } catch (e: Exception) {
                     KanoLog.e("kano_ZTE_LOG", "前置服务启动失败了: ${e.message}", e)
                 }
                 server.start(wait = true)
@@ -35,6 +35,7 @@ class KanoWebServer(private val context: Context, port: Int,private val proxySer
             }
         }.start()
     }
+
     fun stop() {
         CpuManager.stopUpdating()
         server.stop(1000, 2000)

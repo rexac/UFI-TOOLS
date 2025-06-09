@@ -89,6 +89,20 @@ textarea::placeholder {
     transition: all 0.5s;
 }
 
+.actions-buttons {
+    /* display: flex; */
+    /* flex-wrap: wrap; */
+    margin: 0 2px;
+    margin-bottom: 10px;
+}
+
+.actions-buttons button {
+    /* width: 66px; */
+    /* height: 35px; */
+    margin: 4px 2px !important;
+    /* padding: 8px 0px !important; */
+}
+
 .box {
     overflow: auto;
     width: 100%;
@@ -966,9 +980,26 @@ li.dragging {
     grid-template-columns: repeat(4, 1fr);
     /* 每列自动等分 */
     gap: 2px;
+    width: 100%;
     box-sizing: border-box;
     text-align: center;
-    margin-top: 10px;
+    margin-top: 12px;
+    justify-items:center;
+}
+
+.cpu-card .card-inner .signal_bar {
+    width: 30px;
+    margin-bottom: 1px;
+}
+
+.cpu-card .card-inner .signal_bar .text {
+    font-size: .62rem !important;
+}
+
+@media (max-width: 400px) {
+    .cpu-card .card-inner .signal_bar {
+        width: 24px;
+    }
 }
 
 @media (max-width: 650px) {

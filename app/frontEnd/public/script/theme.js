@@ -70,7 +70,25 @@ function updateColor() {
 }
 
 //读取颜色数据
-const initTheme = () => {
+const initTheme = async () => {
+    // 从云端拉取主题数据
+    let result = null
+    try {
+        result = await (await fetchWithTimeout(KANO_baseURL + "/get_theme", {
+            method: 'get'
+        })).json()
+    } catch (e) {
+        result = null
+        console.error('云端主题拉取数据失败：',e)
+    }
+    console.log(result, Object.keys(result));
+
+    if (result) {
+        Object.keys(result).forEach((key) => {
+            localStorage.setItem(key, result[key])
+        })
+    }
+
     let color = localStorage.getItem('themeColor');
     let colorPer = localStorage.getItem('colorPer');
     let opacityPer = localStorage.getItem('opacityPer');

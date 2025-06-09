@@ -1,5 +1,17 @@
 #!/system/bin/sh
 
+if [ -w "/data/local/tmp" ]; then
+    TMPDIR="/data/local/tmp"
+elif [ -w "/sdcard" ]; then
+    TMPDIR="/sdcard"
+else
+    echo 0
+    exit 1
+fi
+
+STAT1="$TMPDIR/stat_cpu.txt"
+STAT2="$TMPDIR/stat_cpu_2.txt"
+
 read_cpu_stat() {
     while IFS= read -r line; do
         case $line in
@@ -28,19 +40,16 @@ read_cpu_stat() {
     done < /proc/stat
 }
 
-# 读取两次 CPU 状态，纯变量方式保存
-stats1="$(read_cpu_stat)"
-sleep 0.1
-stats2="$(read_cpu_stat)"
+# 读取两次状态
+read_cpu_stat > "$STAT1"
+sleep 0.2
+read_cpu_stat > "$STAT2"
 
-# 处理为 JSON
 json="{"
 first=1
 
-# 使用“here string”来将变量作为 while 输入
 while read -r cpu total1 idle1; do
-    # 在 stats2 中查找对应行
-    line2=$(echo "$stats2" | grep "^$cpu ")
+    line2=$(grep "^$cpu " "$STAT2")
     total2=$(echo "$line2" | cut -d' ' -f2)
     idle2=$(echo "$line2" | cut -d' ' -f3)
 
@@ -55,9 +64,10 @@ while read -r cpu total1 idle1; do
     [ $first -eq 0 ] && json="$json,"
     json="$json\"$cpu\":$usage"
     first=0
-done <<EOF
-$stats1
-EOF
+done < "$STAT1"
 
 json="$json}"
 echo "$json"
+
+# 清理
+rm "$STAT1" "$STAT2"

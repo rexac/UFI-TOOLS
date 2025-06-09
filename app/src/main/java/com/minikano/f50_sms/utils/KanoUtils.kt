@@ -1,23 +1,25 @@
 package com.minikano.f50_sms.utils
 
 import android.app.usage.NetworkStatsManager
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.os.BatteryManager
 import android.os.StatFs
-import java.util.Calendar
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.pm.PackageManager
+import android.util.Log
 import android.widget.Toast
 import com.minikano.f50_sms.modules.deviceInfo.MyStorageInfo
+import kotlinx.coroutines.runBlocking
 import java.io.File
 import java.io.FileOutputStream
 import java.net.HttpURLConnection
 import java.net.URL
 import java.security.MessageDigest
+import java.util.Calendar
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 
@@ -118,7 +120,7 @@ class KanoUtils {
         }
 
         // 解析 URL 编码的请求体
-         fun parseUrlEncoded(data: String): Map<String, String> {
+        fun parseUrlEncoded(data: String): Map<String, String> {
             val params = mutableMapOf<String, String>()
             val pairs = data.split("&")
 
@@ -136,7 +138,7 @@ class KanoUtils {
 
 
         //获取内存信息
-         fun parseMeminfo(meminfo: String): Float {
+        fun parseMeminfo(meminfo: String): Float {
             val memMap = mutableMapOf<String, Long>()
 
             meminfo.lines().forEach { line ->
@@ -157,7 +159,7 @@ class KanoUtils {
             return used.toFloat() / total
         }
 
-         fun parseCpuStat(raw: String): Pair<Long, Long>? {
+        fun parseCpuStat(raw: String): Pair<Long, Long>? {
             val line = raw.lines().firstOrNull { it.startsWith("cpu ") } ?: return null
             val parts = line.trim().split(Regex("\\s+"))
             if (parts.size < 8) return null
@@ -194,7 +196,11 @@ class KanoUtils {
             clipboard.setPrimaryClip(clip)
         }
 
-        fun copyFileToFilesDir(context: Context, path: String, skipIfExists: Boolean = true): File? {
+        fun copyFileToFilesDir(
+            context: Context,
+            path: String,
+            skipIfExists: Boolean = true
+        ): File? {
             val assetManager = context.assets
             val fileName = File(path).name
             val outFile = File(context.filesDir, fileName)
@@ -252,7 +258,11 @@ class KanoUtils {
             }
         }
 
-        fun adaptIPChange(context: Context,userTouched: Boolean = false, onIpChanged: ((String) -> Unit)? = null) {
+        fun adaptIPChange(
+            context: Context,
+            userTouched: Boolean = false,
+            onIpChanged: ((String) -> Unit)? = null
+        ) {
             val prefs = context.getSharedPreferences("kano_ZTE_store", Context.MODE_PRIVATE)
             val ip_add = prefs.getString("gateway_ip", null)
             val need_auto_ip = prefs.getString("auto_ip_enabled", true.toString())
@@ -260,35 +270,64 @@ class KanoUtils {
 
             if ((ip_add != null && need_auto_ip == "true") || userTouched) {
                 KanoLog.d("kano_ZTE_LOG", "自动检测IP网关:$currentIp")
-                if(currentIp == null){
+                if (currentIp == null) {
                     KanoLog.d("kano_ZTE_LOG", "自动检测IP网关失败")
                     Toast.makeText(context, "自动检测IP网关失败...", Toast.LENGTH_SHORT).show()
                     return
                 }
                 if ((currentIp != ip_add) || userTouched) {
-                    if(userTouched){
+                    if (userTouched) {
                         KanoLog.d("kano_ZTE_LOG", "用户点击，自动检测IP网关")
                         Toast.makeText(context, "自动检测IP网关~", Toast.LENGTH_SHORT).show()
-                    }else{
+                    } else {
                         KanoLog.d(
                             "kano_ZTE_LOG",
                             "检测到本地IP网关变动，自动修改IP网关为:$currentIp"
                         )
-                        Toast.makeText(context, "检测到本地IP网关变动，自动修改IP网关为:$currentIp", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            context,
+                            "检测到本地IP网关变动，自动修改IP网关为:$currentIp",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                     prefs.edit().putString("gateway_ip", currentIp).apply()
                     if (currentIp != null) {
                         onIpChanged?.invoke(currentIp)
                     } // 通知 Compose 更新 UI
                 }
-            }else if(need_auto_ip == "true"){
+            } else if (need_auto_ip == "true") {
                 //说明可能是第一次启动
                 prefs.edit().putString("gateway_ip", currentIp).apply()
                 KanoLog.d("kano_ZTE_LOG", "可能是第一次启动，自动修改IP网关为:$currentIp")
             }
         }
 
-        fun copyAssetToExternalStorage(context: Context, assetPath: String, skipIfExists: Boolean = false): File? {
+        private fun isADBEnabled(context: Context): Boolean {
+            return try {
+                runBlocking {
+                    val sharedPrefs =
+                        context.getSharedPreferences("kano_ZTE_store", Context.MODE_PRIVATE)
+                    val ADB_IP =
+                        sharedPrefs.getString("gateway_ip", "")?.substringBefore(":")
+                            ?: throw Exception("没有ADMIN_IP")
+
+                    val req = KanoGoformRequest("http://$ADB_IP:8080")
+                    val result = req.getData(mapOf("cmd" to "usb_port_switch"))
+                    val adb_enabled = result?.getString("usb_port_switch")
+                    Log.d("kano_ZTE_LOG", "查询ADB开启状态: $adb_enabled")
+                    adb_enabled == "1"
+                }
+            } catch (e: Exception) {
+                Log.e("kano_ZTE_LOG", "查询ADB开启状态执行错误: ${e.message}")
+                false
+            }
+        }
+
+        fun copyAssetToExternalStorage(
+            context: Context,
+            assetPath: String,
+            skipIfExists: Boolean = false
+        ): File? {
             val fileName = File(assetPath).name
             val outFile = File(context.getExternalFilesDir(null), fileName)
 
@@ -324,7 +363,11 @@ class KanoUtils {
         }
 
         //递归复制asset中所有的目录和文件到files中
-        fun copyAssetsRecursively(context: Context, assetPath: String = "", destDir: File = context.filesDir) {
+        fun copyAssetsRecursively(
+            context: Context,
+            assetPath: String = "",
+            destDir: File = context.filesDir
+        ) {
             val assetManager = context.assets
             val fileList = assetManager.list(assetPath) ?: return
 

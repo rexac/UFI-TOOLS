@@ -4,22 +4,23 @@ import android.content.Context
 import com.minikano.f50_sms.modules.adb.adbModule
 import com.minikano.f50_sms.modules.advance.advanceToolsModule
 import com.minikano.f50_sms.modules.at.atModule
-import io.ktor.server.application.Application
-import io.ktor.server.application.install
-import io.ktor.server.plugins.defaultheaders.DefaultHeaders
-import io.ktor.server.routing.routing
 import com.minikano.f50_sms.modules.auth.authenticatedRoute
 import com.minikano.f50_sms.modules.deviceInfo.baseDeviceInfoModule
 import com.minikano.f50_sms.modules.ota.otaModule
 import com.minikano.f50_sms.modules.plugins.pluginsModule
 import com.minikano.f50_sms.modules.smsForward.smsModule
 import com.minikano.f50_sms.modules.speedtest.speedTestModule
+import com.minikano.f50_sms.modules.theme.themeModule
+import io.ktor.server.application.Application
+import io.ktor.server.application.install
+import io.ktor.server.plugins.defaultheaders.DefaultHeaders
+import io.ktor.server.routing.routing
 
 
 const val BASE_TAG = "kano_ZTE_LOG"
 const val PREFS_NAME = "kano_ZTE_store"
 
-fun Application.mainModule(context: Context,proxyServerIp:String) {
+fun Application.mainModule(context: Context, proxyServerIp: String) {
     install(DefaultHeaders)
     val targetServerIP = proxyServerIp  // 目标服务器地址
     val TAG = "[$BASE_TAG]_reverseProxyModule"
@@ -28,7 +29,7 @@ fun Application.mainModule(context: Context,proxyServerIp:String) {
         // 静态资源
         staticFileModule(context)
 
-        authenticatedRoute(context){
+        authenticatedRoute(context) {
 
             reverseProxyModule(targetServerIP)
 
@@ -38,7 +39,7 @@ fun Application.mainModule(context: Context,proxyServerIp:String) {
 
             atModule(context)
 
-            advanceToolsModule(context,targetServerIP)
+            advanceToolsModule(context, targetServerIP)
 
             speedTestModule(context)
 
@@ -48,6 +49,7 @@ fun Application.mainModule(context: Context,proxyServerIp:String) {
 
         }
 
+        themeModule(context)
         pluginsModule(context)
 
     }

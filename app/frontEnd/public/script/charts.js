@@ -22,10 +22,17 @@ const chartUpdater = (prop, value) => {
                 let html = ''
                 for (let i = 0; value[`cpu${i}`] != undefined && value[`cpu${i}`] != null; i++) {
                     let cur = String(value[`cpu${i}`].cur)
+                    let cur_origin = String(value[`cpu${i}`].cur)
+                    let max = String(value[`cpu${i}`].max)
                     if (cur.length == 1) cur = `&nbsp;&nbsp;&nbsp;${cur}`
                     else if (cur.length == 2) cur = `&nbsp;&nbsp;${cur}`
                     else if (cur.length == 3) cur = `&nbsp;${cur}`
-                    html += `<div>${cur}Mhz</div>`
+                    html += `${kano_parseSignalBar(cur_origin, 0, max, max * 0.9, max * 0.9, {
+                        g: '#ffa5008f',
+                        o: '#ffa5008f',
+                        r: '#40A7EC'
+                    })}`
+
                 }
                 cpuFreqList.innerHTML = html
             }
@@ -118,7 +125,7 @@ const updateCpuChart = (() => {
 const updateCpuCoreChart = (() => {
     const canvas = document.getElementById('kanoCpuCoreChart');
     const ctx = canvas.getContext('2d');
-    const labels = Array(8).fill('0')
+    const labels = ['核心1','核心2','核心3','核心4','核心5','核心6','核心7','核心8']
     const data = Array(8).fill(0)
 
     Chart.register(centerTextPlugin);
@@ -191,7 +198,8 @@ const updateMemChart = (() => {
                 borderColor: '#40A7EC',
                 tension: 0.5,
                 pointRadius: 0,
-                fill: false
+                fill: false,
+                borderWidth: 2,
             }]
         },
         options: {
@@ -215,7 +223,7 @@ const updateMemChart = (() => {
                     ticks: { display: false },
                     border: { display: false },
                     max: 100,
-                    min: -6
+                    min: 0
                 }
             }
         }
@@ -226,7 +234,6 @@ const updateMemChart = (() => {
             chart.options.plugins.centerText.text = [
                 { text: `内存: ${Math.floor(value)} % ` }
             ]
-
 
             let newLabels = [...labels]
             let newData = [...data]
@@ -266,6 +273,7 @@ const updateTempChart = (() => {
                 borderColor: '#40A7EC',
                 tension: 0.5,
                 pointRadius: 0,
+                borderWidth: 2,
                 fill: false
             }]
         },
@@ -290,7 +298,7 @@ const updateTempChart = (() => {
                     ticks: { display: false },
                     border: { display: false },
                     max: 110,
-                    min: -10
+                    min: 0
                 }
             }
         }
@@ -342,7 +350,8 @@ const updateNetworkChart = (() => {
                 tension: 0.5,
                 pointRadius: 0,
                 yAxisID: 'y',
-                fill: false
+                fill: false,
+                borderWidth:2
             }, {
                 label: 'UL',
                 data: dataUL,
@@ -350,7 +359,8 @@ const updateNetworkChart = (() => {
                 tension: 0.5,
                 pointRadius: 0,
                 yAxisID: 'y1',
-                fill: false
+                fill: false,
+                borderWidth:2
             }]
         },
         options: {
@@ -394,9 +404,9 @@ const updateNetworkChart = (() => {
                 if (UL != undefined) {
                     chart.options.plugins.centerText.text = [
                         {
-                            text: `下载: ${formatBytes(value)}/S`
+                            text: `↓ ${formatBytes(value)}/S`
                         },
-                        { text: `上传: ${formatBytes(UL)}/S`, color: '#FFA500' }
+                        { text: `↑ ${formatBytes(UL)}/S`, color: '#FFA500' }
                     ];
 
                     let newLabels = [...labels]

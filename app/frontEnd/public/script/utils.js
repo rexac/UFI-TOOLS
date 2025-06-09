@@ -69,7 +69,7 @@ function copyText(e) {
 }
 
 //按照信号dbm强度绘制信号强度栏(-113到-51)
-function kano_parseSignalBar(val, min = -125, max = -81, green_low = -90, yellow_low = -100) {
+function kano_parseSignalBar(val, min = -125, max = -81, green_low = -90, yellow_low = -100, config = { g: 'green', o: 'green', r: 'red' }) {
     let strength = Number(val)
     strength = strength > max ? max : strength
     strength = strength < min ? min : strength
@@ -89,11 +89,11 @@ function kano_parseSignalBar(val, min = -125, max = -81, green_low = -90, yellow
     progress.style.opacity = '.6'
 
     if (strength >= green_low) {
-        progress.style.backgroundColor = 'green';
+        progress.style.backgroundColor = config.g || 'green';
     } else if (strength >= yellow_low) {
-        progress.style.backgroundColor = 'orange';
+        progress.style.backgroundColor = config.o || 'orange';
     } else {
-        progress.style.backgroundColor = 'red';
+        progress.style.backgroundColor = config.r || 'red';
     }
 
     bar.appendChild(progress)
@@ -515,3 +515,16 @@ const centerTextPlugin = {
 };
 
 Chart.register(centerTextPlugin);
+
+const getRefteshRate = (cb) => {
+    const rate = localStorage.getItem("refreshRate")
+
+    let rate_num = null
+    if (rate == null || rate == undefined || isNaN(Number(rate))) {
+        rate_num = 1000
+    } else {
+        rate_num = Number(rate)
+    }
+    cb && cb(rate_num)
+    return rate_num
+}

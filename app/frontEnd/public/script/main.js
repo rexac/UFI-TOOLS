@@ -1,16 +1,20 @@
 const baseSize = 14;
-  const minScale = 0.9;
-  const maxScale = 1.2;
-  function setRem() {
+const minScale = 0.9;
+const maxScale = 1.2;
+let REFRESH_TIME = getRefteshRate((val) => {
+    let refreshRateSelect = document.querySelector('#refreshRateSelect')
+    refreshRateSelect && (refreshRateSelect.value = val.toString())
+})
+function setRem() {
     const width = document.documentElement.clientWidth;
     let scale = width / 375;
     // 限制缩放范围
     if (scale < minScale) scale = minScale;
     if (scale > maxScale) scale = maxScale;
     document.documentElement.style.fontSize = (baseSize * scale) + 'px';
-  }
-  setRem();
-  window.addEventListener('resize', setRem);
+}
+setRem();
+window.addEventListener('resize', setRem);
 
 let isNeedToken = true
 const MODEL = document.querySelector("#MODEL")
@@ -373,6 +377,8 @@ function main_func() {
 
     //初始化所有按钮
     const initRenderMethod = async () => {
+        initTheme();
+        initBGBtn()
         initLANSettings()
         initSmsForwardModal()
         initChangePassData()
@@ -778,7 +784,7 @@ function main_func() {
         }
     }
     handlerStatusRender(true)
-    StopStatusRenderTimer = requestInterval(() => handlerStatusRender(), 1000)
+    StopStatusRenderTimer = requestInterval(() => handlerStatusRender(), REFRESH_TIME)
 
     //检查usb调试状态
     let handlerADBStatus = async () => {
@@ -1407,7 +1413,7 @@ function main_func() {
 
     let cellInfoRequestTimer = null
     initCellInfo()
-    cellInfoRequestTimer = requestInterval(() => initCellInfo(), 1500)
+    cellInfoRequestTimer = requestInterval(() => initCellInfo(), REFRESH_TIME + 500)
 
     let onSelectCellRow = (pci, earfcn) => {
         let pci_t = document.querySelector('#PCI')
@@ -1507,10 +1513,10 @@ function main_func() {
         }
         target.style.backgroundColor = ''
         rebootTimer && clearTimeout(rebootTimer)
-        if (rebootBtnCount == 1) target.innerHTML = "确定重启？"
-        if (rebootBtnCount == 2) target.innerHTML = "那就重启咯？"
+        if (rebootBtnCount == 1) target.innerHTML = "确定重启?"
+        if (rebootBtnCount == 2) target.innerHTML = "重启咯?"
         if (rebootBtnCount >= 3) {
-            target.innerHTML = "正在重启。。。"
+            target.innerHTML = "重启中.."
             try {
                 const cookie = await login()
                 if (!cookie) {
@@ -1608,19 +1614,25 @@ function main_func() {
         }, 3000);
     }
 
+    const startRefresh = () => {
+        cellInfoRequestTimer = requestInterval(() => initCellInfo(), REFRESH_TIME + 500)
+        StopStatusRenderTimer = requestInterval(() => handlerStatusRender(), REFRESH_TIME)
+    }
+    const stopRefresh = () => {
+        StopStatusRenderTimer && StopStatusRenderTimer()
+        cellInfoRequestTimer && cellInfoRequestTimer()
+    }
 
     //暂停开始刷新
     document.querySelector('#REFRESH').onclick = (e) => {
         if (e.target.innerHTML == '开始刷新') {
             e.target.innerHTML = '停止刷新'
             createToast('已开始刷新', 'green')
-            cellInfoRequestTimer = requestInterval(() => initCellInfo(), 1500)
-            StopStatusRenderTimer = requestInterval(() => handlerStatusRender(), 1000)
+            startRefresh()
         } else {
             e.target.innerHTML = '开始刷新'
             createToast('已停止刷新', 'green')
-            StopStatusRenderTimer && StopStatusRenderTimer()
-            cellInfoRequestTimer && cellInfoRequestTimer()
+            stopRefresh()
         }
     }
 
@@ -2238,12 +2250,23 @@ function main_func() {
     loadTitle()
 
     //设置背景图片
-    document.querySelector('#BG_SETTING').onclick = () => {
-        showModal('#bgSettingModal')
-        initBG()
+    const initBGBtn = async () => {
+        const btn = document.querySelector('#BG_SETTING')
+        if (!(await initRequestData())) {
+            btn.onclick = () => createToast('请登录', 'red')
+            btn.style.backgroundColor = '#80808073'
+            return null
+        }
+        btn.style.backgroundColor = ''
+        btn.onclick = () => {
+            showModal('#bgSettingModal')
+            initBG()
+        }
     }
+    initBGBtn()
 
-    let handleSubmitBg = async () => {
+    //设置主题背景
+    let handleSubmitBg = async (showSuccessToast = true) => {
         const custom_head = document.querySelector('#custom_head')
         const imgUrl = document.querySelector('#BG_INPUT')?.value
         const bg_checked = document.querySelector('#isCheckedBG')?.checked
@@ -2265,17 +2288,40 @@ function main_func() {
         if (!BG || bg_checked == undefined || !BG_OVERLAY) return
         if (!bg_checked) {
             BG.style.backgroundImage = 'unset'
-            // BG_OVERLAY.style.background = 'transparent'
             localStorage.removeItem('backgroundUrl')
         } else {
             imgUrl.trim() && (BG.style.backgroundImage = `url(${imgUrl})`)
-            // BG_OVERLAY.style.background = 'var(--dark-bgi-color)'
-            // 保存
             imgUrl.trim() && localStorage.setItem('backgroundUrl', imgUrl)
         }
-        createToast('保存成功~', 'green')
-        document.querySelector('#fileUploader').value = ''
-        closeModal('#bgSettingModal')
+        //发请求同步数据
+        try {
+            const { result, error } = await (await fetch(`${KANO_baseURL}/set_theme`, {
+                method: 'POST',
+                headers: common_headers,
+                body: JSON.stringify({
+                    "backgroundEnabled": bg_checked,
+                    "backgroundUrl": localStorage.getItem("backgroundUrl") || '',
+                    "textColor": localStorage.getItem("textColor"),
+                    "textColorPer": localStorage.getItem("textColorPer"),
+                    "themeColor": localStorage.getItem("themeColor"),
+                    "colorPer": localStorage.getItem("colorPer"),
+                    "saturationPer": localStorage.getItem("saturationPer"),
+                    "brightPer": localStorage.getItem("brightPer"),
+                    "opacityPer": localStorage.getItem("opacityPer"),
+                })
+            })).json()
+
+            if (result == "success") {
+                showSuccessToast && createToast('保存成功，已同步至机器~', 'green')
+                document.querySelector('#fileUploader').value = ''
+                closeModal('#bgSettingModal')
+            }
+            else throw error || ''
+        }
+        catch (e) {
+            createToast(`同步失败!`, 'red')
+        }
+
     }
 
     //初始化背景图片
@@ -2311,7 +2357,7 @@ function main_func() {
     //重置主题
     let resetThemeBtnTimer = 1
     let isConfirmResetTheme = false
-    const resetTheme = (e) => {
+    const resetTheme = async (e) => {
         e.target.innerHTML = "确定？"
         if (!isConfirmResetTheme) {
             isConfirmResetTheme = true
@@ -2323,15 +2369,36 @@ function main_func() {
             e.target.disabled = false
             e.target.innerHTML = '重置主题'
         }, 2000)
-        localStorage.removeItem('themeColor')
-        localStorage.removeItem('textColorPer')
-        localStorage.removeItem('textColor')
-        localStorage.removeItem('saturationPer')
-        localStorage.removeItem('opacityPer')
-        localStorage.removeItem('colorPer')
-        localStorage.removeItem('brightPer')
+        try {
+            const { result, error } = await (await fetch(`${KANO_baseURL}/set_theme`, {
+                method: 'POST',
+                headers: common_headers,
+                body: JSON.stringify({})
+            })).json()
+
+            if (result == "success") {
+                localStorage.removeItem('themeColor')
+                localStorage.removeItem('textColorPer')
+                localStorage.removeItem('textColor')
+                localStorage.removeItem('saturationPer')
+                localStorage.removeItem('opacityPer')
+                localStorage.removeItem('colorPer')
+                localStorage.removeItem('brightPer')
+
+                createToast('重置成功，已同步至机器~', 'green')
+                document.querySelector('#fileUploader').value = ''
+                setTimeout(() => {
+                    initBG().then(() => {
+                        handleSubmitBg(false)
+                    })
+                }, 100);
+            }
+            else throw error || ''
+        }
+        catch (e) {
+            createToast(`重置失败!`, 'red')
+        }
         initTheme && initTheme()
-        createToast('重置成功！', 'green')
         e.target.innerHTML = '重置主题'
         e.target.disabled = true
     }
@@ -3033,34 +3100,47 @@ function main_func() {
     }
 
     //文件上传
-    const handleFileUpload = (event) => {
-        return new Promise((resolve, reject) => {
-            const file = event.target.files[0];
-            if (file) {
-                // 检查文件大小
-                if (file.size > 3 * 1024 * 1024) {
-                    // 3MB
-                    createToast(`文件大小不能超过${3}MB！`, 'red')
-                    reject({ msg: `文件大小不能超过${3}MB！`, data: null })
-                } else {
-                    const reader = new FileReader();
-                    reader.readAsDataURL(file); // 将文件读取为Data URL
-                    reader.onload = (e) => {
-                        const base64String = e.target.result;
-                        if (!base64String.startsWith('data:image')) {
-                            createToast('请上传图片文件！', 'red')
-                            reject({ msg: '请上传图片文件！', data: null })
-                            return
-                        }
-                        document.querySelector("#BG_INPUT").value = ''
-                        BG.style.backgroundImage = `url(${base64String})`
+    const handleFileUpload = async (event) => {
+        const file = event.target.files[0];
+        const MAX_SIZE = 10
+        if (file) {
+            // 检查文件大小
+            if (file.size > MAX_SIZE * 1024 * 1024) {
+                // MAX_SIZE MB
+                createToast(`文件大小不能超过${MAX_SIZE}MB！`, 'red')
+            } else {
+
+                //上传图片
+                try {
+                    const formData = new FormData();
+                    formData.append("file", file);
+                    const res = await (await fetch(`${KANO_baseURL}/upload_img`, {
+                        method: "POST",
+                        headers: common_headers,
+                        body: formData,
+                    })).json()
+
+                    if (res.url) {
+                        const BG_INPUT = document.querySelector('#BG_INPUT')
+                        const BG = document.querySelector("#BG")
+                        const url = `${KANO_baseURL}${res.url}`
+                        BG_INPUT.value = url
+                        console.log(BG_INPUT.value);
+                        localStorage.setItem('backgroundUrl', url)
                         document.querySelector('#isCheckedBG').checked = true
-                        localStorage.setItem('backgroundUrl', base64String)
-                        resolve({ msg: 'ok' })
-                    };
+                        BG.style.backgroundImage = `url(${url})`
+                        createToast('上传成功', 'green')
+                    }
+                    else throw res.error || ''
+                }
+                catch (e) {
+                    console.log(e);
+                    createToast(`上传失败!`, 'red')
+                } finally {
+                    document.querySelector('#fileUploader').value = ''
                 }
             }
-        })
+        }
     }
 
     //打赏模态框设置
@@ -3890,8 +3970,22 @@ function main_func() {
     collapseGen("#collapse_device_mon_btn", "#collapse_device_mon", 'collapse_device_mon', async (status) => {
     })
 
+    //改变刷新频率
+    const changeRefreshRate = (e) => {
+        const value = e.target.value
+        if (value) {
+            stopRefresh()
+            REFRESH_TIME = value
+            startRefresh()
+            createToast("当前刷新频率：" + (value / 1000).toFixed(2) + "秒/次")
+            //保存
+            localStorage.setItem("refreshRate", value)
+        }
+    }
+
     //挂载方法到window
     const methods = {
+        changeRefreshRate,
         onPluginBtn,
         handlePluginFileUpload,
         OP,

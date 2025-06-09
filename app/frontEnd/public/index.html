@@ -30,52 +30,56 @@
             </div>
             <div class="actions collapse collapse_menu" data-name="close"
                 style="flex-shrink: 0;text-align: start;align-self: flex-start">
-                <div style="margin: 0 2px;margin-bottom: 10px;" class="collapse_box">
-                    <button id="CLEAR" class="btn">登录/退出登录</button>
-                    <button id="CHANGEPWD" class="btn" onclick="createToast('请登录','red')">更改密码</button>
-                    <button id="REBOOT" class="btn" onclick="createToast('请登录','red')">重启设备</button>
-                    <button id="SCHEDULE_REBOOT" class="btn" onclick="createToast('请登录','red')">定时重启</button>
-                    <button id="SHUTDOWN" style="display: none;" class="btn"
-                        onclick="createToast('请登录','red')">关机</button>
-                    <button id="BG_SETTING" class="btn" onclick="createToast('请登录','red')">主题背景</button>
-                    <div style="display: inline-block;position: relative;">
-                        <div class="tip" style="display: none;" id="UNREAD_SMS">0</div>
-                        <button id="SMS" class="btn">短信收发</button>
+                <div style="margin: auto;">
+                    <div class="collapse_box actions-buttons">
+                        <button id="CLEAR" class="btn">登录/登出</button>
+                        <button id="CHANGEPWD" class="btn" onclick="createToast('请登录','red')">更改密码</button>
+                        <button id="REBOOT" class="btn" onclick="createToast('请登录','red')">重启设备</button>
+                        <button id="SCHEDULE_REBOOT" class="btn" onclick="createToast('请登录','red')">定时重启</button>
+                        <button id="SHUTDOWN" style="display: none;" class="btn"
+                            onclick="createToast('请登录','red')">关机</button>
+                        <button id="BG_SETTING" class="btn" onclick="createToast('请登录','red')">主题背景</button>
+                        <div style="display: inline-block;position: relative;">
+                            <div class="tip" style="display: none;" id="UNREAD_SMS">0</div>
+                            <button id="SMS" class="btn">短信收发</button>
+                        </div>
+                        <button id="DataManagement" class="btn">流量管理</button>
+                        <button id="SpeedTestBtn" class="btn" onclick="showModal('#speedTestModal')">内网测速</button>
+                        <button id="ClientManagement" class="btn">连接设备</button>
+                        <button id="WIFIManagement" class="btn">WIFI设置</button>
+                        <button id="LANManagement" class="btn">内网设置</button>
+                        <button id="AT" class="btn" onclick="createToast('请登录','red')">AT指令</button>
+                        <button id="ADVANCE" class="btn" onclick="createToast('请登录','red')">高级功能</button>
+                        <button id="CECULLAR" class="btn" onclick="createToast('请登录','red')">数据流量</button>
+                        <button id="ADB" class="btn" onclick="createToast('请登录','red')">USB调试</button>
+                        <button id="ADB_NET" class="btn" onclick="createToast('请登录','red')">ADB自启</button>
+                        <button id="PERF" class="btn" onclick="createToast('请登录','red')">性能模式</button>
+                        <button id="LIGHT" class="btn" onclick="createToast('请登录','red')">指示灯</button>
+                        <button id="NFC" style="display: none;" class="btn"
+                            onclick="createToast('请登录','red')">NFC</button>
+                        <button id="SMB" class="btn" onclick="createToast('请登录','red')">文件共享</button>
+                        <button id="ROAM" class="btn" onclick="createToast('请登录','red')">网络漫游</button>
+                        <button id="smsForward" class="btn" onclick="createToast('请登录','red')">短信转发</button>
+                        <button id="OTA" class="btn" onclick="createToast('请登录','red')">软件更新</button>
+                        <select class="select" id="NET_TYPE" onchange="changeNetwork(event)">
+                            <option value="WL_AND_5G">5G/4G/3G</option>
+                            <option value="LTE_AND_5G">5G NSA</option>
+                            <option value="Only_5G">5G SA</option>
+                            <option value="WCDMA_AND_LTE">4G/3G</option>
+                            <option value="Only_LTE">仅4G</option>
+                            <option value="Only_WCDMA">仅3G</option>
+                        </select>
+                        <select class="select" id="USB_TYPE" onchange="changeUSBNetwork(event)">
+                            <option value="0">USB上网:自动</option>
+                            <option value="1">RNDIS</option>
+                            <option value="2">CDC-ECM</option>
+                        </select>
+                        <select class="select" id="SIM_CARD_TYPE" style="display: none;"
+                            onchange="changeSimCard(event)">
+                            <option value="0">SIM1</option>
+                            <option value="1">SIM2</option>
+                        </select>
                     </div>
-                    <button id="DataManagement" class="btn">流量管理</button>
-                    <button id="SpeedTestBtn" class="btn" onclick="showModal('#speedTestModal')">内网测速</button>
-                    <button id="ClientManagement" class="btn">连接设备</button>
-                    <button id="WIFIManagement" class="btn">WIFI设置</button>
-                    <button id="LANManagement" class="btn">内网设置</button>
-                    <button id="AT" class="btn" onclick="createToast('请登录','red')">AT指令</button>
-                    <button id="ADVANCE" class="btn" onclick="createToast('请登录','red')">高级功能</button>
-                    <button id="CECULLAR" class="btn" onclick="createToast('请登录','red')">数据流量</button>
-                    <button id="ADB" class="btn" onclick="createToast('请登录','red')">USB调试</button>
-                    <button id="ADB_NET" class="btn" onclick="createToast('请登录','red')">网络ADB自启</button>
-                    <button id="PERF" class="btn" onclick="createToast('请登录','red')">性能模式</button>
-                    <button id="LIGHT" class="btn" onclick="createToast('请登录','red')">指示灯</button>
-                    <button id="NFC" style="display: none;" class="btn" onclick="createToast('请登录','red')">NFC</button>
-                    <button id="SMB" class="btn" onclick="createToast('请登录','red')">文件共享</button>
-                    <button id="ROAM" class="btn" onclick="createToast('请登录','red')">网络漫游</button>
-                    <button id="smsForward" class="btn" onclick="createToast('请登录','red')">短信转发</button>
-                    <button id="OTA" class="btn" onclick="createToast('请登录','red')">软件更新</button>
-                    <select class="select" id="NET_TYPE" onchange="changeNetwork(event)">
-                        <option value="WL_AND_5G">5G/4G/3G</option>
-                        <option value="LTE_AND_5G">5G NSA</option>
-                        <option value="Only_5G">5G SA</option>
-                        <option value="WCDMA_AND_LTE">4G/3G</option>
-                        <option value="Only_LTE">仅4G</option>
-                        <option value="Only_WCDMA">仅3G</option>
-                    </select>
-                    <select class="select" id="USB_TYPE" onchange="changeUSBNetwork(event)">
-                        <option value="0">USB上网:自动</option>
-                        <option value="1">RNDIS</option>
-                        <option value="2">CDC-ECM</option>
-                    </select>
-                    <select class="select" id="SIM_CARD_TYPE" style="display: none;" onchange="changeSimCard(event)">
-                        <option value="0">SIM卡1</option>
-                        <option value="1">SIM卡2</option>
-                    </select>
                 </div>
             </div>
             <!-- 设备监控 -->
@@ -94,16 +98,17 @@
                                 <div class="chart statusCard"
                                     style="position: relative;;max-width: 200px;height: 60px;">
                                     <span
-                                        style="position: absolute;top: 4px;left: 50%;transform: translateX(-50%);font-size: 12px;">核心使用率</span>
+                                        style="position: absolute;z-index: 0;;top: 4px;left: 50%;transform: translateX(-50%);font-size: 12px;">核心使用率</span>
                                     <canvas style="margin-left: -4px;" id="kanoCpuCoreChart"></canvas>
                                 </div>
                                 <div class="cpu-card chart statusCard">
                                     <span
-                                        style="position: absolute;top: 4px;left: 50%;transform: translateX(-50%);font-size: 12px;">CPU占用</span>
+                                        style="position: absolute;top: 4px;left: 50%;transform: translateX(-50%);font-size: 12px;">CPU频率(MHz)</span>
                                     <div class="card-inner" id="cpuFreqList">
                                     </div>
                                 </div>
-                                <div class="chart statusCard" style="max-width: 200px;height: 60px;" onclick="showModal('#memInfoModal')">
+                                <div class="chart statusCard" style="max-width: 200px;height: 60px;"
+                                    onclick="showModal('#memInfoModal')">
                                     <canvas style="margin-left: -4px;" id="kanoMemChart"></canvas>
                                 </div>
                                 <div class="chart statusCard" style="max-width: 200px;height: 60px;">
@@ -130,6 +135,27 @@
                             <div class="title" style="margin-bottom: 6px;">
                                 <button id="DICTIONARY" class="btn" style="padding: 4px;margin-left: 0;">管理字段</button>
                                 <button id="REFRESH" class="btn" style="padding: 4px;margin-left: 10px;">停止刷新</button>
+                                <select class="select" id="refreshRateSelect" onchange="changeRefreshRate(event)"
+                                    style="padding: 3px;margin-left: 10px;">
+                                    <option value="5000">5秒</option>
+                                    <option value="3000">3秒</option>
+                                    <option value="2500">2.5秒</option>
+                                    <option value="2000">2秒</option>
+                                    <option value="1900">1.9秒</option>
+                                    <option value="1700">1.7秒</option>
+                                    <option value="1500">1.5秒</option>
+                                    <option value="1300">1.3秒</option>
+                                    <option value="1000">1秒</option>
+                                    <option value="900">0.9秒</option>
+                                    <option value="800">0.8秒</option>
+                                    <option value="700">0.7秒</option>
+                                    <option value="600">0.6秒</option>
+                                    <option value="500">0.5秒</option>
+                                    <option value="400">0.4秒</option>
+                                    <option value="300">0.3秒</option>
+                                    <option value="200">0.2秒</option>
+                                    <option value="100">0.1秒</option>
+                                </select>
                             </div>
                             <ul class="deviceList" id="STATUS">
                                 <li style="padding-top: 15px;">
@@ -785,7 +811,7 @@
                         <label><input id="fileUploader" type="file" style="display: none;"
                                 onchange="handleFileUpload(event)">
                             <button style="width: 100%;"
-                                onclick="document.querySelector('#fileUploader').click()">上传图片(3MB内)</button></label>
+                                onclick="document.querySelector('#fileUploader').click()">上传图片(10MB内)</button></label>
                     </div>
                     <div style="text-align: left;width: 100%;font-size: 14px;">
                         <p>字体颜色(黑-白)</p>
@@ -950,7 +976,7 @@
                                         <button class="btn"
                                             onclick="disableButtonWhenExecuteFunc(event,()=>handleSambaPath('0'))">移除高级功能(重启生效)</button>
                                         <button class="btn"
-                                            onclick="disableButtonWhenExecuteFunc(event,handleShell)">一键执行shell脚本<br>(脚本需在/sdcard/one_click_shell.sh)</button>
+                                            onclick="disableButtonWhenExecuteFunc(event,handleShell)">一键执行shell脚本(非root)<br>(脚本需在/sdcard/one_click_shell.sh)</button>
                                     </div>
                                 </div>
                             </div>
@@ -1196,8 +1222,8 @@
     <script src="/script/lib/crypto.js"></script>
     <script src="/script/lib/chart.js"></script>
     <script src="/script/utils.js"></script>
-    <script src="/script/theme.js"></script>
     <script src="/script/requests.js"></script>
+    <script src="/script/theme.js"></script>
     <script src="/script/charts.js"></script>
     <script src="/script/main.js"></script>
 </body>

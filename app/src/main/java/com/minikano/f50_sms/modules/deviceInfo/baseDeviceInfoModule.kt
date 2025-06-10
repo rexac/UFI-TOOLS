@@ -5,10 +5,12 @@ import android.os.Build
 import android.os.StatFs
 import com.minikano.f50_sms.modules.BASE_TAG
 import com.minikano.f50_sms.modules.PREFS_NAME
-import com.minikano.f50_sms.utils.CpuManager
 import com.minikano.f50_sms.utils.KanoLog
 import com.minikano.f50_sms.utils.KanoUtils
 import com.minikano.f50_sms.utils.ShellKano
+import com.minikano.f50_sms.utils.calculateCpuUsage
+import com.minikano.f50_sms.utils.getCpuFreqJson
+import com.minikano.f50_sms.utils.getMemoryUsage
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
@@ -69,16 +71,10 @@ fun Route.baseDeviceInfoModule(context: Context) {
         var memUsageRes: Double? = null
 
         try {
-            //喂狗
-            CpuManager.ensureRunning(context)
-            val freq = CpuManager.getCpuFreq() ?: throw Exception("freq没有数据")
-            val usage = CpuManager.getCpuUsage() ?: throw Exception("usage没有数据")
-            val mem = ShellKano.executeShellFromAssetsSubfolder(
-                context,
-                "shell/mem_info.sh",
-                "mem_info.sh"
-            )
-                ?: throw Exception("mem没有数据")
+            val usage = calculateCpuUsage()
+            val freq = getCpuFreqJson()
+            val mem = getMemoryUsage()
+
             KanoLog.d(TAG, "CPU频率数据：${freq}")
             KanoLog.d(TAG, "CPU使用数据：${usage}")
             KanoLog.d(TAG, "Mem使用数据：${mem}")

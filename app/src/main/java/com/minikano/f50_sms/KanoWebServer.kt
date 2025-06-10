@@ -14,7 +14,7 @@ class KanoWebServer(private val context: Context, port: Int, private val proxySe
         var running: Boolean = false
     }
 
-    private val server = embeddedServer(CIO, port = port) {
+    private val server = embeddedServer(CIO, port = port, host = "0.0.0.0") {
         mainModule(context, proxyServerIp)
     }
 

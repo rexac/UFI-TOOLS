@@ -2,7 +2,7 @@ package com.minikano.f50_sms.modules
 
 import android.content.Context
 import com.minikano.f50_sms.modules.adb.adbModule
-import com.minikano.f50_sms.modules.advance.advanceToolsModule
+import com.minikano.f50_sms.modules.advanced.advancedToolsModule
 import com.minikano.f50_sms.modules.at.atModule
 import com.minikano.f50_sms.modules.auth.authenticatedRoute
 import com.minikano.f50_sms.modules.deviceInfo.baseDeviceInfoModule
@@ -39,7 +39,7 @@ fun Application.mainModule(context: Context, proxyServerIp: String) {
 
             atModule(context)
 
-            advanceToolsModule(context, targetServerIP)
+            advancedToolsModule(context, targetServerIP)
 
             speedTestModule(context)
 

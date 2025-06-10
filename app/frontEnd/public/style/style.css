@@ -1,14 +1,16 @@
 :root {
     --dark-text-color: #eee;
-    --dark-card-bg: #00000042;
+    --dark-card-bg: #00000024;
     --dark-card-shadow: 0 0 15px #000 !important;
     --dark-bg-color-transparent: #1f2937ae;
     --dark-bg-color: #1f2937;
     --dark-bgi-color: #0000009c;
     --dark-tag-color: #4b556380;
     --dark-tag-color-active: #4b556380;
-    --dark-btn-color: #87ceeb70;
+    --dark-btn-color: #87ceeb61;
+    --dark-title-color: skyblue;
     --dark-btn-disabled-color: #80808073;
+    --blur-rate:4px
 }
 
 @keyframes spin {
@@ -51,6 +53,13 @@ ul {
     padding: 0;
 }
 
+thead,
+tbody,
+input {
+    backdrop-filter: blur(var(--blur-rate));
+    -webkit-backdrop-filter: blur(var(--blur-rate));
+}
+
 a {
     color: pink;
 }
@@ -69,6 +78,10 @@ textarea {
     color: var(--dark-text-color);
     outline: none;
     resize: vertical;
+}
+
+option {
+    background-color: #000000;
 }
 
 textarea::placeholder {
@@ -119,6 +132,8 @@ textarea::placeholder {
 .deviceList li {
     border-radius: 10px;
     background-color: var(--dark-card-bg);
+    backdrop-filter: blur(var(--blur-rate));
+    -webkit-backdrop-filter: blur(var(--blur-rate));
     padding: 4px;
 }
 
@@ -172,7 +187,7 @@ textarea::placeholder {
     gap: 6px;
     margin-top: 0;
     padding-left: 10px;
-    border-left: 6px solid skyblue;
+    border-left: 6px solid var(--dark-title-color);
     user-select: none;
     -webkit-user-select: none;
 }
@@ -362,8 +377,8 @@ input {
 
 
 .select {
-    color: #00ff17;
-    background-color: #87ceeb70;
+    color: var(--dark-text-color);
+    background-color: var(--dark-btn-color);
     outline: none;
     padding: 8px;
     height: 100%;
@@ -455,6 +470,7 @@ input {
     background-color: rgba(0, 0, 0, 0.371);
     width: 50px;
     border-radius: 6px;
+    opacity: 0.8;
 }
 
 .signal_bar .signal_bar_progress {
@@ -946,6 +962,8 @@ li.dragging {
     transition: all .2s;
     user-select: none;
     -webkit-user-select: none;
+    backdrop-filter: blur(var(--blur-rate));
+    -webkit-backdrop-filter: blur(var(--blur-rate));
 }
 
 .statusCard:active {
@@ -984,7 +1002,7 @@ li.dragging {
     box-sizing: border-box;
     text-align: center;
     margin-top: 12px;
-    justify-items:center;
+    justify-items: center;
 }
 
 .cpu-card .card-inner .signal_bar {
@@ -1021,4 +1039,21 @@ li.dragging {
         display: grid !important;
         grid-template-columns: 50% 50%;
     }
+}
+
+.advanced-btns {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.advanced-btns button {
+    font-size: 10px;
+    padding: 5px;
+}
+
+input[type="range"]{
+    background-color: transparent !important;
+    backdrop-filter:none !important;
+    -webkit-backdrop-filter: none !important;
 }

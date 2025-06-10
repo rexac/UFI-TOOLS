@@ -45,7 +45,7 @@
                         </div>
                         <button id="DataManagement" class="btn">流量管理</button>
                         <button id="SpeedTestBtn" class="btn" onclick="showModal('#speedTestModal')">内网测速</button>
-                        <button id="ClientManagement" class="btn">连接设备</button>
+                        <button id="ClientManagement" class="btn">接入设备</button>
                         <button id="WIFIManagement" class="btn">WIFI设置</button>
                         <button id="LANManagement" class="btn">内网设置</button>
                         <button id="AT" class="btn" onclick="createToast('请登录','red')">AT指令</button>
@@ -814,6 +814,7 @@
                                 onclick="document.querySelector('#fileUploader').click()">上传图片(10MB内)</button></label>
                     </div>
                     <div style="text-align: left;width: 100%;font-size: 14px;">
+                        <p><label style="display: flex;align-items: center;">主页毛玻璃开关&nbsp;<input onchange="updateBlurSwitch(event)" id="blurSwitch" type="checkbox" name="" id=""></label></p>
                         <p>字体颜色(黑-白)</p>
                         <input id="textColorEl" oninput="updateTextColor(event)"
                             style="width: 100%;margin-left: 0;margin-right: 0;" min="0" max="100" type="range">
@@ -828,7 +829,7 @@
                             style="width: 100%;margin-left: 0;margin-right: 0;" min="0" max="100" type="range">
                         <p>背景透明度</p>
                         <input id="opacityEl" oninput="getOpacityByPercent(event)"
-                            style="width: 100%;margin-left: 0;margin-right: 0;" type="range" min="0" max="100">
+                            style="width: 100%;margin-left: 0;margin-right: 0;" type="range" min="0" max="100">                        
                         <p>自定义头部</p>
                         <div class="title" style="font-style: italic;font-size: 12px;">
                             <i>填入的内容会放在网页head末尾(支持脚本样式和meta元素),大小不能超过1145KB</i>
@@ -955,7 +956,7 @@
                         <div style="margin-top: 2px;margin-bottom: 10px;">
                             <div style="display: flex;flex-wrap: wrap; gap: 10px;">
                                 <div>
-                                    <div class="title" style="font-size: 12px;margin-bottom: 10px;">
+                                    <div class="title" style="font-size: 10px;margin-bottom: 10px;">
                                         <div>
                                             <i>TTYD端口为1146(三击标题区域可更改)</i><br>
                                             <i class="user_select">如去除高级功能报错，可以在TTYD上执行 sh
@@ -970,13 +971,17 @@
                                         </div>
                                     </div>
                                     <div style="font-size: 12px;margin: 8px 0;" class="adb_status title"></div>
-                                    <div style="display: flex;gap: 10px;flex-wrap: wrap;">
+                                    <div class="advanced-btns">
+                                        <button class="btn"
+                                            onclick="disableButtonWhenExecuteFunc(event,handleShell)">一键执行shell脚本(非root)<br>(脚本需在/sdcard/one_click_shell.sh)</button>
                                         <button class="btn"
                                             onclick="disableButtonWhenExecuteFunc(event,()=>handleSambaPath())">添加高级功能</button>
                                         <button class="btn"
                                             onclick="disableButtonWhenExecuteFunc(event,()=>handleSambaPath('0'))">移除高级功能(重启生效)</button>
                                         <button class="btn"
-                                            onclick="disableButtonWhenExecuteFunc(event,handleShell)">一键执行shell脚本(非root)<br>(脚本需在/sdcard/one_click_shell.sh)</button>
+                                            onclick="disableButtonWhenExecuteFunc(event,()=>switchCpuCore(false))">关闭小核</button>
+                                        <button class="btn"
+                                            onclick="disableButtonWhenExecuteFunc(event,()=>switchCpuCore(true))">开启小核</button>
                                     </div>
                                 </div>
                             </div>
@@ -1065,7 +1070,6 @@
                     <div class="title" style="font-size: 10px;margin-top: 10px;">
                         <div>
                             <i>软件更新需要启用USB调试+网络ADB调试功能(重启，或者关闭开启一下USB调试),如无法正常使用一键更新功能,可以点击下载安装包自行下载安装。</i><br>
-                            <i>使用有线网络的用户请暂时关掉"网络ADB自启"开关,否则更新完成之后会断网</i><br>
                             <i>由于Android的包管理机制,更新完成后不要直接拔电(会造成数据丢失);请手动重启一次,缓存才会全部写入。</i>
                         </div>
                     </div>

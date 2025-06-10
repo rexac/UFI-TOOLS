@@ -176,6 +176,8 @@ const updateCpuCoreChart = (() => {
             for (let index = 0; index < 8; index++) {
                 if (value[`cpu${index}`] != undefined) {
                     data[index] = Math.round(value[`cpu${index}`])
+                } else {
+                    data[index] = 0
                 }
             }
             chart.update()
@@ -357,7 +359,7 @@ const updateNetworkChart = (() => {
             }, {
                 label: 'UL',
                 data: dataUL,
-                borderColor: '#FFA500',
+                borderColor: 'pink',
                 tension: 0.5,
                 pointRadius: 0,
                 yAxisID: 'y1',
@@ -405,10 +407,10 @@ const updateNetworkChart = (() => {
                 let UL = window?.UFI_DATA?.realtime_tx_thrpt
                 if (UL != undefined) {
                     chart.options.plugins.centerText.text = [
+                        { text: `↑ ${formatBytes(UL)}/S`, color: 'pink' },
                         {
                             text: `↓ ${formatBytes(value)}/S`
-                        },
-                        { text: `↑ ${formatBytes(UL)}/S`, color: '#FFA500' }
+                        }
                     ];
 
                     let newLabels = [...labels]

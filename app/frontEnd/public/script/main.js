@@ -823,7 +823,7 @@ function main_func() {
                 console.error(e.message)
             }
         }
-        btn.style.backgroundColor = res.usb_port_switch == '1' ? '#018ad8b0' : ''
+        btn.style.backgroundColor = res.usb_port_switch == '1' ? '#018ad8a8' : ''
 
     }
     handlerADBStatus()
@@ -885,7 +885,7 @@ function main_func() {
                 console.error(e.message)
             }
         }
-        btn.style.backgroundColor = res.enabled == "true" || res.enabled == true ? '#018ad8b0' : ''
+        btn.style.backgroundColor = res.enabled == "true" || res.enabled == true ? '#018ad8a8' : ''
 
     }
     handlerADBNetworkStatus()
@@ -901,7 +901,7 @@ function main_func() {
         let res = await getData(new URLSearchParams({
             cmd: 'performance_mode'
         }))
-        btn.style.backgroundColor = res.performance_mode == '1' ? '#018ad8b0' : ''
+        btn.style.backgroundColor = res.performance_mode == '1' ? '#018ad8a8' : ''
         btn.onclick = async () => {
             try {
                 if (!(await initRequestData())) {
@@ -1193,7 +1193,7 @@ function main_func() {
                 // createToast(e.message)
             }
         }
-        el.style.backgroundColor = res.samba_switch == '1' ? '#018ad8b0' : ''
+        el.style.backgroundColor = res.samba_switch == '1' ? '#018ad8a8' : ''
     }
     initSMBStatus()
 
@@ -1239,7 +1239,7 @@ function main_func() {
                 // createToast(e.message)
             }
         }
-        el.style.backgroundColor = res.roam_setting_option == 'on' ? '#018ad8b0' : ''
+        el.style.backgroundColor = res.roam_setting_option == 'on' ? '#018ad8a8' : ''
     }
     initROAMStatus()
 
@@ -1279,7 +1279,7 @@ function main_func() {
                 createToast(e.message, 'red')
             }
         }
-        el.style.backgroundColor = res.indicator_light_switch == '1' ? '#018ad8b0' : ''
+        el.style.backgroundColor = res.indicator_light_switch == '1' ? '#018ad8a8' : ''
     }
     initLightStatus()
 
@@ -2234,7 +2234,7 @@ function main_func() {
             }
         }
         btn.innerHTML = '数据流量'
-        btn.style.backgroundColor = res.ppp_status == 'ppp_disconnected' ? '' : '#018ad8b0'
+        btn.style.backgroundColor = res.ppp_status == 'ppp_disconnected' ? '' : '#018ad8a8'
     }
     handlerCecullarStatus()
 
@@ -2308,6 +2308,7 @@ function main_func() {
                     "saturationPer": localStorage.getItem("saturationPer"),
                     "brightPer": localStorage.getItem("brightPer"),
                     "opacityPer": localStorage.getItem("opacityPer"),
+                    "blurSwitch": localStorage.getItem("blurSwitch")
                 })
             })).json()
 
@@ -2421,7 +2422,7 @@ function main_func() {
 
         SCHEDULE_ENABLED.checked = restart_schedule_switch == '1'
         SCHEDULE_TIME.value = restart_time
-        btn.style.backgroundColor = restart_schedule_switch == '1' ? '#018ad8b0' : ''
+        btn.style.backgroundColor = restart_schedule_switch == '1' ? '#018ad8a8' : ''
 
         btn.onclick = async () => {
             if (!(await initRequestData())) {
@@ -2463,6 +2464,7 @@ function main_func() {
                 })).json()
                 if (res?.result == 'success') {
                     createToast('设置成功！', 'green')
+                    initScheduleRebootStatus()
                     closeModal('#scheduleRebootModal')
                 } else {
                     throw '设置失败'
@@ -2962,7 +2964,7 @@ function main_func() {
                 }
             }
 
-            btn.style.backgroundColor = web_wifi_nfc_switch.toString() == '1' ? '#018ad8b0' : ''
+            btn.style.backgroundColor = web_wifi_nfc_switch.toString() == '1' ? '#018ad8a8' : ''
         } catch { }
     }
     initNFCSwitch()
@@ -3983,8 +3985,44 @@ function main_func() {
         }
     }
 
+    //rootShell
+    const runShellWithRoot = async (cmd = '') => {
+        try {
+            const res = await fetchWithTimeout(`${KANO_baseURL}/root_shell`, {
+                method: "POST",
+                headers: common_headers,
+                body: JSON.stringify({
+                    command: cmd.trim()
+                })
+            })
+            const { result, error } = await res.json()
+            return error ? { success: false, content: error } : { success: true, content: result }
+        } catch (e) {
+            return { success: false, content: e.message }
+        }
+    }
+
+
+    //开关小核心
+    const switchCpuCore = async (flag = true) => {
+        const AD_RESULT = document.querySelector('#AD_RESULT')
+        const shell = `
+echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu0/online
+echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu1/online
+echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu2/online
+echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
+        `
+        const result = await runShellWithRoot(shell)
+        result.success ? createToast('执行成功', 'green') : createToast('执行失败', 'red')
+
+        AD_RESULT.innerHTML = result.content
+
+    }
+
     //挂载方法到window
     const methods = {
+        runShellWithRoot,
+        switchCpuCore,
         changeRefreshRate,
         onPluginBtn,
         handlePluginFileUpload,

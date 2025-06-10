@@ -9,6 +9,9 @@ let currentSaturation = 1;
 //字体颜色
 let currentTextColor = 0;
 
+//主页模糊开关
+let homeBlurSwitch = true
+
 // 调色盘
 function getColorByPercent(e) {
     const value = e.target.value; // 0 ~ 100
@@ -57,6 +60,15 @@ function updateTextColor(e) {
     localStorage.setItem('textColor', color);
 }
 
+//主页毛玻璃
+function updateBlurSwitch(e) {
+    const value = e.target.checked; // 0 ~ 100
+    homeBlurSwitch = value
+    updateColor()
+    //保存进度到localStorage
+    localStorage.setItem('blurSwitch', value);
+}
+
 // 更新颜色 + 透明度
 function updateColor() {
     const { r, g, b } = hsvToRgb(currentHue, currentSaturation, currentValue);
@@ -65,6 +77,8 @@ function updateColor() {
     document.documentElement.style.setProperty('--dark-bgi-color', color);
     document.documentElement.style.setProperty('--dark-tag-color', color);
     document.documentElement.style.setProperty('--dark-text-color', currentTextColor);
+    document.documentElement.style.setProperty('--dark-text-color', currentTextColor);
+    document.documentElement.style.setProperty('--blur-rate', homeBlurSwitch ? "4px" : "0");
     //保存到localStorage
     localStorage.setItem('themeColor', currentHue);
 }
@@ -79,9 +93,8 @@ const initTheme = async () => {
         })).json()
     } catch (e) {
         result = null
-        console.error('云端主题拉取数据失败：',e)
+        console.error('云端主题拉取数据失败：', e)
     }
-    console.log(result, Object.keys(result));
 
     if (result) {
         Object.keys(result).forEach((key) => {
@@ -96,6 +109,11 @@ const initTheme = async () => {
     let saturation = localStorage.getItem('saturationPer');
     let textColor = localStorage.getItem('textColor');
     let textColorPer = localStorage.getItem('textColorPer');
+    let blur = localStorage.getItem('blurSwitch');
+
+    if (blur == null || blur == undefined) {
+        blur = "true"
+    }
 
     if (color == null || color == undefined) {
         color = 183;
@@ -126,6 +144,7 @@ const initTheme = async () => {
         localStorage.setItem('textColorPer', textColorPer);
     }
 
+    homeBlurSwitch = blur == "true"
     currentHue = color;
     currentOpacity = opacityPer / 100;
     currentValue = value / 100;
@@ -137,5 +156,6 @@ const initTheme = async () => {
     document.querySelector("#brightEl").value = value;
     document.querySelector("#saturationEl").value = saturation;
     document.querySelector("#textColorEl").value = textColorPer;
+    document.querySelector("#blurSwitch").checked = homeBlurSwitch;
 }
 initTheme();

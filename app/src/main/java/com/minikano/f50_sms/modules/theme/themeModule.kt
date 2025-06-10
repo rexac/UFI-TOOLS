@@ -34,7 +34,8 @@ data class ThemeConfig(
     val colorPer: String = "61",
     val saturationPer: String = "16",
     val brightPer: String = "16",
-    val opacityPer: String = "37"
+    val opacityPer: String = "37",
+    val blurSwitch: String = "true"
 )
 
 val jsonFull = Json {
@@ -127,7 +128,7 @@ fun Route.themeModule(context: Context) {
             }
         }
 
-        //保存自定义头部
+        //保存主题
         post("/api/set_theme") {
             try {
                 val body = call.receiveText()
@@ -142,7 +143,8 @@ fun Route.themeModule(context: Context) {
                     colorPer = json.optString("colorPer", "61").trim(),
                     saturationPer = json.optString("saturationPer", "16").trim(),
                     brightPer = json.optString("brightPer", "16").trim(),
-                    opacityPer = json.optString("opacityPer", "37").trim()
+                    opacityPer = json.optString("opacityPer", "37").trim(),
+                    blurSwitch = json.optString("blurSwitch", "true").trim()
                 )
 
                 val jsonStore = jsonFull.encodeToString(config)
@@ -196,7 +198,8 @@ fun Route.themeModule(context: Context) {
                     colorPer = json.optString("colorPer", "61").trim(),
                     saturationPer = json.optString("saturationPer", "16").trim(),
                     brightPer = json.optString("brightPer", "16").trim(),
-                    opacityPer = json.optString("opacityPer", "37").trim()
+                    opacityPer = json.optString("opacityPer", "37").trim(),
+                    blurSwitch = json.optString("blurSwitch", "true").trim()
                 )
             } else {
                 ThemeConfig()

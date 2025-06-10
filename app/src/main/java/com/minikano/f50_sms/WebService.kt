@@ -13,10 +13,7 @@ import android.os.IBinder
 import android.os.PowerManager
 import android.util.Log
 import androidx.core.app.NotificationCompat
-import com.minikano.f50_sms.utils.KanoGoformRequest
 import com.minikano.f50_sms.utils.KanoUtils
-import com.minikano.f50_sms.utils.ShellKano
-import kotlinx.coroutines.runBlocking
 import kotlin.concurrent.thread
 
 class WebService : Service() {
@@ -24,7 +21,6 @@ class WebService : Service() {
     private val port = 2333
     private val SERVER_INTENT = "com.minikano.f50_sms.SERVER_STATUS_CHANGED"
     private val UI_INTENT = "com.minikano.f50_sms.UI_STATUS_CHANGED"
-    private val PREFS_NAME = "kano_ZTE_store"
     private var wakeLock: PowerManager.WakeLock? = null
 
     @Volatile
@@ -44,88 +40,6 @@ class WebService : Service() {
                 }
             }
         }
-    }
-
-    private fun runADB() {
-        //网络adb
-        //adb setprop service.adb.tcp.port 5555
-        Thread {
-            try {
-                ShellKano.runShellCommand("/system/bin/setprop persist.service.adb.tcp.port 5555")
-                ShellKano.runShellCommand("/system/bin/setprop service.adb.tcp.port 5555")
-                Log.d("kano_ZTE_LOG", "网络adb调试prop执行成功")
-            } catch (e: Exception) {
-                try {
-                    ShellKano.runShellCommand("/system/bin/setprop service.adb.tcp.port 5555")
-                    ShellKano.runShellCommand("/system/bin/setprop persist.service.adb.tcp.port 5555")
-                    Log.d("kano_ZTE_LOG", "网络adb调试prop执行成功")
-                } catch (e: Exception) {
-                    Log.d("kano_ZTE_LOG", "网络adb调试prop执行出错： ${e.message}")
-                }
-            }
-            Thread.sleep(500)
-            try {
-                val sharedPrefs =
-                    applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-
-                val ADB_IP_ENABLED = sharedPrefs.getString("ADB_IP_ENABLED", "") ?: null
-
-                if (ADB_IP_ENABLED == "true") {
-                    val ADB_IP =
-                        sharedPrefs.getString("gateway_ip", "")?.substringBefore(":") ?: throw Exception("没有ADMIN_IP")
-                    val ADMIN_PWD =
-                        sharedPrefs.getString("ADMIN_PWD", "") ?: throw Exception("没有ADMIN_PWD")
-
-                    Log.d(
-                        "kano_ZTE_LOG", "读取网络ADB所需配置：ADB_IP:${
-                            ADB_IP
-                        } ADMIN_PWD:${
-                            ADMIN_PWD
-                        }"
-                    )
-                    try {
-                        runBlocking {
-                            val req = KanoGoformRequest("http://$ADB_IP:8080")
-                            val cookie = req.login(ADMIN_PWD)
-                            if (cookie != null) {
-                                val result1 = req.postData(
-                                    cookie, mapOf(
-                                        "goformId" to "USB_PORT_SETTING",
-                                        "usb_port_switch" to "0"
-                                    )
-                                )
-                                Log.d("kano_ZTE_LOG", "关闭ADBD结果: $result1")
-                                val result2 = req.postData(
-                                    cookie, mapOf(
-                                        "goformId" to "USB_PORT_SETTING",
-                                        "usb_port_switch" to "1"
-                                    )
-                                )
-                                Log.d("kano_ZTE_LOG", "开启ADBD结果: $result2")
-                                req.logout(cookie)
-                                if (result1?.getString("result") == "success" && result2?.getString("result") == "success") {
-                                    Log.d("kano_ZTE_LOG", "ADB_WIFI自启动执行成功")
-                                }
-                            }
-
-                        }
-                    } catch (e:Exception){
-                        Log.e("kano_ZTE_LOG", "ADB_WIFI执行错误:${e.message}")
-                    }
-                } else {
-                    Log.d("kano_ZTE_LOG", "不需要自启动ADB_WIFI")
-                }
-            } catch (e: Exception) {
-                Log.d("kano_ZTE_LOG", "ADB_WIFI自启动执行错误：${e.message}")
-                e.printStackTrace()
-            }
-
-            Thread.sleep(5000)
-            ShellKano.executeShellFromAssetsSubfolderWithArgs(
-                applicationContext, "shell/adb", "start-server"
-            )
-            ShellKano.ensureAdbAlive(applicationContext)
-        }.start()
     }
 
     override fun onCreate() {
@@ -150,7 +64,6 @@ class WebService : Service() {
         allowAutoReStart = true
         startWebServer()
 
-        runADB()
         Log.d("kano_ZTE_LOG", "WebService Init Success!")
     }
 
@@ -161,7 +74,7 @@ class WebService : Service() {
             allowAutoStart = true
             try {
                 Log.d("kano_ZTE_LOG", "正在启动web服务，绑定地址：http://0.0.0.0:$port")
-                webServer = KanoWebServer(applicationContext,2333,currentIp)
+                webServer = KanoWebServer(applicationContext, 2333, currentIp)
                 webServer?.start()
                 sendStickyBroadcast(Intent(SERVER_INTENT).putExtra("status", true))
                 Log.d("kano_ZTE_LOG", "启动服务成功，地址：http://0.0.0.0:$port")

@@ -1,29 +1,34 @@
-package com.minikano.f50_sms.modules.advance
+package com.minikano.f50_sms.modules.advanced
 
 import android.content.Context
+import com.minikano.f50_sms.configs.SMBConfig
+import com.minikano.f50_sms.modules.BASE_TAG
 import com.minikano.f50_sms.utils.KanoLog
 import com.minikano.f50_sms.utils.KanoUtils
 import com.minikano.f50_sms.utils.RootShell
-import com.minikano.f50_sms.configs.SMBConfig
 import com.minikano.f50_sms.utils.ShellKano
 import com.minikano.f50_sms.utils.SmbThrottledRunner
-import com.minikano.f50_sms.modules.BASE_TAG
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
+import io.ktor.server.request.receiveText
 import io.ktor.server.response.respondOutputStream
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
+import io.ktor.server.routing.post
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import org.json.JSONObject
 import java.io.File
 import java.io.OutputStreamWriter
 import java.io.PipedInputStream
 import java.io.PipedOutputStream
 
-fun Route.advanceToolsModule(context: Context,targetServerIP:String) {
+fun Route.advancedToolsModule(context: Context, targetServerIP: String) {
     val TAG = "[$BASE_TAG]_advanceToolsModule"
 
     //更改samba分享地址为根目录
@@ -72,7 +77,7 @@ fun Route.advanceToolsModule(context: Context,targetServerIP:String) {
 
                 val socketPath = File(context.filesDir, "kano_root_shell.sock")
                 if (!socketPath.exists()) {
-                    throw Exception("执行失败，没有找到 socat 创建的 sock")
+                    throw Exception("执行命令失败，没有找到 socat 创建的 sock (高级功能是否开启？)")
                 }
 
                 val result = RootShell.sendCommandToSocket(script, socketPath.absolutePath)
@@ -240,4 +245,58 @@ fun Route.advanceToolsModule(context: Context,targetServerIP:String) {
         }
     }
 
+    //rootShell执行
+    post("/api/root_shell") {
+        try {
+            val body = call.receiveText()
+
+            val json = try {
+                JSONObject(body)
+            } catch (e: Exception) {
+                throw Exception("解析请求的json出错")
+            }
+
+            val text = json.optString("command", "").trim()
+
+            KanoLog.d(TAG, "获取到的command： ${text}")
+
+            if (text.isNotEmpty()) {
+
+                val socketPath = File(context.filesDir, "kano_root_shell.sock")
+                if (!socketPath.exists()) {
+                    throw Exception("执行命令失败，没有找到 socat 创建的 sock (高级功能是否开启？)")
+                }
+
+                val result =
+                    RootShell.sendCommandToSocket(
+                        text,
+                        socketPath.absolutePath
+                    )
+                        ?: throw Exception("请检查命令输入格式")
+
+                KanoLog.d(TAG, "执行结果： ${result}")
+
+                val parsedResult = Json.encodeToString(result)
+
+                call.response.headers.append("Access-Control-Allow-Origin", "*")
+                call.respondText(
+                    """{"result":$parsedResult}""",
+                    ContentType.Application.Json,
+                    HttpStatusCode.OK
+                )
+
+            } else {
+                throw Exception("命令不能为空")
+            }
+
+        } catch (e: Exception) {
+            KanoLog.d(TAG, "shell执行出错： ${e.message}")
+            call.response.headers.append("Access-Control-Allow-Origin", "*")
+            call.respondText(
+                """{"error":"shell执行出错: ${e.message}"}""",
+                ContentType.Application.Json,
+                HttpStatusCode.InternalServerError
+            )
+        }
+    }
 }

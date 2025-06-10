@@ -3,9 +3,8 @@ package com.minikano.f50_sms
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
+import com.minikano.f50_sms.utils.ShellKano
 
 class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
@@ -21,6 +20,10 @@ class BootReceiver : BroadcastReceiver() {
             startIntent_ADB.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             context.startForegroundService(startIntent_ADB)
             Log.d("kano_ZTE_LOG", "启动ADBService")
+
+            //激活网络ADB等
+            ShellKano.runADB(context)
+            Log.d("kano_ZTE_LOG", "激活网络ADB")
         }
     }
 }

@@ -2272,6 +2272,10 @@ function main_func() {
         const bg_checked = document.querySelector('#isCheckedBG')?.checked
         const BG = document.querySelector('#BG')
         const BG_OVERLAY = document.querySelector('#BG_OVERLAY')
+        const isCloudSync = document.querySelector("#isCloudSync")
+
+        localStorage.setItem("isCloudSync", isCloudSync.checked)
+
         if ((await initRequestData())) {
             setCustomHead(custom_head.value?.trim() || '').then(async ({ result, error }) => {
                 if (result != "success") {
@@ -2294,35 +2298,46 @@ function main_func() {
             imgUrl.trim() && localStorage.setItem('backgroundUrl', imgUrl)
         }
         //发请求同步数据
-        try {
-            const { result, error } = await (await fetch(`${KANO_baseURL}/set_theme`, {
-                method: 'POST',
-                headers: common_headers,
-                body: JSON.stringify({
-                    "backgroundEnabled": bg_checked,
-                    "backgroundUrl": localStorage.getItem("backgroundUrl") || '',
-                    "textColor": localStorage.getItem("textColor"),
-                    "textColorPer": localStorage.getItem("textColorPer"),
-                    "themeColor": localStorage.getItem("themeColor"),
-                    "colorPer": localStorage.getItem("colorPer"),
-                    "saturationPer": localStorage.getItem("saturationPer"),
-                    "brightPer": localStorage.getItem("brightPer"),
-                    "opacityPer": localStorage.getItem("opacityPer"),
-                    "blurSwitch": localStorage.getItem("blurSwitch")
-                })
-            })).json()
+        if (isCloudSync.checked) {
+            try {
+                const { result, error } = await (await fetch(`${KANO_baseURL}/set_theme`, {
+                    method: 'POST',
+                    headers: common_headers,
+                    body: JSON.stringify({
+                        "backgroundEnabled": bg_checked,
+                        "backgroundUrl": localStorage.getItem("backgroundUrl") || '',
+                        "textColor": localStorage.getItem("textColor"),
+                        "textColorPer": localStorage.getItem("textColorPer"),
+                        "themeColor": localStorage.getItem("themeColor"),
+                        "colorPer": localStorage.getItem("colorPer"),
+                        "saturationPer": localStorage.getItem("saturationPer"),
+                        "brightPer": localStorage.getItem("brightPer"),
+                        "opacityPer": localStorage.getItem("opacityPer"),
+                        "blurSwitch": localStorage.getItem("blurSwitch")
+                    })
+                })).json()
 
-            if (result == "success") {
-                showSuccessToast && createToast('保存成功，已同步至机器~', 'green')
-                document.querySelector('#fileUploader').value = ''
-                closeModal('#bgSettingModal')
+                if (result == "success") {
+                    showSuccessToast && createToast('保存成功，已同步至机器~', 'green')
+                    document.querySelector('#fileUploader').value = ''
+                    closeModal('#bgSettingModal')
+                }
+                else throw error || ''
             }
-            else throw error || ''
+            catch (e) {
+                createToast(`同步失败!`, 'red')
+            }
+        } else {
+            document.querySelector('#fileUploader').value = ''
+            closeModal('#bgSettingModal')
+            createToast('已保存至本地~', 'green')
         }
-        catch (e) {
-            createToast(`同步失败!`, 'red')
-        }
+    }
 
+    //手动同步主题
+    const syncTheme = () => {
+        initTheme(true);initBG()
+        createToast('已从云端同步至本地', 'green')
     }
 
     //初始化背景图片
@@ -2370,34 +2385,37 @@ function main_func() {
             e.target.disabled = false
             e.target.innerHTML = '重置主题'
         }, 2000)
-        try {
-            const { result, error } = await (await fetch(`${KANO_baseURL}/set_theme`, {
-                method: 'POST',
-                headers: common_headers,
-                body: JSON.stringify({})
-            })).json()
+        const isSync = localStorage.getItem("isCloudSync", isCloudSync.checked)
+        if (isSync == true || isSync == "true") {
+            try {
+                const { result, error } = await (await fetch(`${KANO_baseURL}/set_theme`, {
+                    method: 'POST',
+                    headers: common_headers,
+                    body: JSON.stringify({})
+                })).json()
 
-            if (result == "success") {
-                localStorage.removeItem('themeColor')
-                localStorage.removeItem('textColorPer')
-                localStorage.removeItem('textColor')
-                localStorage.removeItem('saturationPer')
-                localStorage.removeItem('opacityPer')
-                localStorage.removeItem('colorPer')
-                localStorage.removeItem('brightPer')
+                if (result == "success") {
+                    localStorage.removeItem('themeColor')
+                    localStorage.removeItem('textColorPer')
+                    localStorage.removeItem('textColor')
+                    localStorage.removeItem('saturationPer')
+                    localStorage.removeItem('opacityPer')
+                    localStorage.removeItem('colorPer')
+                    localStorage.removeItem('brightPer')
 
-                createToast('重置成功，已同步至机器~', 'green')
-                document.querySelector('#fileUploader').value = ''
-                setTimeout(() => {
-                    initBG().then(() => {
-                        handleSubmitBg(false)
-                    })
-                }, 100);
+                    createToast('重置成功，已同步至机器~', 'green')
+                    document.querySelector('#fileUploader').value = ''
+                    setTimeout(() => {
+                        initBG().then(() => {
+                            handleSubmitBg(false)
+                        })
+                    }, 100);
+                }
+                else throw error || ''
             }
-            else throw error || ''
-        }
-        catch (e) {
-            createToast(`重置失败!`, 'red')
+            catch (e) {
+                createToast(`重置失败!`, 'red')
+            }
         }
         initTheme && initTheme()
         e.target.innerHTML = '重置主题'
@@ -3127,7 +3145,6 @@ function main_func() {
                         const BG = document.querySelector("#BG")
                         const url = `${KANO_baseURL}${res.url}`
                         BG_INPUT.value = url
-                        console.log(BG_INPUT.value);
                         localStorage.setItem('backgroundUrl', url)
                         document.querySelector('#isCheckedBG').checked = true
                         BG.style.backgroundImage = `url(${url})`
@@ -4021,6 +4038,7 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
 
     //挂载方法到window
     const methods = {
+        syncTheme,
         runShellWithRoot,
         switchCpuCore,
         changeRefreshRate,

@@ -84,24 +84,28 @@ function updateColor() {
 }
 
 //读取颜色数据
-const initTheme = async () => {
-    // 从云端拉取主题数据
-    let result = null
-    try {
-        result = await (await fetchWithTimeout(KANO_baseURL + "/get_theme", {
-            method: 'get'
-        })).json()
-    } catch (e) {
-        result = null
-        console.error('云端主题拉取数据失败：', e)
-    }
+const initTheme = async (sync = false) => {
+    const isCloudSync = document.querySelector("#isCloudSync")
 
-    if (result) {
-        Object.keys(result).forEach((key) => {
-            localStorage.setItem(key, result[key])
-        })
-    }
+    const isSync = localStorage.getItem("isCloudSync", isCloudSync.checked)
+    if (isSync == true || isSync == "true" || sync) {
+        // 从云端拉取主题数据
+        let result = null
+        try {
+            result = await (await fetchWithTimeout(KANO_baseURL + "/get_theme", {
+                method: 'get'
+            })).json()
+        } catch (e) {
+            result = null
+            console.error('云端主题拉取数据失败：', e)
+        }
 
+        if (result) {
+            Object.keys(result).forEach((key) => {
+                localStorage.setItem(key, result[key])
+            })
+        }
+    }
     let color = localStorage.getItem('themeColor');
     let colorPer = localStorage.getItem('colorPer');
     let opacityPer = localStorage.getItem('opacityPer');
@@ -157,5 +161,6 @@ const initTheme = async () => {
     document.querySelector("#saturationEl").value = saturation;
     document.querySelector("#textColorEl").value = textColorPer;
     document.querySelector("#blurSwitch").checked = homeBlurSwitch;
+    isCloudSync.checked = isSync == "true"
 }
 initTheme();

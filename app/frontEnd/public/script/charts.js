@@ -13,9 +13,6 @@ const chartUpdater = (prop, value) => {
         case 'mem_usage':
             updateMemChart && updateMemChart(value)
             break
-        case 'cpuUsageInfo':
-            updateCpuCoreChart && updateCpuCoreChart(value)
-            break
         case 'cpuFreqInfo':
             if (value) {
                 const cpuFreqList = document.querySelector('#cpuFreqList')
@@ -24,6 +21,13 @@ const chartUpdater = (prop, value) => {
                     let cur = String(value[`cpu${i}`].cur)
                     let cur_origin = String(value[`cpu${i}`].cur)
                     let max = String(value[`cpu${i}`].max)
+                    // 通过使用率表判断核心启用状态
+                    let usgList = window.UFI_DATA.cpuUsageInfo
+                    if (usgList) {
+                        if (!usgList[`cpu${i}`]) {
+                            cur_origin = 0
+                        }
+                    }
                     if (cur.length == 1) cur = `&nbsp;&nbsp;&nbsp;${cur}`
                     else if (cur.length == 2) cur = `&nbsp;&nbsp;${cur}`
                     else if (cur.length == 3) cur = `&nbsp;${cur}`
@@ -37,6 +41,10 @@ const chartUpdater = (prop, value) => {
                 cpuFreqList.innerHTML = html
             }
             break
+        case 'cpuUsageInfo':
+            updateCpuCoreChart && updateCpuCoreChart(value)
+            break
+
         case 'memInfo':
             if (value) {
                 const memInfo = document.querySelector('#memInfo')

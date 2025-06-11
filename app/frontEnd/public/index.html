@@ -800,10 +800,16 @@
                 style="overflow: hidden;;width: 90%;max-width: 400px; display: flex;flex-direction: column;display: none;">
                 <div class="title" style="margin-bottom: 4px;">主题背景设置</div>
                 <div class="content" style="min-height: 400px;">
-                    <div style="text-align: left ;">
-                        <p style="font-size: 14px"><label
-                                style="display: flex;align-items: center;"><span>启用背景图片？</span><input type="checkbox"
-                                    id="isCheckedBG"></label></p>
+                    <div style="text-align: left;">
+                        <div style="display: flex;align-items: center;gap:10px;font-size: 14px;margin-top: 6px;">
+                            <label style="display: flex;align-items: center;"><span>多设备同步？</span><input type="checkbox"
+                                    id="isCloudSync"></label>
+                            <button class="btn" onclick="syncTheme()">手动同步</button>
+                        </div>
+                        <p style="font-size: 14px">
+                            <label style="display: flex;align-items: center;"><span>启用背景图片？</span><input type="checkbox"
+                                    id="isCheckedBG"></label>
+                        </p>
                         <p style="font-size: 14px;">图片网址：
                             <input placeholder="输入网址" type="text" id="BG_INPUT"
                                 style="width: 100%;max-width: 200px;padding: 6px 10px;margin: 4px 0;">
@@ -814,7 +820,9 @@
                                 onclick="document.querySelector('#fileUploader').click()">上传图片(10MB内)</button></label>
                     </div>
                     <div style="text-align: left;width: 100%;font-size: 14px;">
-                        <p><label style="display: flex;align-items: center;">主页毛玻璃开关&nbsp;<input onchange="updateBlurSwitch(event)" id="blurSwitch" type="checkbox" name="" id=""></label></p>
+                        <p><label style="display: flex;align-items: center;">主页毛玻璃开关&nbsp;<input
+                                    onchange="updateBlurSwitch(event)" id="blurSwitch" type="checkbox" name=""
+                                    id=""></label></p>
                         <p>字体颜色(黑-白)</p>
                         <input id="textColorEl" oninput="updateTextColor(event)"
                             style="width: 100%;margin-left: 0;margin-right: 0;" min="0" max="100" type="range">
@@ -829,7 +837,7 @@
                             style="width: 100%;margin-left: 0;margin-right: 0;" min="0" max="100" type="range">
                         <p>背景透明度</p>
                         <input id="opacityEl" oninput="getOpacityByPercent(event)"
-                            style="width: 100%;margin-left: 0;margin-right: 0;" type="range" min="0" max="100">                        
+                            style="width: 100%;margin-left: 0;margin-right: 0;" type="range" min="0" max="100">
                         <p>自定义头部</p>
                         <div class="title" style="font-style: italic;font-size: 12px;">
                             <i>填入的内容会放在网页head末尾(支持脚本样式和meta元素),大小不能超过1145KB</i>

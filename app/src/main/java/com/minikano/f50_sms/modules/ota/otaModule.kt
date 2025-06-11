@@ -1,11 +1,12 @@
 package com.minikano.f50_sms.modules.ota
 
 import android.content.Context
+import com.minikano.f50_sms.modules.BASE_TAG
 import com.minikano.f50_sms.utils.KanoLog
 import com.minikano.f50_sms.utils.KanoRequest
 import com.minikano.f50_sms.utils.KanoUtils
+import com.minikano.f50_sms.utils.RootShell
 import com.minikano.f50_sms.utils.ShellKano
-import com.minikano.f50_sms.modules.BASE_TAG
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
@@ -189,120 +190,166 @@ fun Route.otaModule(context: Context) {
                     return@launch
                 }
 
-                val outFileAdb = KanoUtils.copyFileToFilesDir(context, "shell/adb")
-                    ?: throw Exception("复制 adb 到 filesDir 失败")
-                outFileAdb.setExecutable(true)
+                //使用高级功能安装
+                val socketPath = File(context.filesDir, "kano_root_shell.sock")
+                //试试能不能
+                val testResult =
+                    RootShell.sendCommandToSocket(
+                        "whoami",
+                        socketPath.absolutePath
+                    ) ?: "whoami执行失败"
+                KanoLog.d(TAG, "socat测试结果： $testResult")
+                if (socketPath.exists() && testResult.contains("root")) {
 
-                // 复制APK到 sdcard 根目录
-                val copyCmd =
-                    "${outFileAdb.absolutePath} -s localhost shell sh -c 'cp ${ApkState.downloadResultPath} /sdcard/ufi_tools_latest.apk'"
-                KanoLog.d(TAG, "执行：$copyCmd")
-                ShellKano.runShellCommand(copyCmd, context)
+                    val shellScript = """
+                #!/system/bin/sh
+                nohup sh -c '
+                pm install -r -g "${ApkState.downloadResultPath}" >> /sdcard/ufi_tools_update.log 2>&1
+                am start -n com.minikano.f50_sms/.MainActivity >> /sdcard/ufi_tools_update.log 2>&1
+                echo "${'$'}(date) done" >> /sdcard/ufi_tools_update.log
+                ' >/dev/null 2>&1 &
+                """.trimIndent()
 
-                // 创建并复制 shell 脚本
-                val scriptText = """
+                    //保存sh
+                    val scriptFile =
+                        ShellKano.createShellScript(
+                            context,
+                            "ufi_tools_update_by_socat.sh",
+                            shellScript
+                        )
+                    val shPath = scriptFile.absolutePath
+
+                    val result =
+                        RootShell.sendCommandToSocket(
+                            "nohup sh $shPath &",
+                            socketPath.absolutePath
+                        )
+
+                    KanoLog.d(TAG, "socat安装apk结果： $result")
+                    delay(2000)
+                    writer.write("""{"result":"success"}""")
+
+                } else {
+                    KanoLog.d(TAG, "没有找到socat，执行B计划")
+
+                    val outFileAdb = KanoUtils.copyFileToFilesDir(context, "shell/adb")
+                        ?: throw Exception("复制 adb 到 filesDir 失败")
+                    outFileAdb.setExecutable(true)
+
+                    // 复制APK到 sdcard 根目录
+                    val copyCmd =
+                        "${outFileAdb.absolutePath} -s localhost shell sh -c 'cp ${ApkState.downloadResultPath} /sdcard/ufi_tools_latest.apk'"
+                    KanoLog.d(TAG, "执行：$copyCmd")
+                    ShellKano.runShellCommand(copyCmd, context)
+
+                    // 创建并复制 shell 脚本
+                    val scriptText = """
                     #!/system/bin/sh
                     pm install -r -g /sdcard/ufi_tools_latest.apk >> /sdcard/ufi_tools_update.log 2>&1
                     am start -n com.minikano.f50_sms/.MainActivity >> /sdcard/ufi_tools_update.log 2>&1
                     echo "$(date) done" >> /sdcard/ufi_tools_update.log
                 """.trimIndent()
 
-                val scriptFile =
-                    ShellKano.createShellScript(context, "ufi_tools_update.sh", scriptText)
-                val shPath = scriptFile.absolutePath
+                    val scriptFile =
+                        ShellKano.createShellScript(context, "ufi_tools_update.sh", scriptText)
+                    val shPath = scriptFile.absolutePath
 
-                val copyShCmd =
-                    "${outFileAdb.absolutePath} -s localhost shell sh -c 'cp $shPath /sdcard/ufi_tools_update.sh'"
-                KanoLog.d(TAG, "执行：$copyShCmd")
-                ShellKano.runShellCommand(copyShCmd, context)
+                    val copyShCmd =
+                        "${outFileAdb.absolutePath} -s localhost shell sh -c 'cp $shPath /sdcard/ufi_tools_update.sh'"
+                    KanoLog.d(TAG, "执行：$copyShCmd")
+                    ShellKano.runShellCommand(copyShCmd, context)
 
-                suspend fun clickStage() {
-                    repeat(10) {
-                        ShellKano.runShellCommand(
-                            "${outFileAdb.absolutePath} -s localhost shell input keyevent KEYCODE_BACK",
-                            context
-                        )
-                    }
-                    delay(100)
-                    repeat(5) {
-                        ShellKano.runShellCommand(
-                            "${outFileAdb.absolutePath} -s localhost shell input keyevent KEYCODE_WAKEUP",
-                            context
-                        )
-                        delay(10)
-                        ShellKano.runShellCommand(
-                            "${outFileAdb.absolutePath} -s localhost shell input keyevent 82",
-                            context
-                        )
-                        delay(10)
-                        ShellKano.runShellCommand(
-                            "${outFileAdb.absolutePath} -s localhost shell input tap 0 0",
-                            context
-                        )
-                        delay(10)
-
-                        val result = ShellKano.runShellCommand(
-                            "${outFileAdb.absolutePath} -s localhost shell am start -n com.sprd.engineermode/.EngineerModeActivity",
-                            context
-                        )
-                        if (result != null) {
-                            val clicked = ShellKano.parseUiDumpAndClick(
-                                "DEBUG&LOG",
-                                outFileAdb.absolutePath,
+                    suspend fun clickStage() {
+                        repeat(10) {
+                            ShellKano.runShellCommand(
+                                "${outFileAdb.absolutePath} -s localhost shell input keyevent KEYCODE_BACK",
                                 context
                             )
-                            if (clicked == 0) {
-                                ShellKano.parseUiDumpAndClick(
-                                    "Adb shell",
+                        }
+                        delay(100)
+                        repeat(5) {
+                            ShellKano.runShellCommand(
+                                "${outFileAdb.absolutePath} -s localhost shell input keyevent KEYCODE_WAKEUP",
+                                context
+                            )
+                            delay(10)
+                            ShellKano.runShellCommand(
+                                "${outFileAdb.absolutePath} -s localhost shell input keyevent 82",
+                                context
+                            )
+                            delay(10)
+                            ShellKano.runShellCommand(
+                                "${outFileAdb.absolutePath} -s localhost shell input tap 0 0",
+                                context
+                            )
+                            delay(10)
+
+                            val result = ShellKano.runShellCommand(
+                                "${outFileAdb.absolutePath} -s localhost shell am start -n com.sprd.engineermode/.EngineerModeActivity",
+                                context
+                            )
+                            if (result != null) {
+                                val clicked = ShellKano.parseUiDumpAndClick(
+                                    "DEBUG&LOG",
                                     outFileAdb.absolutePath,
                                     context
                                 )
+                                if (clicked == 0) {
+                                    ShellKano.parseUiDumpAndClick(
+                                        "Adb shell",
+                                        outFileAdb.absolutePath,
+                                        context
+                                    )
+                                }
+                                return
                             }
-                            return
+                            delay(400)
                         }
-                        delay(400)
+                        throw Exception("click_stage 多次尝试失败")
                     }
-                    throw Exception("click_stage 多次尝试失败")
-                }
 
-                suspend fun tryClickStage(maxRetry: Int = 2) {
-                    var retry = 0
-                    while (retry <= maxRetry) {
-                        try {
-                            clickStage()
-                            return
-                        } catch (e: Exception) {
-                            KanoLog.w(
-                                TAG,
-                                "click_stage1 执行失败，尝试第 ${retry + 1} 次，错误：${e.message}"
-                            )
-                            repeat(10) {
-                                ShellKano.runShellCommand("${outFileAdb.absolutePath} -s localhost shell input keyevent KEYCODE_BACK", context)
+                    suspend fun tryClickStage(maxRetry: Int = 2) {
+                        var retry = 0
+                        while (retry <= maxRetry) {
+                            try {
+                                clickStage()
+                                return
+                            } catch (e: Exception) {
+                                KanoLog.w(
+                                    TAG,
+                                    "click_stage1 执行失败，尝试第 ${retry + 1} 次，错误：${e.message}"
+                                )
+                                repeat(10) {
+                                    ShellKano.runShellCommand(
+                                        "${outFileAdb.absolutePath} -s localhost shell input keyevent KEYCODE_BACK",
+                                        context
+                                    )
+                                }
+                                Thread.sleep(1000)
+                                retry++
                             }
-                            Thread.sleep(1000)
-                            retry++
                         }
+                        throw Exception("click_stage 多次重试失败")
                     }
-                    throw Exception("click_stage 多次重试失败")
-                }
 
-                tryClickStage()
+                    tryClickStage()
 
-                try {
-                    val escapedCommand =
-                        "sh /sdcard/ufi_tools_update.sh".replace("\"", "\\\"")
-                    ShellKano.fillInputAndSend(
-                        escapedCommand,
-                        outFileAdb.absolutePath,
-                        context,
-                        "",
-                        listOf("START", "开始"),
-                        needBack = false,
-                        useClipBoard = true
-                    )
-                    writer.write("""{"result":"success"}""")
-                } catch (e: Exception) {
-                    writer.write("""{"error":${JSONObject.quote("执行 shell 命令失败: ${e.message}")}}""")
+                    try {
+                        val escapedCommand =
+                            "sh /sdcard/ufi_tools_update.sh".replace("\"", "\\\"")
+                        ShellKano.fillInputAndSend(
+                            escapedCommand,
+                            outFileAdb.absolutePath,
+                            context,
+                            "",
+                            listOf("START", "开始"),
+                            needBack = false,
+                            useClipBoard = true
+                        )
+                        writer.write("""{"result":"success"}""")
+                    } catch (e: Exception) {
+                        writer.write("""{"error":${JSONObject.quote("执行 shell 命令失败: ${e.message}")}}""")
+                    }
                 }
             } catch (e: Exception) {
                 writer.write("""{"error":${JSONObject.quote("异常: ${e.message}")}}""")

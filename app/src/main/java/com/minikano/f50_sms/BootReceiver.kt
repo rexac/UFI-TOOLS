@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import com.minikano.f50_sms.MainActivity.Companion.isEnableLog
 import com.minikano.f50_sms.utils.ShellKano
 
 class BootReceiver : BroadcastReceiver() {
@@ -24,6 +25,10 @@ class BootReceiver : BroadcastReceiver() {
             //激活网络ADB等
             ShellKano.runADB(context)
             Log.d("kano_ZTE_LOG", "激活网络ADB")
+
+            //检测有无开启调试日志
+            val sf = context.getSharedPreferences("kano_ZTE_store", Context.MODE_PRIVATE)
+            isEnableLog = sf.getString("kano_is_debug", "false").equals("true")
         }
     }
 }

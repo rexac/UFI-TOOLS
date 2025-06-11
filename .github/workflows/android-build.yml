@@ -3,8 +3,6 @@ name: Android Release CI
 on:
   push:
     branches: [ "http-server-version" ]
-    tags:
-      - 'v*'
 
 jobs:
   build-release:
@@ -35,28 +33,3 @@ jobs:
 
       - name: Build with tag version
         run: ./gradlew assembleDebug
-
-      - name: Rename APK
-        run: mv app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/debug/UFI-TOOLS_WEB_debug.apk
-
-      - name: Generate tag info
-        id: tag
-        run: |
-          TAG_NAME=$(date +'%Y.%m.%d_%H.%M')
-          echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
-          echo "TAG_NAME=$TAG_NAME" >> $GITHUB_OUTPUT
-
-      - name: Create Git Tag
-        run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-          git tag $TAG_NAME
-          git push origin $TAG_NAME
-
-      - name: Upload APK to GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ env.TAG_NAME }}
-          files: app/build/outputs/apk/debug/UFI-TOOLS_WEB_debug.apk
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

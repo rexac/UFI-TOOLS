@@ -375,6 +375,23 @@ function main_func() {
         return isReadable && isIncludeInShowList(dicName)
     }
 
+    //rootShell
+    const runShellWithRoot = async (cmd = '') => {
+        try {
+            const res = await fetchWithTimeout(`${KANO_baseURL}/root_shell`, {
+                method: "POST",
+                headers: common_headers,
+                body: JSON.stringify({
+                    command: cmd.trim()
+                })
+            })
+            const { result, error } = await res.json()
+            return error ? { success: false, content: error } : { success: true, content: result }
+        } catch (e) {
+            return { success: false, content: e.message }
+        }
+    }
+
     //初始化所有按钮
     const initRenderMethod = async () => {
         initTheme();
@@ -2336,7 +2353,7 @@ function main_func() {
 
     //手动同步主题
     const syncTheme = () => {
-        initTheme(true);initBG()
+        initTheme(true); initBG()
         createToast('已从云端同步至本地', 'green')
     }
 
@@ -2790,6 +2807,16 @@ function main_func() {
         }
     }
 
+    const socatAlive = async () => {
+        let res = await checkAdvanceFunc()
+        const socat_status = document.querySelector('#socat_status')
+        if (socat_status) {
+            socat_status.innerHTML = res ? '高级功能：🟢 已开启' : '高级功能：🔴 未开启'
+        }
+    }
+
+    let socatTimerFn = null
+
     //初始化高级功能按钮
     let initAdvanceTools = async () => {
         const el = document.querySelector('#ADVANCE')
@@ -2801,10 +2828,18 @@ function main_func() {
         el.style.backgroundColor = ''
         el.onclick = () => {
             showModal('#advanceModal')
+            //循环检测是否开启socat
+            socatAlive()
+            socatTimerFn && socatTimerFn()
+            socatTimerFn = requestInterval(() => socatAlive(), 1000)
         }
     }
     initAdvanceTools()
 
+    const closeAdvanceToolsModal = () => {
+        socatTimerFn && socatTimerFn()
+        closeModal('#advanceModal')
+    }
 
     //执行高级功能更改 1为启用0为禁用
     const handleSambaPath = async (flag = '1') => {
@@ -3276,6 +3311,17 @@ function main_func() {
         }
     }
 
+    //检测是否启用高级功能
+    const checkAdvanceFunc = async () => {
+        const res = await runShellWithRoot('whoami')
+        if (res.content) {
+            if (res.content.includes('root')) {
+                return true
+            }
+        }
+        return false
+    }
+
     //立即更新
     let updateSoftwareInterval = null
     const handleUpdateSoftware = async (url) => {
@@ -3284,9 +3330,19 @@ function main_func() {
         const doUpdateEl = document.querySelector('#doUpdate')
         const closeUpdateBtnEl = document.querySelector('#closeUpdateBtn')
 
-        let adb_status = await adbKeepAlive()
-        if (!adb_status) {
-            return createToast('ADB未初始化，请等待初始化完成', 'red')
+        doUpdateEl.innerHTML = "一键更新"
+
+        // 是否启用高级功能
+        const isEnabledAdvanceFunc = await checkAdvanceFunc()
+
+        if (!isEnabledAdvanceFunc) {
+            let adb_status = await adbKeepAlive()
+            if (!adb_status) {
+                return createToast('ADB未初始化，请等待初始化完成', 'red')
+            }
+        } else {
+            createToast('检测到您已开启高级功能，已切换为极速更新模式')
+            doUpdateEl.innerHTML = "极速更新中"
         }
 
         // 更新时禁用按钮
@@ -3366,6 +3422,7 @@ function main_func() {
         OTATextContent.innerHTML = '正在检查更新...'
         changelogTextContent.innerHTML = ''
         !silent && showModal('#updateSoftwareModal')
+
         try {
             const content = await queryUpdate()
             if (content) {
@@ -3462,6 +3519,7 @@ function main_func() {
         }
     }
     initUpdateSoftware()
+
 
     //adb轮询
     const adbQuery = async () => {
@@ -4002,23 +4060,6 @@ function main_func() {
         }
     }
 
-    //rootShell
-    const runShellWithRoot = async (cmd = '') => {
-        try {
-            const res = await fetchWithTimeout(`${KANO_baseURL}/root_shell`, {
-                method: "POST",
-                headers: common_headers,
-                body: JSON.stringify({
-                    command: cmd.trim()
-                })
-            })
-            const { result, error } = await res.json()
-            return error ? { success: false, content: error } : { success: true, content: result }
-        } catch (e) {
-            return { success: false, content: e.message }
-        }
-    }
-
 
     //开关小核心
     const switchCpuCore = async (flag = true) => {
@@ -4038,6 +4079,7 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
 
     //挂载方法到window
     const methods = {
+        closeAdvanceToolsModal,
         syncTheme,
         runShellWithRoot,
         switchCpuCore,

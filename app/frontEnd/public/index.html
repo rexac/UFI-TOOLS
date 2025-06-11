@@ -973,12 +973,14 @@
                                                 1.优化Samba目录(添加sd卡目录，设备根目录)<br>
                                                 2.添加TTYD，自带RootShell<br>
                                                 3.默认阻止官方后台 TTYD 网络ADB SMB 的ipv6访问，提升安全性<br>
-                                                4.添加定时脚本(开机执行一次，之后30s左右定时执行一次，脚本在内部存储目录下ufi_tools_boot.sh)<br>
+                                                4.添加定时脚本(30s左右定时执行一次，脚本在内部存储目录下ufi_tools_schedule.sh)<br>
+                                                5.添加开机自启脚本(脚本在内部存储目录下ufi_tools_boot.sh)<br>
                                                 <span style="color: pink;">(感谢酷安 @QuTick @AiCherub @atwat 提供的思路)</span>
                                             </i>
                                         </div>
                                     </div>
-                                    <div style="font-size: 12px;margin: 8px 0;" class="adb_status title"></div>
+                                    <div style="font-size: 12px;margin: 8px 0;margin-bottom: 0;" id="socat_status" class="title"></div>
+                                    <div style="font-size: 12px;margin: 8px 0;margin-top: 0;" class="adb_status title"></div>
                                     <div class="advanced-btns">
                                         <button class="btn"
                                             onclick="disableButtonWhenExecuteFunc(event,handleShell)">一键执行shell脚本(非root)<br>(脚本需在/sdcard/one_click_shell.sh)</button>
@@ -999,7 +1001,7 @@
                         </p>
                     </div>
                     <div class="btn" style="text-align: right;margin-top: 6px;">
-                        <button type="button" onclick="closeModal('#advanceModal')">关闭</button>
+                        <button type="button" onclick="closeAdvanceToolsModal()">关闭</button>
                     </div>
                 </div>
             </div>

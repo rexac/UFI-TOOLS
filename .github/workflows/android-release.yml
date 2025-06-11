@@ -22,11 +22,17 @@ jobs:
           fi
           echo "APK_PATH=$APK_FILE" >> $GITHUB_ENV
           echo "apk_path=$APK_FILE" >> $GITHUB_OUTPUT
+      - name: Generate timestamp tag
+        id: tag
+        run: |
+          TAG_NAME="release-$(date +'%Y%m%d-%H%M%S')"
+          echo "Generated tag: $TAG_NAME"
+          echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
 
       - name: Upload APK to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_name }}
+          tag_name: ${{ steps.tag.outputs.tag_name }}
           files: ${{ steps.find_apk.outputs.apk_path }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

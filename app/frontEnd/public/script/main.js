@@ -2852,6 +2852,18 @@ function main_func() {
 
         AT_RESULT.innerHTML = "执行中,请耐心等待..."
 
+        if (flag == '1') {
+            try {
+                const cookie = await login()
+                if (cookie) {
+                    await (await postData(cookie, {
+                        goformId: 'SAMBA_SETTING',
+                        samba_switch: '1'
+                    })).json()
+                }
+                await initSMBStatus()
+            } catch { }
+        }
         try {
             const res = await (await fetch(`${KANO_baseURL}/smbPath?enable=${flag}`, { headers: common_headers })).json()
             if (res) {

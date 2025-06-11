@@ -22,6 +22,8 @@ class WebService : Service() {
     private val SERVER_INTENT = "com.minikano.f50_sms.SERVER_STATUS_CHANGED"
     private val UI_INTENT = "com.minikano.f50_sms.UI_STATUS_CHANGED"
     private var wakeLock: PowerManager.WakeLock? = null
+    private var wakeLock2: PowerManager.WakeLock? = null
+    private var wakeLock3: PowerManager.WakeLock? = null
 
     @Volatile
     private var allowAutoStart = true
@@ -54,8 +56,23 @@ class WebService : Service() {
             PowerManager.SCREEN_DIM_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP,
             "ZTE-UFI-TOOLS::WakeLock"
         )
-        wakeLock?.acquire() // 保持
+        wakeLock?.acquire()
         Log.d("kano_ZTE_LOG", "已开启唤醒锁，防止屏幕熄灭!")
+
+        wakeLock2 = pm.newWakeLock(
+            PowerManager.FULL_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP,
+            "ZTE-UFI-TOOLS::FULL_WAKE_LOCK"
+        )
+        wakeLock2?.acquire()
+        Log.d("kano_ZTE_LOG", "已开启更强的唤醒锁，保持屏幕常亮并唤醒!")
+
+        wakeLock3 = pm.newWakeLock(
+            PowerManager.SCREEN_BRIGHT_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP,
+            "ZTE-UFI-TOOLS::BrightWakeLock"
+        )
+        wakeLock3?.acquire()
+        Log.d("kano_ZTE_LOG", "已开启屏幕亮度唤醒锁，保持屏幕常亮并唤醒!")
+
 
         // 注册广播接收器
         registerReceiver(statusReceiver, IntentFilter(UI_INTENT), Context.RECEIVER_EXPORTED)

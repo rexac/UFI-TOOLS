@@ -955,6 +955,7 @@ li.dragging {
 }
 
 .statusCard {
+    box-sizing: border-box;
     margin-bottom: 6px;
     background-color: var(--dark-card-bg);
     border-radius: 10px;

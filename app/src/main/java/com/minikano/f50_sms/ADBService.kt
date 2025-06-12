@@ -19,6 +19,7 @@ import com.minikano.f50_sms.utils.ShellKano.Companion.executeShellFromAssetsSubf
 import com.minikano.f50_sms.utils.SmbThrottledRunner
 import com.minikano.f50_sms.utils.SmsPoll
 import java.util.concurrent.Executors
+import kotlin.concurrent.thread
 
 class ADBService : Service() {
     private lateinit var runnable: Runnable
@@ -47,6 +48,22 @@ class ADBService : Service() {
             val executor = Executors.newFixedThreadPool(2)
             executor.execute(runnableSMS)
             executor.execute(runnableSMB)
+        }
+
+        thread {
+            //启动iperf3
+            var result =
+                executeShellFromAssetsSubfolderWithArgs(
+                    applicationContext,
+                    "shell/iperf3",
+                    "-s",
+                    "-D",
+                )
+            if (result != null) {
+                KanoLog.d("kano_ZTE_LOG", "iperf3已启动")
+            } else {
+                KanoLog.d("kano_ZTE_LOG", "iperf3启动失败")
+            }
         }
 
         return START_STICKY

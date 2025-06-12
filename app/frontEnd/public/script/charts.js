@@ -44,7 +44,6 @@ const chartUpdater = (prop, value) => {
         case 'cpuUsageInfo':
             updateCpuCoreChart && updateCpuCoreChart(value)
             break
-
         case 'memInfo':
             if (value) {
                 const memInfo = document.querySelector('#memInfo')
@@ -54,6 +53,20 @@ const chartUpdater = (prop, value) => {
                 <div>全部SWAP：${formatBytes(value['swap_total_kb'] * 1024)}</div>
                 <div>已用SWAP：${formatBytes(value['swap_used_kb'] * 1024)}(${Math.round(value['swap_usage_percent'])}%)</div>
                 <div>可用SWAP：${formatBytes(value['swap_free_kb'] * 1024)}</div>`
+            }
+            break
+        case 'cpu_temp_list':
+            if (value) {
+                value?.sort((a, b) => {
+                    const charA = a?.type?.charAt(0) || '';
+                    const charB = b?.type?.charAt(0) || '';
+                    return charA.localeCompare(charB);
+                });
+                const html = value?.map(item => {
+                    return `<div>${item?.type?.replace('-thmzone','')}: ${(Number(item?.temp)/1000).toFixed(2)} ℃</div>`
+                })
+                const cpuTempInfo = document.querySelector('#cpuTempInfo')
+                cpuTempInfo.innerHTML = html.join("")
             }
             break
     }

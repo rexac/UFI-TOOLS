@@ -111,7 +111,8 @@
                                     onclick="showModal('#memInfoModal')">
                                     <canvas style="margin-left: -4px;" id="kanoMemChart"></canvas>
                                 </div>
-                                <div class="chart statusCard" style="max-width: 200px;height: 60px;">
+                                <div class="chart statusCard" onclick="showModal('#cpuTempInfoModal')"
+                                    style="max-width: 200px;height: 60px;">
                                     <canvas style="margin-left: -4px;" id="kanoTempChart"></canvas>
                                 </div>
                                 <div class="chart statusCard net-card" style="width: 200px;height: 60px;">
@@ -428,6 +429,21 @@
                         <button onclick="sendSMS()" style="margin-right: 6px;height: 100%;">发送</button>
                         <button onclick="closeModal('#smsList')" style="height: 100%;">关闭</button>
                     </div>
+                </div>
+            </div>
+            <!-- cpu温度信息模态框 -->
+            <div class="modal" id="cpuTempInfoModal" style="width: 77%;max-width: 300px;display: none">
+                <div class="title">温度信息</div>
+                <div class="content" style="max-height: 350px;padding: 15px 0px 0 0px;">
+                    <div id="cpuTempInfo" style="font-size: 12px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    justify-content: space-between;">
+                    </div>
+                </div>
+                <div class="btn" style="text-align: right;">
+                    <button onclick="closeModal('#cpuTempInfoModal')">关闭</button>
                 </div>
             </div>
             <!-- 内存信息模态框 -->
@@ -979,8 +995,10 @@
                                             </i>
                                         </div>
                                     </div>
-                                    <div style="font-size: 12px;margin: 8px 0;margin-bottom: 0;" id="socat_status" class="title"></div>
-                                    <div style="font-size: 12px;margin: 8px 0;margin-top: 0;" class="adb_status title"></div>
+                                    <div style="font-size: 12px;margin: 8px 0;margin-bottom: 0;" id="socat_status"
+                                        class="title"></div>
+                                    <div style="font-size: 12px;margin: 8px 0;margin-top: 0;" class="adb_status title">
+                                    </div>
                                     <div class="advanced-btns">
                                         <button class="btn"
                                             onclick="disableButtonWhenExecuteFunc(event,handleShell)">一键执行shell脚本(非root)<br>(脚本需在/sdcard/one_click_shell.sh)</button>

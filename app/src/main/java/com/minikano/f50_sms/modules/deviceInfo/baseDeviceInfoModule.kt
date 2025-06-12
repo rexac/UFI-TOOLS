@@ -3,6 +3,7 @@ package com.minikano.f50_sms.modules.deviceInfo
 import android.content.Context
 import android.os.Build
 import android.os.StatFs
+import android.util.Log
 import com.minikano.f50_sms.modules.BASE_TAG
 import com.minikano.f50_sms.modules.PREFS_NAME
 import com.minikano.f50_sms.utils.KanoLog
@@ -11,6 +12,7 @@ import com.minikano.f50_sms.utils.ShellKano
 import com.minikano.f50_sms.utils.calculateCpuUsage
 import com.minikano.f50_sms.utils.getCpuFreqJson
 import com.minikano.f50_sms.utils.getMemoryUsage
+import com.minikano.f50_sms.utils.readThermalZones
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
@@ -50,13 +52,16 @@ fun Route.baseDeviceInfoModule(context: Context) {
 
         //cpu温度
         var cpuTempRes: String? = null
+        var cpuTempMax:String? = null
         try {
-            val temp = ShellKano.executeShellFromAssetsSubfolder(context, "shell/temp.sh")
-            val temp1 =
-                ShellKano.runShellCommand("cat /sys/class/thermal/thermal_zone1/temp")
+//            val temp = ShellKano.executeShellFromAssetsSubfolder(context, "shell/temp.sh")
+//            val temp1 =
+//                ShellKano.runShellCommand("cat /sys/class/thermal/thermal_zone1/temp")
+            val (maxTemp,temp) = readThermalZones()
+            cpuTempMax = maxTemp.toString()
             KanoLog.d(TAG, "获取CPU温度成功: $temp")
-            cpuTempRes = temp ?: temp1
-            cpuTempRes = cpuTempRes?.replace("\n", "")
+            cpuTempRes = temp
+            cpuTempRes = cpuTempRes.replace("\n", "")
 
         } catch (e: Exception) {
             KanoLog.d(TAG, "获取CPU温度出错： ${e.message}")
@@ -189,7 +194,8 @@ fun Route.baseDeviceInfoModule(context: Context) {
                 "external_total_storage": $externalTotalRes,
                 "external_used_storage": $externalUsedRes,
                 "external_available_storage": $externalAvailableRes,
-                "cpu_temp":$cpuTempRes,
+                "cpu_temp_list":$cpuTempRes,
+                "cpu_temp":$cpuTempMax,
                 "client_ip":"$ipRes",
                 "cpu_usage":$cpuUsageRes,
                 "mem_usage":$memUsageRes,

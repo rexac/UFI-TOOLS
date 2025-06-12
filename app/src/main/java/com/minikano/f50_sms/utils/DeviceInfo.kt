@@ -3,6 +3,7 @@ package com.minikano.f50_sms.utils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
 
@@ -12,6 +13,7 @@ import java.io.File
 
 // 数据类
 data class CpuStat(val cpu: String, val total: Long, val idle: Long)
+data class ThermalZone(val type: String, val temp: Int)
 data class MemoryInfo(
     val total: Long,
     val available: Long,
@@ -25,6 +27,15 @@ data class MemoryInfo(
 
 fun buildJsonObject(block: JSONObject.() -> Unit): JSONObject {
     return JSONObject().apply(block)
+}
+
+private fun buildThermalJson(zones: List<ThermalZone>): String {
+    if (zones.isEmpty()) return "[]"
+    val jsonParts = Array(zones.size) { i ->
+        val zone = zones[i]
+        """{"type":"${zone.type}","temp":${zone.temp}}"""
+    }
+    return "[${jsonParts.joinToString(",")}]"
 }
 
 //获取json格式的cpu频率
@@ -147,3 +158,31 @@ private fun parseMemValue(line: String): Long {
         .getOrNull(1)
         ?.toLongOrNull() ?: 0L
 }
+
+//CPU温度
+suspend fun readThermalZones(): Pair<Int, String> = withContext(Dispatchers.IO) {
+    val thermalDir = File("/sys/class/thermal")
+    val zones = mutableListOf<ThermalZone>()
+
+    thermalDir.listFiles()?.filter { it.name.startsWith("thermal_zone") }?.forEach { zoneDir ->
+        val typeFile = File(zoneDir, "type")
+        val tempFile = File(zoneDir, "temp")
+
+        if (typeFile.exists() && tempFile.exists()) {
+            try {
+                val sensorType = typeFile.readText().trim()
+                val tempValue = tempFile.readText().trim().toIntOrNull() ?: -1
+                if (tempValue >= 0 && sensorType.isNotEmpty()) {
+                    zones.add(ThermalZone(sensorType, tempValue))
+                }
+            } catch (_: Exception) { }
+        }
+    }
+
+    val sortedZones = zones.sortedByDescending { it.temp }
+    val maxTemp = sortedZones.firstOrNull()?.temp ?: -1
+    val json = buildThermalJson(zones)
+
+    return@withContext Pair(maxTemp, json)
+}
+

@@ -1111,7 +1111,14 @@ function main_func() {
             cmd: 'queryWiFiModuleSwitch,queryAccessPointInfo'
         }))
 
+        const WIFIManagementContent = document.querySelector('#wifiInfo')
+
+        try {
+            await initWIFIManagementForm()
+        } catch { }
+
         if (WiFiModuleSwitch == "1") {
+            WIFIManagementContent && (WIFIManagementContent.style.display = '')
             if (ResponseList?.length) {
                 ResponseList.forEach(item => {
                     if (item.AccessPointSwitchStatus == '1') {
@@ -1120,6 +1127,7 @@ function main_func() {
                 })
             }
         } else {
+            WIFIManagementContent && (WIFIManagementContent.style.display = 'none')
             selectEl.value = 0
         }
     }
@@ -1878,9 +1886,11 @@ function main_func() {
             }))
 
             const WIFIManagementForm = document.querySelector('#WIFIManagementForm')
+            const WIFIManagementContent = document.querySelector('#wifiInfo')
             if (!WIFIManagementForm) return
 
             if (WiFiModuleSwitch == "1" && ResponseList?.length) {
+                WIFIManagementContent && (WIFIManagementContent.style.display = '')
                 for (let index in ResponseList) {
                     if (ResponseList[index].AccessPointSwitchStatus == '1') {
                         let item = ResponseList[index]
@@ -1924,6 +1934,8 @@ function main_func() {
 
                     }
                 }
+            } else {
+                WIFIManagementContent && (WIFIManagementContent.style.display = 'none')
             }
         }
         catch (e) {
@@ -1938,8 +1950,8 @@ function main_func() {
             out()
             return null
         }
-        await initWIFIManagementForm()
         showModal("#WIFIManagementModal")
+        await initWIFIManagementForm()
     }
 
     let handleWIFIManagementFormSubmit = async (e) => {

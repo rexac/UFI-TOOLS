@@ -18,8 +18,7 @@
 <body id="BG">
     <div class="bg" id="BG_OVERLAY">
         <div class="container">
-            <div class="title" onclick="enableTTYD()"
-                style="align-self: start;justify-self: start;margin-bottom: 10px;;margin-top: 20px">
+            <div class="title main-title" onclick="enableTTYD()">
                 <strong id="MAIN_TITLE">UFI-TOOLS</strong>
                 <strong id="MODEL" style="font-size: 14px;"></strong>
             </div>
@@ -28,8 +27,7 @@
                 style="align-self: start;justify-self: start;margin: 6px;margin-left: 0;margin-top: 0;">
                 <!-- <button id="CLPS">功能列表</button> -->
             </div>
-            <div class="actions collapse collapse_menu" data-name="close"
-                style="flex-shrink: 0;text-align: start;align-self: flex-start">
+            <div class="functions-container actions collapse collapse_menu" data-name="close">
                 <div style="margin: auto;">
                     <div class="collapse_box actions-buttons">
                         <button id="CLEAR" class="btn">登录/登出</button>
@@ -83,7 +81,7 @@
                 </div>
             </div>
             <!-- 设备监控 -->
-            <div style="flex-shrink:0;width: 100%;margin-top: 10px;">
+            <div class="devices-mon">
                 <div class="title" style="margin: 6px 0;">
                     <strong>设备监控</strong>
                     <div style="display: inline-block;" id="collapse_device_mon_btn"></div>
@@ -118,14 +116,13 @@
                                 <div class="chart statusCard net-card" style="width: 200px;height: 60px;">
                                     <canvas style="margin-left: -14px;" id="kanoNetChart"></canvas>
                                 </div>
-
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
             <!-- 状态 -->
-            <div style="flex-shrink:0;width: 100%;margin-top: 10px;">
+            <div class="status-container">
                 <div class="title" style="margin: 6px 0;">
                     <strong>基本状态</strong>
                     <div style="display: inline-block;" id="collapse_status_btn"></div>
@@ -185,7 +182,7 @@
                 </div>
             </div>
             <!-- 锁频锁基站 -->
-            <div style="width: 100%;flex-shrink: 0;margin-bottom: 40px;margin-top: 10px;">
+            <div class="freq-lock-container">
                 <div class="title" style="margin: 6px 0 ;">
                     <strong>🔒 锁定频段</strong>
                     <div style="display: inline-block" id="collapse_lkband_btn"></div>
@@ -413,8 +410,7 @@
             <!-- 短信模态框 -->
             <div class="modal h100" id="smsList" style="display: none;">
                 <div class="title" style="margin-bottom: 6px;">短信列表</div>
-                <div class="action"
-                    style="margin-top: 10px;background-color: #00ffdd17;box-shadow: 0 0 10px 0 ##00ffdd36;">
+                <div class="action" style="margin-top: 10px;background-color: #00ffdd17;">
                     <span>收件人：</span>
                     <input id="PhoneInput" type="number" style="flex: 1;margin-right: 6px"></input>
                 </div>
@@ -422,7 +418,7 @@
                     <ul id="sms-list">
                     </ul>
                 </div>
-                <div class="action" style="background-color: #00ffdd17;box-shadow: 0 0 10px 0 ##00ffdd36;">
+                <div class="action" style="background-color: #00ffdd17;">
                     <input id="SMSInput" type="text" style="flex: 1;margin-right: 6px"></input>
                     <div class="btn"
                         style="height: 100%;min-width: 103px;display: flex;justify-content: center;align-items: center;">
@@ -439,7 +435,9 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 8px;
-    justify-content: space-between;">
+    justify-content: space-between;
+    white-space: nowrap;
+    ">
                     </div>
                 </div>
                 <div class="btn" style="text-align: right;">
@@ -637,70 +635,74 @@
                                 </select>
                                 <span style="display: inline; font-size: 10px; text-align: right;">此选项即时更改无需确认。</span>
                             </div>
-                            <div class="dash-border-round">
-                                <div class="item">
-                                    <label style="
+                            <div id="wifiInfo">
+                                <div class="dash-border-round">
+                                    <div class="item">
+                                        <label style="
                                 display: flex;
                                 align-items: center;
                             "><span class="label-name">SSID：</span><input style="flex: 1;width: 100%;" name="SSID"
-                                            value="1" type="text" placeholder="请输入SSID"></label>
+                                                value="" type="text" placeholder="请输入SSID"></label>
+                                    </div>
+                                    <div class="item">
+                                        <label style="display: flex;align-items: center;"><span
+                                                class="label-name">广播SSID：</span><input checked type="checkbox"
+                                                name="ApBroadcastDisabled"></label>
+                                    </div>
                                 </div>
-                                <div class="item">
-                                    <label style="display: flex;align-items: center;"><span
-                                            class="label-name">广播SSID：</span><input checked type="checkbox"
-                                            name="ApBroadcastDisabled"></label>
-                                </div>
-                            </div>
-                            <div class="dash-border-round">
-                                <div class="item">
-                                    <label style="
+                                <div class="dash-border-round">
+                                    <div class="item">
+                                        <label style="
                                 display: flex;
                                 align-items: center;
                             ">
-                                        <span class="label-name">安全模式：</span>
-                                        <select class="select" id="WIFI_ENC_MODE"
-                                            onchange="handleWifiEncodeChange(event)"
-                                            style="width: 100%;flex: 1;padding: 4px; margin-left: 6px;text-align: left;"
-                                            value="OPEN" name="AuthMode">
-                                            <option data-value="OPEN" value="OPEN">OPEN</option>
-                                            <option data-value="WPA2PSK" value="WPA2PSK">WPA2(AES)-PSK</option>
-                                            <option data-value="WPA3PSK" value="WPA3PSK">WPA3-PSK</option>
-                                            <option data-value="WPA2PSKWPA3PSK" value="WPA2PSKWPA3PSK">WPA2-PSK/WPA3-PSK
-                                            </option>
-                                        </select>
-                                    </label>
+                                            <span class="label-name">安全模式：</span>
+                                            <select class="select" id="WIFI_ENC_MODE"
+                                                onchange="handleWifiEncodeChange(event)"
+                                                style="width: 100%;flex: 1;padding: 4px; margin-left: 6px;text-align: left;"
+                                                value="OPEN" name="AuthMode">
+                                                <option data-value="OPEN" value="OPEN">OPEN</option>
+                                                <option data-value="WPA2PSK" value="WPA2PSK">WPA2(AES)-PSK</option>
+                                                <option data-value="WPA3PSK" value="WPA3PSK">WPA3-PSK</option>
+                                                <option data-value="WPA2PSKWPA3PSK" value="WPA2PSKWPA3PSK">
+                                                    WPA2-PSK/WPA3-PSK
+                                                </option>
+                                            </select>
+                                        </label>
+                                    </div>
                                 </div>
-                            </div>
-                            <div id="WIFI_FORM_SHOWABLE">
-                                <div class="dash-border-round">
-                                    <div class="item">
-                                        <label style="
+                                <div id="WIFI_FORM_SHOWABLE">
+                                    <div class="dash-border-round">
+                                        <div class="item">
+                                            <label style="
                                 display: flex;
                                 align-items: center;
                             "><span class="label-name">密码：</span><input id="WIFI_PASSWORD" style="flex: 1;width: 100%;"
-                                                name="Password" value="" type="password" placeholder="密码最短为8位"></label>
+                                                    name="Password" value="" type="password"
+                                                    placeholder="密码最短为8位"></label>
+                                        </div>
+                                        <div class="item">
+                                            <label onclick="handleShowPassword(event)"
+                                                style="display: flex;align-items: center;"><span
+                                                    class="label-name">显示密码：</span><input type="checkbox"></label>
+                                        </div>
                                     </div>
-                                    <div class="item">
-                                        <label onclick="handleShowPassword(event)"
-                                            style="display: flex;align-items: center;"><span
-                                                class="label-name">显示密码：</span><input type="checkbox"></label>
-                                    </div>
-                                </div>
-                                <div class="dash-border-round">
-                                    <div class="item">
-                                        <label style="
+                                    <div class="dash-border-round">
+                                        <div class="item">
+                                            <label style="
                                 display: flex;
                                 align-items: center;
                             "><span class="label-name">最大接入：</span><input style="flex: 1;width: 100%;"
-                                                name="ApMaxStationNumber" value="10" type="number" min="1" maxlength="8"
-                                                placeholder="客户端最大接入"></label>
+                                                    name="ApMaxStationNumber" value="10" type="number" min="1"
+                                                    maxlength="8" placeholder="客户端最大接入"></label>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="dash-border-round" style="text-align: center;">
-                                <div>二维码</div>
-                                <div style="text-align: center">
-                                    <img id="QRCodeImg" style="border-radius: 20px;" src="" alt="">
+                                <div class="dash-border-round" style="text-align: center;">
+                                    <div>二维码</div>
+                                    <div style="text-align: center">
+                                        <img id="QRCodeImg" style="border-radius: 20px;" src="" alt="">
+                                    </div>
                                 </div>
                             </div>
                         </div>

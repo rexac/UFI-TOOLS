@@ -26,6 +26,7 @@ class ADBService : Service() {
     private lateinit var handlerThread: HandlerThread
     private lateinit var handler: Handler
     private val adbExecutor = Executors.newSingleThreadExecutor()
+    private val iperfExecutor = Executors.newSingleThreadExecutor()
 
 
     companion object {
@@ -45,25 +46,10 @@ class ADBService : Service() {
 
             // 等文件拷贝完成后再继续
             startAdbKeepAliveTask(applicationContext)
+            startIperfTask(applicationContext)
             val executor = Executors.newFixedThreadPool(2)
             executor.execute(runnableSMS)
             executor.execute(runnableSMB)
-        }
-
-        thread {
-            //启动iperf3
-            var result =
-                executeShellFromAssetsSubfolderWithArgs(
-                    applicationContext,
-                    "shell/iperf3",
-                    "-s",
-                    "-D",
-                )
-            if (result != null) {
-                KanoLog.d("kano_ZTE_LOG", "iperf3已启动")
-            } else {
-                KanoLog.d("kano_ZTE_LOG", "iperf3启动失败")
-            }
         }
 
         return START_STICKY
@@ -111,6 +97,28 @@ class ADBService : Service() {
                 KanoLog.e("kano_ZTE_LOG", "激活SMB内置脚本错误")
             }
             handler.postDelayed(this, 15_000)
+        }
+    }
+
+    private fun startIperfTask(context: Context){
+        iperfExecutor.execute {
+            try{
+            KanoLog.d("kano_ZTE_LOG", "iperf3启动中...")
+            //启动iperf3
+            var result =
+                executeShellFromAssetsSubfolderWithArgs(
+                    applicationContext,
+                    "shell/iperf3",
+                    "-s",
+                    "-D",
+                )
+            if (result != null) {
+                KanoLog.d("kano_ZTE_LOG", "iperf3已启动")
+            } else {
+                KanoLog.e("kano_ZTE_LOG", "iperf3启动失败")
+            }}catch (e:Exception){
+                KanoLog.e("kano_ZTE_LOG", "iperf3命令执行出错",e)
+            }
         }
     }
 

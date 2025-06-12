@@ -2,6 +2,8 @@ package com.minikano.f50_sms.utils
 
 import android.content.Context
 import android.util.Log
+import com.minikano.f50_sms.modules.TAG
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.w3c.dom.Document
 import org.w3c.dom.NodeList
@@ -10,6 +12,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStreamReader
+import java.net.InetAddress
 import java.util.concurrent.TimeUnit
 import javax.xml.parsers.DocumentBuilderFactory
 
@@ -537,6 +540,7 @@ class ShellKano {
             return null
         }
 
+
         fun runADB(context: Context) {
             //网络adb
             //adb setprop service.adb.tcp.port 5555
@@ -576,8 +580,43 @@ class ShellKano {
                                 ADMIN_PWD
                             }"
                         )
+
+                        suspend fun waitUntilReachable(ip: String, timeoutSeconds: Int = 30): Boolean {
+                            val intervalMillis = 300L
+                            val maxAttempts = timeoutSeconds * 1000 / intervalMillis
+                            val req = KanoGoformRequest("http://$ip:8080")
+
+                            repeat(maxAttempts.toInt()) {
+                                try {
+                                    val result = req.getData(
+                                        mapOf(
+                                            "multi_data" to "1",
+                                            "cmd" to "loginfo"
+                                        )
+                                    )
+                                    KanoLog.d("kano_ZTE_LOG", "尝试连接：$result")
+                                    if (result != null) {
+                                        KanoLog.d("kano_ZTE_LOG", "http://$ip:8080 可访问")
+                                        return true
+                                    }
+                                } catch (e: Exception) {
+                                    KanoLog.d("kano_ZTE_LOG", "连接异常: ${e.message}")
+                                }
+                                delay(intervalMillis)
+                            }
+
+                            KanoLog.e("kano_ZTE_LOG", "http://$ip:8080 在 $timeoutSeconds 秒内不可访问")
+                            return false
+                        }
+
                         try {
                             runBlocking {
+                                val reachable = waitUntilReachable(ADB_IP, 30)
+                                if (!reachable) {
+                                    KanoLog.e("kano_ZTE_LOG", "官方WEB服务不可达，终止执行ADB自启操作")
+                                    return@runBlocking
+                                }
+
                                 val req = KanoGoformRequest("http://$ADB_IP:8080")
                                 val cookie = req.login(ADMIN_PWD)
                                 if (cookie != null) {
@@ -587,26 +626,24 @@ class ShellKano {
                                             "usb_port_switch" to "0"
                                         )
                                     )
-                                    Log.d("kano_ZTE_LOG", "关闭ADBD结果: $result1")
+                                    KanoLog.d("kano_ZTE_LOG", "关闭ADBD结果: $result1")
+                                    delay(500)
                                     val result2 = req.postData(
                                         cookie, mapOf(
                                             "goformId" to "USB_PORT_SETTING",
                                             "usb_port_switch" to "1"
                                         )
                                     )
-                                    Log.d("kano_ZTE_LOG", "开启ADBD结果: $result2")
+                                    KanoLog.d("kano_ZTE_LOG", "开启ADBD结果: $result2")
                                     req.logout(cookie)
-                                    if (result1?.getString("result") == "success" && result2?.getString(
-                                            "result"
-                                        ) == "success"
-                                    ) {
-                                        Log.d("kano_ZTE_LOG", "ADB_WIFI自启动执行成功")
+                                    if (result1?.getString("result") == "success" && result2?.getString("result") == "success") {
+                                        KanoLog.d("kano_ZTE_LOG", "ADB_WIFI自启动执行成功")
                                     }
                                 }
-
                             }
+
                         } catch (e: Exception) {
-                            Log.e("kano_ZTE_LOG", "ADB_WIFI执行错误:${e.message}")
+                            KanoLog.e("kano_ZTE_LOG", "ADB_WIFI执行错误: ${e.message}")
                         }
                     } else {
                         Log.d("kano_ZTE_LOG", "不需要自启动ADB_WIFI")

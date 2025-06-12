@@ -10,7 +10,7 @@
     --dark-btn-color: #87ceeb61;
     --dark-title-color: skyblue;
     --dark-btn-disabled-color: #80808073;
-    --blur-rate:4px
+    --blur-rate: 4px
 }
 
 @keyframes spin {
@@ -1002,7 +1002,7 @@ li.dragging {
     width: 100%;
     box-sizing: border-box;
     text-align: center;
-    margin-top: 12px;
+    margin-top: 10px;
     justify-items: center;
 }
 
@@ -1053,8 +1053,40 @@ li.dragging {
     padding: 5px;
 }
 
-input[type="range"]{
+input[type="range"] {
     background-color: transparent !important;
-    backdrop-filter:none !important;
+    backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
+}
+
+.devices-mon {
+    flex-shrink: 0;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.status-container {
+    flex-shrink: 0;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.freq-lock-container {
+    width: 100%;
+    flex-shrink: 0;
+    margin-bottom: 40px;
+    margin-top: 10px;
+}
+
+.functions-container {
+    flex-shrink: 0;
+    text-align: start;
+    align-self: flex-start;
+}
+
+.main-title {
+    align-self: start;
+    justify-self: start;
+    margin-bottom: 10px;
+    margin-top: 20px;
 }

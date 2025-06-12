@@ -2,6 +2,7 @@ package com.minikano.f50_sms.utils
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 import okhttp3.*
 import okhttp3.Headers.Companion.toHeaders
 import org.json.JSONObject
@@ -111,29 +112,41 @@ class KanoGoformRequest(private val baseUrl: String) {
         }
     }
 
-    suspend fun getData(params: Map<String, String>, cookie: String? = null): JSONObject? = withContext(Dispatchers.IO) {
-        val allParams = params.toMutableMap().apply {
-            put("isTest", "false")
-            put("_", System.currentTimeMillis().toString())
-        }
+    suspend fun getData(
+        params: Map<String, String>,
+        cookie: String? = null,
+        timeoutMillis: Long = 2000 // 默认超时 2 秒
+    ): JSONObject? = withContext(Dispatchers.IO) {
+        try {
+            withTimeout(timeoutMillis) {
+                val allParams = params.toMutableMap().apply {
+                    put("isTest", "false")
+                    put("_", System.currentTimeMillis().toString())
+                }
 
-        val query = allParams.map { "${it.key}=${it.value}" }.joinToString("&")
-        val url = "$baseUrl/goform/goform_get_cmd_process?$query"
+                val query = allParams.map { "${it.key}=${it.value}" }.joinToString("&")
+                val url = "$baseUrl/goform/goform_get_cmd_process?$query"
 
-        val headers = if (cookie != null)
-            (commonHeaders + mapOf("Cookie" to cookie)).toHeaders()
-        else
-            commonHeaders.toHeaders()
+                val headers = if (cookie != null)
+                    (commonHeaders + mapOf("Cookie" to cookie)).toHeaders()
+                else
+                    commonHeaders.toHeaders()
 
-        val req = Request.Builder()
-            .url(url)
-            .headers(headers)
-            .get()
-            .build()
+                val req = Request.Builder()
+                    .url(url)
+                    .headers(headers)
+                    .get()
+                    .build()
 
-        client.newCall(req).execute().use { res ->
-            if (!res.isSuccessful) return@withContext null
-            return@withContext JSONObject(res.body?.string() ?: return@withContext null)
+                client.newCall(req).execute().use { res ->
+                    if (!res.isSuccessful) return@withTimeout null
+                    return@withTimeout JSONObject(res.body?.string() ?: return@withTimeout null)
+                }
+            }
+        } catch (e: Exception) {
+            // 打印异常可以帮你 debug
+            KanoLog.e("kano_ZTE_LOG", "getData 异常：${e.message}")
+            return@withContext null
         }
     }
 

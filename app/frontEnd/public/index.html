@@ -31,6 +31,7 @@
                 <div style="margin: auto;">
                     <div class="collapse_box actions-buttons">
                         <button id="CLEAR" class="btn">登录/登出</button>
+                        <button class="btn REFRESH_BTN">停止刷新</button>
                         <button id="CHANGEPWD" class="btn" onclick="createToast('请登录','red')">更改密码</button>
                         <button id="REBOOT" class="btn" onclick="createToast('请登录','red')">重启设备</button>
                         <button id="SCHEDULE_REBOOT" class="btn" onclick="createToast('请登录','red')">定时重启</button>
@@ -132,7 +133,7 @@
                         <div style="overflow: auto;position: relative">
                             <div class="title" style="margin-bottom: 6px;">
                                 <button id="DICTIONARY" class="btn" style="padding: 4px;margin-left: 0;">管理字段</button>
-                                <button id="REFRESH" class="btn" style="padding: 4px;margin-left: 10px;">停止刷新</button>
+                                <button class="btn REFRESH_BTN" style="padding: 4px;margin-left: 10px;">停止刷新</button>
                                 <select class="select" id="refreshRateSelect" onchange="changeRefreshRate(event)"
                                     style="padding: 3px;margin-left: 10px;">
                                     <option value="5000">5秒</option>
@@ -334,7 +335,10 @@
 
                             </tbody>
                         </table>
-                        <div class="title" style="margin: 10px 0 ;"><strong>基站列表</strong></div>
+                        <div class="title" style="margin: 10px 0 ;">
+                            <strong>基站列表</strong>
+                            <button class="btn REFRESH_BTN" style="padding: 4px;margin-left: 10px;">停止刷新</button>
+                        </div>
                         <div class="title" id="CURRENT_CELL" style="display: block;margin: 10px 0;font-size:14px">
                             <strong>当前基站信息：</strong>
                         </div>

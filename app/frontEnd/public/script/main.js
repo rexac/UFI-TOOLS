@@ -1649,17 +1649,23 @@ function main_func() {
     }
 
     //暂停开始刷新
-    document.querySelector('#REFRESH').onclick = (e) => {
-        if (e.target.innerHTML == '开始刷新') {
-            e.target.innerHTML = '停止刷新'
-            createToast('已开始刷新', 'green')
-            startRefresh()
-        } else {
-            e.target.innerHTML = '开始刷新'
-            createToast('已停止刷新', 'green')
-            stopRefresh()
+    Array.from(document.querySelectorAll('.REFRESH_BTN'))?.forEach(el => {
+        el.onclick = (e) => {
+            if (e.target.innerHTML == '开始刷新') {
+                Array.from(document.querySelectorAll('.REFRESH_BTN')).forEach(ee => {
+                    ee.innerHTML = '停止刷新'
+                })
+                createToast('已开始刷新', 'green')
+                startRefresh()
+            } else {
+                Array.from(document.querySelectorAll('.REFRESH_BTN')).forEach(ee => {
+                    ee.innerHTML = '开始刷新'
+                })
+                createToast('已停止刷新', 'green')
+                stopRefresh()
+            }
         }
-    }
+    })
 
     //流量管理逻辑
     document.querySelector("#DataManagement").onclick = async () => {
@@ -3353,6 +3359,7 @@ function main_func() {
         if (!url || url.trim() == "") return
         const doUpdateEl = document.querySelector('#doUpdate')
         const closeUpdateBtnEl = document.querySelector('#closeUpdateBtn')
+        const updateSoftwareModal = document.querySelector('#updateSoftwareModal')
 
         doUpdateEl.innerHTML = "一键更新"
 
@@ -3374,7 +3381,7 @@ function main_func() {
         doUpdateEl && (doUpdateEl.style.backgroundColor = '#80808073')
         closeUpdateBtnEl && (closeUpdateBtnEl.onclick = null)
         closeUpdateBtnEl && (closeUpdateBtnEl.style.backgroundColor = '#80808073')
-
+        updateSoftwareModal && (updateSoftwareModal.onclick = null)
         try {
             // const changelogTextContent = document.querySelector('#ChangelogTextContent')
             // changelogTextContent.innerHTML = ''
@@ -4083,7 +4090,6 @@ function main_func() {
             localStorage.setItem("refreshRate", value)
         }
     }
-
 
     //开关小核心
     const switchCpuCore = async (flag = true) => {

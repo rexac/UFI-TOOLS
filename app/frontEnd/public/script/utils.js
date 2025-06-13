@@ -528,3 +528,20 @@ const getRefteshRate = (cb) => {
     cb && cb(rate_num)
     return rate_num
 }
+
+// 特定模态框模糊区域点击关闭
+Array.from(document.querySelectorAll('.mask'))?.forEach(el => {
+    el.onclick = (e) => {
+        e.stopPropagation()
+        const classList = Array.from(e?.target?.classList || [])
+        const id = e.target.id
+        //维护一个黑名单，黑名单内的模态框不受影响
+        const blackList = ['updateSoftwareModal']
+        const isCloseable = !blackList.includes(id)
+        if (classList && classList.includes('mask') && isCloseable) {
+            if (id) {
+                closeModal(`#${id}`);
+            }
+        }
+    }
+})

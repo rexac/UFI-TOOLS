@@ -380,7 +380,7 @@ function main_func() {
     }
 
     //rootShell
-    const runShellWithRoot = async (cmd = '') => {
+    const runShellWithRoot = async (cmd = '', timeout = 10000) => {
         try {
             const res = await fetchWithTimeout(`${KANO_baseURL}/root_shell`, {
                 method: "POST",
@@ -388,7 +388,7 @@ function main_func() {
                 body: JSON.stringify({
                     command: cmd.trim()
                 })
-            })
+            }, timeout)
             const { result, error } = await res.json()
             return error ? { success: false, content: error } : { success: true, content: result }
         } catch (e) {

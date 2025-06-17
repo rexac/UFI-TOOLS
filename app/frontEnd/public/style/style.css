@@ -442,6 +442,8 @@ input {
     flex-direction: column;
     user-select: none;
     -webkit-user-select: none;
+    /* backdrop-filter: blur(1px);
+    -webkit-backdrop-filter: blur(1px); */
 }
 
 #dictionaryModal .content label {
@@ -1089,4 +1091,18 @@ input[type="range"] {
     justify-self: start;
     margin-bottom: 10px;
     margin-top: 20px;
+}
+
+.cpu-card .signal_bar {
+    display: inline-block;
+    overflow: hidden;
+    position: relative;
+    padding: 7px 8px;
+    background-color: rgba(0, 0, 0, 0.371);
+    width: 50px;
+    border-radius: 6px;
+}
+
+.cpu-card .signal_bar_progress {
+    opacity: 0.4 !important;
 }

@@ -44,18 +44,22 @@ window.UFI_DATA = new Proxy({}, {
                 });
 
                 doc.querySelectorAll('script').forEach(scriptEl => {
-                    const newScript = document.createElement('script');
-                    if (scriptEl.src) {
-                        newScript.src = scriptEl.src;
-                    } else {
-                        newScript.textContent = scriptEl.textContent;
-                    }
-                    if (scriptEl.type) newScript.type = scriptEl.type;
+                    try {
+                        const newScript = document.createElement('script');
+                        if (scriptEl.src) {
+                            newScript.src = scriptEl.src;
+                        } else {
+                            newScript.textContent = scriptEl.textContent;
+                        }
+                        if (scriptEl.type) newScript.type = scriptEl.type;
 
-                    document.head.appendChild(newScript);
+                        document.head.appendChild(newScript);
+                    } catch (e) {
+                        createToast('自定义head解析失败，请检查内容是否正确。');
+                    }
                 })
             } catch (e) {
-                alert('自定义head解析失败，请检查内容是否正确。');
+                createToast('自定义head解析失败，请检查内容是否正确。');
             }
         }
     })
@@ -1585,7 +1589,7 @@ function main_func() {
 
     //字段显示隐藏
     document.querySelector("#DICTIONARY").onclick = (e) => {
-        showModal('#dictionaryModal', 300, '.8')
+        showModal('#dictionaryModal')
     }
 
     document.querySelector('#DIC_LIST')?.addEventListener('click', (e) => {
@@ -2081,8 +2085,8 @@ function main_func() {
             out()
             return null
         }
-        await initClientManagementModal()
         showModal('#ClientManagementModal')
+        await initClientManagementModal()
     }
 
     let initClientManagementModal = async () => {
@@ -3253,7 +3257,6 @@ function main_func() {
         collapseMenuEl.dataset.name = localStorage.getItem('collapse_menu') || 'open'
         const collapseBtn = document.querySelector('#collapseBtn_menu')
         const switchComponent = createSwitch({
-            text: '功能列表',
             value: collapseMenuEl.dataset.name == 'open',
             className: 'collapse_menu',
             onChange: (newVal) => {
@@ -4070,6 +4073,33 @@ function main_func() {
         })
     }
 
+    //插件导出
+    const pluginExport = async () => {
+        try {
+            const { text } = await (await fetch(`${KANO_baseURL}/get_custom_head`, {
+                headers: common_headers
+            })).json()
+            if (text) {
+                const b = new Blob([text], { type: 'text/plain' })
+                const url = URL.createObjectURL(b)
+                const a = document.createElement('a')
+                a.href = url
+                const date = (new Date()).toLocaleString("zh-cn").replaceAll(" ", "_").replaceAll("/", "_").replaceAll(":", "_")
+                a.download = `UFI-TOOLS_Plugins_${date}.txt`
+                a.click()
+            }
+        } catch (e) {
+            console.error(e)
+            createToast('获取插件失败,请检查网路！', 'red')
+        }
+    }
+
+    const clearPluginText = () => {
+        const custom_head = document.querySelector('#custom_head')
+        custom_head.value = ''
+        createToast('已清空,提交后生效~')
+    }
+
     const onPluginBtn = () => {
         document.querySelector('#pluginFileInput')?.click()
     }
@@ -4109,6 +4139,8 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
 
     //挂载方法到window
     const methods = {
+        clearPluginText,
+        pluginExport,
         closeAdvanceToolsModal,
         syncTheme,
         runShellWithRoot,

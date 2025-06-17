@@ -25,6 +25,7 @@
             <!-- 操作按钮 -->
             <div class="title" id="collapseBtn_menu"
                 style="align-self: start;justify-self: start;margin: 6px;margin-left: 0;margin-top: 0;">
+                <strong style="white-space: nowrap;">功能列表</strong>
                 <!-- <button id="CLPS">功能列表</button> -->
             </div>
             <div class="functions-container actions collapse collapse_menu" data-name="close">
@@ -824,17 +825,17 @@
                 <div class="content" style="min-height: 400px;">
                     <div style="text-align: left;">
                         <div style="display: flex;align-items: center;gap:10px;font-size: 14px;margin-top: 6px;">
-                            <label style="display: flex;align-items: center;"><span>多设备同步？</span><input type="checkbox"
+                            <label style="display: flex;align-items: center;"><span style="width: 100px;">多设备同步？</span><input type="checkbox"
                                     id="isCloudSync"></label>
-                            <button class="btn" onclick="syncTheme()">手动同步</button>
+                            <button class="btn" style="flex: 1;" onclick="syncTheme()">手动同步</button>
                         </div>
                         <p style="font-size: 14px">
-                            <label style="display: flex;align-items: center;"><span>启用背景图片？</span><input type="checkbox"
+                            <label style="display: flex;align-items: center;"><span  style="width: 100px;">启用背景图片？</span><input type="checkbox"
                                     id="isCheckedBG"></label>
                         </p>
-                        <p style="font-size: 14px;">图片网址：
+                        <p style="display: flex;align-items: center;font-size: 14px;"><span>图片网址：</span>
                             <input placeholder="输入网址" type="text" id="BG_INPUT"
-                                style="width: 100%;max-width: 200px;padding: 6px 10px;margin: 4px 0;">
+                                style="flex:1;padding: 6px 10px;margin: 4px 0;">
                         </p>
                         <label><input id="fileUploader" type="file" style="display: none;"
                                 onchange="handleFileUpload(event)">
@@ -865,10 +866,16 @@
                             <i>填入的内容会放在网页head末尾(支持脚本样式和meta元素),大小不能超过1145KB</i>
                         </div>
                         <div>
-                            <button class="btn" style="width: 100%;margin-top: 6px;"
-                                onclick="onPluginBtn()">添加插件(.txt文件)</button>
                             <input type="file" id="pluginFileInput" style="display: none;"
                                 onchange="handlePluginFileUpload(event)">
+                            <button class="btn" style="width: 100%;margin-top: 6px;"
+                                onclick="onPluginBtn()">添加插件(.txt文件)</button>
+                            <div style="display: flex;gap: 10px;">
+                                <button class="btn" style="flex:1;margin-top: 6px;"
+                                    onclick="pluginExport()">一键导出插件文件</button>
+                                <button class="btn" style="margin-top: 6px;"
+                                    onclick="clearPluginText()">一键清空</button>
+                            </div>
                         </div>
                         <textarea id="custom_head"
                             style="font-size: 12px;font-family: monospace;margin: 6px 0;resize: vertical;width: 100%;box-sizing: border-box;"
@@ -1070,7 +1077,7 @@
             </div>
             <!-- 网络测速模态框 -->
             <div class="modal" id="speedTestModal" style="display: none">
-                <div class="title">内网测速</div>
+                <div class="title">内网测速(不准)</div>
 
                 <div class="content" style="
                     overflow-y: scroll;

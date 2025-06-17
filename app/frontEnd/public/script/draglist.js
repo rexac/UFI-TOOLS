@@ -1,3 +1,19 @@
+//适配状态显示模态框
+const toggleDictionaryModal = (flag = false) => {
+    const dictionaryModal = document.querySelector("#dictionaryModal")
+    if (!flag) {
+        dictionaryModal.style.backdropFilter = "none"
+        if (dictionaryModal.style.webKitBackdropFilter) {
+            dictionaryModal.style.webKitBackdropFilter = "none"
+        }
+    } else {
+        dictionaryModal.style.backdropFilter = ""
+        if (dictionaryModal.style.webKitBackdropFilter) {
+            dictionaryModal.style.webKitBackdropFilter = ""
+        }
+    }
+}
+
 function DragList(listId, callback) {
     if (!listId) return null
     const list = document.querySelector(listId);
@@ -10,6 +26,7 @@ function DragList(listId, callback) {
 
     // -------- PC 拖拽逻辑 --------
     list.addEventListener("dragstart", (e) => {
+        toggleDictionaryModal(false)
         currentLi = e.target;
         setTimeout(() => currentLi.classList.add("moving"), 0);
     });
@@ -35,6 +52,7 @@ function DragList(listId, callback) {
     });
 
     list.addEventListener("dragend", () => {
+        toggleDictionaryModal(true)
         if (currentLi) currentLi.classList.remove("moving");
         currentLi = null;
         callback && callback(list)
@@ -42,6 +60,7 @@ function DragList(listId, callback) {
 
     // -------- 移动端 touch 拖拽逻辑 --------
     list.addEventListener("touchstart", (e) => {
+        toggleDictionaryModal(false)
         const target = e.target;
         if (target.tagName.toLowerCase() !== "li") return;
 
@@ -88,6 +107,7 @@ function DragList(listId, callback) {
     });
 
     list.addEventListener("touchend", () => {
+        toggleDictionaryModal(true)
         if (!currentLi) return;
         currentLi.classList.remove("dragging");
         currentLi.style = "";

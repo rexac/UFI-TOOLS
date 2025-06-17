@@ -13,7 +13,6 @@ import okhttp3.*
 import okhttp3.Headers
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
-import java.util.concurrent.TimeUnit
 
 val unsafeHeaderNames = setOf(
     // Hop-by-hop headers (RFC 7230 6.1)

@@ -50,3 +50,5 @@
 备注2：由于cpu使用率 温度 内存使用率并无官方接口，如果你将本apk安装在手机上使用，则温度和占用数据源是你的手机提供，并非随身WiFi数据。
 
 下载链接： https://www.123684.com/s/7oa5Vv-dQLD3?提取码:CkSj
+
+API文档：https://kanokano.cn/wp-content/uploads/2025/06/UFI-TOOLSAPI文档.html

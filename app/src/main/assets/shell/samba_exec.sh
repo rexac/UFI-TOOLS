@@ -67,15 +67,15 @@ check_socat_running(){
   fi
 }
 
+lock_smb_conf(){
+    #lock samba conf
+    chmod 444 /data/samba/etc/smb.conf
+    chattr +i /data/samba/etc/smb.conf
+    echo "[`date`] samba_file LOCKED! to unlock samba_file run [sh /sdcard/unlock_samba.sh]" >> "$LOG_FILE"
+}
+
 #boot_script
 boot_up_script() {
-  #lock samba conf
-  chmod 444 /data/samba/etc/smb.conf
-  chattr +i /data/samba/etc/smb.conf
-
-  echo "$UNLOCK_SAMBA_CONF" > /cache/unlock_samba.sh
-  echo "$UNLOCK_SAMBA_CONF" > /sdcard/unlock_samba.sh
-
   if [ -f "$BOOTUP_SCRIPT_PATH" ]; then
       echo "[`date`] exec $BOOTUP_SCRIPT_PATH ..." >> "$LOG_FILE"
       sh "$BOOTUP_SCRIPT_PATH"
@@ -92,6 +92,10 @@ boot_up_script() {
   ip6tables -A INPUT -p tcp --dport 445 -j DROP
   ip6tables -A INPUT -p tcp --dport 5555 -j DROP
 
+  echo "$UNLOCK_SAMBA_CONF" > /cache/unlock_samba.sh
+  echo "$UNLOCK_SAMBA_CONF" > /sdcard/unlock_samba.sh
+
+  lock_smb_conf
   check_log_file
   check_ttyd_running
   check_socat_running
@@ -108,6 +112,7 @@ schedule_script() {
       echo "[`date`] $SCHEDULE_SCRIPT_PATH not found，skip" >> "$LOG_FILE"
   fi
 
+  lock_smb_conf
   check_log_file
   check_ttyd_running
   check_socat_running

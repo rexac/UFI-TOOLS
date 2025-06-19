@@ -425,6 +425,8 @@ function main_func() {
         initATBtn()
         initAdvanceTools()
         initShellBtn()
+        initScheduledTask()
+        initPluginSetting()
         QOSRDPCommand("AT+CGEQOSRDP=1")
     }
 
@@ -2306,7 +2308,6 @@ function main_func() {
 
     //设置主题背景
     let handleSubmitBg = async (showSuccessToast = true) => {
-        const custom_head = document.querySelector('#custom_head')
         const imgUrl = document.querySelector('#BG_INPUT')?.value
         const bg_checked = document.querySelector('#isCheckedBG')?.checked
         const BG = document.querySelector('#BG')
@@ -2314,19 +2315,6 @@ function main_func() {
         const isCloudSync = document.querySelector("#isCloudSync")
 
         localStorage.setItem("isCloudSync", isCloudSync.checked)
-
-        if ((await initRequestData())) {
-            setCustomHead(custom_head.value?.trim() || '').then(async ({ result, error }) => {
-                if (result != "success") {
-                    if (error)
-                        createToast(error, 'red')
-                    else
-                        createToast('自定义头部保存失败，请检查网络', 'red')
-                }
-            })
-        } else {
-            createToast('没有登录，自定义头部不会保存', 'yellow')
-        }
 
         if (!BG || bg_checked == undefined || !BG_OVERLAY) return
         if (!bg_checked) {
@@ -2381,18 +2369,10 @@ function main_func() {
 
     //初始化背景图片
     const initBG = async () => {
-        const head_text = await getCustomHead()
         const BG = document.querySelector('#BG')
         const imgUrl = localStorage.getItem('backgroundUrl')
         const isCheckedBG = document.querySelector('#isCheckedBG')
         const BG_INPUT = document.querySelector('#BG_INPUT')
-
-        if (head_text) {
-            const custom_head = document.querySelector('#custom_head')
-            if (custom_head) {
-                custom_head.value = head_text
-            }
-        }
 
         if (!BG || !isCheckedBG || !BG_INPUT) return
         isCheckedBG.checked = imgUrl ? true : false
@@ -4048,6 +4028,338 @@ function main_func() {
         enableDHCP.value = status == 'open' ? "SERVER" : "DISABLE"
     })
 
+    //设备监控
+    collapseGen("#collapse_device_mon_btn", "#collapse_device_mon", 'collapse_device_mon', async (status) => {
+    })
+
+    //改变刷新频率
+    const changeRefreshRate = (e) => {
+        const value = e.target.value
+        if (value) {
+            stopRefresh()
+            REFRESH_TIME = value
+            startRefresh()
+            createToast("当前刷新频率：" + (value / 1000).toFixed(2) + "秒/次")
+            //保存
+            localStorage.setItem("refreshRate", value)
+        }
+    }
+
+    //开关小核心
+    const switchCpuCore = async (flag = true) => {
+        const AD_RESULT = document.querySelector('#AD_RESULT')
+        const shell = `
+echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu0/online
+echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu1/online
+echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu2/online
+echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
+        `
+        const result = await runShellWithRoot(shell)
+        result.success ? createToast('执行成功', 'green') : createToast('执行失败', 'red')
+
+        AD_RESULT.innerHTML = result.content
+
+    }
+
+    //定时任务管理
+    const clearAddTaskForm = () => {
+        const form = document.querySelector('#AddTaskForm')
+        form.id.value = '' // 清空ID
+        form.id.disabled = false // 允许修改 ID
+        form.date_date.value = '' // 清空日期
+        form.date_time.value = '' // 清空时间
+        form.repeatDaily.checked = false // 清空复选框
+        form.action.value = '' // 清空动作参数
+    }
+    const setAddTaskForm = (task) => {
+        let date = ''
+        let time = ''
+        if (task.time.split(' ').length == 1) {
+            time = task.time.split(' ')[0]
+        } else {
+            date = task.time.split(' ')[0]
+            time = task.time.split(' ')[1]
+        }
+        const form = document.querySelector('#AddTaskForm')
+        form.id.value = task.id
+        form.id.disabled = true
+        form.date_date.value = date
+        form.date_time.value = time
+        form.repeatDaily.checked = task.repeatDaily
+        form.action.value = JSON.stringify(task.actionMap || {}, null, 2)
+    }
+
+    const initScheduledTask = async () => {
+        const btn = document.querySelector('#ScheduledTaskManagement')
+        if (!(await initRequestData())) {
+            btn.onclick = () => createToast('请登录', 'red')
+            btn.style.backgroundColor = '#80808073'
+            return null
+        }
+        btn.style.backgroundColor = 'var(--dark-btn-color)'
+        btn.onclick = async () => {
+            showModal('#ScheduledTasksModal')
+            handleInitialScheduledTasks()
+        }
+    }
+    initScheduledTask()
+
+    function appendTaskToList(task) {
+        const SCHEDULED_TASK_LIST = document.querySelector('#SCHEDULED_TASK_LIST')
+        const li = document.createElement('li')
+        li.style.marginBottom = '10px'
+        li.style.padding = '0 10px'
+        li.style.boxSizing = 'border-box'
+        li.style.width = '100%'
+        li.style.overflow = 'hidden'
+
+        li.innerHTML = `
+    <div style="background: none;display: flex;width: 100%;margin-top: 10px;overflow: auto;" class="card-item">
+      <div style="flex:1;margin-right: 10px;">
+        <p><span>任务名称：</span><span>${task.id}</span></p>
+        <p><span>触发时间：</span><span>${task.time}</span></p>
+        <p><span>上次执行：</span><span>${task.lastRunTimestamp ? (new Date(task.lastRunTimestamp).toLocaleString('zh-cn').replaceAll('/', '-')) : '暂未执行'}${task.hasTriggered ? "（执行过）" : ""}</span></p>
+        <p><span>重复执行：</span><span>${task.repeatDaily ? "是" : "否"}</span></p>
+        <p><span>动作参数:</span></p>
+        <p class="text_Area"></p>
+      </div>
+    </div>
+    <div style="padding-bottom:10px;text-align: right;">
+      <button class="btn editBtn" style="margin: 2px;padding: 4px 6px;" onclick="editTask('${task.id}')">修改</button>
+      <button class="btn deleteBtn" style="margin: 2px;padding: 4px 6px;">删除</button>
+    </div>
+  `
+
+        const textarea = document.createElement('textarea')
+        textarea.disabled = true
+        textarea.style.width = '100%'
+        textarea.style.fontSize = '12px'
+        textarea.style.padding = '6px'
+        textarea.rows = 6
+        textarea.value = JSON.stringify(task.actionMap || {}, null, 2)
+        li.querySelector('.text_Area').appendChild(textarea)
+
+        let timer = null
+        let counter = 0
+        // 删除功能
+        li.querySelector('.deleteBtn').onclick = async () => {
+            timer && clearTimeout(timer)
+            timer = setTimeout(() => {
+                li.querySelector('.deleteBtn').innerHTML = '删除'
+                counter = 0
+            }, 1000)
+            li.querySelector('.deleteBtn').innerHTML = '确认?'
+            counter += 1
+            if (counter >= 2) {
+                try {
+                    const res = await fetchWithTimeout(`${KANO_baseURL}/remove_task`, {
+                        method: 'POST',
+                        headers: {
+                            ...common_headers,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ id: task.id })
+                    })
+                    const json = await res.json()
+                    if (json.result === 'removed') {
+                        createToast('删除成功', 'green')
+                        handleInitialScheduledTasks()
+                    } else {
+                        createToast('删除失败', 'red')
+                    }
+                } catch (e) {
+                    console.error(e)
+                    createToast('删除请求异常', 'red')
+                }
+            }
+        }
+
+        SCHEDULED_TASK_LIST.appendChild(li)
+    }
+
+    const handleInitialScheduledTasks = async () => {
+        const SCHEDULED_TASK_LIST = document.querySelector('#SCHEDULED_TASK_LIST')
+        SCHEDULED_TASK_LIST.innerHTML = `<li style="backdrop-filter: none;padding-top: 15px;background:transparent;">
+            <strong class="green" style="background:transparent;margin: 10px auto;margin-top: 0; display: flex;flex-direction: column;padding: 40px;">
+                <span style="font-size: 50px;" class="spin">🌀</span>
+                <span style="font-size: 16px;padding-top: 10px;">loading...</span>
+            </strong>
+        </li>`
+        try {
+            const res = await (await fetchWithTimeout(`${KANO_baseURL}/list_tasks`, {
+                method: 'GET',
+                headers: common_headers
+            })).json()
+            if (res && res.tasks && res.tasks.length > 0) {
+                SCHEDULED_TASK_LIST.innerHTML = ''
+                res.tasks.forEach((task) => {
+                    appendTaskToList(task)
+                })
+            } else {
+                SCHEDULED_TASK_LIST.innerHTML = `<li style="padding:10px">暂无定时任务</li>`
+            }
+        }
+        catch (e) {
+            console.error(e)
+            createToast('加载定时任务失败，请检查网络连接', 'red')
+            SCHEDULED_TASK_LIST.innerHTML = ''
+            return
+        }
+    }
+
+    //添加定时任务
+    const handleSubmitTask = async (e) => {
+        e.preventDefault()
+        const form = e.target
+        const data = {
+            id: form.id.value.trim(),
+            time: form.date_date.value ? form.date_date.value.trim() + ' ' + form.date_time.value.trim() : form.date_time.value.trim(),
+            repeatDaily: form.repeatDaily.checked,
+            action: {}
+        }
+
+        try {
+            data.action = form.action.value.trim()
+                ? JSON.parse(form.action.value.trim())
+                : {}
+        } catch (e) {
+            return createToast('动作参数必须是合法 JSON', 'red')
+        }
+
+        try {
+            const res = await fetchWithTimeout(`${KANO_baseURL}/add_task`, {
+                method: 'POST',
+                headers: {
+                    ...common_headers,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+
+            const json = await res.json()
+            if (json.result === 'success') {
+                createToast('保存成功', 'green')
+                closeModal('#AddTaskModal')
+                handleInitialScheduledTasks()
+
+                //清除字段
+                form.id.value = ''
+                form.date_date.value = ''
+                form.date_time.value = ''
+                form.repeatDaily.checked = false
+                form.action.value = ''
+            } else {
+                createToast('添加失败', 'red')
+            }
+        } catch (e) {
+            console.error(e)
+            createToast('网络异常', 'red')
+        }
+    }
+
+    const addTask = () => {
+        clearAddTaskForm()
+        setTimeout(() => {
+            showModal('#AddTaskModal')
+        }, 100);
+    }
+
+    const editTask = async (id) => {
+        clearAddTaskForm()
+        const form = document.querySelector('#AddTaskForm')
+        form.id.value = id
+        //拿取最新数据
+        try {
+            const res = await fetchWithTimeout(`${KANO_baseURL}/get_task?id=${id}`, {
+                headers: {
+                    ...common_headers,
+                    'Content-Type': 'application/json'
+                },
+            })
+            const json = await res.json()
+            //预填充表单
+            setAddTaskForm(json)
+            form.id.disabled = true // 禁止修改 ID
+            setTimeout(() => {
+                showModal('#AddTaskModal')
+            }, 100);
+        } catch (e) {
+            console.error(e)
+            createToast('请求异常', 'red')
+        }
+    }
+
+    const closeAddTask = () => {
+        closeModal('#AddTaskModal')
+        setTimeout(() => {
+            clearAddTaskForm()
+        }, 300);
+    }
+
+    //动作列表
+    const actionList = {
+        "指示灯": {
+            "goformId": "INDICATOR_LIGHT_SETTING",
+            "indicator_light_switch": '1 或者 0'
+        },
+        "NFC": {
+            goformId: 'WIFI_NFC_SET',
+            web_wifi_nfc_switch: '1 或者 0'
+        },
+        "文件共享": {
+            goformId: 'SAMBA_SETTING',
+            samba_switch: '1 或者 0'
+        },
+        "网络漫游": {
+            goformId: 'SET_CONNECTION_MODE',
+            ConnectionMode: "auto_dial",
+            roam_setting_option: 'on 或者 off',
+            dial_roam_setting_option: 'on 或者 off',
+        },
+        "性能模式": {
+            goformId: 'PERFORMANCE_MODE',
+            performance_mode: '1 或者 0',
+        },
+        "USB调试": {
+            goformId: 'USB_PORT_SETTING',
+            usb_port_switch: '1 或者 0'
+        },
+        "数据流量": {
+            goformId: 'CONNECT_NETWORK 或者 DISCONNECT_NETWORK',
+        },
+        "关闭WIFI": {
+            goformId: 'switchWiFiModule',
+            SwitchOption: 0
+        },
+        "开启WIFI(5G)": {
+            goformId: 'switchWiFiChip',
+            ChipEnum: 'chip2',
+            GuestEnable: 0
+        },
+        "开启WIFI(2.4G)": {
+            goformId: 'switchWiFiChip',
+            ChipEnum: 'chip1',
+            GuestEnable: 0
+        },
+        "关机": {
+            goformId: 'SHUTDOWN_DEVICE'
+        },
+        "重启": {
+            goformId: 'REBOOT_DEVICE'
+        }
+    }
+
+    const fillAction = (e, actionName) => {
+        e.preventDefault()
+        const taskAction = document.querySelector('#taskAction')
+        if (!taskAction) return
+        const action = actionList[actionName]
+        if (action) {
+            taskAction.value = JSON.stringify(action, null, 2)
+        }
+    }
+
+
     //插件上传
     const handlePluginFileUpload = (event) => {
         return new Promise((resolve, reject) => {
@@ -4104,41 +4416,61 @@ function main_func() {
         document.querySelector('#pluginFileInput')?.click()
     }
 
-    //设备监控
-    collapseGen("#collapse_device_mon_btn", "#collapse_device_mon", 'collapse_device_mon', async (status) => {
-    })
+    //初始化插件功能
+    // PLUGIN_SETTING
+    const initPluginSetting = async () => {
+        const btn = document.querySelector('#PLUGIN_SETTING')
+        if (!(await initRequestData())) {
+            btn.onclick = () => createToast('请登录', 'red')
+            btn.style.backgroundColor = '#80808073'
+            return null
+        }
+        btn.style.backgroundColor = 'var(--dark-btn-color)'
+        btn.onclick = async () => {
+            showModal('#PluginModal')
+            //获取当前插件
+            try {
+                const { text } = await (await fetch(`${KANO_baseURL}/get_custom_head`, {
+                    headers: common_headers
+                })).json()
+                const custom_head = document.querySelector('#custom_head')
+                custom_head.value = text || ''
+            } catch (e) {
+                console.error(e)
+                createToast('获取插件失败，请检查网络', 'red')
+            }
+        }
+    }
+    initPluginSetting()
 
-    //改变刷新频率
-    const changeRefreshRate = (e) => {
-        const value = e.target.value
-        if (value) {
-            stopRefresh()
-            REFRESH_TIME = value
-            startRefresh()
-            createToast("当前刷新频率：" + (value / 1000).toFixed(2) + "秒/次")
-            //保存
-            localStorage.setItem("refreshRate", value)
+    const savePluginSetting = async (e) => {
+        const custom_head = document.querySelector('#custom_head')
+        if ((await initRequestData())) {
+            setCustomHead(custom_head.value?.trim() || '').then(async ({ result, error }) => {
+                if (result != "success") {
+                    if (error)
+                        createToast(error, 'red')
+                    else
+                        createToast('插件保存失败，请检查网络', 'red')
+                } else {
+                    createToast('插件保存成功', 'green')
+                    closeModal('#PluginModal')
+                }
+            })
+        } else {
+            createToast('没有登录，插件不会保存', 'yellow')
         }
     }
 
-    //开关小核心
-    const switchCpuCore = async (flag = true) => {
-        const AD_RESULT = document.querySelector('#AD_RESULT')
-        const shell = `
-echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu0/online
-echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu1/online
-echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu2/online
-echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
-        `
-        const result = await runShellWithRoot(shell)
-        result.success ? createToast('执行成功', 'green') : createToast('执行失败', 'red')
-
-        AD_RESULT.innerHTML = result.content
-
-    }
 
     //挂载方法到window
     const methods = {
+        savePluginSetting,
+        fillAction,
+        closeAddTask,
+        addTask,
+        editTask,
+        handleSubmitTask,
         clearPluginText,
         pluginExport,
         closeAdvanceToolsModal,

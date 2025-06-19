@@ -9,6 +9,7 @@ import com.minikano.f50_sms.modules.auth.authenticatedRoute
 import com.minikano.f50_sms.modules.deviceInfo.baseDeviceInfoModule
 import com.minikano.f50_sms.modules.ota.otaModule
 import com.minikano.f50_sms.modules.plugins.pluginsModule
+import com.minikano.f50_sms.modules.scheduledTask.scheduledTaskModule
 import com.minikano.f50_sms.modules.smsForward.smsModule
 import com.minikano.f50_sms.modules.speedtest.SpeedTestDispatchers
 import com.minikano.f50_sms.modules.speedtest.speedTestModule
@@ -52,6 +53,7 @@ fun Application.mainModule(context: Context, proxyServerIp: String) {
 
             smsModule(context)
 
+            scheduledTaskModule(context)
         }
 
         themeModule(context)

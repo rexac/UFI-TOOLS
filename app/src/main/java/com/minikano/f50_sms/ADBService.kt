@@ -18,6 +18,7 @@ import com.minikano.f50_sms.utils.ShellKano
 import com.minikano.f50_sms.utils.ShellKano.Companion.executeShellFromAssetsSubfolderWithArgs
 import com.minikano.f50_sms.utils.SmbThrottledRunner
 import com.minikano.f50_sms.utils.SmsPoll
+import com.minikano.f50_sms.utils.TaskSchedulerManager
 import java.util.concurrent.Executors
 import kotlin.concurrent.thread
 
@@ -27,7 +28,6 @@ class ADBService : Service() {
     private lateinit var handler: Handler
     private val adbExecutor = Executors.newSingleThreadExecutor()
     private val iperfExecutor = Executors.newSingleThreadExecutor()
-
 
     companion object {
         @Volatile
@@ -52,6 +52,8 @@ class ADBService : Service() {
             executor.execute(runnableSMB)
         }
 
+        //开启定时任务
+        TaskSchedulerManager.init(applicationContext)
         return START_STICKY
     }
 
@@ -192,6 +194,7 @@ class ADBService : Service() {
         super.onDestroy()
         handlerThread.quitSafely()
         handler.removeCallbacks(runnable)
+        TaskSchedulerManager.scheduler?.stop()
     }
 
     override fun onBind(intent: Intent?): IBinder? = null

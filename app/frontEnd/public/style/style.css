@@ -1106,3 +1106,9 @@ input[type="range"] {
 .cpu-card .signal_bar_progress {
     opacity: 0.4 !important;
 }
+
+#ScheduledTasksModal .card-item:hover{
+    box-shadow: none !important;
+    border-color: transparent !important;
+    transform: scale(1) !important;
+}

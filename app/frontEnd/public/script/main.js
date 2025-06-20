@@ -398,6 +398,8 @@ function main_func() {
 
     //初始化所有按钮
     const initRenderMethod = async () => {
+        initScheduledTask()
+        initPluginSetting()
         initTheme();
         initBGBtn()
         initLANSettings()
@@ -425,8 +427,6 @@ function main_func() {
         initATBtn()
         initAdvanceTools()
         initShellBtn()
-        initScheduledTask()
-        initPluginSetting()
         QOSRDPCommand("AT+CGEQOSRDP=1")
     }
 
@@ -4066,25 +4066,15 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
         const form = document.querySelector('#AddTaskForm')
         form.id.value = '' // 清空ID
         form.id.disabled = false // 允许修改 ID
-        form.date_date.value = '' // 清空日期
         form.date_time.value = '' // 清空时间
         form.repeatDaily.checked = false // 清空复选框
         form.action.value = '' // 清空动作参数
     }
     const setAddTaskForm = (task) => {
-        let date = ''
-        let time = ''
-        if (task.time.split(' ').length == 1) {
-            time = task.time.split(' ')[0]
-        } else {
-            date = task.time.split(' ')[0]
-            time = task.time.split(' ')[1]
-        }
         const form = document.querySelector('#AddTaskForm')
         form.id.value = task.id
         form.id.disabled = true
-        form.date_date.value = date
-        form.date_time.value = time
+        form.date_time.value = task.time
         form.repeatDaily.checked = task.repeatDaily
         form.action.value = JSON.stringify(task.actionMap || {}, null, 2)
     }
@@ -4213,7 +4203,7 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
         const form = e.target
         const data = {
             id: form.id.value.trim(),
-            time: form.date_date.value ? form.date_date.value.trim() + ' ' + form.date_time.value.trim() : form.date_time.value.trim(),
+            time: form.date_time.value.trim(),
             repeatDaily: form.repeatDaily.checked,
             action: {}
         }
@@ -4244,7 +4234,6 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
 
                 //清除字段
                 form.id.value = ''
-                form.date_date.value = ''
                 form.date_time.value = ''
                 form.repeatDaily.checked = false
                 form.action.value = ''
@@ -4259,9 +4248,11 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
 
     const addTask = () => {
         clearAddTaskForm()
-        setTimeout(() => {
-            showModal('#AddTaskModal')
-        }, 100);
+        showModal('#AddTaskModal')
+    }
+
+    const refreshTask = () => {
+        handleInitialScheduledTasks()
     }
 
     const editTask = async (id) => {
@@ -4324,8 +4315,11 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
             goformId: 'USB_PORT_SETTING',
             usb_port_switch: '1 或者 0'
         },
-        "数据流量": {
-            goformId: 'CONNECT_NETWORK 或者 DISCONNECT_NETWORK',
+        "打开数据": {
+            goformId: 'CONNECT_NETWORK',
+        },
+        "关闭数据": {
+            goformId: 'DISCONNECT_NETWORK',
         },
         "关闭WIFI": {
             goformId: 'switchWiFiModule',
@@ -4340,6 +4334,22 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
             goformId: 'switchWiFiChip',
             ChipEnum: 'chip1',
             GuestEnable: 0
+        },
+        "5G/4G/3G": {
+            goformId: 'SET_BEARER_PREFERENCE',
+            BearerPreference: 'WL_AND_5G'
+        },
+        "5G NSA": {
+            goformId: 'SET_BEARER_PREFERENCE',
+            BearerPreference: 'LTE_AND_5G'
+        },
+        "5G SA": {
+            goformId: 'SET_BEARER_PREFERENCE',
+            BearerPreference: 'Only_5G'
+        },
+        "仅4G": {
+            goformId: 'SET_BEARER_PREFERENCE',
+            BearerPreference: 'Only_LTE'
         },
         "关机": {
             goformId: 'SHUTDOWN_DEVICE'
@@ -4462,9 +4472,9 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
         }
     }
 
-
     //挂载方法到window
     const methods = {
+        refreshTask,
         savePluginSetting,
         fillAction,
         closeAddTask,

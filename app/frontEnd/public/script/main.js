@@ -686,6 +686,16 @@ function main_func() {
             return
         }
         if (res) {
+            //需要一直保持登录
+            if (res.loginfo && res.loginfo != 'ok') {
+                try {
+                    console.log('Login timeout keep login...');
+                    if (await initRequestData()) {
+                        await login()
+                        return //跳过本次渲染
+                    }
+                } catch (e) { }
+            }
             Object.keys(res).forEach(key => {
                 window.UFI_DATA[key] = res[key];
             });
@@ -2688,9 +2698,17 @@ function main_func() {
             cmd: 'dual_sim_support'
         }))
         if (!sim_slot || dual_sim_support != '1') {
+            //单卡用户默认0槽位
             sim_slot = 0
         }
         let res = await executeATCommand(cmd, sim_slot)
+        //如果是单卡用户，0槽位又获取不到数据，那就尝试1槽位
+        if (res.result && res.result.includes('ERROR')) {
+            if (dual_sim_support != '1') {
+                sim_slot = 1
+                res = await executeATCommand(cmd, sim_slot)
+            }
+        }
         if (res.result) return QORS_MESSAGE = parseCGEQOSRDP(res.result)
         return QORS_MESSAGE = null
     }
@@ -4472,8 +4490,60 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
         }
     }
 
+    const handleDisableFOTA = async () => {
+        const AD_RESULT = document.querySelector('#AD_RESULT')
+        try {
+            //看看是不是开启了高级功能
+            AD_RESULT.innerHTML = `<strong class="green" style="font-size: 12px;">正在禁用系统更新...</strong>`
+            if (await checkAdvanceFunc()) {
+                createToast('检测到高级功能，使用ROOT方式执行', '')
+                let res0 = await runShellWithRoot("pm disable com.zte.zdm")
+                let res1 = await runShellWithRoot("pm uninstall -k --user 0 com.zte.zdm ")
+                let res2 = await runShellWithRoot("pm uninstall -k --user 0 cn.zte.aftersale")
+                let res3 = await runShellWithRoot("pm uninstall -k --user 0 com.zte.zdmdaemon")
+                let res4 = await runShellWithRoot("pm uninstall -k --user 0 com.zte.zdmdaemon.install")
+                let res5 = await runShellWithRoot("pm uninstall -k --user 0 com.zte.analytics")
+                let res6 = await runShellWithRoot("pm uninstall -k --user 0 com.zte.neopush")
+                AD_RESULT.innerHTML = `
+                <div style="min-width:200px;font-size:12px">
+                <p>已使用ROOT方式禁用系统更新,请检查是否生效！</p>
+                <p>${res0.content}</p>
+                <p>${res1.content}</p>
+                <p>${res2.content}</p>
+                <p>${res3.content}</p>
+                <p>${res4.content}</p>
+                <p>${res5.content}</p>
+                <p>${res6.content}</p>
+                </div>`
+            } else {
+                createToast('未开启高级功能，使用ADB方式执行', '')
+                let adb_status = await adbKeepAlive()
+                if (!adb_status) {
+                    AT_RESULT.innerHTML = ""
+                    return createToast('ADB未初始化，请等待初始化完成', 'red')
+                }
+                const res = await (await fetchWithTimeout(`${KANO_baseURL}/disable_fota`, {
+                    method: 'get',
+                    headers: common_headers
+                })).json()
+                if (!res.error) {
+                    createToast('系统更新已禁用', 'green')
+                    AD_RESULT.innerHTML = `<strong class="green" style="font-size: 12px;">已使用ADB方式禁用系统更新！如需强力禁用请打开高级功能再试！</strong>`
+                } else {
+                    createToast('禁用系统更新失败', 'red')
+                    AD_RESULT.innerHTML = `<strong class="red" style="font-size: 12px;">禁用系统更新失败</strong>`
+                }
+            }
+        } catch (e) {
+            console.error(e)
+            AD_RESULT.innerHTML = `<strong class="red" style="font-size: 12px;">禁用系统更新失败</strong>`
+            createToast('请求异常', 'red')
+        }
+    }
+
     //挂载方法到window
     const methods = {
+        handleDisableFOTA,
         refreshTask,
         savePluginSetting,
         fillAction,

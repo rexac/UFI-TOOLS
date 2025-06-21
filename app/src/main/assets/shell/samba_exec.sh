@@ -74,6 +74,19 @@ lock_smb_conf(){
     echo "[`date`] samba_file LOCKED! to unlock samba_file run [sh /sdcard/unlock_samba.sh]" >> "$LOG_FILE"
 }
 
+#net accelerate
+net_accelerate(){
+  iptables -D INPUT -j zte_fw_net_limit
+  iptables -F zte_fw_net_limit
+  iptables -X zte_fw_net_limit
+  tc qdisc del dev sipa_eth0 root 2>/dev/null
+  tc qdisc del dev sipa_eth0 ingress 2>/dev/null
+  tc qdisc del dev br0 root 2>/dev/null
+  tc qdisc del dev br0 ingress 2>/dev/null
+  tc qdisc del dev wlan0 root 2>/dev/null
+  tc qdisc del dev wlan0 ingress 2>/dev/null
+}
+
 #boot_script
 boot_up_script() {
   if [ -f "$BOOTUP_SCRIPT_PATH" ]; then
@@ -99,6 +112,7 @@ boot_up_script() {
   check_log_file
   check_ttyd_running
   check_socat_running
+  net_accelerate
 }
 
 #schedule_script(30s per time)

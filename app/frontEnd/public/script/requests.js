@@ -60,9 +60,8 @@ const common_headers = {
     "authorization": KANO_TOKEN
 }
 
-const login = async () => {
+const login1 = async () => {
     try {
-
         const { LD } = await getLD()
         if (!LD) throw new Error('无法获取LD')
 
@@ -71,6 +70,38 @@ const login = async () => {
             "goformId": "LOGIN",
             "isTest": "false",
             "password": pwd,
+            "user": "admin"
+        })
+        const res = await fetch(KANO_baseURL + "/goform/goform_set_cmd_process", {
+            method: "POST",
+            headers: {
+                ...common_headers,
+                "content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+            },
+            body
+        })
+        const res_data = await res.json()
+        if (res_data == undefined || res_data == null || res_data.result == '3' || res_data.result == 3) {
+            return null
+        }
+        return res.headers.get('kano-cookie').split(';')[0]
+    }
+    catch {
+        return null
+    }
+}
+
+let login = async () => {
+    try {
+        const { LD } = await getLD()
+        if (!LD) throw new Error('无法获取LD')
+
+        const pwd = SHA256(SHA256(KANO_PASSWORD) + LD)
+        const body = new URLSearchParams({
+            "goformId": "LOGIN_MULTI_USER",
+            "isTest": "false",
+            "password": pwd,
+            "IP":"localhost",
             "user": "admin"
         })
         const res = await fetch(KANO_baseURL + "/goform/goform_set_cmd_process", {

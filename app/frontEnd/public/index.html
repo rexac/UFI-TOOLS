@@ -825,7 +825,8 @@
             <div class="mask" id="ScheduledTasksModal" style="display: none">
                 <div class="modal" style="width: 90%;max-width: 600px; display: flex;flex-direction: column;">
                     <div class="title" style="margin-bottom: 4px;">定时任务</div>
-                    <div style="display: flex;justify-content: space-between;align-items: center;font-size: 14px;margin: 10px 0;">
+                    <div
+                        style="display: flex;justify-content: space-between;align-items: center;font-size: 14px;margin: 10px 0;">
                         <span>任务列表</span>
                         <div>
                             <button class="btn" onclick="refreshTask()">刷新</button>
@@ -1091,11 +1092,13 @@
                                     </div>
                                     <div class="advanced-btns">
                                         <button class="btn"
-                                            onclick="disableButtonWhenExecuteFunc(event,handleShell)">一键执行shell脚本(非root)<br>(脚本需在/sdcard/one_click_shell.sh)</button>
-                                        <button class="btn"
                                             onclick="disableButtonWhenExecuteFunc(event,()=>handleSambaPath())">添加高级功能</button>
                                         <button class="btn"
                                             onclick="disableButtonWhenExecuteFunc(event,()=>handleSambaPath('0'))">移除高级功能(重启生效)</button>
+                                        <button class="btn"
+                                            onclick="disableButtonWhenExecuteFunc(event,handleDisableFOTA)">禁用更新</button>
+                                        <button class="btn"
+                                            onclick="disableButtonWhenExecuteFunc(event,handleShell)">一键执行shell脚本(非root)<br>(脚本需在/sdcard/one_click_shell.sh)</button>
                                         <button class="btn"
                                             onclick="disableButtonWhenExecuteFunc(event,()=>switchCpuCore(false))">关闭小核</button>
                                         <button class="btn"

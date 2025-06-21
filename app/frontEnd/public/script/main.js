@@ -426,7 +426,6 @@ function main_func() {
         initShutdownBtn()
         initATBtn()
         initAdvanceTools()
-        initShellBtn()
         QOSRDPCommand("AT+CGEQOSRDP=1")
     }
 
@@ -654,6 +653,7 @@ function main_func() {
 
     let StopStatusRenderTimer = null
     let isNotLoginOnce = true
+    let status_login_try_times = 0
     let handlerStatusRender = async (flag = false) => {
         const status = document.querySelector('#STATUS')
         if (flag) {
@@ -689,9 +689,26 @@ function main_func() {
             //需要一直保持登录
             if (res.loginfo && res.loginfo != 'ok') {
                 try {
-                    console.log('Login timeout keep login...');
                     if (await initRequestData()) {
-                        await login()
+                        console.log('Login timeout keep login...');
+                        const res = await login()
+                        if (res === null) {
+                            console.log('Login faild, try again...');
+                            status_login_try_times += 1
+                        }
+                        if (status_login_try_times >= 3) {
+                            createToast('登录失效，请重新登录', 'red')
+                            out()
+                            isFirstRender = true
+                            lastRequestSmsIds = null
+                            localStorage.removeItem('kano_sms_pwd')
+                            localStorage.removeItem('kano_sms_token')
+                            KANO_TOKEN = null
+                            common_headers.authorization = null
+                            initRenderMethod()
+                            status_login_try_times = 0
+                            return
+                        }
                         return //跳过本次渲染
                     }
                 } catch (e) { }

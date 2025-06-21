@@ -119,7 +119,7 @@ let login = async () => {
         return res.headers.get('kano-cookie').split(';')[0]
     }
     catch {
-        return null
+        return undefined
     }
 }
 

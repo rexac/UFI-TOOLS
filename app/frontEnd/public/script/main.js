@@ -696,6 +696,9 @@ function main_func() {
                             console.log('Login faild, try again...');
                             status_login_try_times += 1
                         }
+                        if (res) {
+                            initRenderMethod()
+                        }
                         if (status_login_try_times >= 3) {
                             createToast('登录失效，请重新登录', 'red')
                             out()

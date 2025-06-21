@@ -76,15 +76,57 @@ lock_smb_conf(){
 
 #net accelerate
 net_accelerate(){
-  iptables -D INPUT -j zte_fw_net_limit
-  iptables -F zte_fw_net_limit
-  iptables -X zte_fw_net_limit
-  tc qdisc del dev sipa_eth0 root 2>/dev/null
-  tc qdisc del dev sipa_eth0 ingress 2>/dev/null
-  tc qdisc del dev br0 root 2>/dev/null
-  tc qdisc del dev br0 ingress 2>/dev/null
-  tc qdisc del dev wlan0 root 2>/dev/null
-  tc qdisc del dev wlan0 ingress 2>/dev/null
+    iptables -D INPUT -j zte_fw_net_limit
+    iptables -F zte_fw_net_limit
+    iptables -X zte_fw_net_limit
+    tc qdisc del dev sipa_eth0 root 2>/dev/null
+    tc qdisc del dev sipa_eth0 ingress 2>/dev/null
+    tc qdisc del dev br0 root 2>/dev/null
+    tc qdisc del dev br0 ingress 2>/dev/null
+    tc qdisc del dev wlan0 root 2>/dev/null
+    tc qdisc del dev wlan0 ingress 2>/dev/null
+    tc qdisc del dev sipa_eth0 root    2>/dev/null
+    tc qdisc del dev sipa_eth0 ingress 2>/dev/null
+    tc qdisc del dev sipa_eth0 clsact  2>/dev/null
+
+    for dev in $(ls /sys/class/net); do
+        tc qdisc del dev "$dev" root 2>/dev/null
+        tc qdisc del dev "$dev" ingress 2>/dev/null
+    done
+
+    iptables -D INPUT -j bw_INPUT
+    iptables -D FORWARD -j bw_FORWARD
+    iptables -D OUTPUT -j bw_OUTPUT
+    iptables -D FORWARD -j tetherctrl_FORWARD
+
+    iptables -D bw_FORWARD -i sipa_eth0 -j bw_costly_sipa_eth0
+    iptables -D bw_FORWARD -o sipa_eth0 -j bw_costly_sipa_eth0
+    iptables -D bw_INPUT -i sipa_eth0 -j bw_costly_sipa_eth0
+    iptables -D bw_OUTPUT -o sipa_eth0 -j bw_costly_sipa_eth0
+
+    iptables -F bw_FORWARD
+    iptables -F bw_INPUT
+    iptables -F bw_OUTPUT
+    iptables -F bw_costly_shared
+    iptables -F bw_costly_sipa_eth0
+    iptables -F bw_data_saver
+    iptables -F bw_global_alert
+    iptables -F bw_happy_box
+    iptables -F bw_penalty_box
+    iptables -X bw_FORWARD
+    iptables -X bw_INPUT
+    iptables -X bw_OUTPUT
+    iptables -X bw_costly_shared
+    iptables -X bw_costly_sipa_eth0
+    iptables -X bw_data_saver
+    iptables -X bw_global_alert
+    iptables -X bw_happy_box
+    iptables -X bw_penalty_box
+
+    iptables -F tetherctrl_FORWARD
+    iptables -F tetherctrl_counters
+    iptables -X tetherctrl_FORWARD
+    iptables -X tetherctrl_counters
 }
 
 #boot_script

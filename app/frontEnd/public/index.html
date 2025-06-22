@@ -475,6 +475,7 @@
                 display: flex;
                 flex-direction: column;
                 align-items: start;
+                font-size: 14px;
                 ">
                     <!-- 在这里管理字段显示 -->
                     <div class="title" style="margin: 10px 0;">基本状态</div>
@@ -629,6 +630,8 @@
                         <div class="content" style="
                         overflow-y: scroll;
                         padding: 10px;
+                        padding-bottom: 0;
+                        margin-bottom: 20px;
                         width: 66vw;
                         max-width: 400px;">
                             <input style="display: none;" type="text" name="AccessPointIndex" value="0">
@@ -731,7 +734,8 @@
                         padding: 10px;
                         width: 66vw;
                         max-height: 100%;
-                        max-width: 400px;">
+                        max-width: 400px;
+                        font-size: 14px;">
                             <div class="dash-border-round">
                                 <div class="item">
                                     <label style="
@@ -765,11 +769,9 @@
                             <div id="collapse_dhcp" class="collapse">
                                 <div class="collapse_box">
                                     <div class="dash-border-round">
-                                        <div class="item" style="
-                                display: flex;
-                                align-items: center;
-                                flex-direction: column;
-                            "><span class="label-name">DHCP IP池</span>
+                                        <div class="item"
+                                            style="display: flex;align-items: center;flex-direction: column;padding-top: 4px;">
+                                            <span class="label-name">DHCP IP池</span>
                                             <input style="flex: 1;width: 100%;padding: 6px 4px; margin: 4px 2px"
                                                 name="dhcpStart" type="text" placeholder="起始地址">
                                             <span style="transform: rotate(90deg);">&nbsp;->&nbsp;</span>
@@ -815,7 +817,7 @@
                             style="padding:0 10px;box-sizing: border-box;width: 100%;overflow: hidden;;">
                         </li>
                     </ul>
-                    <div class="btn" style="text-align: right;margin-top: 6px;">
+                    <div class="btn" style="text-align: right;margin-top: 20px;">
                         <!-- <button type="submit">提交</button> -->
                         <button type="button" onclick="closeClientManager()">关闭</button>
                     </div>
@@ -971,7 +973,7 @@
                 <div class="modal" style="width: 90%;max-width: 400px; display: flex;flex-direction: column;">
                     <form id="scheduleRebootForm" onsubmit="handleScheduleRebootFormSubmit(event)">
                         <div class="title" style="margin-bottom: 4px;">每日定时重启</div>
-                        <div style="text-align: left;">
+                        <div style="text-align: left;font-size: 14px;">
                             <p><label>启用每日定时重启？<input id="SCHEDULE_ENABLED" type="checkbox"
                                         name="restart_schedule_switch"></label></p>
                             <p>每日重启时间：<input id="SCHEDULE_TIME" name="restart_time" placeholder="00:00" type="text"

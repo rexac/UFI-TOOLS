@@ -40,6 +40,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.TextUnit
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.minikano.f50_sms.utils.DeviceModelChecker
 import com.minikano.f50_sms.utils.KanoLog
 import com.minikano.f50_sms.utils.KanoUtils
 import com.minikano.f50_sms.utils.ShellKano
@@ -75,13 +76,11 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        //阻止非随身WiFi安装使用
-        val isUFI_0 = KanoUtils.isAppInstalled(applicationContext,"com.zte.web")
-        val isUFI = ShellKano.runShellCommand("pm list package")
-        KanoLog.d("kano_ZTE_LOG", "isUFI_0：${isUFI_0} isUFI:${isUFI} ")
+        //阻止非随身WiFi与黑名单设备安装使用
+        val isNotUFI = DeviceModelChecker.checkIsNotUFI(applicationContext)
+        val isUnSupportDevice = DeviceModelChecker.checkBlackList()
 
-        if(!(isUFI != null && isUFI.contains("com.zte.web")) || !isUFI_0) {
-
+        if(isNotUFI) {
             Toast.makeText(applicationContext, "App仅可在随身wifi上安装使用，手机使用请下载手机直装版，正在退出...", Toast.LENGTH_LONG).show()
             Handler(Looper.getMainLooper()).postDelayed({
                 exitProcess(-114514)
@@ -108,7 +107,34 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
+        } else if (isUnSupportDevice) {
+            Toast.makeText(applicationContext, "该设备不受支持,正在退出...", Toast.LENGTH_LONG).show()
+            Handler(Looper.getMainLooper()).postDelayed({
+                exitProcess(-114514)
+            }, 4600)
 
+            setContent {
+                Card(
+                    shape = RoundedCornerShape(16.dp), // 圆角
+                    elevation = CardDefaults.cardElevation(8.dp), // 阴影
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp) // 外边距
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        repeat(10) {
+                            Text("不受支持的设备！！", fontSize = 20.sp)
+                        }
+                        Text("3秒后自动退出！！", fontSize = 20.sp)
+                    }
+                }
+            }
         } else {
             // 保持屏幕常亮
             window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)

@@ -3730,8 +3730,9 @@ function main_func() {
         btn.style.backgroundColor = 'var(--dark-btn-color)'
         btn.onclick = async () => {
             initSmsForward()
-            await initSmsForwardSwitch()
-            showModal('#smsForwardModal')
+            initSmsForwardSwitch().then(() => {
+                showModal('#smsForwardModal')
+            })
         }
     }
     initSmsForwardModal()

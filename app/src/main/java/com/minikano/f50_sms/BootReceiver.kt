@@ -5,12 +5,30 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import com.minikano.f50_sms.MainActivity.Companion.isEnableLog
+import com.minikano.f50_sms.utils.DeviceModelChecker
 import com.minikano.f50_sms.utils.ShellKano
+import kotlin.system.exitProcess
 
 class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == Intent.ACTION_BOOT_COMPLETED) {
             Log.d("kano_ZTE_LOG", "开机广播接收到，准备启动服务")
+
+            //check
+            val isNotUFI = DeviceModelChecker.checkIsNotUFI(context)
+            val isUnSupportDevice = DeviceModelChecker.checkBlackList()
+
+            if(isUnSupportDevice){
+                Log.d("kano_ZTE_LOG", "检测到不受支持的设备，终结程序")
+            }
+
+            if(isNotUFI){
+                Log.d("kano_ZTE_LOG", "检测到设备不是UFI/MIFI设备，终结程序")
+            }
+
+            if(isUnSupportDevice || isNotUFI) {
+                exitProcess(-999)
+            }
 
             val startIntent = Intent(context, WebService::class.java)
             startIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)

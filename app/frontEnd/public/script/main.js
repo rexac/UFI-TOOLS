@@ -4395,6 +4395,23 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
         },
         "重启": {
             goformId: 'REBOOT_DEVICE'
+        },
+        "解锁基站": {
+            goformId: 'UNLOCK_ALL_CELL'
+        },
+        "锁基站": {
+            goformId: 'CELL_LOCK',
+            pci: "输入pci，比如：912",
+            earfcn: "输入频率，比如：504990",
+            rat: "5G请输入:16,4G请输入:12"
+        },
+        "切SIM卡1": {
+            goformId: 'SET_SIM_SLOT',
+            sim_slot: 0
+        },
+        "切SIM卡2": {
+            goformId: 'SET_SIM_SLOT',
+            sim_slot: 1
         }
     }
 

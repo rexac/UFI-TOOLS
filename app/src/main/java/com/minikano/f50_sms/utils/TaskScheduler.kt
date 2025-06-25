@@ -60,6 +60,19 @@ class TaskScheduler(
     private val taskMap = ConcurrentHashMap<String, ScheduledTask>()
     private var job: Job? = null
     private val json = Json { ignoreUnknownKeys = true }
+    private var lastScheduleDate: String? = null
+    private var pollJob: Job? = null
+
+    private fun resetDailyTaskFlags() {
+        var shouldPersist = false
+        for (task in taskMap.values) {
+            if (task.repeatDaily && task.hasTriggered) {
+                task.hasTriggered = false
+                shouldPersist = true
+            }
+        }
+        if (shouldPersist) persistTasks()
+    }
 
     private fun getNextTriggerTimeMillis(): Long? {
         val now = Calendar.getInstance()
@@ -91,11 +104,27 @@ class TaskScheduler(
     fun start() {
         if (job?.isActive == true) return
         reschedule()
+        startPolling()  // 启动轮询器
     }
 
+    private fun startPolling() {
+        pollJob?.cancel()
+        pollJob = scope.launch {
+            while (isActive) {
+                delay(5 * 60 * 1000L) // 每 5 分钟
+                KanoLog.d("kano_ZTE_LOG_TaskScheduler", "定时轮询触发 reschedule() 更新")
+                reschedule()
+            }
+        }
+    }
 
     fun reschedule() {
         job?.cancel()
+        val todayStr = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+        if (lastScheduleDate != todayStr) {
+            lastScheduleDate = todayStr
+            resetDailyTaskFlags()
+        }
         val nextTimeMillis = getNextTriggerTimeMillis() ?: return
         KanoLog.d("kano_ZTE_LOG_TaskScheduler", "下一任务时间：${SimpleDateFormat("HH:mm", Locale.getDefault()).format(nextTimeMillis)}")
         val delayMillis = (nextTimeMillis - System.currentTimeMillis()).coerceAtLeast(0)
@@ -129,7 +158,9 @@ class TaskScheduler(
 
     fun stop() {
         job?.cancel()
+        pollJob?.cancel()
         job = null
+        pollJob = null
     }
 
     fun addTask(

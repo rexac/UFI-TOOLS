@@ -72,10 +72,43 @@ function updateBlurSwitch(e) {
 // 更新颜色 + 透明度
 function updateColor() {
     const { r, g, b } = hsvToRgb(currentHue, currentSaturation, currentValue);
+    const { h, s, l } = hsvToHsl(currentHue, currentSaturation, currentValue);
+
+    // 基础颜色
+    const lighterL = Math.min(l + 20, 100);
+    const btnBaseOpacity = Math.min(currentOpacity * 1.2, 1);
+
+    // 正常按钮
+    const btnColor = `hsl(${Math.round(h)} ${s.toFixed(1)}% ${lighterL.toFixed(1)}% / ${(btnBaseOpacity * 100).toFixed(2)}%)`;
+
+    // 激活按钮（更亮、更饱和、更实）
+    let activeS, activeL;
+
+    if (lighterL > 80) {
+        activeS = Math.min(s * 1.8, 100);
+        activeL = Math.max(lighterL - 25, 20);
+    } else {
+        activeS = Math.min(s * 1.6, 100);
+        activeL = Math.min(lighterL + 20, 60);
+        activeL = Math.max(activeL, 20);
+    }
+
+    const btnActiveOpacity = Math.min(btnBaseOpacity + 0.2, 1);
+    const btnActiveColor = `hsl(${Math.round(h)} ${activeS.toFixed(1)}% ${activeL.toFixed(1)}% / ${(btnActiveOpacity * 100).toFixed(2)}%)`;
+
+    // 禁用按钮（去饱和、更透明）
+    const btnDisabledOpacity = Math.max(btnBaseOpacity - 0.2, 0.1);
+    const btnDisabledColor = `hsl(${Math.round(h)} 0% ${lighterL.toFixed(1)}% / ${(btnDisabledOpacity * 100).toFixed(2)}%)`;
+
     const color = `rgba(${r}, ${g}, ${b}, ${currentOpacity})`;
+
     // 修改 :root 中的 CSS 变量
     document.documentElement.style.setProperty('--dark-bgi-color', color);
     document.documentElement.style.setProperty('--dark-tag-color', color);
+    document.documentElement.style.setProperty('--dark-btn-color', btnColor);
+    document.documentElement.style.setProperty('--dark-title-color', btnActiveColor);
+    document.documentElement.style.setProperty('--dark-btn-color-active', btnActiveColor);
+    document.documentElement.style.setProperty('--dark-btn-disabled-color', btnDisabledColor);
     document.documentElement.style.setProperty('--dark-text-color', currentTextColor);
     document.documentElement.style.setProperty('--dark-text-color', currentTextColor);
     document.documentElement.style.setProperty('--blur-rate', homeBlurSwitch ? "4px" : "0");

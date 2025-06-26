@@ -31,10 +31,11 @@ const chartUpdater = (prop, value) => {
                     if (cur.length == 1) cur = `&nbsp;&nbsp;&nbsp;${cur}`
                     else if (cur.length == 2) cur = `&nbsp;&nbsp;${cur}`
                     else if (cur.length == 3) cur = `&nbsp;${cur}`
+                    const btnColor = getCssVariableColor('--dark-btn-color-active')
                     html += `${kano_parseSignalBar(cur_origin, 0, max, max * 0.9, max * 0.9, {
                         g: '#ffa5008f',
                         o: '#ffa5008f',
-                        r: '#40A7EC'
+                        r: btnColor
                     })}`
 
                 }
@@ -63,7 +64,7 @@ const chartUpdater = (prop, value) => {
                     return charA.localeCompare(charB);
                 });
                 const html = value?.map(item => {
-                    return `<div>${item?.type?.replace('-thmzone','')}: ${(Number(item?.temp)/1000).toFixed(2)} ℃</div>`
+                    return `<div>${item?.type?.replace('-thmzone', '')}: ${(Number(item?.temp) / 1000).toFixed(2)} ℃</div>`
                 })
                 const cpuTempInfo = document.querySelector('#cpuTempInfo')
                 cpuTempInfo.innerHTML = html.join("")
@@ -92,8 +93,8 @@ const updateCpuChart = (() => {
                 tension: 0.5,
                 pointRadius: 0,
                 fill: true,
-                backgroundColor: '#40A7EC',
-                borderColor: '#40A7EC',
+                backgroundColor: getCssVariableColor('--dark-btn-color-active'),
+                borderColor: getCssVariableColor('--dark-btn-color-active'),
                 borderRadius: 3,
                 borderSkipped: false,
             }]
@@ -136,7 +137,8 @@ const updateCpuChart = (() => {
             labels.push(Number(labels[labels.length - 1]) + 1)
             data.push(Number(value))
 
-
+            chart.data.datasets[0].backgroundColor = getCssVariableColor('--dark-btn-color-active');
+            chart.data.datasets[0].borderColor = getCssVariableColor('--dark-btn-color-active');
             chart.update()
         }
     }
@@ -159,8 +161,8 @@ const updateCpuCoreChart = (() => {
                 tension: 0.5,
                 pointRadius: 0,
                 fill: true,
-                backgroundColor: '#40A7EC',
-                borderColor: '#40A7EC',
+                backgroundColor: getCssVariableColor('--dark-btn-color-active'),
+                borderColor: getCssVariableColor('--dark-btn-color-active'),
                 borderRadius: 3,
                 borderSkipped: false,
             }]
@@ -201,6 +203,8 @@ const updateCpuCoreChart = (() => {
                     data[index] = 0
                 }
             }
+            chart.data.datasets[0].backgroundColor = getCssVariableColor('--dark-btn-color-active');
+            chart.data.datasets[0].borderColor = getCssVariableColor('--dark-btn-color-active');
             chart.update()
         }
     }
@@ -220,7 +224,7 @@ const updateMemChart = (() => {
             labels,
             datasets: [{
                 data,
-                borderColor: '#40A7EC',
+                borderColor: getCssVariableColor('--dark-btn-color-active'),
                 tension: 0.5,
                 pointRadius: 0,
                 fill: false,
@@ -275,7 +279,8 @@ const updateMemChart = (() => {
             data.forEach((_, index) => {
                 data[index] = newData[index]
             })
-
+            chart.data.datasets[0].backgroundColor = getCssVariableColor('--dark-btn-color-active');
+            chart.data.datasets[0].borderColor = getCssVariableColor('--dark-btn-color-active');
             chart.update()
         }
     }
@@ -295,7 +300,7 @@ const updateTempChart = (() => {
             labels,
             datasets: [{
                 data,
-                borderColor: '#40A7EC',
+                borderColor: getCssVariableColor('--dark-btn-color-active'),
                 tension: 0.5,
                 pointRadius: 0,
                 borderWidth: 2,
@@ -349,7 +354,8 @@ const updateTempChart = (() => {
             data.forEach((_, index) => {
                 data[index] = newData[index]
             })
-
+            chart.data.datasets[0].backgroundColor = getCssVariableColor('--dark-btn-color-active');
+            chart.data.datasets[0].borderColor = getCssVariableColor('--dark-btn-color-active');
             chart.update()
         }
     }
@@ -371,7 +377,7 @@ const updateNetworkChart = (() => {
             datasets: [{
                 label: 'DL',
                 data: dataDL,
-                borderColor: '#40A7EC',
+                borderColor: getCssVariableColor('--dark-btn-color-active'),
                 tension: 0.5,
                 pointRadius: 0,
                 yAxisID: 'y',
@@ -455,7 +461,8 @@ const updateNetworkChart = (() => {
                     dataUL.forEach((_, index) => {
                         dataUL[index] = newDataUL[index]
                     })
-
+                    chart.data.datasets[0].backgroundColor = getCssVariableColor('--dark-btn-color-active');
+                    chart.data.datasets[0].borderColor = getCssVariableColor('--dark-btn-color-active');
                     chart.update()
                 }
             }, 1);

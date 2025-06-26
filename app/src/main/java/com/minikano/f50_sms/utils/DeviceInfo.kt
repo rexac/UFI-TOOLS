@@ -185,3 +185,45 @@ suspend fun readThermalZones(): Pair<Int, String> = withContext(Dispatchers.IO) 
     return@withContext Pair(maxTemp, json)
 }
 
+//电池电压，电流
+data class BatteryInfo(
+    var current_uA: Int = -1,  // 单位 μA
+    var voltage_uV: Int = -1  // 单位 μV
+)
+suspend fun readBatteryStatus(): BatteryInfo = withContext(Dispatchers.IO) {
+    val baseDir = File("/sys/class/power_supply/battery")
+    val info = BatteryInfo()
+
+    val files = mapOf(
+        "current_now" to ::parseMicroAmp,
+        "voltage_now" to ::parseMicroVolt
+    )
+
+    val details = mutableMapOf<String, Any>()
+
+    files.forEach { (filename, parser) ->
+        val file = File(baseDir, filename)
+        if (file.exists()) {
+            try {
+                val raw = file.readText().trim()
+                val value = parser(raw)
+                details[filename] = value
+                when (filename) {
+                    "current_now" -> info.current_uA = value
+                    "voltage_now" -> info.voltage_uV = value
+                }
+            } catch (_: Exception) { }
+        }
+    }
+
+    return@withContext info
+}
+
+private fun parseMicroAmp(text: String): Int {
+    return text.toIntOrNull() ?: -1
+}
+
+private fun parseMicroVolt(text: String): Int {
+    return text.toIntOrNull() ?: -1
+}
+

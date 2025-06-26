@@ -162,9 +162,18 @@ function main_func() {
                 "isShow": true
             },
             {
+                "name": "current_now",
+                "isShow": true
+            },
+            {
+                "name": "voltage_now",
+                "isShow": true
+            },
+            {
                 "name": "realtime_rx_thrpt",
                 "isShow": true
-            }],
+            }
+        ],
         signalShowList: [
             {
                 "name": "Z5g_rsrp",
@@ -758,7 +767,7 @@ function main_func() {
                 QORS_MESSAGE: `${notNullOrundefinedOrIsShow(res, "QORS_MESSAGE") ? `<strong onclick="copyText(event)"  class="green">${QORS_MESSAGE}</strong>` : ''}`,
                 network_type: `${notNullOrundefinedOrIsShow(res, 'network_type') ? `<strong onclick="copyText(event)"  class="green">网络状态：${res.network_provider} ${res.network_type == '20' ? '5G' : res.network_type == '13' ? '4G' : res.network_type}</strong>` : ''}`,
                 wifi_access_sta_num: `${notNullOrundefinedOrIsShow(res, 'wifi_access_sta_num') ? `<strong onclick="copyText(event)"  class="blue">WIFI连接：${res.wifi_access_sta_num}</strong>` : ''}`,
-                battery: `${notNullOrundefinedOrIsShow(res, 'battery') ? `<strong onclick="copyText(event)"  class="green">${res.battery_charging == "1" ? "正在充电" : "剩余电量"}：${res.battery} %</strong>` : ''}`,
+                battery: `${notNullOrundefinedOrIsShow(res, 'battery') && (res.battery_value != '' || res.battery_vol_percent != '') ? `<strong onclick="copyText(event)"  class="green">${res.battery_charging == "1" ? "正在充电" : "剩余电量"}：${res.battery} %</strong>` : ''}`,
                 rssi: `${notNullOrundefinedOrIsShow(res, 'rssi') || notNullOrundefinedOrIsShow(res, 'network_signalbar', true) ? `<strong onclick="copyText(event)"  class="green">信号强度：${kano_getSignalEmoji(notNullOrundefinedOrIsShow(res, 'rssi') ? res.rssi : res.network_signalbar)}</strong>` : ''}`,
                 cpu_temp: `${notNullOrundefinedOrIsShow(res, 'cpu_temp') ? `<strong onclick="copyText(event)"  class="blue">CPU温度：<span style="text-align:center;display:inline-block;width: 8ch;">${String(Number(res.cpu_temp / 1000).toFixed(2)).padStart(5, ' ')} ℃</span></strong>` : ''}`,
                 cpu_usage: `${notNullOrundefinedOrIsShow(res, 'cpu_usage') ? `<strong onclick="copyText(event)"  class="blue">CPU占用：<span style="text-align:center;display:inline-block;width: 8ch;">${String(Number(res.cpu_usage).toFixed(2)).padStart(5, ' ')} %</span></strong>` : ''}`,
@@ -770,7 +779,9 @@ function main_func() {
                     return limit_size.split('_')[0] * limit_size.split('_')[1] * Math.pow(1024, 2)
                 })()) : ''}</strong>` : ''}`,
                 daily_data: `${notNullOrundefinedOrIsShow(res, 'daily_data') ? `<strong onclick="copyText(event)"  class="blue">当日流量：${formatBytes(res.daily_data)}</strong>` : ''}`,
-                realtime_rx_thrpt: `${notNullOrundefinedOrIsShow(res, 'realtime_tx_thrpt') || notNullOrundefinedOrIsShow(res, 'realtime_rx_thrpt') ? `<strong onclick="copyText(event)" class="blue">当前网速: <span style="text-align:center;display:inline-block;width: 14ch;">⬇️&nbsp;${formatBytes(Number((res.realtime_rx_thrpt)), true)}/S</span><span style="text-align:center;display:inline-block;width: 14ch;">⬆️&nbsp;${formatBytes(Number((res.realtime_tx_thrpt)))}/S</span></strong>` : ''}`,
+                current_now: `${notNullOrundefinedOrIsShow(res, 'current_now') && (res.battery_value != '' || res.battery_vol_percent != '') ? `<strong onclick="copyText(event)"  class="blue">电池电流：<span style="width: 8ch;text-align:center">${res.current_now / 1000} mA</span></strong>` : ''}`,
+                voltage_now: `${notNullOrundefinedOrIsShow(res, 'voltage_now') && (res.battery_value != '' || res.battery_vol_percent != '') ? `<strong onclick="copyText(event)"  class="blue">电池电压：${(res.voltage_now / 1000000).toFixed(3)} V</strong>` : ''}`,
+                realtime_rx_thrpt: `${notNullOrundefinedOrIsShow(res, 'realtime_tx_thrpt') || notNullOrundefinedOrIsShow(res, 'realtime_rx_thrpt') ? `<strong onclick="copyText(event)" class="blue">当前网速: <span style="text-align:center;display:inline-block;width: 14ch;">↓&nbsp;${formatBytes(Number((res.realtime_rx_thrpt)), true)}/S</span><span style="text-align:center;display:inline-block;width: 14ch;font-weight:bolder">↑&nbsp;${formatBytes(Number((res.realtime_tx_thrpt)))}/S</span></strong>` : ''}`,
             }
             let statusHtml_net = {
                 lte_rsrp: `${notNullOrundefinedOrIsShow(res, 'lte_rsrp') ? `<strong onclick="copyText(event)"  class="green">4G接收功率：${kano_parseSignalBar(res.lte_rsrp)}</strong>` : ''}`,
@@ -844,7 +855,7 @@ function main_func() {
         const btn = document.querySelector('#ADB')
         if (!(await initRequestData())) {
             btn.onclick = () => createToast('请登录', 'red')
-            btn.style.backgroundColor = '#80808073'
+            btn.style.backgroundColor = 'var(--dark-btn-disabled-color)'
             return null
         }
         let res = await getData(new URLSearchParams({
@@ -876,7 +887,7 @@ function main_func() {
                 console.error(e.message)
             }
         }
-        btn.style.backgroundColor = res.usb_port_switch == '1' ? '#018ad8a8' : ''
+        btn.style.backgroundColor = res.usb_port_switch == '1' ? 'var(--dark-btn-color-active)' : ''
 
     }
     handlerADBStatus()
@@ -886,7 +897,7 @@ function main_func() {
         const btn = document.querySelector('#ADB_NET')
         if (!(await initRequestData())) {
             btn.onclick = () => createToast('请登录', 'red')
-            btn.style.backgroundColor = '#80808073'
+            btn.style.backgroundColor = 'var(--dark-btn-disabled-color)'
             return null
         }
 
@@ -938,7 +949,7 @@ function main_func() {
                 console.error(e.message)
             }
         }
-        btn.style.backgroundColor = res.enabled == "true" || res.enabled == true ? '#018ad8a8' : ''
+        btn.style.backgroundColor = res.enabled == "true" || res.enabled == true ? 'var(--dark-btn-color-active)' : ''
 
     }
     handlerADBNetworkStatus()
@@ -948,13 +959,13 @@ function main_func() {
         const btn = document.querySelector('#PERF')
         if (!(await initRequestData())) {
             btn.onclick = () => createToast('请登录', 'red')
-            btn.style.backgroundColor = '#80808073'
+            btn.style.backgroundColor = 'var(--dark-btn-disabled-color)'
             return null
         }
         let res = await getData(new URLSearchParams({
             cmd: 'performance_mode'
         }))
-        btn.style.backgroundColor = res.performance_mode == '1' ? '#018ad8a8' : ''
+        btn.style.backgroundColor = res.performance_mode == '1' ? 'var(--dark-btn-color-active)' : ''
         btn.onclick = async () => {
             try {
                 if (!(await initRequestData())) {
@@ -1022,7 +1033,7 @@ function main_func() {
     let initNetworktype = async () => {
         const selectEl = document.querySelector('#NET_TYPE')
         if (!(await initRequestData()) || !selectEl) {
-            selectEl.style.backgroundColor = '#80808073'
+            selectEl.style.backgroundColor = 'var(--dark-btn-disabled-color)'
             selectEl.disabled = true
             return null
         }
@@ -1084,7 +1095,7 @@ function main_func() {
     let initUSBNetworkType = async () => {
         const selectEl = document.querySelector('#USB_TYPE')
         if (!(await initRequestData()) || !selectEl) {
-            selectEl.style.backgroundColor = '#80808073'
+            selectEl.style.backgroundColor = 'var(--dark-btn-disabled-color)'
             selectEl.disabled = true
             return null
         }
@@ -1136,7 +1147,7 @@ function main_func() {
     let initWIFISwitch = async () => {
         const selectEl = document.querySelector('#WIFI_SWITCH')
         if (!(await initRequestData()) || !selectEl) {
-            selectEl.style.backgroundColor = '#80808073'
+            selectEl.style.backgroundColor = 'var(--dark-btn-disabled-color)'
             selectEl.disabled = true
             return null
         }
@@ -1179,7 +1190,7 @@ function main_func() {
         }
         createToast('更改中，请稍后', '#BF723F')
         try {
-            selectEl.style.backgroundColor = '#80808073'
+            selectEl.style.backgroundColor = 'var(--dark-btn-disabled-color)'
             selectEl.disabled = true
             const cookie = await login()
             if (!cookie) {
@@ -1222,7 +1233,7 @@ function main_func() {
         const el = document.querySelector('#SMB')
         if (!(await initRequestData()) || !el) {
             el.onclick = () => createToast('请登录', 'red')
-            el.style.backgroundColor = '#80808073'
+            el.style.backgroundColor = 'var(--dark-btn-disabled-color)'
             return null
         }
         let res = await getData(new URLSearchParams({
@@ -1254,7 +1265,7 @@ function main_func() {
                 // createToast(e.message)
             }
         }
-        el.style.backgroundColor = res.samba_switch == '1' ? '#018ad8a8' : ''
+        el.style.backgroundColor = res.samba_switch == '1' ? 'var(--dark-btn-color-active)' : ''
     }
     initSMBStatus()
 
@@ -1263,7 +1274,7 @@ function main_func() {
         const el = document.querySelector('#ROAM')
         if (!(await initRequestData()) || !el) {
             el.onclick = () => createToast('请登录', 'red')
-            el.style.backgroundColor = '#80808073'
+            el.style.backgroundColor = 'var(--dark-btn-disabled-color)'
             return null
         }
         let res = await getData(new URLSearchParams({
@@ -1300,7 +1311,7 @@ function main_func() {
                 // createToast(e.message)
             }
         }
-        el.style.backgroundColor = res.roam_setting_option == 'on' ? '#018ad8a8' : ''
+        el.style.backgroundColor = res.roam_setting_option == 'on' ? 'var(--dark-btn-color-active)' : ''
     }
     initROAMStatus()
 
@@ -1308,7 +1319,7 @@ function main_func() {
         const el = document.querySelector('#LIGHT')
         if (!(await initRequestData()) || !el) {
             el.onclick = () => createToast('请登录', 'red')
-            el.style.backgroundColor = '#80808073'
+            el.style.backgroundColor = 'var(--dark-btn-disabled-color)'
             return null
         }
         let res = await getData(new URLSearchParams({
@@ -1340,7 +1351,7 @@ function main_func() {
                 createToast(e.message, 'red')
             }
         }
-        el.style.backgroundColor = res.indicator_light_switch == '1' ? '#018ad8a8' : ''
+        el.style.backgroundColor = res.indicator_light_switch == '1' ? 'var(--dark-btn-color-active)' : ''
     }
     initLightStatus()
 
@@ -1569,7 +1580,7 @@ function main_func() {
         let target = e.target
         if (!(await initRequestData())) {
             out()
-            target.style.backgroundColor = '#80808073'
+            target.style.backgroundColor = 'var(--dark-btn-disabled-color)'
             return null
         }
         target.style.backgroundColor = ''
@@ -1611,7 +1622,7 @@ function main_func() {
         let target = document.querySelector('#REBOOT')
         if (!(await initRequestData())) {
             target.onclick = () => createToast('请登录', 'red')
-            target.style.backgroundColor = '#80808073'
+            target.style.backgroundColor = 'var(--dark-btn-disabled-color)'
             return null
         }
         target.style.backgroundColor = ''
@@ -2270,7 +2281,7 @@ function main_func() {
         const btn = document.querySelector('#CECULLAR')
         if (!(await initRequestData())) {
             btn.onclick = () => createToast('请登录', 'red')
-            btn.style.backgroundColor = '#80808073'
+            btn.style.backgroundColor = 'var(--dark-btn-disabled-color)'
             return null
         }
         let res = await getData(new URLSearchParams({
@@ -2305,7 +2316,7 @@ function main_func() {
             }
         }
         btn.innerHTML = '数据流量'
-        btn.style.backgroundColor = res.ppp_status == 'ppp_disconnected' ? '' : '#018ad8a8'
+        btn.style.backgroundColor = res.ppp_status == 'ppp_disconnected' ? '' : 'var(--dark-btn-color-active)'
     }
     handlerCecullarStatus()
 
@@ -2325,7 +2336,7 @@ function main_func() {
         const btn = document.querySelector('#BG_SETTING')
         if (!(await initRequestData())) {
             btn.onclick = () => createToast('请登录', 'red')
-            btn.style.backgroundColor = '#80808073'
+            btn.style.backgroundColor = 'var(--dark-btn-disabled-color)'
             return null
         }
         btn.style.backgroundColor = ''
@@ -2479,7 +2490,7 @@ function main_func() {
         if (!btn) return
         if (!(await initRequestData())) {
             btn.onclick = () => createToast('请登录', 'red')
-            btn.style.backgroundColor = '#80808073'
+            btn.style.backgroundColor = 'var(--dark-btn-disabled-color)'
             return null
         }
 
@@ -2489,12 +2500,12 @@ function main_func() {
 
         SCHEDULE_ENABLED.checked = restart_schedule_switch == '1'
         SCHEDULE_TIME.value = restart_time
-        btn.style.backgroundColor = restart_schedule_switch == '1' ? '#018ad8a8' : ''
+        btn.style.backgroundColor = restart_schedule_switch == '1' ? 'var(--dark-btn-color-active)' : ''
 
         btn.onclick = async () => {
             if (!(await initRequestData())) {
                 btn.onclick = () => createToast('请登录', 'red')
-                btn.style.backgroundColor = '#80808073'
+                btn.style.backgroundColor = 'var(--dark-btn-disabled-color)'
                 return null
             }
             showModal('#scheduleRebootModal')
@@ -2552,7 +2563,7 @@ function main_func() {
         if (!btn) return
         if (!(await initRequestData())) {
             btn.onclick = () => createToast('请登录', 'red')
-            btn.style.backgroundColor = '#80808073'
+            btn.style.backgroundColor = 'var(--dark-btn-disabled-color)'
             return null
         }
 
@@ -2572,7 +2583,7 @@ function main_func() {
         btn.onclick = async () => {
             if (!(await initRequestData())) {
                 btn.onclick = () => createToast('请登录', 'red')
-                btn.style.backgroundColor = '#80808073'
+                btn.style.backgroundColor = 'var(--dark-btn-disabled-color)'
                 return null
             }
             shutDownBtnCount++
@@ -2685,7 +2696,7 @@ function main_func() {
         if (parts.length < 8) {
             return input
         }
-        return `QCI等级：${parts[1]} 🔽 ${+parts[6] / 1000}Mbps 🔼 ${+parts[7] / 1000}Mbps`
+        return `QCI等级：${parts[1]} ↓ ${+parts[6] / 1000}Mbps ↑ ${+parts[7] / 1000}Mbps`
     }
 
 
@@ -2738,7 +2749,7 @@ function main_func() {
         const el = document.querySelector('#AT')
         if (!(await initRequestData()) || !el) {
             el.onclick = () => createToast('请登录', 'red')
-            el.style.backgroundColor = '#80808073'
+            el.style.backgroundColor = 'var(--dark-btn-disabled-color)'
             return null
         }
         el.style.backgroundColor = ''
@@ -2862,7 +2873,7 @@ function main_func() {
         const el = document.querySelector('#ADVANCE')
         if (!(await initRequestData()) || !el) {
             el.onclick = () => createToast('请登录', 'red')
-            el.style.backgroundColor = '#80808073'
+            el.style.backgroundColor = 'var(--dark-btn-disabled-color)'
             return null
         }
         el.style.backgroundColor = ''
@@ -2929,10 +2940,10 @@ function main_func() {
         const el = document.querySelector("#CHANGEPWD")
         if (!(await initRequestData()) || !el) {
             el.onclick = () => createToast('请登录', 'red')
-            el.style.backgroundColor = '#80808073'
+            el.style.backgroundColor = 'var(--dark-btn-disabled-color)'
             return null
         }
-        el.style.backgroundColor = '#87ceeb70'
+        el.style.backgroundColor = ''
         el.onclick = async () => {
             showModal('#changePassModal')
         }
@@ -2997,7 +3008,7 @@ function main_func() {
         selectEl.style.display = ''
         // }
         if (!(await initRequestData()) || !selectEl) {
-            selectEl.style.backgroundColor = '#80808073'
+            selectEl.style.backgroundColor = 'var(--dark-btn-disabled-color)'
             selectEl.disabled = true
             return null
         }
@@ -3023,7 +3034,7 @@ function main_func() {
         const btn = document.querySelector('#NFC')
         if (!(await initRequestData())) {
             btn.onclick = () => createToast('请登录', 'red')
-            btn.style.backgroundColor = '#80808073'
+            btn.style.backgroundColor = 'var(--dark-btn-disabled-color)'
             return null
         }
         // 查询是否支持NFC
@@ -3045,7 +3056,7 @@ function main_func() {
             btn.onclick = async () => {
                 try {
                     if (!(await initRequestData())) {
-                        btn.style.backgroundColor = '#80808073'
+                        btn.style.backgroundColor = 'var(--dark-btn-disabled-color)'
                         return null
                     }
                     const cookie = await login()
@@ -3069,7 +3080,7 @@ function main_func() {
                 }
             }
 
-            btn.style.backgroundColor = web_wifi_nfc_switch.toString() == '1' ? '#018ad8a8' : ''
+            btn.style.backgroundColor = web_wifi_nfc_switch.toString() == '1' ? 'var(--dark-btn-color-active)' : ''
         } catch { }
     }
     initNFCSwitch()
@@ -3122,7 +3133,7 @@ function main_func() {
         speedController = new AbortController();
         const speedSignal = speedController.signal;
 
-        e.target.style.backgroundColor = '#80808073';
+        e.target.style.backgroundColor = 'var(--dark-btn-disabled-color)';
         e.target.innerHTML = '停止测速';
 
         const serverUrl = `${KANO_baseURL}/speedtest`;
@@ -3399,9 +3410,9 @@ function main_func() {
 
         // 更新时禁用按钮
         doUpdateEl && (doUpdateEl.onclick = null)
-        doUpdateEl && (doUpdateEl.style.backgroundColor = '#80808073')
+        doUpdateEl && (doUpdateEl.style.backgroundColor = 'var(--dark-btn-disabled-color)')
         closeUpdateBtnEl && (closeUpdateBtnEl.onclick = null)
-        closeUpdateBtnEl && (closeUpdateBtnEl.style.backgroundColor = '#80808073')
+        closeUpdateBtnEl && (closeUpdateBtnEl.style.backgroundColor = 'var(--dark-btn-disabled-color)')
         updateSoftwareModal && (updateSoftwareModal.onclick = null)
         try {
             // const changelogTextContent = document.querySelector('#ChangelogTextContent')
@@ -3522,8 +3533,8 @@ function main_func() {
                     } else {
                         doUpdateEl.onclick = null
                         doDownloadAPKEl.onclick = null
-                        doUpdateEl.style.backgroundColor = '#80808073'
-                        doDownloadAPKEl.style.backgroundColor = '#80808073'
+                        doUpdateEl.style.backgroundColor = 'var(--dark-btn-disabled-color)'
+                        doDownloadAPKEl.style.backgroundColor = 'var(--dark-btn-disabled-color)'
                     }
                 }
                 //获取changeLog
@@ -3556,7 +3567,7 @@ function main_func() {
 
         if (!(await initRequestData())) {
             btn.onclick = () => createToast('请登录', 'red')
-            btn.style.backgroundColor = '#80808073'
+            btn.style.backgroundColor = 'var(--dark-btn-disabled-color)'
             return null
         }
         btn.style.backgroundColor = 'var(--dark-btn-color)'
@@ -3564,7 +3575,7 @@ function main_func() {
             const btn = document.querySelector('#OTA')
             if (!(await initRequestData())) {
                 btn.onclick = () => createToast('请登录', 'red')
-                btn.style.backgroundColor = '#80808073'
+                btn.style.backgroundColor = 'var(--dark-btn-disabled-color)'
                 return null
             }
             checkUpdateAction()
@@ -3724,7 +3735,7 @@ function main_func() {
         const btn = document.querySelector('#smsForward')
         if (!(await initRequestData())) {
             btn.onclick = () => createToast('请登录', 'red')
-            btn.style.backgroundColor = '#80808073'
+            btn.style.backgroundColor = 'var(--dark-btn-disabled-color)'
             return null
         }
         btn.style.backgroundColor = 'var(--dark-btn-color)'
@@ -3884,7 +3895,7 @@ function main_func() {
         const btn = document.querySelector('#LANManagement')
         if (!(await initRequestData())) {
             btn.onclick = () => createToast('请登录', 'red')
-            btn.style.backgroundColor = '#80808073'
+            btn.style.backgroundColor = 'var(--dark-btn-disabled-color)'
             return null
         }
         btn.style.backgroundColor = 'var(--dark-btn-color)'
@@ -4122,7 +4133,7 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
         const btn = document.querySelector('#ScheduledTaskManagement')
         if (!(await initRequestData())) {
             btn.onclick = () => createToast('请登录', 'red')
-            btn.style.backgroundColor = '#80808073'
+            btn.style.backgroundColor = 'var(--dark-btn-disabled-color)'
             return null
         }
         btn.style.backgroundColor = 'var(--dark-btn-color)'
@@ -4488,7 +4499,7 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
         const btn = document.querySelector('#PLUGIN_SETTING')
         if (!(await initRequestData())) {
             btn.onclick = () => createToast('请登录', 'red')
-            btn.style.backgroundColor = '#80808073'
+            btn.style.backgroundColor = 'var(--dark-btn-disabled-color)'
             return null
         }
         btn.style.backgroundColor = 'var(--dark-btn-color)'
@@ -4579,8 +4590,35 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
         }
     }
 
+    const getBoot = async () => {
+        try {
+            const AD_RESULT = document.querySelector('#AD_RESULT')
+            AD_RESULT.innerHTML = ''
+            const res = await runShellWithRoot("getprop ro.boot.slot_suffix")
+            let ab = res.content.includes('a') ? "A" : "B"
+            createToast(`你当前的槽位是：${ab}`, '')
+            await runShellWithRoot('mkdir /data/data/com.minikano.f50_sms/files/uploads')
+            const outFile = `boot_a.img`
+            await runShellWithRoot(`rm -f /data/data/com.minikano.f50_sms/files/uploads/${outFile}`)
+            const command = `dd if=/dev/block/by-name/boot_${ab.toLowerCase()} of=/data/data/com.minikano.f50_sms/files/uploads/${outFile}`
+            let result = await runShellWithRoot(command)
+            if (result.success) {
+                AD_RESULT.innerHTML = `<strong style="font-size: 12px;">你当前的分区槽位是：${ab}，正在下载：boot_${ab}.img...</strong>`
+            }
+            //开始下载
+            const outLink = `/api/uploads/${outFile}`
+            const a = document.createElement('a')
+            a.href = outLink
+            a.download = outFile
+            a.click()
+        } catch {
+            createToast(`执行错误`, 'red')
+        }
+    }
+
     //挂载方法到window
     const methods = {
+        getBoot,
         handleDisableFOTA,
         refreshTask,
         savePluginSetting,

@@ -10,6 +10,7 @@
     --dark-btn-color: #87ceeb61;
     --dark-title-color: skyblue;
     --dark-btn-disabled-color: #80808073;
+    --dark-btn-color-active: #018ad8a8;
     --blur-rate: 4px
 }
 
@@ -1101,10 +1102,6 @@ input[type="range"] {
     background-color: rgba(0, 0, 0, 0.371);
     width: 50px;
     border-radius: 6px;
-}
-
-.cpu-card .signal_bar_progress {
-    opacity: 0.4 !important;
 }
 
 #ScheduledTasksModal .card-item:hover{

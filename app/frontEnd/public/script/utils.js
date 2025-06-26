@@ -102,7 +102,7 @@ function kano_parseSignalBar(val, min = -125, max = -81, green_low = -90, yellow
 }
 
 function kano_getSignalEmoji(strength) {
-    const signals = ["📶 ⬜⬜⬜⬜", "📶 🟨⬜⬜⬜", "📶 🟩🟨⬜⬜", "📶 🟩🟩🟨⬜", "📶 🟩🟩🟩🟨", "📶 🟩🟩🟩🟩"];
+    const signals = ["□□□□□", "■□□□□", "■■□□□", "■■■□□", "■■■■□", "■■■■■"];
     return `${strength} ${signals[Math.max(0, Math.min(strength, 5))]}`; // 确保输入在 0-5 之间
 }
 
@@ -180,7 +180,7 @@ function createToast(text, color, delay = 3000) {
         toastEl.style.opacity = `0`
         toastEl.style.transform = `scale(0)`
         toastEl.style.transformOrigin = 'top center'
-        toastEl.style.boxShadow = '0 0 10px 0 #87ceeb70'
+        toastEl.style.boxShadow = '0 0 10px 0 rgba(135, 207, 235, 0.24)'
         toastEl.style.fontWeight = 'bold'
         toastEl.style.backdropFilter = 'blur(10px)'
         toastEl.style.borderRadius = '6px'
@@ -256,6 +256,17 @@ function hsvToRgb(h, s, v) {
         r: Math.round((r + m) * 255),
         g: Math.round((g + m) * 255),
         b: Math.round((b + m) * 255)
+    };
+}
+
+function hsvToHsl(h, s, v) {
+    // h: 0–360, s: 0–1, v: 0–1
+    const l = v * (1 - s / 2);
+    const sl = (l === 0 || l === 1) ? 0 : (v - l) / Math.min(l, 1 - l);
+    return {
+        h: h,              
+        s: sl * 100,       
+        l: l * 100        
     };
 }
 
@@ -545,3 +556,12 @@ Array.from(document.querySelectorAll('.mask'))?.forEach(el => {
         }
     }
 })
+
+
+//传入css变量返回颜色
+const getCssVariableColor = (variableName) => {
+    const color = getComputedStyle(document.documentElement)
+        ?.getPropertyValue(variableName)
+        ?.trim();
+    return color
+}

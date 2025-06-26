@@ -12,6 +12,7 @@ import com.minikano.f50_sms.utils.ShellKano
 import com.minikano.f50_sms.utils.calculateCpuUsage
 import com.minikano.f50_sms.utils.getCpuFreqJson
 import com.minikano.f50_sms.utils.getMemoryUsage
+import com.minikano.f50_sms.utils.readBatteryStatus
 import com.minikano.f50_sms.utils.readThermalZones
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
@@ -155,8 +156,13 @@ fun Route.baseDeviceInfoModule(context: Context) {
         var versionCodeRes: Int? = null
         var modelRes: String? = null
         var batteryLevelRes: Int? = null
+        var currentNow :Int? = null
+        var votageNow :Int? = null
         try {
-            val model = Build.MODEL
+            var model = Build.MODEL
+            if (model.contains("MU5352")){
+                model = "U30 Lite"
+            }
             val batteryLevel: Int = KanoUtils.getBatteryPercentage(context)
 
             val packageManager = context.packageManager
@@ -165,6 +171,10 @@ fun Route.baseDeviceInfoModule(context: Context) {
 
             val versionName = packageInfo.versionName
             val versionCode = packageInfo.versionCode
+
+            val batteryStatus = readBatteryStatus()
+            currentNow = batteryStatus.current_uA
+            votageNow = batteryStatus.voltage_uV
 
             KanoLog.d(TAG, "型号与电量：$model $batteryLevel")
 
@@ -201,7 +211,9 @@ fun Route.baseDeviceInfoModule(context: Context) {
                 "mem_usage":$memUsageRes,
                 "cpuFreqInfo":$cpuFreqInfo,
                 "cpuUsageInfo":$cpuUsageInfo,
-                "memInfo":$memInfo
+                "memInfo":$memInfo,
+                "current_now":$currentNow,
+                "voltage_now":$votageNow
             }
         """.trimIndent()
         call.response.headers.append("Access-Control-Allow-Origin", "*")

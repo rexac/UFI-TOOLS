@@ -30,11 +30,11 @@ data class ThemeConfig(
     val backgroundUrl: String = "",
     val textColor: String = "rgba(255, 255, 255, 1)",
     val textColorPer: String = "100",
-    val themeColor: String = "183",
-    val colorPer: String = "61",
-    val saturationPer: String = "16",
-    val brightPer: String = "16",
-    val opacityPer: String = "37",
+    val themeColor: String = "201",
+    val colorPer: String = "67",
+    val saturationPer: String = "100",
+    val brightPer: String = "21",
+    val opacityPer: String = "21",
     val blurSwitch: String = "true"
 )
 
@@ -139,11 +139,11 @@ fun Route.themeModule(context: Context) {
                     backgroundUrl = json.optString("backgroundUrl", "").trim(),
                     textColor = json.optString("textColor", "rgba(255, 255, 255, 1)").trim(),
                     textColorPer = json.optString("textColorPer", "100").trim(),
-                    themeColor = json.optString("themeColor", "183").trim(),
-                    colorPer = json.optString("colorPer", "61").trim(),
-                    saturationPer = json.optString("saturationPer", "16").trim(),
-                    brightPer = json.optString("brightPer", "16").trim(),
-                    opacityPer = json.optString("opacityPer", "37").trim(),
+                    themeColor = json.optString("themeColor", "201").trim(),
+                    colorPer = json.optString("colorPer", "67").trim(),
+                    saturationPer = json.optString("saturationPer", "100").trim(),
+                    brightPer = json.optString("brightPer", "21").trim(),
+                    opacityPer = json.optString("opacityPer", "21").trim(),
                     blurSwitch = json.optString("blurSwitch", "true").trim()
                 )
 
@@ -194,11 +194,11 @@ fun Route.themeModule(context: Context) {
                     backgroundUrl = json.optString("backgroundUrl", "").trim(),
                     textColor = json.optString("textColor", "rgba(255, 255, 255, 1)").trim(),
                     textColorPer = json.optString("textColorPer", "100").trim(),
-                    themeColor = json.optString("themeColor", "183").trim(),
-                    colorPer = json.optString("colorPer", "61").trim(),
-                    saturationPer = json.optString("saturationPer", "16").trim(),
-                    brightPer = json.optString("brightPer", "16").trim(),
-                    opacityPer = json.optString("opacityPer", "37").trim(),
+                    themeColor = json.optString("themeColor", "201").trim(),
+                    colorPer = json.optString("colorPer", "67").trim(),
+                    saturationPer = json.optString("saturationPer", "100").trim(),
+                    brightPer = json.optString("brightPer", "21").trim(),
+                    opacityPer = json.optString("opacityPer", "21").trim(),
                     blurSwitch = json.optString("blurSwitch", "true").trim()
                 )
             } else {

@@ -494,6 +494,8 @@
                         <li draggable="true"> <label><input type="checkbox" data-name="monthly_tx_bytes">流量使用情况</label>
                         </li>
                         <li draggable="true"> <label><input type="checkbox" data-name="daily_data">当日流量</label></li>
+                        <li draggable="true"> <label><input type="checkbox" data-name="current_now">电池电流</label></li>
+                        <li draggable="true"> <label><input type="checkbox" data-name="voltage_now">电池电压</label></li>
                         <li draggable="true"> <label><input type="checkbox" data-name="realtime_rx_thrpt">实时网速</label>
                         </li>
                     </ul>
@@ -928,7 +930,7 @@
                             style="width: 100%;margin-left: 0;margin-right: 0;" min="0" max="100" type="range">
                         <input id="brightEl" oninput="getValueByPercent(event)"
                             style="width: 100%;margin-left: 0;margin-right: 0;" min="0" max="100" type="range">
-                        <p>背景透明度</p>
+                        <p>主题透明度</p>
                         <input id="opacityEl" oninput="getOpacityByPercent(event)"
                             style="width: 100%;margin-left: 0;margin-right: 0;" type="range" min="0" max="100">
                     </div>
@@ -1109,6 +1111,8 @@
                                             onclick="disableButtonWhenExecuteFunc(event,()=>switchCpuCore(false))">关闭小核</button>
                                         <button class="btn"
                                             onclick="disableButtonWhenExecuteFunc(event,()=>switchCpuCore(true))">开启小核</button>
+                                        <button class="btn"
+                                            onclick="disableButtonWhenExecuteFunc(event,()=>getBoot())">提取Boot</button>
                                     </div>
                                 </div>
                             </div>

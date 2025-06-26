@@ -35,7 +35,8 @@ data class ThemeConfig(
     val saturationPer: String = "100",
     val brightPer: String = "21",
     val opacityPer: String = "21",
-    val blurSwitch: String = "true"
+    val blurSwitch: String = "true",
+    val overlaySwitch: String = "true"
 )
 
 val jsonFull = Json {
@@ -144,7 +145,8 @@ fun Route.themeModule(context: Context) {
                     saturationPer = json.optString("saturationPer", "100").trim(),
                     brightPer = json.optString("brightPer", "21").trim(),
                     opacityPer = json.optString("opacityPer", "21").trim(),
-                    blurSwitch = json.optString("blurSwitch", "true").trim()
+                    blurSwitch = json.optString("blurSwitch", "true").trim(),
+                    overlaySwitch = json.optString("overlaySwitch", "true").trim()
                 )
 
                 val jsonStore = jsonFull.encodeToString(config)
@@ -199,7 +201,8 @@ fun Route.themeModule(context: Context) {
                     saturationPer = json.optString("saturationPer", "100").trim(),
                     brightPer = json.optString("brightPer", "21").trim(),
                     opacityPer = json.optString("opacityPer", "21").trim(),
-                    blurSwitch = json.optString("blurSwitch", "true").trim()
+                    blurSwitch = json.optString("blurSwitch", "true").trim(),
+                    overlaySwitch = json.optString("overlaySwitch", "true").trim()
                 )
             } else {
                 ThemeConfig()

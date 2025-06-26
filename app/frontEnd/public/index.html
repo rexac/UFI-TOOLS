@@ -918,6 +918,9 @@
                         <p><label style="display: flex;align-items: center;">主页毛玻璃开关&nbsp;<input
                                     onchange="updateBlurSwitch(event)" id="blurSwitch" type="checkbox" name=""
                                     id=""></label></p>
+                        <p><label style="display: flex;align-items: center;">背景遮罩颜色&nbsp;<input
+                                    onchange="updateOverlaySwitch(event)" id="overlaySwitch" type="checkbox" name=""
+                                    id=""></label></p>
                         <p>字体颜色(黑-白)</p>
                         <input id="textColorEl" oninput="updateTextColor(event)"
                             style="width: 100%;margin-left: 0;margin-right: 0;" min="0" max="100" type="range">
@@ -1327,12 +1330,8 @@
                     <div class="title" style="display: flex;align-items: center;margin-top: 10px;font-size: 12px;">
                         <div>
                             <p style="margin: 0; font-style: italic;">开发不易，打赏随意～</p>
-                            <p style="margin: 0; font-style: italic;">點擊即可讓黑奴幹活（bushi）</p>
                             <p style="margin: 0; font-style: italic;">长按赞赏码可保存为图片</p>
                         </div>
-                        <img style="max-width: 80px;flex:1; animation: a 5s infinite ease-in-out;border-radius: 8px;"
-                            src="https://kanokano.cn/wp-content/uploads/2025/05/BFEE3DCE16FE04E6EF4EC52396E618B1.webp"
-                            onerror="this.onerror=null; this.src='/img/hn.webp'" alt="">
                     </div>
                     <div class="content"
                         style="overflow-y: hidden;padding: 15px;width: 66vw;max-width: 400px;max-height:fit-content;">

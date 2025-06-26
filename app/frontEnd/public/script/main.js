@@ -1,3 +1,9 @@
+const _cloudSync = localStorage.getItem('isCloudSync');
+if (_cloudSync == null || _cloudSync == undefined) {
+    localStorage.setItem('isCloudSync', true);
+    initTheme()
+}
+
 const baseSize = 14;
 const minScale = 0.9;
 const maxScale = 1.2;
@@ -2381,7 +2387,8 @@ function main_func() {
                         "saturationPer": localStorage.getItem("saturationPer"),
                         "brightPer": localStorage.getItem("brightPer"),
                         "opacityPer": localStorage.getItem("opacityPer"),
-                        "blurSwitch": localStorage.getItem("blurSwitch")
+                        "blurSwitch": localStorage.getItem("blurSwitch"),
+                        "overlaySwitch": localStorage.getItem("overlaySwitch")
                     })
                 })).json()
 
@@ -2476,6 +2483,8 @@ function main_func() {
             catch (e) {
                 createToast(`重置失败!`, 'red')
             }
+        } else {
+            createToast(`开启多设备同步才能重置！`, 'red')
         }
         initTheme && initTheme()
         e.target.innerHTML = '重置主题'

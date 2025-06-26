@@ -12,6 +12,9 @@ let currentTextColor = 0;
 //主页模糊开关
 let homeBlurSwitch = true
 
+//背景overlay开关
+let overlaySwitch = true;
+
 // 调色盘
 function getColorByPercent(e) {
     const value = e.target.value; // 0 ~ 100
@@ -62,12 +65,22 @@ function updateTextColor(e) {
 
 //主页毛玻璃
 function updateBlurSwitch(e) {
-    const value = e.target.checked; // 0 ~ 100
+    const value = e.target.checked; 
     homeBlurSwitch = value
     updateColor()
     //保存进度到localStorage
     localStorage.setItem('blurSwitch', value);
 }
+
+//背景遮罩
+function updateOverlaySwitch(e) {
+    const value = e.target.checked;
+    overlaySwitch = value
+    updateColor()
+    //保存进度到localStorage
+    localStorage.setItem('overlaySwitch', value);
+}
+
 
 // 更新颜色 + 透明度
 function updateColor() {
@@ -112,6 +125,7 @@ function updateColor() {
     document.documentElement.style.setProperty('--dark-text-color', currentTextColor);
     document.documentElement.style.setProperty('--dark-text-color', currentTextColor);
     document.documentElement.style.setProperty('--blur-rate', homeBlurSwitch ? "4px" : "0");
+    document.querySelector('#BG_OVERLAY').style.backgroundColor = overlaySwitch ? `var(--dark-bgi-color)` : 'transparent';
     //保存到localStorage
     localStorage.setItem('themeColor', currentHue);
 }
@@ -147,29 +161,36 @@ const initTheme = async (sync = false) => {
     let textColor = localStorage.getItem('textColor');
     let textColorPer = localStorage.getItem('textColorPer');
     let blur = localStorage.getItem('blurSwitch');
+    let overlay = localStorage.getItem('overlaySwitch');
 
     if (blur == null || blur == undefined) {
         blur = "true"
+        localStorage.setItem('blurSwitch', blur);
+    }
+
+    if (overlay == null || overlay == undefined) {
+        overlay = "true"
+        localStorage.setItem('overlaySwitch', overlay);
     }
 
     if (color == null || color == undefined) {
-        color = 183;
+        color = 201;
         localStorage.setItem('themeColor', color);
     }
     if (colorPer == null || colorPer == undefined) {
-        colorPer = 61;
+        colorPer = 67;
         localStorage.setItem('colorPer', colorPer);
     }
     if (opacityPer == null || opacityPer == undefined) {
-        opacityPer = 37;
+        opacityPer = 21;
         localStorage.setItem('opacityPer', opacityPer);
     }
     if (value == null || value == undefined) {
-        value = 16;
+        value = 21;
         localStorage.setItem('brightPer', value);
     }
     if (saturation == null || saturation == undefined) {
-        saturation = 16;
+        saturation = 100;
         localStorage.setItem('saturationPer', saturation);
     }
     if (textColor == null || textColor == undefined) {
@@ -182,6 +203,7 @@ const initTheme = async (sync = false) => {
     }
 
     homeBlurSwitch = blur == "true"
+    overlaySwitch = overlay == "true"
     currentHue = color;
     currentOpacity = opacityPer / 100;
     currentValue = value / 100;
@@ -194,6 +216,7 @@ const initTheme = async (sync = false) => {
     document.querySelector("#saturationEl").value = saturation;
     document.querySelector("#textColorEl").value = textColorPer;
     document.querySelector("#blurSwitch").checked = homeBlurSwitch;
+    document.querySelector("#overlaySwitch").checked = overlaySwitch;
     isCloudSync.checked = isSync == "true"
 }
 initTheme();

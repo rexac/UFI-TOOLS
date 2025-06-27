@@ -48,12 +48,12 @@ const chartUpdater = (prop, value) => {
         case 'memInfo':
             if (value) {
                 const memInfo = document.querySelector('#memInfo')
-                memInfo.innerHTML = `<div>内存(全部)：${formatBytes(value['mem_total_kb'] * 1024)}</div>
-                <div>内存(可用)：${formatBytes(value['mem_available_kb'] * 1024)}</div>
-                <div>内存(已用)：${formatBytes(value['mem_used_kb'] * 1024)}(${Math.round(value['mem_usage_percent'])}%)</div>
-                <div>全部SWAP：${formatBytes(value['swap_total_kb'] * 1024)}</div>
-                <div>已用SWAP：${formatBytes(value['swap_used_kb'] * 1024)}(${Math.round(value['swap_usage_percent'])}%)</div>
-                <div>可用SWAP：${formatBytes(value['swap_free_kb'] * 1024)}</div>`
+                memInfo.innerHTML = `<div>${t('ram_all')}：${formatBytes(value['mem_total_kb'] * 1024)}</div>
+                <div>${t('ram_available')}：${formatBytes(value['mem_available_kb'] * 1024)}</div>
+                <div>${t('ram_used')}：${formatBytes(value['mem_used_kb'] * 1024)}(${Math.round(value['mem_usage_percent'])}%)</div>
+                <div>${t('all_swap')}：${formatBytes(value['swap_total_kb'] * 1024)}</div>
+                <div>${t('swap_used')}：${formatBytes(value['swap_used_kb'] * 1024)}(${Math.round(value['swap_usage_percent'])}%)</div>
+                <div>${t('swap_available')}：${formatBytes(value['swap_free_kb'] * 1024)}</div>`
             }
             break
         case 'cpu_temp_list':
@@ -261,7 +261,7 @@ const updateMemChart = (() => {
     return (value) => {
         if (value != undefined || value != null) {
             chart.options.plugins.centerText.text = [
-                { text: `内存: ${Math.floor(value)} % ` }
+                { text: `${t('ram')}: ${Math.floor(value)} % ` }
             ]
 
             let newLabels = [...labels]
@@ -337,7 +337,7 @@ const updateTempChart = (() => {
     return (value) => {
         if (value != undefined || value != null) {
             chart.options.plugins.centerText.text = [
-                { text: `温度: ${String(Number(value / 1000).toFixed(2))}℃` }
+                { text: `${t('temperature')}: ${String(Number(value / 1000).toFixed(2))}℃` }
             ]
             let newLabels = [...labels]
             let newData = [...data]

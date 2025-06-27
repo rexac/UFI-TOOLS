@@ -40,9 +40,9 @@ function copyText(e) {
     if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
         // 浏览器支持
         navigator.clipboard.writeText(text).then(() => {
-            createToast('已经复制到剪贴板！', 'green')
+            createToast(t('copy_success'), 'green')
         }).catch(err => {
-            createToast('复制失败', 'red')
+            createToast(t('copy_failed'), 'red')
         });
     } else {
         // 创建text area
@@ -61,9 +61,9 @@ function copyText(e) {
             document.execCommand('copy') ? res() : rej();
             textArea.remove();
         }).then(() => {
-            createToast('已经复制到剪贴板！', 'green')
+            createToast(t('copy_success'), 'green')
         }).catch(() => {
-            createToast('复制失败', 'red')
+            createToast(t('copy_failed'), 'red')
         });
     }
 }
@@ -102,17 +102,17 @@ function kano_parseSignalBar(val, min = -125, max = -81, green_low = -90, yellow
 }
 
 function kano_getSignalEmoji(strength) {
-    const signals = ["□□□□□", "■□□□□", "■■□□□", "■■■□□", "■■■■□", "■■■■■"];
+    const signals = ["📶 ⬜⬜⬜⬜", "📶 🟨⬜⬜⬜", "📶 🟩🟨⬜⬜", "📶 🟩🟩🟨⬜", "📶 🟩🟩🟩🟨", "📶 🟩🟩🟩🟩"];
     return `${strength} ${signals[Math.max(0, Math.min(strength, 5))]}`; // 确保输入在 0-5 之间
 }
 
 function kano_formatTime(seconds) {
     if (seconds < 60) {
-        return `${seconds} 秒`;
+        return `${seconds} ${t('seconds')}`;
     } else if (seconds < 3600) {
-        return `${(seconds / 60).toFixed(1)} 分钟`;
+        return `${(seconds / 60).toFixed(1)} ${t('minutes')}`;
     } else {
-        return `${(seconds / 3600).toFixed(1)} 小时`;
+        return `${(seconds / 3600).toFixed(1)} ${t('hours')}`;
     }
 }
 
@@ -264,9 +264,9 @@ function hsvToHsl(h, s, v) {
     const l = v * (1 - s / 2);
     const sl = (l === 0 || l === 1) ? 0 : (v - l) / Math.min(l, 1 - l);
     return {
-        h: h,              
-        s: sl * 100,       
-        l: l * 100        
+        h: h,
+        s: sl * 100,
+        l: l * 100
     };
 }
 
@@ -405,7 +405,7 @@ const collapseGen = (btn_id, collapse_id, storName, callback = undefined) => {
 
 //inputIMEI
 const inputIMEIAT = () => {
-    document.querySelector('#AT_INPUT').value = 'AT+SPIMEI=0或者1,"你的串号"'
+    document.querySelector('#AT_INPUT').value = 'AT+SPIMEI=0,"IMEI"'
 }
 
 //提取apk中日期与时间

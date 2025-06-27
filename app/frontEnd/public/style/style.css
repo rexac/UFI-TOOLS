@@ -42,6 +42,8 @@ body {
     background-attachment: fixed;
     color: var(--dark-text-color);
     word-break: break-all;
+    text-shadow:
+        -1px -1px 10px rgba(0, 0, 0, 0.3)
 }
 
 .bg {
@@ -59,6 +61,11 @@ tbody,
 input {
     backdrop-filter: blur(var(--blur-rate));
     -webkit-backdrop-filter: blur(var(--blur-rate));
+}
+
+input[type^="radio"] {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
 }
 
 a {
@@ -533,7 +540,7 @@ input {
 
 #WIFIManagementModal .label-name {
     display: inline-block;
-    width: 76px;
+    min-width: 100px;
 }
 
 #TTYDModal {
@@ -589,7 +596,7 @@ li.dragging {
 }
 
 .speedtest {
-    white-space: pre-wrap;
+    /* white-space: pre-wrap; */
     word-wrap: break-word;
     padding: 0 10px;
     border-left: 4px solid #2196F3;
@@ -653,7 +660,7 @@ li.dragging {
 }
 
 .Switch .switch.active {
-    background-color: var(--dark-btn-color);
+    background-color: var(--dark-btn-color-active);
 }
 
 .Switch .switch.active .dot {
@@ -685,6 +692,8 @@ li.dragging {
     padding: 10px;
     box-sizing: border-box;
     pointer-events: none;
+    text-shadow:
+        -1px -1px 10px rgba(0, 0, 0, 0.519),
 }
 
 .tip {
@@ -855,8 +864,24 @@ input[type="range"] {
     border-radius: 6px;
 }
 
-#ScheduledTasksModal .card-item:hover{
+#ScheduledTasksModal .card-item:hover {
     box-shadow: none !important;
     border-color: transparent !important;
     transform: scale(1) !important;
+}
+
+.donate_content img {
+    aspect-ratio: 1/1;
+}
+
+@media (max-width: 600px) {
+    .donate_content {
+        align-items: center;
+        justify-content: center !important;
+    }
+
+    .donate_content img {
+        width: 80% !important;
+        margin-bottom: 10px;
+    }
 }

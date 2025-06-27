@@ -2,53 +2,62 @@
 <img src="https://kanokano.cn/wp-content/uploads/2025/04/5acb8625d65a3fd5d7b228830a9450a1.webp" style="width:50%;text-align:center" />
 </div>
 
-## 有哪些功能？
- 
- 
-* **远程管理（需配合内网穿透）**
-* **短信收发**
-* **短信转发**
-* **AT指令发送**
-* **内网测速**
-* **主题+背景自定义**
-* **各种参数实时显示（QCI速率、cpu温度，内存负载 ，信号强度 , SNR、PCI、小区号、频段、v6地址等）**
-* **锁频段，锁小区（免重启）**
-* **USB调试，网络USB调试自启**
-* **双端可用（既可手机安装使用（无），也可为F50作为服务端安装使用）**
-* **开机自启**
-* **一键OTA**
-* **性能模式、指示灯、文件共享开关**
-* **3G/4G/5G 网络切换**
-* **其他未来会继续更新功能**
+## What Features Does It Have?
 
-|   ![](img/1.jpg)   |   ![](img/2.jpg)   |
-| ---- | ---- |
+* **Remote management (requires LAN penetration)**
+* **Send and receive SMS messages**
+* **SMS forwarding**
+* **Send AT commands**
+* **Local network speed testing**
+* **Customizable themes and backgrounds**
+* **Real-time display of various parameters**
+  (QCI speed, CPU temperature, memory load, signal strength, SNR, PCI, cell ID, frequency band, IPv6 address, etc.)
+* **Lock frequency band and cell without reboot**
+* **USB debugging and auto-start for network USB debugging**
+* **Dual-end support** (can be installed and used on a phone or installed as a server on an F50 device)
+* **Auto-start on boot**
+* **One-click OTA updates**
+* **Performance mode, LED indicator, and file sharing toggles**
+* **3G/4G/5G network switching**
+* **More features coming soon!**
 
-|   ![](img/3.jpg)   |   ![](img/4.jpg)   |
-| ---- | ---- |
+![](img/5.png) 
 
+| ![](img/1.jpg) | ![](img/2.jpg) |
+| -------------- | -------------- |
 
+| ![](img/3.jpg) | ![](img/4.jpg) |
+| -------------- | -------------- |
 
+---
 
-## 如何使用？
+## How to Use
 
-**安卓用户**
+**For Android Users:**
 
-1. 首先下载软件apk，安装至自己的手机内并打开
-2. 和随身WiFi处于同一个网络下，打开控制网页，登录并启用adb功能
-3. 使用电脑或手机的ADB功能 连接上随身WIFI 并将apk安装至随身WiFi机内
-4. 使用scrcpy等远程控制软件启动zte-ufi-tools，设置网关，启动服务，并关掉电池优化，启用通知（确保能顺利开机自启）
-5. 手机访问随身WiFi的ip地址，端口为2333，即可食用
+1. Download and install the APK on your phone, then open it.
+2. Make sure your phone is connected to the same network as the portable WiFi device. Open the control webpage, log in, and enable ADB functionality.
+3. Use ADB on your computer or phone to connect to the portable WiFi and install the APK on the device.
+4. Use remote control software like scrcpy to launch zte-ufi-tools, configure the gateway, start the service, disable battery optimization, and enable notifications (to ensure it can auto-start on boot).
+5. Open your phone’s browser, visit the portable WiFi’s IP address on port 2333, and start using the tool.
 
-**ios用户**
+**For iOS Users:**
 
-> ios用户需要使用传统方法打开adb, 连接wifi 输入 http://192.168.0.1/index.html#usb_port 开启adb
-> 之后的操作按照安卓用户 步骤3开始即可
+> iOS users need to enable ADB the traditional way: connect to WiFi, then open
+> `http://192.168.0.1/index.html#usb_port` and turn on ADB.
+> From step 3 onwards, follow the Android user instructions.
 
-备注：功能是否能使用取决于你的机型和版本，目前我测试完美的版本是 **MU300_ZYV1.0.0B09**
+**Notes:**
 
-备注2：由于cpu使用率 温度 内存使用率并无官方接口，如果你将本apk安装在手机上使用，则温度和占用数据源是你的手机提供，并非随身WiFi数据。
+* Functionality depends on your device model and firmware version. The version I tested with perfect results is **MU300\_ZYV1.0.0B09**.
+* CPU usage, temperature, and memory usage data come from your phone if you install the APK on it, since there are no official APIs for these on the portable WiFi device itself.
 
-下载链接： https://www.123684.com/s/7oa5Vv-dQLD3?提取码:CkSj
+**Download link:**
+[https://www.123684.com/s/7oa5Vv-dQLD3](https://www.123684.com/s/7oa5Vv-dQLD3? pwd:CkS) pwd:CkSj
 
-API文档：https://kanokano.cn/wp-content/uploads/2025/06/UFI-TOOLSAPI文档.html
+**API Documentation(Chinese):**
+[https://kanokano.cn/wp-content/uploads/2025/06/UFI-TOOLSAPI文档.html](https://kanokano.cn/wp-content/uploads/2025/06/UFI-TOOLSAPI文档.html)
+
+---
+
+If you want, I can help you polish it further or add a more technical section!

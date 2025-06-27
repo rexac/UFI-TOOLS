@@ -21,6 +21,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -35,7 +36,10 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.MutableLiveData
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.TextUnit
 import androidx.core.app.ActivityCompat
@@ -128,10 +132,12 @@ class MainActivity : ComponentActivity() {
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        repeat(10) {
+                        repeat(5) {
                             Text("不受支持的设备！！", fontSize = 20.sp)
+                            Text("Unsupported device！！", fontSize = 20.sp)
                         }
                         Text("3秒后自动退出！！", fontSize = 20.sp)
+                        Text("Auto exit in 3 seconds！！", fontSize = 20.sp)
                     }
                 }
             }
@@ -232,7 +238,7 @@ class MainActivity : ComponentActivity() {
                     ServerUI(
                         serverAddress = "http://${gatewayIp.substringBefore(":")}:$port",
                         gatewayIp,
-                        versionName = versionName ?: "未知",
+                        versionName = versionName ?: "unknown",
                         onStopServer = {
                             sendBroadcast(Intent(UI_INTENT).putExtra("status", false))
                             serverStatusLiveData.postValue(false)
@@ -244,7 +250,7 @@ class MainActivity : ComponentActivity() {
                         gatewayIp = gatewayIp,
                         onGatewayIpChange = { gatewayIp = it },
                         loginToken = loginToken,
-                        versionName = versionName ?: "未知",
+                        versionName = versionName ?: "unknown",
                         onLoginTokenChange = { loginToken = it },
                         isTokenEnabled = isTokenEnabled == true.toString(),
                         isAutoCheckIp = isAutoIpEnabled == true.toString(),
@@ -392,82 +398,117 @@ fun InputUI(
     onAutoCheckIpChange: (Boolean) -> Unit,
     onDebugChange:(Boolean) -> Unit
 ) {
-    Surface(modifier = Modifier.fillMaxSize()) {
+    Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Card(
             shape = RoundedCornerShape(16.dp),
             elevation = CardDefaults.cardElevation(8.dp),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
+                .wrapContentHeight()
         ) {
             Column(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.Center,
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp, vertical = 24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text("服务已停止", fontSize = 24.sp)
-                Spacer(modifier = Modifier.height(16.dp))
-                Text("请输入路由器管理 IP", fontSize = 20.sp)
-                Spacer(modifier = Modifier.height(16.dp))
-
+                // 标题
+                Text(
+                    text = "服务已停止\nService has stopped",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                Text(
+                    text = "路由器管理IP\nRouter management IP",
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(6.dp))
                 OutlinedTextField(
                     value = gatewayIp,
                     onValueChange = onGatewayIpChange,
-                    label = { Text("路由器管理 IP") },
                     enabled = !isAutoCheckIp,
-                    singleLine = true
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    placeholder = { Text("e.g. 192.168.0.1") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 )
-
-
-                // 登录口令输入框
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    text = "登录口令(默认admin)\nLogin Token (default: admin)",
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(6.dp))
                 OutlinedTextField(
                     value = loginToken,
-                    enabled = isTokenEnabled,
                     onValueChange = onLoginTokenChange,
-                    label = { Text("登录口令(默认admin)") },
+                    enabled = isTokenEnabled,
                     singleLine = true,
-                    visualTransformation = PasswordVisualTransformation()
+                    visualTransformation = PasswordVisualTransformation(),
+                    modifier = Modifier.fillMaxWidth(),
+                    placeholder = { Text("admin") }
                 )
-
-                Spacer(modifier = Modifier.height(16.dp))
-                // 开关：是否启用登录口令
+                Spacer(modifier = Modifier.height(6.dp))
+                // 开关组
                 Row(
-                    verticalAlignment = Alignment.CenterVertically
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text("自动检测IP")
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Switch(
-                        checked = isAutoCheckIp,
-                        onCheckedChange = onAutoCheckIpChange
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("启用登录口令")
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Switch(
-                        checked = isTokenEnabled,
-                        onCheckedChange = onTokenEnableChange
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("自动检测IP\nAuto detect IP",fontSize = 12.sp)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Switch(
+                            checked = isAutoCheckIp,
+                            onCheckedChange = onAutoCheckIpChange
+                        )
+                    }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("登录口令\nLogin Token",fontSize = 12.sp)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Switch(
+                            checked = isTokenEnabled,
+                            onCheckedChange = onTokenEnableChange
+                        )
+                    }
                 }
                 Row(
-                    verticalAlignment = Alignment.CenterVertically
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Start
                 ) {
-                    Text("启用调试日志")
+                    Text("调试日志\nDebug logs",fontSize = 12.sp)
                     Spacer(modifier = Modifier.width(8.dp))
                     Switch(
                         checked = isDebug,
                         onCheckedChange = onDebugChange
                     )
                 }
-
-                Button(onClick = onConfirm) {
-                    Text("启动服务")
+                Spacer(modifier = Modifier.height(6.dp))
+                Button(
+                    onClick = onConfirm,
+                    modifier = Modifier
+                        .fillMaxWidth(0.5f)
+                        .height(48.dp),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text("启动/Start", textAlign = TextAlign.Center)
                 }
-                Spacer(modifier = Modifier.height(16.dp))
-                Text("Created by Minikano with ❤️ ver: $versionName", fontSize = 12.sp)
                 Spacer(modifier = Modifier.height(10.dp))
+                Text(
+                    text = "Created by Minikano with ❤️ ver: $versionName",
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
                 HyperlinkText(
                     "View source code on Github(Minikano)",
                     "Github(Minikano)",
@@ -493,40 +534,51 @@ fun ServerUI(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp) // 外边距
+                .wrapContentHeight()
         ) {
             Column(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.Center,
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp, vertical = 24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text("服务运行中", fontSize = 24.sp)
-                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "服务运行中\nServer is running",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(10.dp))
                 HyperlinkText(
-                    "页面地址: $serverAddress",
+                    "页面地址/Link: $serverAddress",
                     serverAddress,
                     fontSize = 16.sp,
                     url = serverAddress
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 HyperlinkText(
-                    "网关地址: $gatewayIP",
+                    "网关地址/Gateway: $gatewayIP",
                     gatewayIP,
                     fontSize = 16.sp,
                     url = "http://$gatewayIP"
                 )
                 Spacer(modifier = Modifier.height(20.dp))
-                Text("可点击停止服务更改网关和口令密码(默认admin)", fontSize = 12.sp)
+                Text("可点击停止服务更改网关和口令密码(默认admin)\nClick to stop the service and change the gateway and password (default: admin)",
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth())
                 Spacer(modifier = Modifier.height(10.dp))
                 Text(
-                    "本软件需安装在随身WiFi机内，请勿安装到手机上",
-                    fontSize = 10.sp
-                )
-                Text("如需手机使用，请下载手机独立版", fontSize = 10.sp)
+                    "本软件需安装在随身WiFi机内，请勿安装到手机上\nThis software must be installed inside the portable WiFi device. Please do not install it on your phone.",
+                    fontSize = 10.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth())
                 Spacer(modifier = Modifier.height(20.dp))
                 Button(onClick = onStopServer) {
-                    Text("停止服务")
+                    Text("停止服务/Stop Server")
                 }
                 Spacer(modifier = Modifier.height(32.dp))
                 Text("Created by Minikano with ❤️ ver: ${versionName}", fontSize = 12.sp)

@@ -52,6 +52,8 @@
                         <button id="DataManagement" class="btn" data-i18n="data_mgmt">流量管理</button>
                         <button id="SpeedTestBtn" class="btn" data-i18n="speed_test"
                             onclick="showModal('#speedTestModal')">内网测速</button>
+                        <button id="CellularSpeedTestBtn" class="btn" data-i18n="cellular_speed_test"
+                            onclick="createToast('请登录','red')">流量测速</button>
                         <button id="ClientManagement" class="btn" data-i18n="client_mgmt">接入设备</button>
                         <button id="WIFIManagement" class="btn" data-i18n="wifi_mgmt">WIFI设置</button>
                         <button id="LANManagement" class="btn" data-i18n="lan_mgmt">内网设置</button>
@@ -1330,7 +1332,7 @@
                     </form>
                 </div>
             </div>
-            <!-- 网络测速模态框 -->
+            <!-- 内网测速模态框 -->
             <div class="modal" id="speedTestModal" style="display: none">
                 <div class="title" data-i18n="modal_speedtest_title">内网测速(不准)</div>
 
@@ -1349,6 +1351,32 @@
                     <button id="startSpeedBtn" onclick="startTest(event)" data-i18n="speedtest_start_btn">开始测速</button>
                     <button id="loopMode" onclick="handleLoopMode(event)" data-i18n="speedtest_loop_btn">循环测速</button>
                     <button type="button" onclick="closeModal('#speedTestModal')" data-i18n="close_btn">关闭</button>
+                </div>
+            </div>
+            <!-- 自定义测速 -->
+            <div class="modal" id="CellularTestModal" style="display: none">
+                <div class="title" data-i18n="cellular_speed_test">流量测速</div>
+                <div class="title" style="font-size: 12px;margin-top: 10px;"><i data-i18n="cellular_speed_test_notice">测速经过内网代理转发，数据仅供参考</i></div>
+                <div class="content" style="overflow-y: scroll; padding: 10px; width: 66vw; max-width: 400px;">
+                    <div class="item" style="margin: 10px auto;">
+                        <label style="display: flex; font-size: 14px; align-items: center;">
+                            <span data-i18n="cellular_speed_test_url">测速地址：</span>
+                            <input onchange="saveCellularTestUrl(event)" style="flex: 1;padding: 4px 6px;width: 100%;" id="CellularTestUrl" type="text">
+                        </label>
+                        <div style="margin-top: 10px;;display: flex; font-size: 14px; align-items: center;">
+                            <span data-i18n="cellular_speed_test_thread">线程数量：</span>
+                            <span id="thread_num" style="padding-right: 6px;">1</span>
+                            <input value="1" oninput="onThreadNumChange(event)" style="flex:1" type="range" min="1"
+                                max="5" name="" id="">
+                        </div>
+                    </div>
+                    <div class="speedtest" id="CellularTestResult" data-i18n="cellular_speed_test_prepared">准备就绪</div>
+                </div>
+
+                <div class="btn" style="text-align: right;">
+                    <button id="startSpeedBtn" onclick="startCellularTestRealtime(event)" data-i18n="speedtest_start_btn">开始测速</button>
+                    <button id="loopMode" onclick="handleCellularLoopMode(event)" data-i18n="speedtest_loop_btn">循环测速</button>
+                    <button type="button" onclick="closeCellularTest('#CellularTestModal')" data-i18n="close_btn">关闭</button>
                 </div>
             </div>
             <!-- 版本更新模态框 -->

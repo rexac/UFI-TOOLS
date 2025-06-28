@@ -440,6 +440,7 @@ function main_func() {
         initScheduleRebootStatus()
         initShutdownBtn()
         initATBtn()
+        initCellularSpeedTestBtn()
         initAdvanceTools()
         QOSRDPCommand("AT+CGEQOSRDP=1")
     }
@@ -3123,6 +3124,7 @@ function main_func() {
         e.target.innerHTML = t('speedtest_stop_btn');
 
         const serverUrl = `${KANO_baseURL}/speedtest`;
+
         const ckSize = document.querySelector('#speedTestModal #ckSize').value;
         const chunkSize = !isNaN(Number(ckSize)) ? Number(ckSize) : 1000;
         const resultDiv = document.getElementById('speedtestResult');
@@ -3146,7 +3148,7 @@ function main_func() {
                 totalBytes += value.length;
                 const now = performance.now();
 
-                if (now - lastUpdateTime >= 50) {
+                if (now - lastUpdateTime >= 80) {
                     const elapsed = (now - lastUpdateTime) / 1000;
                     const speed = ((totalBytes - lastBytes) * 8 / 1024 / 1024) / elapsed;
 
@@ -3634,7 +3636,7 @@ function main_func() {
     setTimeout(() => {
         checkUpdateAction(true).then((res) => {
             if (res) {
-                createToast(`${t('found')}${res.isForceUpdate ? t('sticky_update') : t('mew_update')}：${res.text}`)
+                createToast(`${t('found')} ${res.isForceUpdate ? t('sticky_update') : t('mew_update')}：${res.text}`)
             }
         })
     }, 100);
@@ -4609,8 +4611,199 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
         }
     }
 
+    let cellularSpeedFlag = false;
+    let cellularSpeedController = null;
+    let loopCellularTimer = null;
+    let isCellularTestLooping = false;
+
+    async function startCellularTestRealtime(e) {
+        const resultEl = document.getElementById('CellularTestResult');
+        const url = document.getElementById('CellularTestUrl').value.trim();
+        const rawThreadNum = Number(document.querySelector('#thread_num').textContent);
+
+        if (!url) {
+            createToast(t('cellular_pls_input_url'), 'red');
+            return;
+        }
+
+        if (cellularSpeedFlag) {
+            // 停止测速
+            cellularSpeedController?.abort();
+            createToast(t('speedtest_aborted'), 'orange');
+            cellularSpeedFlag = false;
+            e && (e.target.innerText = t('speedtest_start_btn'));
+            return;
+        }
+
+        // 启动测速
+        cellularSpeedFlag = true;
+        cellularSpeedController = new AbortController();
+
+        const maxThreadNum = 5;
+        const batchSize = 8;
+        const threadNum = Math.min(rawThreadNum, maxThreadNum);
+
+        if (rawThreadNum > maxThreadNum) {
+            createToast(`${t('thread_imit')} ${maxThreadNum},${t('avoid_overload')}`, 'orange');
+        }
+
+        e && (e.target.innerText = t('speedtest_stop_btn'));
+        resultEl.innerHTML = `${t('speed_test_ing')} (${threadNum} ${t('thread')})...<br/><span>${t('preparing')}...</span>`;
+
+        let totalBytes = 0;
+        let startTime = performance.now();
+        let lastUpdateTime = startTime;
+        let lastBytes = 0;
+        let firstResponseReceived = false;
+
+        const readTasks = [];
+
+        // 分批发起测速请求，并立即开始读取
+        for (let i = 0; i < threadNum; i++) {
+            const testUrl = `${KANO_baseURL}/proxy/--${url}?t=${Math.random()}`;
+
+            const task = (async () => {
+                try {
+                    const res = await fetch(testUrl, {
+                        signal: cellularSpeedController.signal,
+                        cache: 'no-store',
+                    });
+
+                    const reader = res.body?.getReader();
+                    if (!reader) return;
+
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
+
+                        totalBytes += value.length;
+
+                        if (!firstResponseReceived && value.length > 0) {
+                            firstResponseReceived = true;
+                            resultEl.innerHTML += `<br/><span style="color:green;">✅ ${t('cellular_speed_test_start_receive_data')}...</span>`;
+                        }
+                    }
+                } catch (_) {
+                    // 忽略异常
+                }
+            })();
+
+            readTasks.push(task);
+
+            // 批处理延迟，避免同时连接过多
+            if ((i + 1) % batchSize === 0) {
+                await new Promise(res => setTimeout(res, 100));
+            }
+        }
+
+        // 每 80ms 更新一次速度
+        const interval = setInterval(() => {
+            const now = performance.now();
+            const deltaTime = (now - lastUpdateTime) / 1000;
+            const deltaBytes = totalBytes - lastBytes;
+            const speedMbps = (deltaBytes * 8 / 1024 / 1024) / deltaTime;
+
+            resultEl.innerHTML = `
+            ${t('cellular_speed_test_thread')}${rawThreadNum}<br/>
+            ${t('speedtest_current_speed')}: ${speedMbps.toFixed(2)} Mbps<br/>
+            ${t('speedtest_total_download')}: ${(totalBytes / 1024 / 1024).toFixed(2)} MB
+        `;
+            lastUpdateTime = now;
+            lastBytes = totalBytes;
+        }, 100);
+
+        // 响应慢提示
+        setTimeout(() => {
+            if (!firstResponseReceived && cellularSpeedFlag) {
+                resultEl.innerHTML += `<br/><span>${t('cellular_speed_test_slow')}</span>`;
+            }
+        }, 2000);
+
+        try {
+            await Promise.all(readTasks);
+        } catch (_) {
+            // 忽略中断异常
+        }
+
+        clearInterval(interval);
+        cellularSpeedFlag = false;
+        e && (e.target.innerText = t('speedtest_start_btn'));
+
+        const totalTime = (performance.now() - startTime) / 1000;
+        const avgSpeed = ((totalBytes * 8) / 1024 / 1024) / totalTime;
+
+        if (totalBytes === 0) {
+            resultEl.innerHTML += `<br/><span style="color:red;">${t('cellular_speed_test_failed')}</span>`;
+        } else {
+            resultEl.innerHTML += `<br/>${t('speedtest_avg_speed')}: ${avgSpeed.toFixed(2)} Mbps`;
+        }
+
+        // 循环测速
+        if (!isCellularTestLooping) return;
+        loopCellularTimer = setTimeout(() => {
+            if (isCellularTestLooping) startCellularTestRealtime(); // 不传 e
+        }, 500);
+    }
+
+    function handleCellularLoopMode(event) {
+        const btn = event.target;
+        isCellularTestLooping = !isCellularTestLooping;
+
+        if (isCellularTestLooping) {
+            btn.innerText = t('loop_mode_stop');
+            startCellularTestRealtime();
+        } else {
+            btn.innerText = t('loop_mode_start');
+            clearTimeout(loopCellularTimer);
+            cellularSpeedController?.abort();
+            cellularSpeedFlag = false;
+            document.querySelector('#CellularTestResult').innerHTML = t('toast_speed_test_cancel');
+        }
+    }
+
+    function closeCellularTest(selector) {
+        closeModal(selector);
+        isCellularTestLooping = false;
+        clearTimeout(loopCellularTimer);
+        cellularSpeedController?.abort();
+        cellularSpeedFlag = false;
+    }
+
+    const onThreadNumChange = (event) => {
+        document.querySelector('#thread_num').innerHTML = event.target.value;
+    };
+
+    const initCellularSpeedTestBtn = async () => {
+        const btn = document.querySelector('#CellularSpeedTestBtn')
+        const stor = localStorage.getItem("cellularTestUrl")
+        if (stor) {
+            const CellularTestUrl = document.querySelector('#CellularTestUrl')
+            CellularTestUrl && (CellularTestUrl.value = stor)
+        }
+        if (!(await initRequestData())) {
+            btn.onclick = () => createToast(t('toast_please_login'), 'red')
+            return null
+        }
+        btn.onclick = async () => {
+            showModal('#CellularTestModal')
+        }
+    }
+    initCellularSpeedTestBtn()
+
+    const saveCellularTestUrl = (e) => {
+        const target = e.target
+        if (target?.value?.trim()) {
+            localStorage.setItem("cellularTestUrl", target.value.trim())
+        }
+    }
+
     //挂载方法到window
     const methods = {
+        saveCellularTestUrl,
+        onThreadNumChange,
+        closeCellularTest,
+        handleCellularLoopMode,
+        startCellularTestRealtime,
         getBoot,
         handleDisableFOTA,
         refreshTask,

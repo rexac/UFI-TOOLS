@@ -383,8 +383,8 @@
                                         <th data-i18n="network_freq">频率</th>
                                         <th>PCI</th>
                                         <th>RSRP</th>
-                                        <th>RSRQ</th>
                                         <th>SINR</th>
+                                        <th>RSRQ</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -1356,12 +1356,14 @@
             <!-- 自定义测速 -->
             <div class="modal" id="CellularTestModal" style="display: none">
                 <div class="title" data-i18n="cellular_speed_test">流量测速</div>
-                <div class="title" style="font-size: 12px;margin-top: 10px;"><i data-i18n="cellular_speed_test_notice">测速经过内网代理转发，数据仅供参考</i></div>
+                <div class="title" style="font-size: 12px;margin-top: 10px;"><i
+                        data-i18n="cellular_speed_test_notice">测速经过内网代理转发，数据仅供参考</i></div>
                 <div class="content" style="overflow-y: scroll; padding: 10px; width: 66vw; max-width: 400px;">
                     <div class="item" style="margin: 10px auto;">
                         <label style="display: flex; font-size: 14px; align-items: center;">
                             <span data-i18n="cellular_speed_test_url">测速地址：</span>
-                            <input onchange="saveCellularTestUrl(event)" style="flex: 1;padding: 4px 6px;width: 100%;" id="CellularTestUrl" type="text">
+                            <input onchange="saveCellularTestUrl(event)" style="flex: 1;padding: 4px 6px;width: 100%;"
+                                id="CellularTestUrl" type="text">
                         </label>
                         <div style="margin-top: 10px;;display: flex; font-size: 14px; align-items: center;">
                             <span data-i18n="cellular_speed_test_thread">线程数量：</span>
@@ -1374,9 +1376,12 @@
                 </div>
 
                 <div class="btn" style="text-align: right;">
-                    <button id="startSpeedBtn" onclick="startCellularTestRealtime(event)" data-i18n="speedtest_start_btn">开始测速</button>
-                    <button id="loopMode" onclick="handleCellularLoopMode(event)" data-i18n="speedtest_loop_btn">循环测速</button>
-                    <button type="button" onclick="closeCellularTest('#CellularTestModal')" data-i18n="close_btn">关闭</button>
+                    <button id="startSpeedBtn" onclick="startCellularTestRealtime(event)"
+                        data-i18n="speedtest_start_btn">开始测速</button>
+                    <button id="loopMode" onclick="handleCellularLoopMode(event)"
+                        data-i18n="speedtest_loop_btn">循环测速</button>
+                    <button type="button" onclick="closeCellularTest('#CellularTestModal')"
+                        data-i18n="close_btn">关闭</button>
                 </div>
             </div>
             <!-- 版本更新模态框 -->

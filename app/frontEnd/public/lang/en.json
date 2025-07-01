@@ -607,5 +607,6 @@
     "preparing": "Preparing",
     "thread_imit": "Thread limit set to",
     "avoid_overload": "To avoid overload",
-    "cellular_pls_input_url": "Please enter the test URL"
+    "cellular_pls_input_url": "Please enter the test URL",
+    "select_current_cell":"Select Current Cell"
 }

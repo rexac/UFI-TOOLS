@@ -111,6 +111,7 @@
     "carrier_mobile": "移动",
     "carrier_broadcast_mobile": "广电/移动",
     "current_cell": "当前连接",
+    "select_current_cell":"选择当前基站",
     "network_status": "网络状态",
     "wifi_client_num": "WIFI连接",
     "charging": "正在充电",

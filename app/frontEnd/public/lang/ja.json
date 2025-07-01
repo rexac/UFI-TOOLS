@@ -607,5 +607,6 @@
     "preparing": "準備中",
     "thread_imit": "スレッド制限：",
     "avoid_overload": "負荷回避のため",
-    "cellular_pls_input_url": "テストURLを入力してください"
+    "cellular_pls_input_url": "テストURLを入力してください",
+    "select_current_cell": "現在のセルを選択"
 }

@@ -428,7 +428,7 @@
                             <i>
                                 <span data-i18n="token_note_1">注：请在UFI-TOOLS_WEB</span><br>
                                 <span data-i18n="token_note_2">后台App查看口令(默认为admin)</span><br>
-                                <span data-i18n="token_note_3">密码为官方WEB管理密码</span><br>
+                                <span data-i18n="token_note_3">密码为设备的管理密码(默认在机器背面)</span><br>
                                 <span data-i18n="token_note_4">如果忘记了密码,请重置设备或联系作者</span>
                             </i>
                         </p>
@@ -1523,7 +1523,7 @@
             <div class="mask" id="payModal" style="display: none" onclick="handleClosePayModal(event)">
                 <div class="modal">
                     <div class="title" style="width: 100%;display: flex;justify-content:space-between;"><span
-                            data-i18n="pay_title">打赏作者</span>
+                            data-i18n="pay_title">打赏作者/群组链接</span>
                         <button type="button" onclick="onClosePayModal()" data-i18n="pay_btn_dismiss"
                             style="margin-right: 15px;">不再显示</button>
                     </div>
@@ -1534,11 +1534,17 @@
                             <p style="margin: 0; font-style: italic;" data-i18n="pay_tip_2">长按赞赏码可保存为图片</p>
                         </div>
                     </div>
-                    <div class="title" style="font-size: 14px;">
-                        <p><a
+                    <div class="title" style="font-size: 14px;display: flex;flex-direction: column;">
+                        <div style="display: flex;flex-wrap: wrap;gap: 10px;justify-content: center;">
+                            <button><a href="https://t.me/ufi_tools_chat" target="_blank" data-i18n="tg_group">点我加入TG群组:
+                                    @ufi_tools_chat</a></button>
+                            <button><a href="https://t.me/ufi_tools" target="_blank" data-i18n="tg_channel">TG频道:
+                                    @ufi_tools</a></button>
+                        </div>
+                        <button onclick="copyText(event)"><a
                                 href="https://link.trustwallet.com/send?coin=60&address=0xdf0503f26D83214d1D4895fC13E8913f52F47607&token_id=0xdAC17F958D2ee523a2206206994597C13D831ec7">USDT</a>
-                            <button onclick="copyText(event)"> 0xdf0503f26D83214d1D4895fC13E8913f52F47607</button>
-                        </p>
+                            0xdf0503f26D83214d1D4895fC13E8913f52F47607</button>
+
                     </div>
                     <div class="donate_content"
                         style="display: flex; flex-direction: row; justify-content: space-between; padding: 15px; width: 66vw; max-width: 400px; flex-wrap: wrap;">

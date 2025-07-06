@@ -11,7 +11,12 @@
     --dark-title-color: skyblue;
     --dark-btn-disabled-color: #80808073;
     --dark-btn-color-active: #018ad8a8;
-    --blur-rate: 4px
+    --blur-rate: 4px;
+}
+
+.blur-px {
+    backdrop-filter: blur(4px) !important;
+    -webkit-backdrop-filter: blur(4px) !important;
 }
 
 @keyframes spin {
@@ -43,7 +48,14 @@ body {
     color: var(--dark-text-color);
     word-break: break-all;
     text-shadow:
-        -1px -1px 10px rgba(0, 0, 0, 0.3)
+        -1px -1px 10px rgba(0, 0, 0, 0.3);
+
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -moz-backface-visibility: hidden;
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: matrix3d(0, 0, 0);
+    -moz-transform: translate3d(0, 0, 0);
 }
 
 .bg {
@@ -394,7 +406,7 @@ input {
     font-size: 14px;
     border-radius: 6px;
     text-align: center;
-    border-color: #ffc0cb7a;
+    border-color: transparent;
 }
 
 .nice-table {
@@ -451,8 +463,12 @@ input {
     flex-direction: column;
     user-select: none;
     -webkit-user-select: none;
-    /* backdrop-filter: blur(1px);
-    -webkit-backdrop-filter: blur(1px); */
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -moz-backface-visibility: hidden;
+    transform: translate3d(-50%, -50%, 0);
+    -webkit-transform: translate3d(-50%, -50%, 0);
+    -moz-transform: translate3d(-50%, -50%, 0);
 }
 
 #dictionaryModal .content label {
@@ -729,6 +745,13 @@ li.dragging {
     -webkit-user-select: none;
     backdrop-filter: blur(var(--blur-rate));
     -webkit-backdrop-filter: blur(var(--blur-rate));
+
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -moz-backface-visibility: hidden;
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: matrix3d(0, 0, 0);
+    -moz-transform: translate3d(0, 0, 0);
 }
 
 .statusCard:active {

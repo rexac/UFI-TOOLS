@@ -82,7 +82,7 @@
     "token_title": "请输入口令与密码",
     "token_note_1": "注：请在UFI-TOOLS_WEB",
     "token_note_2": "后台App查看口令(默认为admin)",
-    "token_note_3": "密码为官方WEB管理密码",
+    "token_note_3": "密码为设备的管理密码(默认在机器背面)",
     "token_note_4": "如果忘记了密码,请重置设备或联系作者",
     "token_placeholder_token": "请在后台App查看",
     "token_placeholder_pwd": "官方WEB管理密码",
@@ -355,7 +355,7 @@
     "update_checking": "正在检查更新...",
     "btn_update": "一键更新",
     "btn_download": "下载安装包",
-    "pay_title": "打赏作者",
+    "pay_title": "打赏作者/群组链接",
     "pay_tip_1": "开发不易，打赏随意～",
     "pay_tip_2": "长按赞赏码可保存为图片",
     "pay_btn_dismiss": "不再显示",
@@ -608,5 +608,7 @@
     "preparing":"准备中",
     "thread_imit":"线程数已限制为",
     "avoid_overload":"避免过载卡顿",
-    "cellular_pls_input_url":"请输入测速地址"
+    "cellular_pls_input_url":"请输入测速地址",
+    "tg_group":"TG群组:@ufi_tools_chat",
+    "tg_channel":"TG频道: @ufi_tools"
 }

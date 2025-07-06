@@ -353,7 +353,7 @@
     "update_checking": "Checking for updates...",
     "btn_update": "One-Click Update",
     "btn_download": "Download APK",
-    "pay_title": "Support Me",
+    "pay_title": "Support Me / Group",
     "pay_tip_1": "Development is not easy, feel free to tip if you'd like~",
     "pay_tip_2": "Long-press the QR code to save it as an image",
     "pay_btn_dismiss": "Don't show again",
@@ -608,5 +608,7 @@
     "thread_imit": "Thread limit set to",
     "avoid_overload": "To avoid overload",
     "cellular_pls_input_url": "Please enter the test URL",
-    "select_current_cell":"Select Current Cell"
+    "select_current_cell":"Select Current Cell",
+    "tg_group":"Telegram Group: @ufi_tools_chat",
+    "tg_channel":"Telegram Channel: @ufi_tools"
 }

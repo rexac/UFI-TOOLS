@@ -3257,7 +3257,7 @@ function main_func() {
     }
 
     //打赏模态框设置
-    const payModalState = localStorage.getItem('hidePayModal') || false
+    const payModalState = localStorage.getItem('hidePayAndGroupModal') || false
     !payModalState && window.addEventListener('load', () => {
         setTimeout(() => {
             showModal('#payModal')
@@ -3266,14 +3266,13 @@ function main_func() {
 
     const onClosePayModal = () => {
         closeModal('#payModal')
-        localStorage.setItem('hidePayModal', 'true')
+        localStorage.setItem('hidePayAndGroupModal', 'true')
     }
 
     const handleClosePayModal = (e) => {
         if (e.target.id != 'payModal') return
         onClosePayModal()
     }
-
 
     //展开收起
     // 配置观察器_菜单
@@ -4594,7 +4593,7 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
             let ab = res.content.includes('a') ? "A" : "B"
             createToast(`${t('your_boot_slot')}：${ab}`, '')
             await runShellWithRoot('mkdir /data/data/com.minikano.f50_sms/files/uploads')
-            const outFile = `boot_a.img`
+            const outFile = `boot_${ab.toLowerCase()}.img`
             await runShellWithRoot(`rm -f /data/data/com.minikano.f50_sms/files/uploads/${outFile}`)
             const command = `dd if=/dev/block/by-name/boot_${ab.toLowerCase()} of=/data/data/com.minikano.f50_sms/files/uploads/${outFile}`
             let result = await runShellWithRoot(command)

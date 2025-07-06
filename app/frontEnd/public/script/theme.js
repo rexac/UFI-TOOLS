@@ -65,7 +65,7 @@ function updateTextColor(e) {
 
 //主页毛玻璃
 function updateBlurSwitch(e) {
-    const value = e.target.checked; 
+    const value = e.target.checked;
     homeBlurSwitch = value
     updateColor()
     //保存进度到localStorage
@@ -123,8 +123,21 @@ function updateColor() {
     document.documentElement.style.setProperty('--dark-btn-color-active', btnActiveColor);
     document.documentElement.style.setProperty('--dark-btn-disabled-color', btnDisabledColor);
     document.documentElement.style.setProperty('--dark-text-color', currentTextColor);
-    document.documentElement.style.setProperty('--dark-text-color', currentTextColor);
     document.documentElement.style.setProperty('--blur-rate', homeBlurSwitch ? "4px" : "0");
+
+    //针对Safari -webkit-backdrop-filter 不支持css变量 进行修复
+    document.querySelectorAll('.statusCard,thead,tbody,input')?.forEach(el=>{
+       homeBlurSwitch ?  el.classList.add('blur-px') :  el.classList.remove('blur-px')
+    })
+    const _style = document.createElement('style')
+    _style.innerHTML = `.deviceList li {backdrop-filter: blur(${homeBlurSwitch ? "4px" : "0"}) !important;-webkit-backdrop-filter: blur(${homeBlurSwitch ? "4px" : "0"}) !important;}`
+    document.querySelector('.status-container')?.insertAdjacentElement('beforebegin',_style)
+
+    
+    const el = document.querySelector('body');
+    el.style.transform = 'translateZ(0)';  // 强制 GPU 图层
+
+
     document.querySelector('#BG_OVERLAY').style.backgroundColor = overlaySwitch ? `var(--dark-bgi-color)` : 'transparent';
     //保存到localStorage
     localStorage.setItem('themeColor', currentHue);

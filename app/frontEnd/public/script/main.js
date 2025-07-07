@@ -4485,27 +4485,51 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
 
             reader.onload = (e) => {
                 const str = e.target.result;
-                const custom_head = document.querySelector("#custom_head")
+                const custom_head = document.querySelector("#custom_head");
                 if (!custom_head) return;
 
                 const pluginRegex = /<!--\s*\[KANO_PLUGIN_START\]\s*(.*?)\s*-->([\s\S]*?)<!--\s*\[KANO_PLUGIN_END\]\s*\1\s*-->/g;
 
-                if (pluginRegex.test(str)) {
-                    // 原始内容就包含头尾，直接追加
-                    custom_head.value += `\n${str}\n\n`
-                    createToast(t('toast_add_success_save_to_submit'), 'green')
-                    resolve({ msg: 'added as plugin set' })
-                } else {
-                    // 单个插件包裹为一个插件块
-                    custom_head.value += `<!-- [KANO_PLUGIN_START] ${file.name} -->\n${str}\n<!-- [KANO_PLUGIN_END] ${file.name} -->\n\n\n\n`
-                    createToast(t('toast_add_success_save_to_submit'), 'pink')
-                    resolve({ msg: 'added as single plugin' })
+                let matched = false;
+                let match;
+
+                while ((match = pluginRegex.exec(str)) !== null) {
+                    console.log("匹配到一个插件集");
+
+                    matched = true;
+
+                    const pluginName =
+                        (match[1].trim() || match[3].trim() || file.name).replace(/-->/g, "").trim();
+                    const pluginContent = match[2].trim();
+
+                    custom_head.value += `<!-- [KANO_PLUGIN_START] ${pluginName} -->\n${pluginContent}\n<!-- [KANO_PLUGIN_END] ${pluginName} -->\n\n`;
+
+                    if (!plugins.some(el => el.name === pluginName)) {
+                        plugins.push({
+                            name: pluginName,
+                            content: pluginContent
+                        });
+                    }
                 }
-                plugins.push({
-                    name: file.name,
-                    content: str
-                })
-                renderPluginList()
+
+                if (matched) {
+                    createToast(t('toast_add_success_save_to_submit'), 'green');
+                    resolve({ msg: 'added as plugin set' });
+                } else {
+                    // 不含插件头尾，手动包裹整个为一个插件
+                    const pluginName = file.name;
+                    custom_head.value += `<!-- [KANO_PLUGIN_START] ${pluginName} -->\n${str}\n<!-- [KANO_PLUGIN_END] ${pluginName} -->\n\n\n\n`;
+                    createToast(t('toast_add_success_save_to_submit'), 'pink');
+
+                    plugins.push({
+                        name: pluginName,
+                        content: str
+                    });
+
+                    resolve({ msg: 'added as single plugin' });
+                }
+
+                renderPluginList();
             }
         })
     }

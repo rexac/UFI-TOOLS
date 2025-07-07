@@ -76,11 +76,27 @@ fun Route.anyProxyModule(context: Context) {
                 val statusCode = response.code
                 val contentType = responseBody?.contentType()?.toString()?.let { ContentType.parse(it) }
 
-                // 转发响应头（安全头部）
+                // 处理响应头
                 response.headers.names().forEach { name ->
-                    if (isSafeHeader(name)) {
-                        call.response.headers.append(name, response.header(name).orEmpty())
+                    val lowerName = name.lowercase()
+                    val values = response.headers.values(name)
+
+                    if (lowerName == "set-cookie") {
+                        values.forEach { rawCookie ->
+                            call.response.headers.append("Kano-SetCk", rawCookie)
+                        }
+                    } else if (isSafeHeader(name)) {
+                        values.forEach { value ->
+                            call.response.headers.append(name, value)
+                        }
                     }
+                }
+
+                val origin = call.request.header("Origin") ?: "*"
+                if (origin != "*") {
+                    call.response.headers.append("Access-Control-Allow-Origin", origin)
+                    call.response.headers.append("Access-Control-Allow-Credentials", "true")
+                    call.response.headers.append("Access-Control-Expose-Headers", "Kano-SetCk")
                 }
 
                 if (responseBody != null) {

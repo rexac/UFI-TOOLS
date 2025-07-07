@@ -369,6 +369,7 @@ function main_func() {
             item.checked = foundItem.isShow
         }
     })
+
     const isNullOrUndefiend = (obj) => {
         let isNumber = typeof obj === 'number'
         if (isNumber) {
@@ -1698,10 +1699,12 @@ function main_func() {
     const startRefresh = () => {
         cellInfoRequestTimer = requestInterval(() => initCellInfo(), REFRESH_TIME + 500)
         StopStatusRenderTimer = requestInterval(() => handlerStatusRender(), REFRESH_TIME)
+        QORSTimer = requestInterval(() => { QOSRDPCommand("AT+CGEQOSRDP=1") }, 10000)
     }
     const stopRefresh = () => {
         StopStatusRenderTimer && StopStatusRenderTimer()
         cellInfoRequestTimer && cellInfoRequestTimer()
+        QORSTimer && QORSTimer()
     }
 
     //暂停开始刷新
@@ -2309,7 +2312,7 @@ function main_func() {
     const loadTitle = async () => {
         try {
             const { app_ver, model } = await (await fetch(`${KANO_baseURL}/version_info`, { headers: common_headers })).json()
-            MODEL.innerHTML = `${t('device')}：${model}`
+            MODEL.innerHTML = `${model}`
             document.querySelector('#TITLE').innerHTML = `[${model}]UFI-TOOLS-WEB Ver: ${app_ver}`
             document.querySelector('#MAIN_TITLE').innerHTML = `UFI-TOOLS <span style="font-size:14px">Ver: ${app_ver}</span>`
         } catch {/*没有，不处理*/ }
@@ -2720,6 +2723,14 @@ function main_func() {
             //单卡用户默认0槽位
             sim_slot = 0
         }
+        // V50 内置卡1(移动)slot=0 内置卡2(电信)slot=1 内置卡3(联通)slot=2 外置卡slot=11 外置卡 slot需要设置为0 联通内置卡slot设置为1
+        // For V50
+        if (sim_slot == "11") {
+            sim_slot = 0
+        }
+        if (sim_slot == "2") {
+            sim_slot = 1
+        }
         let res = await executeATCommand(cmd, sim_slot)
         //如果是单卡用户，0槽位又获取不到数据，那就尝试1槽位
         if (res.result && res.result.includes('ERROR')) {
@@ -2732,6 +2743,7 @@ function main_func() {
         return QORS_MESSAGE = null
     }
     QOSRDPCommand("AT+CGEQOSRDP=1")
+    let QORSTimer = requestInterval(() => { QOSRDPCommand("AT+CGEQOSRDP=1") }, 10000)
 
     let initATBtn = async () => {
         const el = document.querySelector('#AT')
@@ -2985,7 +2997,12 @@ function main_func() {
 
     //sim卡切换
     let initSimCardType = async () => {
-        const selectEl = document.querySelector('#SIM_CARD_TYPE')
+        let selectEl = document.querySelector('#SIM_CARD_TYPE')
+        const { model } = await (await fetch(`${KANO_baseURL}/version_info`, { headers: common_headers })).json()
+        if (model.toLowerCase() == 'v50') {
+            selectEl = document.querySelector('#SIM_CARD_TYPE_V50')
+        }
+
         //查询是否支持双卡
         // const { dual_sim_support } = await getData(new URLSearchParams({
         //     cmd: 'dual_sim_support'
@@ -3095,7 +3112,8 @@ function main_func() {
             } else {
                 createToast(t('toast_oprate_failed'), 'red')
             }
-            await initUSBNetworkType()
+            await initSimCardType()
+            QOSRDPCommand("AT+CGEQOSRDP=1")
         } catch (e) {
             // createToast(e.message)
         }
@@ -4418,6 +4436,22 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
         "切SIM卡2": {
             goformId: 'SET_SIM_SLOT',
             sim_slot: 1
+        },
+        "切移动": {
+            goformId: 'SET_SIM_SLOT',
+            sim_slot: 0
+        },
+        "切联通": {
+            goformId: 'SET_SIM_SLOT',
+            sim_slot: 2
+        },
+        "切电信": {
+            goformId: 'SET_SIM_SLOT',
+            sim_slot: 1
+        },
+        "切外置": {
+            goformId: 'SET_SIM_SLOT',
+            sim_slot: 11
         }
     }
 
@@ -4437,22 +4471,41 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
         return new Promise((resolve, reject) => {
             const file = event.target.files[0];
 
-            if (file) {
-                if (file.size > 1145 * 1024) {
-                    createToast(`${('toast_file_size_not_over_than')}${1145}KB！`, 'red')
-                    reject({ msg: `${('toast_file_size_not_over_than')}${1145}KB！`, data: null })
+            if (!file) return;
+
+            if (file.size > 1145 * 1024) {
+                const msg = `${t('toast_file_size_not_over_than')}${1145}KB！`
+                createToast(msg, 'red')
+                reject({ msg, data: null })
+                return
+            }
+
+            const reader = new FileReader();
+            reader.readAsText(file);
+
+            reader.onload = (e) => {
+                const str = e.target.result;
+                const custom_head = document.querySelector("#custom_head")
+                if (!custom_head) return;
+
+                const pluginRegex = /<!--\s*\[KANO_PLUGIN_START\]\s*(.*?)\s*-->([\s\S]*?)<!--\s*\[KANO_PLUGIN_END\]\s*\1\s*-->/g;
+
+                if (pluginRegex.test(str)) {
+                    // 原始内容就包含头尾，直接追加
+                    custom_head.value += `\n${str}\n\n`
+                    createToast(t('toast_add_success_save_to_submit'), 'green')
+                    resolve({ msg: 'added as plugin set' })
                 } else {
-                    const reader = new FileReader();
-                    reader.readAsText(file); // 将文件读取为Data URL
-                    reader.onload = (e) => {
-                        const str = e.target.result;
-                        console.log(str);
-                        const custom_head = document.querySelector("#custom_head")
-                        custom_head && (custom_head.value += (`\n\n\n<!-- ${file.name} -->\n` + str))
-                        createToast(t('toast_add_success_save_to_submit'), 'pink')
-                        resolve({ msg: 'ok' })
-                    }
+                    // 单个插件包裹为一个插件块
+                    custom_head.value += `<!-- [KANO_PLUGIN_START] ${file.name} -->\n${str}\n<!-- [KANO_PLUGIN_END] ${file.name} -->\n\n\n\n`
+                    createToast(t('toast_add_success_save_to_submit'), 'pink')
+                    resolve({ msg: 'added as single plugin' })
                 }
+                plugins.push({
+                    name: file.name,
+                    content: str
+                })
+                renderPluginList()
             }
         })
     }
@@ -4478,18 +4531,104 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
         }
     }
 
-    const clearPluginText = () => {
-        const custom_head = document.querySelector('#custom_head')
-        custom_head.value = ''
-        createToast(t('toast_clear_success_save_to_submit'), 'green')
-    }
-
     const onPluginBtn = () => {
         document.querySelector('#pluginFileInput')?.click()
     }
 
     //初始化插件功能
-    // PLUGIN_SETTING
+    let sortable_plugin = null
+    let plugins = []
+
+    const renderPluginList = () => {
+        const listEl = document.getElementById('sortable-list')
+        const custom_head = document.querySelector('#custom_head')
+
+        listEl.innerHTML = ''
+
+        plugins.forEach((item, index) => {
+            const el = document.createElement('li')
+            el.dataset.index = index
+            el.style.display = "flex"
+            el.style.justifyContent = "space-between"
+            el.style.alignItems = "center"
+            el.style.width = "100%"
+            el.style.gap = "10px"
+
+            const deleteBtn = document.createElement('div')
+            deleteBtn.style.height = '20px'
+            deleteBtn.classList.add('drag-option', 'delete-btn')
+            deleteBtn.innerHTML = `<svg width="20px" height="20px" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"><path fill="#ffffff" d="M736 352.032L736.096 800h-0.128L288 799.968 288.032 352 736 352.032zM384 224h256v64h-256V224z m448 64h-128V202.624C704 182.048 687.232 160 640.16 160h-256.32C336.768 160 320 182.048 320 202.624V288H192a32 32 0 1 0 0 64h32V799.968C224 835.296 252.704 864 288.032 864h447.936A64.064 64.064 0 0 0 800 799.968V352h32a32 32 0 1 0 0-64z"  /><path fill="#ffffff" d="M608 690.56a32 32 0 0 0 32-32V448a32 32 0 1 0-64 0v210.56a32 32 0 0 0 32 32M416 690.56a32 32 0 0 0 32-32V448a32 32 0 1 0-64 0v210.56a32 32 0 0 0 32 32"  /></svg>`
+            deleteBtn.onclick = () => {
+                plugins.splice(index, 1)
+                createToast(`${t('deleted_plugin')}：${item.name}，${t('save_to_apply')}！`)
+                renderPluginList() // 重新渲染
+            }
+
+            const sortBtn = document.createElement('div')
+            sortBtn.classList.add('handle', 'drag-option')
+            sortBtn.style.height = '20px'
+            sortBtn.innerHTML = `<svg width="20px" height="20px" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"><path fill="#ffffff" d="M909.3 506.3L781.7 405.6c-4.7-3.7-11.7-0.4-11.7 5.7V476H548V254h64.8c6 0 9.4-7 5.7-11.7L517.7 114.7c-2.9-3.7-8.5-3.7-11.3 0L405.6 242.3c-3.7 4.7-0.4 11.7 5.7 11.7H476v222H254v-64.8c0-6-7-9.4-11.7-5.7L114.7 506.3c-3.7 2.9-3.7 8.5 0 11.3l127.5 100.8c4.7 3.7 11.7 0.4 11.7-5.7V548h222v222h-64.8c-6 0-9.4 7-5.7 11.7l100.8 127.5c2.9 3.7 8.5 3.7 11.3 0l100.8-127.5c3.7-4.7 0.4-11.7-5.7-11.7H548V548h222v64.8c0 6 7 9.4 11.7 5.7l127.5-100.8c3.7-2.9 3.7-8.5 0.1-11.4z" /></svg>`
+
+            const text = document.createElement('span')
+            text.innerHTML = item.name
+            text.style.padding = '2px 6px'
+
+            text.onclick = () => {
+                const editSinglePlugin = document.querySelector('#editSinglePlugin')
+                if (editSinglePlugin) {
+                    const currentItem = item
+                    document.querySelector('#currentPluginName').textContent = currentItem.name
+                    showModal('#editSinglePluginModal')
+                    editSinglePlugin.value = currentItem.content
+                    const submitEditSinglePlugin = document.querySelector('#submitEditSinglePlugin')
+                    if (submitEditSinglePlugin) {
+                        submitEditSinglePlugin.onclick = () => {
+                            const index = plugins.findIndex(el => el.name == currentItem.name)
+                            if (index != -1 && plugins[index]) {
+                                plugins[index].content = editSinglePlugin.value
+                                renderPluginList()
+                                closeModal('#editSinglePluginModal')
+                                editSinglePlugin.value = ''
+                                document.querySelector('#currentPluginName').textContent = ''
+                                createToast(t('toast_add_success_save_to_submit'), 'pink')
+                            }
+                        }
+                    }
+                }
+            }
+
+            el.appendChild(sortBtn)
+            el.appendChild(text)
+            el.appendChild(deleteBtn)
+            listEl.appendChild(el)
+        })
+
+        // 初始化或重新绑定拖拽
+        if (sortable_plugin && sortable_plugin.destroy) {
+            sortable_plugin.destroy()
+            sortable_plugin = null
+        }
+
+        sortable_plugin = new Sortable(listEl, {
+            animation: 150,
+            handle: '.handle',
+            onEnd: (evt) => {
+                const moved = plugins.splice(evt.oldIndex, 1)[0]
+                plugins.splice(evt.newIndex, 0, moved)
+                renderPluginList() // 拖动后重新渲染
+            }
+        })
+
+        // 同步 textarea 内容
+        custom_head.value = plugins.map(item =>
+            `<!-- [KANO_PLUGIN_START] ${item.name} -->\n${item.content}\n<!-- [KANO_PLUGIN_END] ${item.name} -->\n\n\n\n`
+        ).join('')
+
+        // 同步插件数量
+        const PLUGINS_NUM = document.querySelector('#PLUGINS_NUM')
+        if (PLUGINS_NUM) PLUGINS_NUM.innerHTML = plugins.length
+    }
+
     const initPluginSetting = async () => {
         const btn = document.querySelector('#PLUGIN_SETTING')
         if (!(await initRequestData())) {
@@ -4500,13 +4639,26 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
         btn.style.backgroundColor = 'var(--dark-btn-color)'
         btn.onclick = async () => {
             showModal('#PluginModal')
-            //获取当前插件
+
             try {
                 const { text } = await (await fetch(`${KANO_baseURL}/get_custom_head`, {
                     headers: common_headers
                 })).json()
                 const custom_head = document.querySelector('#custom_head')
                 custom_head.value = text || ''
+
+                // 提取插件
+                const pluginRegex = /<!--\s*\[KANO_PLUGIN_START\]\s*(.*?)\s*-->([\s\S]*?)<!--\s*\[KANO_PLUGIN_END\]\s*\1\s*-->/g;
+
+                plugins = []
+                let match
+                while ((match = pluginRegex.exec(text)) !== null) {
+                    const name = match[1].trim()
+                    const content = match[2].trim()
+                    plugins.push({ name, content })
+                }
+
+                renderPluginList() // 初始化渲染
             } catch (e) {
                 console.error(e)
                 createToast(t('toast_get_plugin_failed'), 'red')
@@ -4514,6 +4666,14 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
         }
     }
     initPluginSetting()
+
+    const clearPluginText = () => {
+        const custom_head = document.querySelector('#custom_head')
+        custom_head.value = ''
+        createToast(t('toast_clear_success_save_to_submit'), 'green')
+        plugins.length = 0
+        renderPluginList()
+    }
 
     const savePluginSetting = async (e) => {
         const custom_head = document.querySelector('#custom_head')
@@ -4523,14 +4683,17 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
                     if (error)
                         createToast(error, 'red')
                     else
-                        createToast('插件保存失败，请检查网络', 'red')
+                        createToast(t('plugin_save_fail_network'), 'red')
                 } else {
-                    createToast('插件保存成功', 'green')
+                    createToast(t('save_plugin_success_refresh'), 'green')
                     closeModal('#PluginModal')
+                    setTimeout(() => {
+                        location.reload()
+                    }, 2000)
                 }
             })
         } else {
-            createToast('没有登录，插件不会保存', 'yellow')
+            createToast(t("not_login_not_save_plugin"), 'yellow')
         }
     }
 
@@ -4877,4 +5040,11 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
         })
     }
     catch { }
+
+    // 初始化语言包
+    (() => {
+        const savedLang = localStorage.getItem(LANG_STORAGE_KEY);
+        const langToLoad = savedLang || detectBrowserLang();
+        loadLanguage(langToLoad);
+    })()
 }

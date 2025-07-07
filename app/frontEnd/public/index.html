@@ -12,7 +12,6 @@
     <link rel="manifest" href="/manifest.json">
     <link rel="stylesheet" href="/style/style.css">
     <script src="/script/polyfill.min.js"></script>
-    <script src="/script/draglist.js"></script>
 </head>
 
 <body id="BG">
@@ -20,7 +19,8 @@
         <div class="container">
             <div class="title main-title" onclick="enableTTYD()">
                 <strong id="MAIN_TITLE">UFI-TOOLS</strong>
-                <strong id="MODEL" style="font-size: 14px;"></strong>
+                <span style="font-size: 14px;" data-i18n="device"></span>:<strong id="MODEL"
+                    style="font-size: 14px;"></strong>
             </div>
             <!-- 操作按钮 -->
             <div class="title" id="collapseBtn_menu"
@@ -101,6 +101,15 @@
                             <option value="0" data-i18n="sim1">SIM1</option>
                             <option value="1" data-i18n="sim2">SIM2</option>
                         </select>
+
+                        <select class="select" id="SIM_CARD_TYPE_V50" style="display: none;"
+                            onchange="changeSimCard(event)">
+                            <option value="0" data-i18n="sim1_v50">移动</option>
+                            <option value="1" data-i18n="sim2_v50">电信</option>
+                            <option value="2" data-i18n="sim3_v50">联通</option>
+                            <option value="11" data-i18n="sim4_v50">外置</option>
+                        </select>
+
                         <select class="select" id="LANG"></select>
                     </div>
                 </div>
@@ -985,6 +994,10 @@
                                 data-i18n="action_sim1">切SIM卡1</button>
                             <button class="btn" onclick="fillAction(event,'切SIM卡2')"
                                 data-i18n="action_sim2">切SIM卡2</button>
+                            <button class="btn" onclick="fillAction(event,'切移动')" data-i18n="sim1_v50">切移动</button>
+                            <button class="btn" onclick="fillAction(event,'切联通')" data-i18n="sim3_v50">切联通</button>
+                            <button class="btn" onclick="fillAction(event,'切电信')" data-i18n="sim2_v50">切电信</button>
+                            <button class="btn" onclick="fillAction(event,'切外置')" data-i18n="sim4_v50">切外置</button>
                         </div>
                         <div style="text-align: right">
                             <button type="submit" class="btn" data-i18n="submit_btn">提交</button>
@@ -1068,14 +1081,14 @@
             <div class="mask" id="PluginModal" style="display: none;">
                 <div class="modal"
                     style="overflow: hidden;width: 90%;max-width: 400px; display: flex;flex-direction: column;">
-                    <div class="title" data-i18n="plugin_modal_title" style="margin-bottom: 4px;">插件功能</div>
-
+                    <div class="title" style="margin-bottom: 4px;"><span data-i18n="plugin_modal_title">插件功能</span> -
+                        <span data-i18n="plugin_modal_num">插件数量</span><span id="PLUGINS_NUM">?</span>
+                    </div>
                     <div class="content" style="min-height: 400px;">
                         <div style="text-align: left;width: 100%;font-size: 14px;">
                             <div class="title" data-i18n="plugin_modal_tip" style="font-style: italic;font-size: 12px;">
                                 <i>填入的内容会放在网页head末尾(支持脚本样式和meta元素),大小不能超过1145KB</i>
                             </div>
-
                             <div>
                                 <input type="file" id="pluginFileInput" style="display: none;"
                                     onchange="handlePluginFileUpload(event)">
@@ -1089,12 +1102,13 @@
                                         onclick="clearPluginText()">一键清空</button>
                                 </div>
                             </div>
-
-                            <textarea id="custom_head" placeholder="插件内容..."
+                            <ul id="sortable-list" class="plugin-list"
+                                style="margin-top: 10px;display: flex;gap:6px;flex-wrap: wrap;font-size: 12px;">
+                            </ul>
+                            <textarea disabled id="custom_head" placeholder="插件内容..."
                                 data-i18n-placeholder="plugin_modal_textarea_placeholder"
                                 style="font-size: 12px;font-family: monospace;margin: 6px 0;resize: vertical;width: 100%;box-sizing: border-box;"
-                                rows="20">
-        </textarea>
+                                rows="20"></textarea>
                         </div>
                     </div>
 
@@ -1106,6 +1120,23 @@
                     </div>
                 </div>
             </div>
+            <!-- 编辑插件模态框 -->
+            <div class="mask" id="editSinglePluginModal" style="display: none">
+                <div class="modal" style="width: 90%;max-width: 400px; display: flex;flex-direction: column;">
+                    <div class="title" style="margin-bottom: 4px;" data-i18n="edit_plugin">编辑插件</div>
+                    <p style="font-size: 14px;"><span data-i18n="plugin_current">当前插件</span>：<span
+                            id="currentPluginName"></span></p>
+                    <div class="content" style="min-height: 400px;">
+                        <textarea id="editSinglePlugin" style="width: 100%;box-sizing: border-box;min-height: 390px;"
+                            name="" id=""></textarea>
+                    </div>
+                    <div class="btn" style="text-align: right;margin-top: 6px;">
+                        <button id="submitEditSinglePlugin" data-i18n="submit_btn">提交</button>
+                        <button onclick="closeModal('#editSinglePluginModal')" data-i18n="close_btn">关闭</button>
+                    </div>
+                </div>
+            </div>
+
             <!-- 定时重启模态框 -->
             <div class="mask" id="scheduleRebootModal" style="display: none">
                 <div class="modal" style="width: 90%;max-width: 400px; display: flex;flex-direction: column;">
@@ -1562,6 +1593,8 @@
                 href="javascript:;" onclick="showModal('#payModal')" data-i18n="pay_title">打赏作者</a></p>
     </div>
     <div id="toastContainer"></div>
+    <script src="/script/lib/sortable.js"></script>
+    <script src="/script/draglist.js"></script>
     <script src="/script/i18n.js"></script>
     <script src="/script/lib/crypto.js"></script>
     <script src="/script/lib/chart.js"></script>

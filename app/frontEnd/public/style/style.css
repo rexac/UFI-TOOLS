@@ -94,6 +94,7 @@ input::placeholder {
 }
 
 textarea {
+    font-size: 10px !important;
     background-color: var(--dark-bgi-color);
     color: var(--dark-text-color);
     outline: none;
@@ -908,4 +909,28 @@ input[type="range"] {
         width: 80% !important;
         margin-bottom: 10px;
     }
+}
+
+.plugin-list li {
+    width: 70%;
+    min-width: 150px;
+    border-radius: 10px;
+    background-color: var(--dark-tag-color);
+    margin-bottom: 6px;
+    padding: 6px;
+    box-sizing: border-box;
+    user-select: none;
+    -webkit-user-select: none;
+
+}
+
+.drag-option {
+    border-radius: 4px;
+    background-color: var(--dark-tag-color);
+}
+
+.plugin-list li span {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }

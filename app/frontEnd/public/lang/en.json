@@ -622,5 +622,9 @@
     "not_login_not_save_plugin": "Not logged in, plugin will not be saved",
     "plugin_modal_num": "Plugin count",
     "plugin_current": "Current plugin",
-    "edit_plugin": "Edit plugin"
+    "edit_plugin": "Edit plugin",
+    "refresh_page": "Refresh Page",
+    "plugin": "Plugin",
+    "exists_skip": "Exists, skipped",
+    "same_plugin": "This plugin is already added"
 }

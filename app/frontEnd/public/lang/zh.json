@@ -622,5 +622,9 @@
     "not_login_not_save_plugin":"没有登录，插件不会保存",
     "plugin_modal_num":"插件数量",
     "plugin_current":"当前插件",
-    "edit_plugin":"编辑插件"
+    "edit_plugin":"编辑插件",
+    "refresh_page":"刷新页面",
+    "plugin":"插件",
+    "exists_skip":"已存在，跳过",
+    "same_plugin":"你已经添加过该插件了"
 }

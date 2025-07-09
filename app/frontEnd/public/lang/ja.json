@@ -622,5 +622,9 @@
     "not_login_not_save_plugin": "未ログインのため、プラグインは保存されません",
     "plugin_modal_num": "プラグイン数",
     "plugin_current": "現在のプラグイン",
-    "edit_plugin": "プラグインを編集"
+    "edit_plugin": "プラグインを編集",
+    "refresh_page": "ページを更新する",
+    "plugin": "プラグイン",
+    "exists_skip": "既に存在、スキップ",
+    "same_plugin": "このプラグインは追加済みです"
 }

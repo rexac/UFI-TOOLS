@@ -2,6 +2,7 @@ package com.minikano.f50_sms.modules.at
 
 import android.content.Context
 import com.minikano.f50_sms.modules.BASE_TAG
+import com.minikano.f50_sms.utils.KanoLog
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
@@ -28,7 +29,7 @@ fun isSafeHeader(header: String): Boolean {
 }
 
 fun Route.anyProxyModule(context: Context) {
-    val TAG = "[$BASE_TAG]_atModule"
+    val TAG = "[$BASE_TAG]_anyProxyModule"
 
     route("/api/proxy/{...}") {
         handle {
@@ -58,7 +59,12 @@ fun Route.anyProxyModule(context: Context) {
             val headersBuilder = Headers.Builder()
             for ((key, values) in call.request.headers.entries()) {
                 if (key.startsWith("kano-", ignoreCase = true)) {
-                    headersBuilder.addUnsafeNonAscii(key.removePrefix("kano-"), values.first())
+                    KanoLog.d(TAG,"代理请求头检测到$key=$values，已去掉前缀")
+                    if(key.contains("kano-cookie", ignoreCase = true)) {
+                        headersBuilder.add("Cookie", values.first())
+                    }else {
+                        headersBuilder.addUnsafeNonAscii(key.removePrefix("kano-"), values.first())
+                    }
                 } else if (isSafeHeader(key)) {
                     headersBuilder.addUnsafeNonAscii(key, values.first())
                 }

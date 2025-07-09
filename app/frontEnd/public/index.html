@@ -31,8 +31,8 @@
             <div class="functions-container actions collapse collapse_menu" data-name="close">
                 <div style="margin: auto;">
                     <div class="collapse_box actions-buttons">
+                        <button onclick="location.reload()" style="" class="btn" data-i18n="refresh_page">刷新页面</button>
                         <button id="CLEAR" class="btn" data-i18n="login_btn">登录/登出</button>
-                        <button class="btn REFRESH_BTN" data-i18n="stop_refresh">停止刷新</button>
                         <button id="CHANGEPWD" class="btn" data-i18n="change_password"
                             onclick="createToast('请登录','red')">更改密码</button>
                         <button id="REBOOT" class="btn" data-i18n="reboot"
@@ -1079,8 +1079,8 @@
             </div>
             <!-- 插件模态框 -->
             <div class="mask" id="PluginModal" style="display: none;">
-                <div class="modal"
-                    style="overflow: hidden;width: 90%;max-width: 400px; display: flex;flex-direction: column;">
+                <div class="modal" id="pluginDropZone"
+                    style="padding: 18px;border: 2px solid transparent;overflow: hidden;width: 90%;max-width: 400px; display: flex;flex-direction: column;">
                     <div class="title" style="margin-bottom: 4px;"><span data-i18n="plugin_modal_title">插件功能</span> -
                         <span data-i18n="plugin_modal_num">插件数量</span><span id="PLUGINS_NUM">?</span>
                     </div>
@@ -1594,6 +1594,7 @@
     </div>
     <div id="toastContainer"></div>
     <script src="/script/lib/sortable.js"></script>
+    <script src="/script/lib/filesaver.js"></script>
     <script src="/script/draglist.js"></script>
     <script src="/script/i18n.js"></script>
     <script src="/script/lib/crypto.js"></script>

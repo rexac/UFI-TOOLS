@@ -4465,6 +4465,36 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
         }
     }
 
+    //拖拽上传插件
+    (() => {
+        const dropZone = document.getElementById('pluginDropZone');
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.style.border = '2px dashed #007bff';
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.style.border = '2px solid transparent';
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.style.border = '2px solid transparent';
+            const files = e.dataTransfer.files;
+
+            if (files.length > 0) {
+                const fakeEvent = {
+                    target: {
+                        files: files
+                    }
+                };
+                handlePluginFileUpload(fakeEvent);
+            }
+        });
+
+    })()
+
 
     //插件上传
     const handlePluginFileUpload = (event) => {
@@ -4492,7 +4522,7 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
 
                 let matched = false;
                 let match;
-
+                let msgs = ''
                 while ((match = pluginRegex.exec(str)) !== null) {
                     console.log("匹配到一个插件集");
 
@@ -4509,7 +4539,12 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
                             name: pluginName,
                             content: pluginContent
                         });
+                    } else {
+                        msgs += `<p>${t('plugin')}:${pluginName} ${t('exists_skip')}</p>`
                     }
+                }
+                if (msgs) {
+                    createToast(msgs, 'pink', 5000)
                 }
 
                 if (matched) {
@@ -4519,13 +4554,15 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
                     // 不含插件头尾，手动包裹整个为一个插件
                     const pluginName = file.name;
                     custom_head.value += `<!-- [KANO_PLUGIN_START] ${pluginName} -->\n${str}\n<!-- [KANO_PLUGIN_END] ${pluginName} -->\n\n\n\n`;
-                    createToast(t('toast_add_success_save_to_submit'), 'pink');
-
-                    plugins.push({
-                        name: pluginName,
-                        content: str
-                    });
-
+                    if (!plugins.some(el => el.name === pluginName)) {
+                        plugins.push({
+                            name: pluginName,
+                            content: str
+                        });
+                        createToast(t('toast_add_success_save_to_submit'), 'pink');
+                    } else {
+                        createToast(t('same_plugin'), 'pink')
+                    }
                     resolve({ msg: 'added as single plugin' });
                 }
 
@@ -4542,12 +4579,8 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
             })).json()
             if (text) {
                 const b = new Blob([text], { type: 'text/plain' })
-                const url = URL.createObjectURL(b)
-                const a = document.createElement('a')
-                a.href = url
                 const date = (new Date()).toLocaleString("zh-cn").replaceAll(" ", "_").replaceAll("/", "_").replaceAll(":", "_")
-                a.download = `UFI-TOOLS_Plugins_${date}.txt`
-                a.click()
+                saveAs(b, `UFI-TOOLS_Plugins_${date}.txt`)
             }
         } catch (e) {
             console.error(e)

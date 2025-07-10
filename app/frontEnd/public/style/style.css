@@ -934,3 +934,45 @@ input[type="range"] {
     white-space: nowrap;
     text-overflow: ellipsis;
 }
+
+.toolbar {
+    position: fixed;
+    z-index: 4;
+    right: .6rem;
+    bottom: 28px;
+}
+
+.toolbar .refresh,
+.toolbar .top {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    top: 0;
+    width: 2.4rem;
+    height: 2.4rem;
+    background-color: var(--dark-btn-color);
+    opacity: .8;
+    border-radius: 50%;
+    box-sizing: border-box;
+    padding: 10px;
+    margin: 10px;
+    box-shadow: 0 0 10px #00000036;
+    transition: all .06s;
+}
+
+.toolbar .refresh:active,
+.toolbar .top:active,
+.toolbar .refresh:hover,
+.toolbar .top:hover {
+    box-shadow: 0 0 10px #00000066;
+    opacity: 1;
+}
+
+@media (max-width:650px) {
+
+    .toolbar .refresh,
+    .toolbar .top {
+        width: 2.8rem;
+        height: 2.8rem;
+    }
+}

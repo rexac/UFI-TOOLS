@@ -565,3 +565,10 @@ const getCssVariableColor = (variableName) => {
         ?.trim();
     return color
 }
+
+const scroolToTop = () => {
+    document.querySelector('.container').scrollTo({
+        top: 0,
+        behavior: "smooth",
+    })
+}

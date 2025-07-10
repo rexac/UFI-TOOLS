@@ -1,3 +1,30 @@
+// toolbar
+const tb = document.querySelector('#top_btn')
+if (tb) {
+    let ctTimer = null
+    let ctTimer1 = null
+    const ct = document.querySelector('.container')
+    tb.style.transition = 'all .3s'
+    const fn = debounce(() => {
+        if (ct.scrollTop > 100) {
+            tb.style.display = ''
+            ctTimer1 && clearTimeout(ctTimer1)
+            ctTimer1 = setTimeout(() => {
+                tb.style.opacity = '1'
+            }, 300);
+        } else {
+            tb.style.opacity = '0'
+            ctTimer && clearTimeout(ctTimer)
+            ctTimer = setTimeout(() => {
+                tb.style.display = 'none'
+            }, 300);
+        }
+    }, 50)
+    if (ct) {
+        ct.addEventListener('scroll', fn)
+    }
+}
+
 const _cloudSync = localStorage.getItem('isCloudSync');
 if (_cloudSync == null || _cloudSync == undefined) {
     localStorage.setItem('isCloudSync', true);

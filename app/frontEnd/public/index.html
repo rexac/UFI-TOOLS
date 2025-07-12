@@ -12,6 +12,22 @@
     <link rel="manifest" href="/manifest.json">
     <link rel="stylesheet" href="/style/style.css">
     <script src="/script/polyfill.min.js"></script>
+    <script>
+        const baseSize = 14;
+        const minScale = 0.9;
+        const maxScale = 1.2;
+
+        function setRem() {
+            const width = document.documentElement.clientWidth;
+            let scale = width / 375;
+            // 限制缩放范围
+            if (scale < minScale) scale = minScale;
+            if (scale > maxScale) scale = maxScale;
+            document.documentElement.style.fontSize = (baseSize * scale) + 'px';
+        }
+        setRem();
+        window.addEventListener('resize', setRem);
+    </script>
 </head>
 
 <body id="BG">

@@ -31,23 +31,10 @@ if (_cloudSync == null || _cloudSync == undefined) {
     initTheme()
 }
 
-const baseSize = 14;
-const minScale = 0.9;
-const maxScale = 1.2;
 let REFRESH_TIME = getRefteshRate((val) => {
     let refreshRateSelect = document.querySelector('#refreshRateSelect')
     refreshRateSelect && (refreshRateSelect.value = val.toString())
 })
-function setRem() {
-    const width = document.documentElement.clientWidth;
-    let scale = width / 375;
-    // 限制缩放范围
-    if (scale < minScale) scale = minScale;
-    if (scale > maxScale) scale = maxScale;
-    document.documentElement.style.fontSize = (baseSize * scale) + 'px';
-}
-setRem();
-window.addEventListener('resize', setRem);
 
 let isNeedToken = true
 const MODEL = document.querySelector("#MODEL")

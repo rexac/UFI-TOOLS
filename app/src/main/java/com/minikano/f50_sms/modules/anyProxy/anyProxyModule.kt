@@ -90,6 +90,7 @@ fun Route.anyProxyModule(context: Context) {
                     if (lowerName == "set-cookie") {
                         values.forEach { rawCookie ->
                             call.response.headers.append("Kano-SetCk", rawCookie)
+                            call.response.headers.append("Kano-Set-Cookie", rawCookie)
                         }
                     } else if (isSafeHeader(name)) {
                         values.forEach { value ->

@@ -1,6 +1,7 @@
 package com.minikano.f50_sms.utils
 
 import android.content.Context
+import android.os.Build
 import java.util.concurrent.atomic.AtomicBoolean
 import jcifs.smb.SmbFile
 import jcifs.context.SingletonContext
@@ -27,11 +28,10 @@ object SmbThrottledRunner {
 
         Thread {
             try {
-
-                KanoLog.d("kano_ZTE_LOG", "开始执行 SMB 命令,连接到：\"smb://$host/root/\"")
+                KanoLog.d("kano_ZTE_LOG", "开始执行 SMB 命令,连接到：\"smb://$host/internal_storage/\"")
 
                 val ctx = SingletonContext.getInstance()
-                val smbFile = SmbFile("smb://$host/root/", ctx)
+                val smbFile = SmbFile("smb://$host/internal_storage/", ctx)
 
                 if (smbFile.exists()) {
                     KanoLog.d("kano_ZTE_LOG", "SMB路径存在")

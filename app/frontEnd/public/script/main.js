@@ -450,6 +450,7 @@ function main_func() {
         initUSBNetworkType()
         initNFCSwitch()
         initWIFISwitch()
+        socatAlive()
         rebootDeviceBtnInit()
         handlerCecullarStatus()
         initScheduleRebootStatus()
@@ -458,6 +459,17 @@ function main_func() {
         initCellularSpeedTestBtn()
         initAdvanceTools()
         QOSRDPCommand("AT+CGEQOSRDP=1")
+    }
+
+    //检测是否启用高级功能
+    const checkAdvanceFunc = async () => {
+        const res = await runShellWithRoot('whoami')
+        if (res.content) {
+            if (res.content.includes('root')) {
+                return true
+            }
+        }
+        return false
     }
 
     const onTokenConfirm = debounce(async () => {
@@ -2874,11 +2886,16 @@ function main_func() {
 
     const socatAlive = async () => {
         let res = await checkAdvanceFunc()
+        if (res) {
+            let smb = document.querySelector('#SMB')
+            smb && (smb.style.display = 'none')
+        }
         const socat_status = document.querySelector('#socat_status')
         if (socat_status) {
             socat_status.innerHTML = res ? `${t('advanced')}：🟢 ${t('advanced_tools_on')}` : `${t('advanced')}：🔴 ${t('advanced_tools_off')}`
         }
     }
+    socatAlive()
 
     let socatTimerFn = null
 
@@ -3400,17 +3417,6 @@ function main_func() {
         }
     }
 
-    //检测是否启用高级功能
-    const checkAdvanceFunc = async () => {
-        const res = await runShellWithRoot('whoami')
-        if (res.content) {
-            if (res.content.includes('root')) {
-                return true
-            }
-        }
-        return false
-    }
-
     //立即更新
     let updateSoftwareInterval = null
     const handleUpdateSoftware = async (url) => {
@@ -3894,7 +3900,7 @@ function main_func() {
 
         console.log('钉钉表单数据:', { webhook_url, secret })
 
-        if (!webhook_url || webhook_url.trim() == '') return createToast('请输入钉钉Webhook地址', 'red')
+        if (!webhook_url || webhook_url.trim() == '') return createToast(t('no_dingtalk_url'), 'red')
 
         //请求
         try {
@@ -3910,7 +3916,7 @@ function main_func() {
                 })
             })).json()
             if (res.result == 'success') {
-                createToast('钉钉测试消息发送成功', 'green')
+                createToast(t('dingtalk_test_msg_success'), 'green')
                 // form.reset()
                 // closeModal('#smsForwardModal')
             } else {

@@ -626,5 +626,11 @@
     "refresh_page": "ページを更新する",
     "plugin": "プラグイン",
     "exists_skip": "既に存在、スキップ",
-    "same_plugin": "このプラグインは追加済みです"
+    "same_plugin": "このプラグインは追加済みです",
+    "dingtalk_method": "DingTalk方式",
+    "no_dingtalk_url": "DingTalkのWebhookアドレスを入力してください",
+    "dingtalk_test_msg_success": "DingTalkテストメッセージ送信成功",
+    "dingtalk_hint": "DingTalkグループBotのWebhookアドレスを設定。署名に対応",
+    "dingtalk_webhook": "Webhookアドレス：",
+    "dingtalk_secret": "署名キー："
 }

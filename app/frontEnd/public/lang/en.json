@@ -626,5 +626,11 @@
     "refresh_page": "Refresh Page",
     "plugin": "Plugin",
     "exists_skip": "Exists, skipped",
-    "same_plugin": "This plugin is already added"
+    "same_plugin": "This plugin is already added",
+    "dingtalk_method": "DingTalk Method",
+    "no_dingtalk_url": "Please enter the DingTalk Webhook URL",
+    "dingtalk_test_msg_success": "DingTalk test message sent successfully",
+    "dingtalk_hint": "Configure the DingTalk group bot webhook URL, signing supported",
+    "dingtalk_webhook": "Webhook URL:",
+    "dingtalk_secret": "Sign Secret:"
 }

@@ -26,14 +26,6 @@ object SMBConfig {
             	public = yes
             	guest ok = yes
 
-            [root]
-            	comment = Android Server
-            	path = /
-            	browseable = yes
-            	writable = yes
-            	public = yes
-            	guest ok = yes
-
             [internal_storage]
             	comment = Android Server
             	path = /sdcard

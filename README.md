@@ -2,62 +2,52 @@
 <img src="https://kanokano.cn/wp-content/uploads/2025/04/5acb8625d65a3fd5d7b228830a9450a1.webp" style="width:50%;text-align:center" />
 </div>
 
-## What Features Does It Have?
-
-* **Remote management (requires LAN penetration)**
-* **Send and receive SMS messages**
+## What features does it have?
+ 
+* **Remote management (requires intranet penetration)**
+* **SMS sending and receiving**
 * **SMS forwarding**
-* **Send AT commands**
-* **Local network speed testing**
-* **Customizable themes and backgrounds**
-* **Real-time display of various parameters**
-  (QCI speed, CPU temperature, memory load, signal strength, SNR, PCI, cell ID, frequency band, IPv6 address, etc.)
-* **Lock frequency band and cell without reboot**
-* **USB debugging and auto-start for network USB debugging**
-* **Dual-end support** (can be installed and used on a phone or installed as a server on an F50 device)
+* **AT command sending**
+* **Intranet speed test**
+* **Theme + background customization**
+* **Real-time display of various parameters (QCI rate, CPU temperature, memory load, signal strength, SNR, PCI, cell number, frequency band, IPv6 address, etc.)**
+* **Lock frequency band, lock cell (no restart required)**
+* **USB debugging, network USB debugging auto-start**
+* **Available on both ends (can be installed and used on mobile phones (none), or installed as a server for F50)**
 * **Auto-start on boot**
-* **One-click OTA updates**
-* **Performance mode, LED indicator, and file sharing toggles**
+* **One-click OTA**
+* **Performance mode, indicator light, file sharing switch**
 * **3G/4G/5G network switching**
-* **More features coming soon!**
+* **Other functions will continue to be updated in the future**
 
-![](img/5.png) 
+|   ![](img/1.jpg)   |   ![](img/2.jpg)   |
+| ---- | ---- |
 
-| ![](img/1.jpg) | ![](img/2.jpg) |
-| -------------- | -------------- |
+|   ![](img/3.jpg)   |   ![](img/4.jpg)   |
+| ---- | ---- |
 
-| ![](img/3.jpg) | ![](img/4.jpg) |
-| -------------- | -------------- |
+## How to use?
 
----
+**Android Users**
 
-## How to Use
+1. First, download the software APK, install it on your mobile phone and open it
+2. Be on the same network as the portable WiFi, open the control webpage, log in and enable the adb function
+3. Use the ADB function of your computer or mobile phone to connect to the portable WiFi and install the APK into the portable WiFi device
+4. Use remote control software such as Scrcpy to start zte-ufi-tools, set the gateway, start the service, turn off battery optimization, and enable notifications (to ensure smooth auto-start on boot)
+5. Use your mobile phone to access the IP address of the portable WiFi, with the port being 2333, and then you can use it
 
-**For Android Users:**
+**iOS Users**
 
-1. Download and install the APK on your phone, then open it.
-2. Make sure your phone is connected to the same network as the portable WiFi device. Open the control webpage, log in, and enable ADB functionality.
-3. Use ADB on your computer or phone to connect to the portable WiFi and install the APK on the device.
-4. Use remote control software like scrcpy to launch zte-ufi-tools, configure the gateway, start the service, disable battery optimization, and enable notifications (to ensure it can auto-start on boot).
-5. Open your phone’s browser, visit the portable WiFi’s IP address on port 2333, and start using the tool.
+> iOS users need to use the traditional method to open adb, connect to WiFi and enter http://192.168.0.1/index.html#usb_port to enable adb
+> 
+> After that, you can follow the **step 3** for Android users
 
-**For iOS Users:**
+Note: Whether the functions can be used depends on your device model and version. Currently, the version that I have tested to work perfectly is **MU300_ZYV1.0.0B09**
 
-> iOS users need to enable ADB the traditional way: connect to WiFi, then open
-> `http://192.168.0.1/index.html#usb_port` and turn on ADB.
-> From step 3 onwards, follow the Android user instructions.
+Note 2: Since there are no official interfaces for CPU usage, temperature, and memory usage, if you install this APK on your mobile phone, the temperature and usage data will be provided by your mobile phone, not the portable WiFi.
 
-**Notes:**
+Download link: https://www.123684.com/s/7oa5Vv-dQLD3?pwd=CkSj
 
-* Functionality depends on your device model and firmware version. The version I tested with perfect results is **MU300\_ZYV1.0.0B09**.
-* CPU usage, temperature, and memory usage data come from your phone if you install the APK on it, since there are no official APIs for these on the portable WiFi device itself.
+Extraction code: `CkSj`
 
-**Download link:**
-[https://www.123684.com/s/7oa5Vv-dQLD3](https://www.123684.com/s/7oa5Vv-dQLD3? pwd:CkS) pwd:CkSj
-
-**API Documentation(Chinese):**
-[https://kanokano.cn/wp-content/uploads/2025/06/UFI-TOOLSAPI文档.html](https://kanokano.cn/wp-content/uploads/2025/06/UFI-TOOLSAPI文档.html)
-
----
-
-If you want, I can help you polish it further or add a more technical section!
+API documentation: https://kanokano.cn/wp-content/uploads/2025/06/UFI-TOOLSAPI文档.html

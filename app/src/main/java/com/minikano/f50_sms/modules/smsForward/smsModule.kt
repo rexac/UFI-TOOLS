@@ -63,7 +63,7 @@ fun Route.smsModule(context: Context) {
 
             KanoLog.d(TAG, "SMTP配置已保存：$smtpHost:$smtpPort [$smtpUsername]")
 
-            val test_msg = SmsInfo("1010721", "UFI-TOOLS TEST消息", 0)
+            val test_msg = SmsInfo("1016263950", "UFI-TOOLS TEST消息", 0)
             SmsPoll.forwardByEmail(test_msg, context)
 
             call.response.headers.append("Access-Control-Allow-Origin", "*")
@@ -225,6 +225,72 @@ fun Route.smsModule(context: Context) {
                 HttpStatusCode.InternalServerError
             )
         }
+    }
+
+    //短信转发参数存入-钉钉webhook
+    post("/api/sms_forward_dingtalk") {
+        try {
+            val body = call.receiveText()
+            val json = JSONObject(body)
+
+            val webhookUrl = json.optString("webhook_url", "").trim()
+            val secret = json.optString("secret", "").trim()
+
+            if (webhookUrl.isEmpty()) {
+                throw Exception("缺少必要参数：webhook_url")
+            }
+
+            // 存储到 SharedPreferences
+            val sharedPrefs =
+                context.getSharedPreferences("kano_ZTE_store", Context.MODE_PRIVATE)
+            sharedPrefs.edit().apply {
+                putString("kano_sms_forward_method", "DINGTALK")
+                putString("kano_dingtalk_webhook", webhookUrl)
+                putString("kano_dingtalk_secret", secret)
+                apply()
+            }
+
+            KanoLog.d(TAG, "钉钉配置已保存：$webhookUrl")
+
+            // 发送测试消息
+            val test_msg =
+                SmsInfo("1010721", "UFI-TOOLS TEST消息", System.currentTimeMillis())
+            SmsPoll.forwardSmsByDingTalk(test_msg, context)
+
+            call.response.headers.append("Access-Control-Allow-Origin", "*")
+            call.respondText(
+                """{"result":"success"}""",
+                ContentType.Application.Json,
+                HttpStatusCode.OK
+            )
+        } catch (e: Exception) {
+            KanoLog.d(TAG, "钉钉配置出错：${e.message}")
+            call.response.headers.append("Access-Control-Allow-Origin", "*")
+            call.respondText(
+                """{"error":"钉钉配置出错：${e.message}"}""",
+                ContentType.Application.Json,
+                HttpStatusCode.InternalServerError
+            )
+        }
+    }
+
+    //读取短信转发钉钉配置
+    get("/api/sms_forward_dingtalk") {
+        val sharedPrefs =
+            context.getSharedPreferences("kano_ZTE_store", Context.MODE_PRIVATE)
+
+        val webhookUrl = sharedPrefs.getString("kano_dingtalk_webhook", "") ?: ""
+        val secret = sharedPrefs.getString("kano_dingtalk_secret", "") ?: ""
+
+        val json = """
+        {
+            "webhook_url": "$webhookUrl",
+            "secret": "$secret"
+        }
+    """.trimIndent()
+
+        call.response.headers.append("Access-Control-Allow-Origin", "*")
+        call.respondText(json, ContentType.Application.Json, HttpStatusCode.OK)
     }
 
 }

@@ -1455,6 +1455,8 @@
                             data-i18n="smtp_method">SMTP方式</button>
                         <button id="curl_btn" data-method="curl" id="curlForwardBtn" style="flex: 1;" class="tab-btn"
                             data-i18n="curl_method">CURL方式</button>
+                        <button id="dingtalk_btn" data-method="dingtalk" id="dingtalkForwardBtn" style="flex: 1;" class="tab-btn"
+                            data-i18n="dingtalk_method">钉钉方式</button>
                     </div>
                     <div id="collapse_smsforward" class="collapse">
                         <div class="collapse_box">
@@ -1538,6 +1540,39 @@
                                                 id="curl_text" name="curl_text" type="text"
                                                 placeholder="curl 'https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=xxx'"></textarea>
                                         </div>
+                                    </div>
+                                </div>
+                                <div class="btn" style="text-align: right;">
+                                    <button type="submit">提交</button>
+                                    <button type="button" onclick="closeModal('#smsForwardModal')">关闭</button>
+                                </div>
+                            </form>
+                            <!-- 钉钉webhook转发 -->
+                            <form onsubmit="handleSmsForwardDingTalkForm(event)" id="smsForwardDingTalkForm"
+                                style="display: none;">
+                                <div class="content" style="
+                                    overflow-y: scroll;
+                                    padding: 15px;
+                                    width: 66vw;
+                                    max-width: 400px;">
+                                    <div class="title" style="font-size: 12px;" data-i18n="dingtalk_hint">
+                                        配置钉钉群机器人webhook地址，支持加签安全设置
+                                    </div>
+                                    <div class="item" style="margin: 10px auto;">
+                                        <label style="
+                                display: flex;
+                                align-items: center;
+                            "><span data-i18n="dingtalk_webhook">Webhook地址：</span><input
+                                                style="flex: 1;padding: 4px 6px;width: 100%;" id="dingtalk_webhook"
+                                                name="dingtalk_webhook" type="text" placeholder="https://oapi.dingtalk.com/robot/send?access_token=xxx"></label>
+                                    </div>
+                                    <div class="item" style="margin: 10px auto;">
+                                        <label style="
+                                display: flex;
+                                align-items: center;
+                            "><span data-i18n="dingtalk_secret">加签密钥：</span><input
+                                                style="flex: 1;padding: 4px 6px;width: 100%;" id="dingtalk_secret"
+                                                name="dingtalk_secret" type="text" placeholder="SEC000000000000000000000" optional></label>
                                     </div>
                                 </div>
                                 <div class="btn" style="text-align: right;">

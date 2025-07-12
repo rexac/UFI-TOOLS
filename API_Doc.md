@@ -289,6 +289,8 @@ Content-Type: application/json
 | GET  | `/api/sms_forward_mail`    | 获取邮件转发配置       | 无                                                           | 是       |
 | POST | `/api/sms_forward_curl`    | 配置 curl 方式的转发   | {`curl_text`}（需包含 `{{sms-body}}`、`{{sms-time}}`、`{{sms-from}}`） | 是       |
 | GET  | `/api/sms_forward_curl`    | 获取 curl 转发配置     | 无                                                           | 是       |
+| POST | `/api/sms_forward_dingtalk` | 配置钉钉webhook方式的转发 | {`webhook_url`, `secret`}（`secret`为可选的加签密钥） | 是       |
+| GET  | `/api/sms_forward_dingtalk` | 获取钉钉webhook转发配置 | 无                                                           | 是       |
 | POST | `/api/sms_forward_enabled` | 设置短信转发总开关     | Query 参数：`enable`（字符串）                               | 是       |
 | GET  | `/api/sms_forward_enabled` | 获取短信转发开关状态   | 无                                                           | 是       |
 

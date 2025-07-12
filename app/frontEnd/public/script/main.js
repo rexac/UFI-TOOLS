@@ -3712,6 +3712,18 @@ function main_func() {
             const curlTextEl = document.querySelector('#curl_text')
             curlTextEl.value = curl_text || ''
             needSwitch && switchSmsForwardMethodTab({ target: document.querySelector('#curl_btn') })
+        } else if (method.toLowerCase() == 'dingtalk') {
+            //获取模态框数据
+            const data = await (await fetch(`${KANO_baseURL}/sms_forward_dingtalk`, {
+                method: 'GET',
+                headers: common_headers
+            })).json()
+            const { webhook_url, secret } = data
+            const webhookEl = document.querySelector('#dingtalk_webhook')
+            const secretEl = document.querySelector('#dingtalk_secret')
+            webhookEl.value = webhook_url || ''
+            secretEl.value = secret || ''
+            needSwitch && switchSmsForwardMethodTab({ target: document.querySelector('#dingtalk_btn') })
         } else {
             needSwitch && switchSmsForwardMethodTab({ target: document.querySelector('#smtp_btn') })
         }
@@ -3739,18 +3751,27 @@ function main_func() {
     const switchSmsForwardMethod = (method) => {
         const smsForwardForm = document.querySelector('#smsForwardForm')
         const smsForwardCurlForm = document.querySelector('#smsForwardCurlForm')
+        const smsForwardDingTalkForm = document.querySelector('#smsForwardDingTalkForm')
         switch (method.toLowerCase()) {
             case 'smtp':
                 smsForwardForm.style.display = 'block'
                 smsForwardCurlForm.style.display = 'none'
+                smsForwardDingTalkForm.style.display = 'none'
                 break
             case 'curl':
                 smsForwardForm.style.display = 'none'
                 smsForwardCurlForm.style.display = 'block'
+                smsForwardDingTalkForm.style.display = 'none'
+                break
+            case 'dingtalk':
+                smsForwardForm.style.display = 'none'
+                smsForwardCurlForm.style.display = 'none'
+                smsForwardDingTalkForm.style.display = 'block'
                 break
             default:
                 smsForwardForm.style.display = 'block'
                 smsForwardCurlForm.style.display = 'none'
+                smsForwardDingTalkForm.style.display = 'none'
                 break
         }
         initSmsForward(false, method)
@@ -3847,6 +3868,49 @@ function main_func() {
             })).json()
             if (res.result == 'success') {
                 createToast(t('toast_curl_test_msg'), 'green')
+                // form.reset()
+                // closeModal('#smsForwardModal')
+            } else {
+                if (res.error) {
+                    createToast(res.error, 'red')
+                } else {
+                    createToast(t('toast_set_failed'), 'red')
+                }
+            }
+        }
+        catch (e) {
+            createToast(t('toast_request_failed'), 'red')
+            return
+        }
+    }
+
+    const handleSmsForwardDingTalkForm = async (e) => {
+        console.log('钉钉表单提交事件触发')
+        e.preventDefault()
+        const form = e.target
+        const formData = new FormData(form);
+        const webhook_url = formData.get('dingtalk_webhook')
+        const secret = formData.get('dingtalk_secret')
+
+        console.log('钉钉表单数据:', { webhook_url, secret })
+
+        if (!webhook_url || webhook_url.trim() == '') return createToast('请输入钉钉Webhook地址', 'red')
+
+        //请求
+        try {
+            const res = await (await fetch(`${KANO_baseURL}/sms_forward_dingtalk`, {
+                method: 'POST',
+                headers: {
+                    ...common_headers,
+                    'Content-Type': 'application/json;charset=UTF-8'
+                },
+                body: JSON.stringify({
+                    webhook_url: webhook_url.trim(),
+                    secret: secret.trim(),
+                })
+            })).json()
+            if (res.result == 'success') {
+                createToast('钉钉测试消息发送成功', 'green')
                 // form.reset()
                 // closeModal('#smsForwardModal')
             } else {
@@ -5061,6 +5125,7 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
         switchSmsForwardMethodTab,
         handleSmsForwardCurlForm,
         handleSmsForwardForm,
+        handleSmsForwardDingTalkForm,
         handleShell,
         handleDownloadSoftwareLink,
         handleUpdateSoftware,

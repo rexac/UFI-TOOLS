@@ -34,6 +34,9 @@ object SmsPoll {
             else if(sms_forward_method == "CURL"){
                 forwardSmsByCurl(lastSms,context)
             }
+            else if(sms_forward_method == "DINGTALK"){
+                forwardSmsByDingTalk(lastSms,context)
+            }
         } else {
             KanoLog.d(
                 "kano_ZTE_LOG",
@@ -128,6 +131,41 @@ object SmsPoll {
                 </div>
             """.trimIndent()
         )
+    }
+
+    //通过钉钉webhook转发
+    fun forwardSmsByDingTalk(sms_data: SmsInfo?, context: Context) {
+        if (sms_data == null) return
+        val sharedPrefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+
+        val webhookUrl = sharedPrefs.getString("kano_dingtalk_webhook", null)
+        if (webhookUrl.isNullOrEmpty()) {
+            KanoLog.e("kano_ZTE_LOG", "钉钉配置错误：kano_dingtalk_webhook 为空")
+            return
+        }
+
+        val secret = sharedPrefs.getString("kano_dingtalk_secret", null)
+
+        KanoLog.d("kano_ZTE_LOG", "开始转发短信...（钉钉）")
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+            .withZone(ZoneId.systemDefault())
+        val smsText = sms_data.body.trimStart()
+        val smsFrom = sms_data.address
+        val smsTime = formatter.format(Instant.ofEpochMilli(sms_data.timestamp))
+
+        // 构建钉钉消息内容
+        val messageContent = """
+            📱 新短信通知
+            
+            📄 内容：$smsText
+            📞 来自：$smsFrom
+            ⏰ 时间：$smsTime
+            
+            Powered by UFI-TOOLS
+        """.trimIndent()
+
+        val dingTalkClient = KanoDingTalk(webhookUrl, secret)
+        dingTalkClient.sendMessage(messageContent)
     }
 
     fun getLatestSms(context: Context): SmsInfo? {

@@ -205,7 +205,7 @@ fun Route.otaModule(context: Context) {
                 #!/system/bin/sh
                 nohup sh -c '
                 pm install -r -g "${ApkState.downloadResultPath}" >> /sdcard/ufi_tools_update.log 2>&1
-                am start -n com.minikano.f50_sms/.MainActivity >> /sdcard/ufi_tools_update.log 2>&1
+                dumpsys activity start-activity -n com.minikano.f50_sms/.MainActivity >> /sdcard/ufi_tools_update.log 2>&1
                 sync
                 sync
                 echo "${'$'}(date)install and sync complete!" >> /sdcard/ufi_tools_update.log
@@ -248,7 +248,7 @@ fun Route.otaModule(context: Context) {
                     val scriptText = """
                     #!/system/bin/sh
                     pm install -r -g /sdcard/ufi_tools_latest.apk >> /sdcard/ufi_tools_update.log 2>&1
-                    am start -n com.minikano.f50_sms/.MainActivity >> /sdcard/ufi_tools_update.log 2>&1
+                    dumpsys activity start-activity -n com.minikano.f50_sms/.MainActivity >> /sdcard/ufi_tools_update.log 2>&1
                     sync
                     sync
                     echo "$(date)install and sync complete!" >> /sdcard/ufi_tools_update.log

@@ -34,10 +34,16 @@
     -webkit-user-select: all !important;
 }
 
+html {
+    height: 100vh;
+    max-height: 100dvh;
+}
+
 body {
-    position: relative;
     margin: 0;
     padding: 0;
+    height: 100vh;
+    max-height: 100dvh;
     font-weight: bold;
     background-attachment: fixed;
     background-size: cover;
@@ -117,6 +123,7 @@ textarea::placeholder {
     display: flex;
     flex-direction: column;
     height: 100vh;
+    max-height: 100dvh;
     max-width: 1260px;
     margin: 0 auto;
     align-items: center;

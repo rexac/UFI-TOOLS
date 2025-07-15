@@ -46,8 +46,8 @@ Note: Whether the functions can be used depends on your device model and version
 
 Note 2: Since there are no official interfaces for CPU usage, temperature, and memory usage, if you install this APK on your mobile phone, the temperature and usage data will be provided by your mobile phone, not the portable WiFi.
 
-Download link: https://www.123684.com/s/7oa5Vv-dQLD3?pwd=CkSj
+Download link: https://www.123684.com/s/7oa5Vv-R05D3
 
-Extraction code: `CkSj`
+Extraction code: `2333`
 
 API documentation: https://kanokano.cn/wp-content/uploads/2025/06/UFI-TOOLSAPI文档.html

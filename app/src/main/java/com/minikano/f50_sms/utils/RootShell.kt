@@ -18,9 +18,9 @@ object RootShell {
             KanoLog.d("kano_ZTE_LOG", "开始发送socket,目录：${socketPath},命令:${command}")
 
             socket.connect(socketAddress)
+            socket.soTimeout = 60*1000 // 60 秒超时
 
             KanoLog.d("kano_ZTE_LOG", "Socket")
-
 
             val outputStream = BufferedWriter(OutputStreamWriter(socket.outputStream))
             val inputStream = BufferedReader(InputStreamReader(socket.inputStream))

@@ -118,6 +118,11 @@ boot_up_script() {
   ip6tables -A INPUT -p tcp --dport 139 -j DROP
   ip6tables -A INPUT -p tcp --dport 445 -j DROP
   ip6tables -A INPUT -p tcp --dport 5555 -j DROP
+  ip6tables -A INPUT -p udp --dport 8080 -j DROP
+  ip6tables -A INPUT -p udp --dport 1146 -j DROP
+  ip6tables -A INPUT -p udp --dport 139 -j DROP
+  ip6tables -A INPUT -p udp --dport 445 -j DROP
+  ip6tables -A INPUT -p udp --dport 5555 -j DROP
 
   echo "$UNLOCK_SAMBA_CONF" > /cache/unlock_samba.sh
   echo "$UNLOCK_SAMBA_CONF" > /sdcard/unlock_samba.sh
@@ -144,6 +149,8 @@ schedule_script() {
   check_log_file
   check_ttyd_running
   check_socat_running
+  ip6tables -A INPUT -p tcp --dport 5555 -j DROP
+  ip6tables -A INPUT -p udp --dport 5555 -j DROP
 }
 
 uptime_seconds=$(cut -d. -f1 /proc/uptime)

@@ -29,6 +29,17 @@ let KANO_TOKEN = null;
         const t = Date.now();
         const method = (init.method || 'GET').toUpperCase();
 
+        //无感验证anyProxy
+        if (input.startsWith('/api/proxy')) {
+            let _token = common_headers.authorization
+            if (!_token) {
+                _token = localStorage.getItem('kano_sms_token')
+            }
+            if (_token) {
+                headers.set('authorization', _token)
+            }
+        }
+
         // 提取纯路径（不含 query）
         let urlPath = '';
         try {
@@ -101,7 +112,7 @@ let login = async () => {
             "goformId": "LOGIN_MULTI_USER",
             "isTest": "false",
             "password": pwd,
-            "IP":"localhost",
+            "IP": "localhost",
             "user": "admin"
         })
         const res = await fetch(KANO_baseURL + "/goform/goform_set_cmd_process", {

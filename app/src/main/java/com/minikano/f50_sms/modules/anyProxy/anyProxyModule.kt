@@ -14,6 +14,9 @@ import okhttp3.*
 import okhttp3.Headers
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
+import java.net.InetAddress
+import java.net.URI
+import java.net.UnknownHostException
 
 val unsafeHeaderNames = setOf(
     "connection", "keep-alive", "proxy-authenticate", "proxy-authorization", "te", "trailers",
@@ -28,6 +31,31 @@ fun isSafeHeader(header: String): Boolean {
     return header.lowercase() !in unsafeHeaderNames
 }
 
+val forbiddenDomains = listOf(
+    "ufi.ztedevice.com"
+)
+
+fun isForbiddenHost(targetUrl: String): Boolean {
+    return try {
+        val uri = URI(targetUrl)
+        val host = uri.host ?: return true
+        if (forbiddenDomains.any { it.equals(host, ignoreCase = true) }) {
+            return true
+        }
+        val addresses = InetAddress.getAllByName(host)
+        addresses.any { address ->
+            address.isAnyLocalAddress || // 0.0.0.0
+            address.isLoopbackAddress || // 127.0.0.1, ::1
+            address.isLinkLocalAddress || // 169.254.x.x
+            address.isSiteLocalAddress // 192.168.x.x, 10.x.x.x, 172.16.x.x
+        }
+    } catch (e: UnknownHostException) {
+        true
+    } catch (e: Exception) {
+        true
+    }
+}
+
 fun Route.anyProxyModule(context: Context) {
     val TAG = "[$BASE_TAG]_anyProxyModule"
 
@@ -35,6 +63,12 @@ fun Route.anyProxyModule(context: Context) {
         handle {
             val rawPath = call.request.uri.removePrefix("/api/proxy/")
             val targetUrl = rawPath.removePrefix("--")
+
+            if (isForbiddenHost(targetUrl)) {
+                call.respond(HttpStatusCode.Forbidden, "Access to target address is not allowed.")
+                return@handle
+            }
+
             val method = call.request.httpMethod.value
 
             val okHttpClient = OkHttpClient.Builder()

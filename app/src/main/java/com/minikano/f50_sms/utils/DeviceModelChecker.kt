@@ -22,6 +22,7 @@ object DeviceModelChecker {
         Log.d("kano_ZTE_LOG_devcheck", "正在遍历黑名单设备...")
         val model = Build.MODEL.trim()
         val firmwareVersion = Build.DISPLAY
+
         devicesBlackList.forEach {
             Log.d("kano_ZTE_LOG_devcheck", "$it == $model ?")
             if (it.trim().contains(model)) {

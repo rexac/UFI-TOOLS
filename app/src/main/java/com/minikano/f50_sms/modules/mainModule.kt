@@ -33,9 +33,9 @@ fun Application.mainModule(context: Context, proxyServerIp: String) {
         // 静态资源
         staticFileModule(context)
 
-        anyProxyModule(context)
-
         authenticatedRoute(context) {
+
+            anyProxyModule(context)
 
             reverseProxyModule(targetServerIP)
 

@@ -185,6 +185,12 @@ GET /api/proxy/--http://example.com/api/xxx
 
 请求体（如 POST 的 JSON）将会原样转发给目标地址。
 
+**注意：**
+
+1. 该接口也需要进行auth验证
+2. 为了避免UFI-TOOLS authToken和需要转发头部冲突，代理验证token时可以以`kano-authorization`携带token进行验证(见下表)
+3. 为了避免内网服务暴露在外网，反向代理接口默认会阻止以此方式访问内网地址
+
 ------
 
 #### 可自定义的请求头（自动转发）：

@@ -25,8 +25,7 @@ object KanoAuth {
             "/api/version_info",
             "/api/need_token",
             "/api/get_theme",
-            "/api/uploads",
-            "/api/proxy"
+            "/api/uploads"
         )
 
         val noAuthRequired = !uri.startsWith("/api/") || apiWhiteList.any { uri.startsWith(it) }
@@ -42,7 +41,7 @@ object KanoAuth {
             return false
         }
 
-        if (authHeader != KanoUtils.sha256Hex(token)) {
+        if ((authHeader != KanoUtils.sha256Hex(token))) {
             return false
         }
 

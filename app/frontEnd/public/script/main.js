@@ -100,18 +100,44 @@ if ('serviceWorker' in navigator) {
         });
 }
 
+const overlay = document.createElement('div')
+overlay.className = 'loading-overlay'
+overlay.innerHTML = "<p>Loading...</p>"
+document.body.appendChild(overlay)
+
 //判断一下是否需要token
-const needToken = async () => {
-    try {
-        let res = await (await fetch(`${KANO_baseURL}/need_token`, { headers: { ...common_headers } })).json()
+const needToken = async (shouldThrowError = false, fetchMaxRetries = 3) => {
+    let retries = 0
+    let res = null
+
+    while (retries < fetchMaxRetries) {
+        try {
+            res = await (await fetchWithTimeout(`${KANO_baseURL}/need_token`, { headers: { ...common_headers } }, 1000)).json()
+            if (res) {
+                break
+            }
+        } catch {
+            if (overlay) {
+                overlay.innerHTML = `<p>${t('backend_not_respond')}, ${t('toast_retries')} ${retries + 1} ...</p>`
+            }
+        } finally {
+            retries++
+        }
+    }
+
+    if (!res) {
+        if (shouldThrowError) {
+            throw new Error(t('toast_connect_failed') + `, ${t('toast_retries')}：${retries}`)
+        }
+        isNeedToken = true
+    } else {
         if (res.need_token) {
             isNeedToken = true
         } else {
             isNeedToken = false
         }
-    } catch {
-        isNeedToken = true
     }
+
     let tkInput = document.querySelector('#TOKEN')
     if (isNeedToken) {
         tkInput && (tkInput.style.display = "")
@@ -120,16 +146,22 @@ const needToken = async () => {
     }
 };
 
-document.addEventListener("DOMContentLoaded", () => {
+needToken(true, 30).then(() => {
+    overlay && (overlay.style.opacity = '0')
     setTimeout(() => {
         let container = document.querySelector('.container')
         container.style.opacity = 1
         container.style.filter = 'none'
+        overlay && overlay.remove()
     }, 100);
-})
-
-needToken().finally(() => {
     main_func()
+}).catch((e) => {
+    if (overlay) {
+        overlay.innerHTML = `
+        <p>${e.message}</p>
+        <div><button onclick="location.reload()">${t('common_refresh_btn')}</button></div>
+        `
+    }
 })
 
 function main_func() {
@@ -472,10 +504,18 @@ function main_func() {
         return false
     }
 
+    let toastTimer = null
     const onTokenConfirm = debounce(async () => {
+        const createTimer = () => setTimeout(() => {
+            createToast(t('toast_logining'), 'pink')
+        }, 2000)
         // psw_fail_num_str
         try {
+            toastTimer && clearTimeout(toastTimer)
+            createToast(t('toast_login_checking'), '', 2000)
+            toastTimer = createTimer()
             await needToken()
+            toastTimer && clearTimeout(toastTimer)
             let tkInput = document.querySelector('#tokenInput')
             let tokenInput = document.querySelector('#TOKEN')
             let password = tkInput && (tkInput.value)
@@ -487,20 +527,49 @@ function main_func() {
             }
             KANO_TOKEN = SHA256(token.trim()).toLowerCase()
             common_headers.authorization = KANO_TOKEN
-            let { psw_fail_num_str, login_lock_time } = await getData(new URLSearchParams({
+
+            const data = new URLSearchParams({
                 cmd: 'psw_fail_num_str,login_lock_time'
-            }))
+            })
+            data.append('isTest', 'false')
+            data.append('_', Date.now())
+            toastTimer = createTimer()
+            const res = await fetchWithTimeout(KANO_baseURL + "/goform/goform_get_cmd_process?" + data.toString(), {
+                method: "GET",
+                headers: {
+                    ...common_headers,
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+            }, 3000)
+            toastTimer && clearTimeout(toastTimer)
+
+            if (res.status != 200) {
+                if (res.status == 401) {
+                    return createToast(t('toast_token_failed'), 'red')
+                }
+                throw new Error(res.status + "：" + t('toast_login_failed_catch'), 'red')
+            }
+
+            toastTimer = createTimer()
+            let { psw_fail_num_str, login_lock_time } = await res.json()
+            toastTimer && clearTimeout(toastTimer)
+
             if (psw_fail_num_str == '0' && login_lock_time != '0') {
                 createToast(`${t('toast_pwd_failed_limit')}${login_lock_time}S`, 'red')
                 out()
+                toastTimer = createTimer()
                 await needToken()
+                toastTimer && clearTimeout(toastTimer)
                 return null
             }
             const cookie = await login()
+            toastTimer && clearTimeout(toastTimer)
             if (!cookie) {
                 createToast(t('toast_pwd_failed') + (psw_fail_num_str != undefined ? ` ${t('toast_pwd_failed_count')}：${psw_fail_num_str}` : ''), 'red')
                 out()
+                toastTimer = createTimer()
                 await needToken()
+                toastTimer && clearTimeout(toastTimer)
                 return null
             }
             createToast(t('toast_login_success'), 'green')
@@ -509,7 +578,8 @@ function main_func() {
             closeModal('#tokenModal')
             initRenderMethod()
         }
-        catch {
+        catch (e) {
+            toastTimer && clearTimeout(toastTimer)
             createToast(t('toast_login_failed_catch'), 'red')
         }
     }, 200)
@@ -937,13 +1007,13 @@ function main_func() {
             return null
         }
 
-        let res = await (await fetch(`${KANO_baseURL}/adb_wifi_setting`, {
+        let res = await (await fetchWithTimeout(`${KANO_baseURL}/adb_wifi_setting`, {
             method: 'GET',
             headers: {
                 ...common_headers,
                 'Content-Type': 'application/json',
             }
-        })).json()
+        }, 3000)).json()
 
         btn.onclick = async () => {
             try {
@@ -963,7 +1033,7 @@ function main_func() {
                         usb_port_switch: '1'
                     })).json()
                 }
-                let res1 = await (await fetch(`${KANO_baseURL}/adb_wifi_setting`, {
+                let res1 = await (await fetchWithTimeout(`${KANO_baseURL}/adb_wifi_setting`, {
                     method: 'POST',
                     headers: {
                         ...common_headers,
@@ -973,7 +1043,7 @@ function main_func() {
                         enabled: res.enabled == "true" || res.enabled == true ? false : true,
                         password: KANO_PASSWORD
                     })
-                })).json()
+                }, 3000)).json()
                 if (res1.result == 'success') {
                     createToast(t('toast_oprate_success_reboot'), 'green')
                     await handlerADBStatus()

@@ -632,5 +632,11 @@
     "dingtalk_test_msg_success": "DingTalk test message sent successfully",
     "dingtalk_hint": "Configure the DingTalk group bot webhook URL, signing supported",
     "dingtalk_webhook": "Webhook URL:",
-    "dingtalk_secret": "Sign Secret:"
+    "dingtalk_secret": "Sign Secret:",
+    "toast_token_failed": "Token error",
+    "backend_not_respond": "No response from backend",
+    "toast_retries": "Retry count",
+    "toast_connect_failed": "Failed to connect to backend, check network",
+    "toast_logining": "Network is slow, please wait...",
+    "toast_login_checking": "Verifying..."
 }

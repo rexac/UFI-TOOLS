@@ -13,6 +13,11 @@
     <link rel="stylesheet" href="/style/style.css">
     <script src="/script/polyfill.min.js"></script>
     <script src="/script/requests.js"></script>
+    <script src="/script/lib/crypto.js"></script>
+    <script src="/script/lib/sortable.js"></script>
+    <script src="/script/lib/filesaver.js"></script>
+    <script src="/script/lib/chart.js"></script>
+
     <script>
         const baseSize = 14;
         const minScale = 0.9;
@@ -459,15 +464,16 @@
                             </i>
                         </p>
                     </div>
-                    <div class="content"
+                    <form class="content"
                         style="padding: 15px 4px 0 4px;display: flex;flex-direction: column;align-items: center;">
-                        <input id="TOKEN" type="password" data-i18n-placeholder="token_placeholder_token"
-                            placeholder="请在后台App查看"
+                        <input type="text" name="username" autocomplete="username" style="display: none;">
+                        <input name="backend_password" autocomplete="current-password" id="TOKEN" type="password"
+                            data-i18n-placeholder="token_placeholder_token" placeholder="请在后台App查看"
                             style="width: 100%;text-indent: .5em;margin:0 4px;margin-bottom: 10px;height: 30px;">
-                        <input id="tokenInput" type="password" data-i18n-placeholder="token_placeholder_pwd"
-                            placeholder="设备的WEB管理密码"
+                        <input name="web_password" autocomplete="new-password" id="tokenInput" type="password"
+                            data-i18n-placeholder="token_placeholder_pwd" placeholder="设备的WEB管理密码"
                             style="width: 100%;text-indent: .5em; margin:0 4px;margin-bottom: 20px;height: 30px;">
-                    </div>
+                    </form>
                     <div class="btn" style="text-align: right;">
                         <button data-i18n="confirm_btn" onclick="onTokenConfirm()">确认</button>
                         <button data-i18n="cancel_btn" onclick="closeModal('#tokenModal')">取消</button>
@@ -793,7 +799,7 @@
                             "><span class="label-name" data-i18n="wifi_password_label">密码：</span><input
                                                     data-i18n-placeholder="wifi_password_placeholder" id="WIFI_PASSWORD"
                                                     style="flex: 1;width: 100%;" name="Password" value=""
-                                                    type="password" placeholder="密码最短为8位"></label>
+                                                    type="password" autocomplete="none" placeholder="密码最短为8位"></label>
                                         </div>
                                         <div class="item">
                                             <label onclick="handleShowPassword(event)"
@@ -1347,12 +1353,13 @@
                 <div class="modal">
                     <div class="title" data-i18n="change_password_title">更改密码(中兴WEB密码)</div>
                     <form onsubmit="handleChangePassword(event)" id="changePassForm">
+                        <input type="text" autocomplete="username" name="username" value="admin" style="display: none;">
                         <div class="content" style="overflow-y: scroll; padding: 15px; width: 66vw; max-width: 400px;">
                             <div class="item" style="margin: 10px auto;">
                                 <label style="display: flex; align-items: center;">
                                     <span data-i18n="old_password">旧的密码：</span>
                                     <input style="flex: 1;padding: 4px 6px;width: 100%;" name="oldPassword"
-                                        type="password" placeholder="旧密码"
+                                        type="password" placeholder="旧密码" autocomplete="current-password"
                                         data-i18n-placeholder="old_password_placeholder">
                                 </label>
                             </div>
@@ -1360,7 +1367,7 @@
                                 <label style="display: flex; align-items: center;">
                                     <span data-i18n="new_password">新的密码：</span>
                                     <input style="flex: 1;padding: 4px 6px;width: 100%;" name="newPassword"
-                                        type="password" placeholder="新密码"
+                                        type="password" placeholder="新密码" autocomplete="new-password"
                                         data-i18n-placeholder="new_password_placeholder">
                                 </label>
                             </div>
@@ -1368,7 +1375,7 @@
                                 <label style="display: flex; align-items: center;">
                                     <span data-i18n="confirm_password">确认密码：</span>
                                     <input style="flex: 1;padding: 4px 6px;width: 100%;" name="confirmPassword"
-                                        type="password" placeholder="确认密码"
+                                        type="password" placeholder="确认密码" autocomplete="new-password"
                                         data-i18n-placeholder="confirm_password_placeholder">
                                 </label>
                             </div>
@@ -1472,8 +1479,8 @@
                             data-i18n="smtp_method">SMTP方式</button>
                         <button id="curl_btn" data-method="curl" id="curlForwardBtn" style="flex: 1;" class="tab-btn"
                             data-i18n="curl_method">CURL方式</button>
-                        <button id="dingtalk_btn" data-method="dingtalk" id="dingtalkForwardBtn" style="flex: 1;" class="tab-btn"
-                            data-i18n="dingtalk_method">钉钉方式</button>
+                        <button id="dingtalk_btn" data-method="dingtalk" id="dingtalkForwardBtn" style="flex: 1;"
+                            class="tab-btn" data-i18n="dingtalk_method">钉钉方式</button>
                     </div>
                     <div id="collapse_smsforward" class="collapse">
                         <div class="collapse_box">
@@ -1515,7 +1522,7 @@
                                         <label style="
                                 display: flex;
                                 align-items: center;
-                            "><span data-i18n="smtp_password">密码：</span><input
+                            "><span data-i18n="smtp_password">密码：</span><input autocomplete="off"
                                                 style="flex: 1;padding: 4px 6px;width: 100%;" id="smtp_password"
                                                 name="smtp_password" type="password" placeholder=""></label>
                                     </div>
@@ -1579,17 +1586,21 @@
                                         <label style="
                                 display: flex;
                                 align-items: center;
-                            "><span data-i18n="dingtalk_webhook" style="display: inline-block; width:110px;font-size: 14px;">Webhook地址：</span><input
+                            "><span data-i18n="dingtalk_webhook"
+                                                style="display: inline-block; width:110px;font-size: 14px;">Webhook地址：</span><input
                                                 style="flex: 1;padding: 4px 6px;width: 100%;" id="dingtalk_webhook"
-                                                name="dingtalk_webhook" type="text" placeholder="https://oapi.dingtalk.com/robot/send?access_token=xxx"></label>
+                                                name="dingtalk_webhook" type="text"
+                                                placeholder="https://oapi.dingtalk.com/robot/send?access_token=xxx"></label>
                                     </div>
                                     <div class="item" style="margin: 10px auto;">
                                         <label style="
                                 display: flex;
                                 align-items: center;
-                            "><span data-i18n="dingtalk_secret" style="display: inline-block; width:110px;font-size: 14px;">加签密钥：</span><input
+                            "><span data-i18n="dingtalk_secret"
+                                                style="display: inline-block; width:110px;font-size: 14px;">加签密钥：</span><input
                                                 style="flex: 1;padding: 4px 6px;width: 100%;" id="dingtalk_secret"
-                                                name="dingtalk_secret" type="text" placeholder="SEC000000000000000000000" optional></label>
+                                                name="dingtalk_secret" type="text"
+                                                placeholder="SEC000000000000000000000" optional></label>
                                     </div>
                                 </div>
                                 <div class="btn" style="text-align: right;">
@@ -1660,12 +1671,8 @@
         </div>
     </div>
     <div id="toastContainer"></div>
-    <script src="/script/lib/sortable.js"></script>
-    <script src="/script/lib/filesaver.js"></script>
     <script src="/script/draglist.js"></script>
     <script src="/script/i18n.js"></script>
-    <script src="/script/lib/crypto.js"></script>
-    <script src="/script/lib/chart.js"></script>
     <script src="/script/utils.js"></script>
     <script src="/script/theme.js"></script>
     <script src="/script/charts.js"></script>

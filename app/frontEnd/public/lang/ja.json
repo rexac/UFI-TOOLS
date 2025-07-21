@@ -632,5 +632,11 @@
     "dingtalk_test_msg_success": "DingTalkテストメッセージ送信成功",
     "dingtalk_hint": "DingTalkグループBotのWebhookアドレスを設定。署名に対応",
     "dingtalk_webhook": "Webhookアドレス：",
-    "dingtalk_secret": "署名キー："
+    "dingtalk_secret": "署名キー：",
+    "toast_token_failed": "トークンエラー",
+    "backend_not_respond": "バックエンドが応答なし",
+    "toast_retries": "再試行回数",
+    "toast_connect_failed": "バックエンドに接続できません。ネットワークを確認してください",
+    "toast_logining": "ネットワークが遅れています。しばらくお待ちください...",
+    "toast_login_checking": "確認中..."
 }

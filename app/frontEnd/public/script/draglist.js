@@ -29,7 +29,7 @@ function DragList(listId, callback) {
         toggleDictionaryModal(false)
         currentLi = e.target;
         setTimeout(() => currentLi.classList.add("moving"), 0);
-    });
+    }, { passive: true });
 
     list.addEventListener("dragover", (e) => e.preventDefault());
 
@@ -49,14 +49,14 @@ function DragList(listId, callback) {
                 list?.insertBefore(currentLi, e.target);
             }
         } catch { }
-    });
+    }, { passive: true });
 
     list.addEventListener("dragend", () => {
         toggleDictionaryModal(true)
         if (currentLi) currentLi.classList.remove("moving");
         currentLi = null;
         callback && callback(list)
-    });
+    }, { passive: true });
 
     // -------- 移动端 touch 拖拽逻辑 --------
     list.addEventListener("touchstart", (e) => {
@@ -79,7 +79,7 @@ function DragList(listId, callback) {
         currentLi.style.left = "0px";
         //   currentLi.style.width = "100%";
         currentLi.style.top = `${e.touches[0].clientY - offsetY - list.getBoundingClientRect().top}px`;
-    });
+    }, { passive: true });
 
     list.addEventListener("touchmove", (e) => {
         if (!currentLi) return;
@@ -104,7 +104,7 @@ function DragList(listId, callback) {
                 break;
             }
         }
-    });
+    }, { passive: true });
 
     list.addEventListener("touchend", () => {
         toggleDictionaryModal(true)
@@ -115,5 +115,5 @@ function DragList(listId, callback) {
         placeholder.remove();
         currentLi = null;
         callback && callback(list)
-    });
+    }, { passive: true });
 }

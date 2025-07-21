@@ -217,13 +217,13 @@ const postData = async (cookie, data = {}) => {
 const getData = async (data = new URLSearchParams({})) => {
     data.append('isTest', 'false')
     data.append('_', Date.now())
-    const res = await fetch(KANO_baseURL + "/goform/goform_get_cmd_process?" + data.toString(), {
+    const res = await fetchWithTimeout(KANO_baseURL + "/goform/goform_get_cmd_process?" + data.toString(), {
         method: "GET",
         headers: {
             ...common_headers,
             "Content-Type": "application/x-www-form-urlencoded",
         },
-    })
+    }, 5000)
     return await res.json()
 }
 

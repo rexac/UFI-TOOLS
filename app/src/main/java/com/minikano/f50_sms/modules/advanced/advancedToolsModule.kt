@@ -65,7 +65,7 @@ fun Route.advancedToolsModule(context: Context, targetServerIP: String) {
                     "${outFileAdb.absolutePath} -s localhost shell cat $smbPath > /data/samba/etc/smb.conf"
                 val result = ShellKano.runShellCommand(cmd, context = context)
                     ?: throw Exception("修改 smb.conf 失败")
-                jsonResult = """{"result":"执行成功，等待一会儿即可生效！"}"""
+                jsonResult = """{"result":"执行成功，等待1-2分钟即可生效！"}"""
             } else {
                 val script = """
                 sh /sdcard/ufi_tools_boot.sh

@@ -1026,3 +1026,35 @@ input[type="range"] {
         height: 2.8rem;
     }
 }
+
+.plugin-items .plugin-item {
+    padding: 10px;
+    font-size: .85rem;
+    background-color: var(--dark-tag-color);
+    border-radius: 10px;
+    box-sizing: border-box;
+    margin: 5px 0;
+    margin-top: 0;
+    border: 1px solid transparent;
+    transition: all 0.3s;
+}
+
+.plugin-item .actions {
+    margin-top: 10px;
+    text-align: right;
+}
+
+.plugin-item .actions button {
+    font-size: 0.7rem;
+    padding: 6px;
+    margin: 0;
+}
+
+.plugin-item .plugin-title {
+    margin-bottom: 4px;
+}
+
+.plugin-item .info {
+    font-size: .6rem;
+    font-style: italic;
+}

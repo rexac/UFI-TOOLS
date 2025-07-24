@@ -4,6 +4,7 @@ import android.content.Context
 import com.minikano.f50_sms.utils.KanoLog
 import com.minikano.f50_sms.modules.BASE_TAG
 import com.minikano.f50_sms.modules.auth.authenticatedRoute
+import com.minikano.f50_sms.utils.KanoRequest
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
@@ -18,44 +19,89 @@ fun Route.pluginsModule(context: Context) {
     val TAG = "[$BASE_TAG]_pluginsModule"
 
     authenticatedRoute(context){
-      //保存自定义头部
-      post("/api/set_custom_head") {
-        try {
-            val body = call.receiveText()
-            val bodyBytes = body.toByteArray(Charsets.UTF_8)
-            val maxSizeInBytes = 1145 * 1024
+        //保存自定义头部
+        post("/api/set_custom_head") {
+            try {
+                val body = call.receiveText()
+                val bodyBytes = body.toByteArray(Charsets.UTF_8)
+                val maxSizeInBytes = 1145 * 1024
 
-            if (bodyBytes.size > maxSizeInBytes) {
-                throw Exception("自定义头部超出限制: ${bodyBytes.size / 1145}KB/1024KB")
+                if (bodyBytes.size > maxSizeInBytes) {
+                    throw Exception("自定义头部超出限制: ${bodyBytes.size / 1145}KB/1024KB")
+                }
+
+                val json = JSONObject(body)
+                val text = json.optString("text", "").trim()
+
+                val sharedPref =
+                    context.getSharedPreferences("kano_ZTE_store", Context.MODE_PRIVATE)
+                sharedPref.edit().apply {
+                    putString("kano_custom_head", text)
+                    apply()
+                }
+
+                call.response.headers.append("Access-Control-Allow-Origin", "*")
+                call.respondText(
+                    """{"result":"success"}""",
+                    ContentType.Application.Json,
+                    HttpStatusCode.OK
+                )
+
+            } catch (e: Exception) {
+                KanoLog.d(TAG, "配置出错： ${e.message}")
+                call.response.headers.append("Access-Control-Allow-Origin", "*")
+                call.respondText(
+                    """{"error":"配置出错: ${e.message}"}""",
+                    ContentType.Application.Json,
+                    HttpStatusCode.InternalServerError
+                )
             }
-
-            val json = JSONObject(body)
-            val text = json.optString("text", "").trim()
-
-            val sharedPref =
-                context.getSharedPreferences("kano_ZTE_store", Context.MODE_PRIVATE)
-            sharedPref.edit().apply {
-                putString("kano_custom_head", text)
-                apply()
-            }
-
-            call.response.headers.append("Access-Control-Allow-Origin", "*")
-            call.respondText(
-                """{"result":"success"}""",
-                ContentType.Application.Json,
-                HttpStatusCode.OK
-            )
-
-        } catch (e: Exception) {
-            KanoLog.d(TAG, "配置出错： ${e.message}")
-            call.response.headers.append("Access-Control-Allow-Origin", "*")
-            call.respondText(
-                """{"error":"配置出错: ${e.message}"}""",
-                ContentType.Application.Json,
-                HttpStatusCode.InternalServerError
-            )
         }
-    }
+
+        //从插件市场获取插件
+        get("/api/plugins_store"){
+            try {
+                val download_url = "https://pan.kanokano.cn/d/UFI-TOOLS-UPDATE/plugins/ufi-tools-plugins"
+                val url = "https://pan.kanokano.cn/api/fs/list"
+                val path = "/UFI-TOOLS-UPDATE/plugins/ufi-tools-plugins"
+
+                // 请求 alist 的 API
+                val requestBody = """
+            {
+                "path": "$path",
+                "password": "",
+                "page": 1,
+                "per_page": 0,
+                "refresh": false
+            }
+        """.trimIndent()
+
+                val alistResponse = KanoRequest.postJson(url, requestBody)
+
+                val alistBody = alistResponse.body?.string()
+
+                // 拼装 JSON 响应
+                val resultJson = """{
+                    |"download_url":"$download_url",
+                    |"res":$alistBody
+                    |}""".trimMargin()
+
+                call.response.headers.append("Access-Control-Allow-Origin", "*")
+                if (resultJson != null) {
+                    call.respondText(resultJson, ContentType.Application.Json, HttpStatusCode.OK)
+                }else{
+                    throw Exception("响应为空")
+                }
+            } catch (e: Exception) {
+                KanoLog.d(TAG, "请求出错：${e.message}")
+                call.response.headers.append("Access-Control-Allow-Origin", "*")
+                call.respondText(
+                    """{"error":"请求出错"}""",
+                    ContentType.Application.Json,
+                    HttpStatusCode.InternalServerError
+                )
+            }
+        }
     }
 
     //读取自定义头部
@@ -82,4 +128,5 @@ fun Route.pluginsModule(context: Context) {
             )
         }
     }
+
 }

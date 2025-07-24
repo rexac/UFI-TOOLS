@@ -5171,8 +5171,80 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
         }
     }
 
+    //从插件商店下载插件并安装
+    const installPluginFromStore = async (url, name) => {
+        createToast(t('download_ing'), 'pink')
+        const res = await fetchWithTimeout(`${KANO_baseURL}/proxy/--${url}`, {
+            method: 'GET',
+        })
+        if (!res.ok) {
+            createToast(t('download_failed'), 'red')
+            return
+        }
+        const text = await res.text()
+        createToast(t('install_ing'), 'pink')
+        await handlePluginFileUpload({
+            target: {
+                files: [new File([text], name, { type: 'text/plain' })]
+            }
+        })
+    }
+
+    //插件市场
+    const plugin_store = document.querySelector('#plugin_store_btn')
+    plugin_store.onclick = () => {
+        showModal('#plugin_store')
+        const items = document.querySelector('#plugin_store .plugin-items')
+        //loading
+        items.innerHTML = `
+        <li style="padding-top: 15px;overflow:hidden">
+            <strong class="green" style="text-align: center;margin: 10px auto;margin-top: 0; display: flex;flex-direction: column;padding: 40px;">
+                <span style="font-size: 50px;" class="spin">🌀</span>
+                <span style="font-size: 16px;padding-top: 10px;">loading...</span>
+            </strong>
+        </li>
+        `
+        const total = document.querySelector('#plugin_store .total')
+        //加载插件
+        fetchWithTimeout(`${KANO_baseURL}/plugins_store`)
+            .then(res => res.json())
+            .then(({ res, download_url }) => {
+                const data = res.data || {}
+                items.innerHTML = ''
+                if (data && data.content && data.content.length > 0) {
+                    total.innerHTML = `${t('plugin_modal_num')}: ${data.content.length}`
+                    data.content.forEach(plugin => {
+                        const li = document.createElement('li')
+                        li.className = 'plugin-item'
+                        li.innerHTML = `
+                            <div class="plugin-title">
+                            ${plugin.name}
+                            </div>
+                            <div class="info">
+                                <span>MD5:${plugin?.hash_info?.md5}</span><br>
+                                <span>last-modified: ${new Date(plugin?.modified).toLocaleString('zh-cn')}</span>
+                            </div>
+                            <div class="actions">
+                                <button onclick="installPluginFromStore('${download_url}/${plugin.name}','${plugin.name}')">${t('one_click_install')}</button>
+                                <button onclick="downloadUrl('${download_url}/${plugin.name}')">${t('only_download')}</button>
+                            </div>
+                        `
+                        items.appendChild(li)
+                    })
+                } else {
+                    items.innerHTML = `<li style="padding:10px">${t('no_plugins_found')}</li>`
+                }
+            })
+            .catch(err => {
+                console.error(err)
+                items.innerHTML = `<li style="padding:10px">${t('error_loading_plugins')}</li>`
+            })
+
+    }
+
     //挂载方法到window
     const methods = {
+        installPluginFromStore,
         saveCellularTestUrl,
         onThreadNumChange,
         closeCellularTest,

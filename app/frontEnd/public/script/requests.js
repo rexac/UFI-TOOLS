@@ -5,6 +5,8 @@ let KANO_baseURL = '/api'
 let KANO_PASSWORD = null
 let KANO_TOKEN = null;
 
+const originFetch = window.fetch;
+
 // 包装fetch
 (() => {
     const of = window.fetch;
@@ -351,6 +353,33 @@ const getUFIData = async () => {
         clearTimeout(timeoutId); // 清理定时器
     }
 };
+
+
+function originFetchWithTimeout(url = '', options = {}, timeout = 10000) {
+    const controller = new AbortController()
+    const tid = setTimeout(() => controller.abort(), timeout);
+    return originFetch(url, {
+        ...options,
+        signal: controller.signal,
+    })
+        .then(response => {
+            // 处理响应
+            return response
+        })
+        .catch(err => {
+            if (err.name === 'AbortError') {
+                console.error('请求超时')
+            } else {
+                console.error('请求失败', err)
+            }
+            throw err
+        }).finally(() => {
+            clearTimeout(tid)
+        })
+}
+
+
+
 
 function fetchWithTimeout(url = '', options = {}, timeout = 10000) {
     const controller = new AbortController()

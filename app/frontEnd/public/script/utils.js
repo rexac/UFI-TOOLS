@@ -572,3 +572,15 @@ const scroolToTop = () => {
         behavior: "smooth",
     })
 }
+
+//下载url
+const downloadUrl = (url, filename) => {
+    const a = document.createElement('a')
+    a.href = url
+    a.download = filename || url.split('/').pop() || 'download'
+    a.style.display = 'none'
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    createToast(t('download_ing'), 'pink')
+}

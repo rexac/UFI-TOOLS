@@ -638,5 +638,13 @@
     "toast_retries": "Retry count",
     "toast_connect_failed": "Failed to connect to backend, check network",
     "toast_logining": "Network is slow, please wait...",
-    "toast_login_checking": "Verifying..."
+    "toast_login_checking": "Verifying...",
+    "one_click_install": "One-click Install",
+    "only_download": "Download Only",
+    "no_plugins_found": "No plugins found",
+    "error_loading_plugins": "Error loading plugins. Please check your network",
+    "plugin_store": "Plugin Store",
+    "plugin_store_tip": "The plugin store offers more plugin features. You can download and install them here.",
+    "plugin_store_tip1": "Please note that installing plugins may affect device performance and stability. Choose carefully.",
+    "plugin_store_tip2": "Some plugins require advanced features to be enabled before use."
 }

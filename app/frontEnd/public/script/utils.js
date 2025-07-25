@@ -547,7 +547,7 @@ Array.from(document.querySelectorAll('.mask'))?.forEach(el => {
         const classList = Array.from(e?.target?.classList || [])
         const id = e.target.id
         //维护一个黑名单，黑名单内的模态框不受影响
-        const blackList = ['updateSoftwareModal']
+        const blackList = ['updateSoftwareModal', "plugin_store"]
         const isCloseable = !blackList.includes(id)
         if (classList && classList.includes('mask') && isCloseable) {
             if (id) {
@@ -583,4 +583,71 @@ const downloadUrl = (url, filename) => {
     a.click()
     document.body.removeChild(a)
     createToast(t('download_ing'), 'pink')
+}
+
+//获取浏览器版本号
+function getBrowserVersion() {
+    const ua = navigator.userAgent;
+
+    const browsers = [
+        { name: 'Edge', regex: /Edg\/([\d.]+)/ },
+        { name: 'Opera', regex: /OPR\/([\d.]+)/ },
+        { name: 'Brave', regex: /Brave\/([\d.]+)/ },
+        { name: 'Chrome', regex: /Chrome\/([\d.]+)/ },
+        { name: 'Firefox', regex: /Firefox\/([\d.]+)/ },
+        { name: 'Safari', regex: /Version\/([\d.]+).*Safari/ },
+        { name: 'Samsung Internet', regex: /SamsungBrowser\/([\d.]+)/ },
+        { name: 'QQBrowser', regex: /QQBrowser\/([\d.]+)/ },
+        { name: 'UC Browser', regex: /UCBrowser\/([\d.]+)/ },
+        { name: 'Baidu Browser', regex: /(?:BIDUBrowser|baidubrowser)\/([\d.]+)/i },
+        { name: 'Mi Browser', regex: /MiuiBrowser\/([\d.]+)/ },
+        { name: 'Huawei Browser', regex: /HuaweiBrowser\/([\d.]+)/ },
+        { name: 'Vivo Browser', regex: /VivoBrowser\/([\d.]+)/ },
+        { name: 'OPPO Browser', regex: /HeyTapBrowser\/([\d.]+)/ },
+        { name: '360SE', regex: /360SE/ },
+        { name: '360EE', regex: /360EE/ },
+        { name: 'Sogou Browser', regex: /SogouMobileBrowser\/([\d.]+)/ },
+    ];
+
+    for (const browser of browsers) {
+        const match = ua.match(browser.regex);
+        if (match) {
+            return {
+                browser: browser.name,
+                version: match[1] || 'unknown'
+            };
+        }
+    }
+
+    return {
+        browser: 'Unknown',
+        version: 'Unknown'
+    };
+}
+const result = getBrowserVersion();
+console.log(`${result.browser} ${result.version}`);
+if (result.browser === "Chrome") {
+    //需要大于125
+    const versionParts = result.version.split('.');
+    const majorVersion = parseInt(versionParts[0], 10);
+    if (majorVersion <= 125) {
+        alert(`您的${result.browser}内核版本过低，可能无法正常使用部分功能，请升级浏览器。`);
+        createToast(`您的${result.browser}内核版本过低，可能无法正常使用部分功能，请升级浏览器。`);
+    }
+} else if (result.browser === "Firefox") {
+    //需要大于125
+    const versionParts = result.version.split('.');
+    const majorVersion = parseInt(versionParts[0], 10);
+    if (majorVersion <= 125) {
+        alert(`您的${result.browser}内核版本过低，可能无法正常使用部分功能，请升级浏览器。`);
+        createToast(`您的${result.browser}内核版本过低，可能无法正常使用部分功能，请升级浏览器。`);
+    }
+} else if (result.browser === "Safari") {
+    //需要大于17.5
+    const versionParts = result.version.split('.');
+    const majorVersion = parseInt(versionParts[0], 10);
+    if (majorVersion <= 17.5) {
+        alert(`您的${result.browser}内核版本过低，可能无法正常使用部分功能，请升级浏览器。`);
+        createToast(`您的${result.browser}内核版本过低，可能无法正常使用部分功能，请升级浏览器。`);
+    }
 }

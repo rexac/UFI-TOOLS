@@ -646,5 +646,12 @@
     "plugin_store": "插件商店",
     "plugin_store_tip": "插件商店提供了更多的插件功能，您可以在这里下载和安装。",
     "plugin_store_tip1": "请注意，安装插件可能会影响设备性能和稳定性，请谨慎选择。",
-    "plugin_store_tip2": "有些插件需要开启高级功能才可以使用。"
+    "plugin_store_tip2": "有些插件需要开启高级功能才可以使用。",
+    "total":"总共",
+    "cur_page":"当前",
+    "prev_page":"上一页",
+    "next_page":"下一页",
+    "plugin_search_reset_btn":"重置",
+    "plugin_search_btn":"搜索",
+    "plugin_search_placeholder":"搜索插件"
 }

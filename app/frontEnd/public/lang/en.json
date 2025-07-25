@@ -646,5 +646,12 @@
     "plugin_store": "Plugin Store",
     "plugin_store_tip": "The plugin store offers more plugin features. You can download and install them here.",
     "plugin_store_tip1": "Please note that installing plugins may affect device performance and stability. Choose carefully.",
-    "plugin_store_tip2": "Some plugins require advanced features to be enabled before use."
+    "plugin_store_tip2": "Some plugins require advanced features to be enabled before use.",
+    "total": "Total",
+    "cur_page": "Current",
+    "prev_page": "Previous",
+    "next_page": "Next",
+    "plugin_search_reset_btn": "Reset",
+    "plugin_search_btn": "Search",
+    "plugin_search_placeholder": "Search plugins"
 }

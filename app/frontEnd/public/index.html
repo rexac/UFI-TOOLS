@@ -1103,7 +1103,7 @@
             <!-- 插件模态框 -->
             <div class="mask" id="PluginModal" style="display: none;">
                 <div class="modal" id="pluginDropZone"
-                    style="padding: 18px;border: 2px solid transparent;overflow: hidden;width: 90%;max-width: 400px; display: flex;flex-direction: column;">
+                    style="backdrop-filter: none;-webkit-backdrop-filter: none;padding: 18px;border: 2px solid transparent;overflow: hidden;width: 90%;max-width: 400px; display: flex;flex-direction: column;">
                     <div class="title" style="margin-bottom: 4px;"><span data-i18n="plugin_modal_title">插件功能</span> -
                         <span data-i18n="plugin_modal_num">插件数量</span><span id="PLUGINS_NUM">?</span>
                     </div>
@@ -1150,7 +1150,7 @@
             <!-- 插件市场模态框 -->
             <div id="plugin_store" class="mask" style="display: none">
                 <div class="modal"
-                    style="overflow: hidden;;width: 90%;max-width: 500px; display: flex;flex-direction: column;">
+                    style="backdrop-filter: none;-webkit-backdrop-filter: none;overflow: visible;width: 90%;max-width: 500px; display: flex;flex-direction: column;">
                     <div class="title" style="margin-bottom: 10px;"><span data-i18n="plugin_store">插件商店</span> - <span
                             class="total"></span></div>
                     <div class="title" style="display: block;font-size: .7rem;font-style: italic;margin-bottom: 10px;">
@@ -1159,12 +1159,30 @@
                             style="color: rgb(255, 162, 0);">请注意，安装插件可能会影响设备性能和稳定性，请谨慎选择。</span><br>
                         <span data-i18n="plugin_store_tip2">有些插件需要开启高级功能才可以使用。</span>
                     </div>
+                    <div class="searchBox">
+                        <input onkeyup="handlePluginStoreSearchInput(event)" style="padding-left: 6px;width: 100%;" type="text" placeholder="搜索插件" id="pluginSearchInput"
+                            data-i18n-placeholder="plugin_search_placeholder">
+                        <button id="pluginSearchResetBtn" style="width: fit-content;min-width: 50px;" class="btn"
+                            data-i18n="plugin_search_reset_btn">重置</button>
+                        <button id="pluginSearchBtn" style="width: fit-content;min-width: 50px;" class="btn"
+                            data-i18n="plugin_search_btn">搜索</button>
+                    </div>
                     <div class="content" style="max-height: 500px;overflow-y: auto;">
                         <ul class="plugin-items">
                         </ul>
                     </div>
-                    <div class="btn" style="text-align: right;margin-top: 6px;">
-                        <button onclick="closeModal('#plugin_store')" data-i18n="close_btn">关闭</button>
+                    <div style="font-size: .8rem;margin-top: 10px;display: flex;align-items: center;">
+                        <div class="left" style="flex:1">
+                            <span data-i18n="cur_page">当前</span>&nbsp;
+                            <span id="plugin_store_cur_page">1</span>
+                            /
+                            <span id="plugin_store_total_page">8</span>
+                            &nbsp;<span data-i18n="total">总共</span>
+                            <button style="margin-left: 10px;" data-i18n="prev_page"
+                                id="plugin_store_prev_page">上一页</button>
+                            <button id="plugin_store_next_page" data-i18n="next_page">下一页</button>
+                        </div>
+                        <button id="plugin_store_close_btn" data-i18n="close_btn">关闭</button>
                     </div>
                 </div>
             </div>

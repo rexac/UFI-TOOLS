@@ -5190,9 +5190,93 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
         })
     }
 
+    //渲染插件
+    const renderPluginItems = (items, download_url) => {
+        const items_el = document.querySelector('#plugin_store .plugin-items')
+        items_el.innerHTML = '' //清空之前的内容
+        items.forEach(plugin => {
+            const li = document.createElement('li')
+            li.className = 'plugin-item'
+            li.innerHTML = `
+                            <div class="plugin-title">
+                            ${plugin.name}
+                            </div>
+                            <div class="info">
+                                <span>MD5:${plugin?.hash_info?.md5}</span><br>
+                                <span>last-modified: ${new Date(plugin?.modified).toLocaleString('zh-cn')}</span>
+                            </div>
+                            <div class="actions">
+                                <button onclick="installPluginFromStore('${download_url}/${plugin.name}','${plugin.name}')">${t('one_click_install')}</button>
+                                <button onclick="downloadUrl('${download_url}/${plugin.name}')">${t('only_download')}</button>
+                            </div>
+                        `
+            items_el.appendChild(li)
+        })
+    }
+
+    //搜索插件，滚动到合适位置
+    const scrollToElement = (elementsName = '#plugin_store .plugin-title', keyword) => {
+        let found = false
+        document.querySelectorAll(elementsName).forEach(el => {
+            if (el.textContent.includes(keyword)) {
+                // 找到最近的可滚动容器
+                let scrollContainer = el.parentElement;
+                while (scrollContainer && scrollContainer.scrollHeight <= scrollContainer.clientHeight) {
+                    scrollContainer = scrollContainer.parentElement;
+                }
+
+                if (scrollContainer) {
+                    // 计算 el 相对于 scrollContainer 的位置
+                    const topOffset = -15
+                    const elTop = el.getBoundingClientRect().top;
+                    const containerTop = scrollContainer.getBoundingClientRect().top;
+                    const relativeTop = elTop - containerTop + scrollContainer.scrollTop + topOffset;
+
+                    // 平滑滚动到该位置
+                    scrollContainer.scrollTo({
+                        top: relativeTop,
+                        behavior: 'smooth'
+                    });
+                    found = true
+                } else {
+                    found = false
+                }
+            }
+        });
+        return found
+    }
+
     //插件市场
+    const plugin_store_modal = document.querySelector('#plugin_store')
+    plugin_store_modal.onclick = (e) => {
+        e.stopPropagation()
+        const pluginModal = document.querySelector('#PluginModal')
+        const classList = Array.from(e?.target?.classList || [])
+        const id = e.target.id
+        if (classList && classList.includes('mask')) {
+            if (id) {
+                closeModal(`#${id}`);
+                setTimeout(() => {
+                    showModal('#PluginModal')
+                }, 200);
+            }
+        }
+    }
+
     const plugin_store = document.querySelector('#plugin_store_btn')
-    plugin_store.onclick = () => {
+    plugin_store.onclick = (e) => {
+        //隐藏插件功能模态框
+        const pluginModal = document.querySelector('#PluginModal')
+        pluginModal.style.display = 'none'
+
+        const plugin_store_close_btn = document.querySelector('#plugin_store_close_btn')
+        plugin_store_close_btn.onclick = () => {
+            closeModal('#plugin_store')
+            setTimeout(() => {
+                showModal('#PluginModal')
+            }, 200);
+        }
+
         showModal('#plugin_store')
         const items = document.querySelector('#plugin_store .plugin-items')
         //loading
@@ -5213,24 +5297,107 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
                 items.innerHTML = ''
                 if (data && data.content && data.content.length > 0) {
                     total.innerHTML = `${t('plugin_modal_num')}: ${data.content.length}`
-                    data.content.forEach(plugin => {
-                        const li = document.createElement('li')
-                        li.className = 'plugin-item'
-                        li.innerHTML = `
-                            <div class="plugin-title">
-                            ${plugin.name}
-                            </div>
-                            <div class="info">
-                                <span>MD5:${plugin?.hash_info?.md5}</span><br>
-                                <span>last-modified: ${new Date(plugin?.modified).toLocaleString('zh-cn')}</span>
-                            </div>
-                            <div class="actions">
-                                <button onclick="installPluginFromStore('${download_url}/${plugin.name}','${plugin.name}')">${t('one_click_install')}</button>
-                                <button onclick="downloadUrl('${download_url}/${plugin.name}')">${t('only_download')}</button>
-                            </div>
-                        `
-                        items.appendChild(li)
-                    })
+                    //分页
+                    const pageSize = 10
+                    const totalPages = Math.ceil(data.content.length / pageSize)
+                    let pageNum = 0
+                    const cur_page_el = document.querySelector('#plugin_store_cur_page')
+                    const total_page_el = document.querySelector('#plugin_store_total_page')
+                    cur_page_el.innerHTML = pageNum + 1
+                    total_page_el.innerHTML = totalPages
+                    renderPluginItems(data.content.slice(pageNum * pageSize, pageNum * pageSize + pageSize), download_url)
+
+                    //下一页
+                    const nextPageBtn = document.querySelector('#plugin_store_next_page')
+                    nextPageBtn.onclick = () => {
+                        pageNum++
+                        if (pageNum >= totalPages - 1) {
+                            nextPageBtn.style.backgroundColor = 'var(--dark-btn-disabled-color)'
+                        } else {
+                            nextPageBtn.style.backgroundColor = ''
+                        }
+                        if (pageNum >= totalPages) {
+                            pageNum = totalPages - 1
+                            return
+                        }
+                        prevageBtn.style.backgroundColor = ''
+                        cur_page_el.innerHTML = pageNum + 1
+                        total_page_el.innerHTML = totalPages
+                        renderPluginItems(data.content.slice(pageNum * pageSize, pageNum * pageSize + pageSize), download_url)
+                    }
+
+                    //上一页
+                    const prevageBtn = document.querySelector('#plugin_store_prev_page')
+                    prevageBtn.style.backgroundColor = 'var(--dark-btn-disabled-color)'
+                    prevageBtn.onclick = () => {
+                        pageNum--
+                        if (pageNum <= 0) {
+                            prevageBtn.style.backgroundColor = 'var(--dark-btn-disabled-color)'
+                        } else {
+                            prevageBtn.style.backgroundColor = ''
+                        }
+                        if (pageNum < 0) {
+                            pageNum = 0
+                            return
+                        }
+                        nextPageBtn.style.backgroundColor = ''
+                        cur_page_el.innerHTML = pageNum + 1
+                        total_page_el.innerHTML = totalPages
+                        renderPluginItems(data.content.slice(pageNum * pageSize, pageNum * pageSize + pageSize), download_url)
+                    }
+
+                    //搜索插件
+                    const pluginSearchBtn = document.querySelector('#pluginSearchBtn')
+                    pluginSearchBtn.onclick = () => {
+                        const pluginSearchInput = document.querySelector('#pluginSearchInput')
+                        const keyword = pluginSearchInput.value.trim()
+
+                        const scrollToFirstPage = () => {
+                            pageNum = 0
+                            prevageBtn.style.backgroundColor = 'var(--dark-btn-disabled-color)'
+                            nextPageBtn.style.backgroundColor = ''
+                            cur_page_el.innerHTML = pageNum + 1
+                            renderPluginItems(data.content.slice(pageNum * pageSize, pageNum * pageSize + pageSize), download_url)
+                            scrollToElement('#plugin_store .plugin-title', data.content[0].name)
+                        }
+
+                        if (!keyword || keyword == '') {
+                            return scrollToFirstPage()
+                        }
+
+                        //寻找存在的页面页码并跳转
+                        const cur_index = data.content.findIndex(plugin => plugin.name.includes(keyword))
+                        if (cur_index == -1) {
+                            createToast(`${t('no_plugins_found')}：${keyword}`, 'red')
+                            return scrollToFirstPage()
+                        }
+
+                        pageNum = Math.floor(cur_index / pageSize)
+
+                        if (pageNum == 0) {
+                            prevageBtn.style.backgroundColor = 'var(--dark-btn-disabled-color)'
+                            nextPageBtn.style.backgroundColor = ''
+                        } else if (pageNum == totalPages - 1) {
+                            prevageBtn.style.backgroundColor = ''
+                            nextPageBtn.style.backgroundColor = 'var(--dark-btn-disabled-color)'
+                        } else {
+                            prevageBtn.style.backgroundColor = ''
+                            nextPageBtn.style.backgroundColor = ''
+                        }
+
+                        cur_page_el.innerHTML = pageNum + 1
+                        renderPluginItems(data.content.slice(pageNum * pageSize, pageNum * pageSize + pageSize), download_url)
+                        scrollToElement('#plugin_store .plugin-title', keyword)
+                        return
+                    }
+
+                    const plugin_search_reset_btn = document.querySelector('#pluginSearchResetBtn')
+                    plugin_search_reset_btn.onclick = () => {
+                        const pluginSearchInput = document.querySelector('#pluginSearchInput')
+                        pluginSearchInput.value = '';
+                        pluginSearchBtn.click() //触发搜索
+                    }
+
                 } else {
                     items.innerHTML = `<li style="padding:10px">${t('no_plugins_found')}</li>`
                 }
@@ -5242,8 +5409,18 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
 
     }
 
+    const handlePluginStoreSearchInput = (e) => {
+        if (e.code.toLowerCase() == 'enter') {
+            const pluginSearchBtn = document.querySelector('#pluginSearchBtn')
+            if (pluginSearchBtn) {
+                pluginSearchBtn.click()
+            }
+        }
+    }
+
     //挂载方法到window
     const methods = {
+        handlePluginStoreSearchInput,
         installPluginFromStore,
         saveCellularTestUrl,
         onThreadNumChange,

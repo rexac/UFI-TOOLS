@@ -646,5 +646,12 @@
     "plugin_store": "プラグインストア",
     "plugin_store_tip": "プラグインストアでは、より多くの機能をダウンロードしてインストールできます。",
     "plugin_store_tip1": "プラグインのインストールは、デバイスの性能や安定性に影響する可能性があります。ご注意ください。",
-    "plugin_store_tip2": "一部のプラグインは、高度な機能を有効にする必要があります。"
+    "plugin_store_tip2": "一部のプラグインは、高度な機能を有効にする必要があります。",
+    "total": "合計",
+    "cur_page": "現在",
+    "prev_page": "前",
+    "next_page": "次",
+    "plugin_search_reset_btn": "リセット",
+    "plugin_search_btn": "検索",
+    "plugin_search_placeholder": "プラグインを検索"
 }

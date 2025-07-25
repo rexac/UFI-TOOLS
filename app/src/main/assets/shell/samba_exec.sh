@@ -149,8 +149,14 @@ schedule_script() {
   check_log_file
   check_ttyd_running
   check_socat_running
-  ip6tables -A INPUT -p tcp --dport 5555 -j DROP
-  ip6tables -A INPUT -p udp --dport 5555 -j DROP
+
+  if ! ip6tables -C INPUT -p tcp --dport 5555 -j DROP 2>/dev/null; then
+    ip6tables -A INPUT -p tcp --dport 5555 -j DROP
+  fi
+
+  if ! ip6tables -C INPUT -p udp --dport 5555 -j DROP 2>/dev/null; then
+    ip6tables -A INPUT -p udp --dport 5555 -j DROP
+  fi
 }
 
 uptime_seconds=$(cut -d. -f1 /proc/uptime)

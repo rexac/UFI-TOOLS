@@ -626,28 +626,37 @@ function getBrowserVersion() {
 }
 const result = getBrowserVersion();
 console.log(`${result.browser} ${result.version}`);
-if (result.browser === "Chrome") {
-    //需要大于125
-    const versionParts = result.version.split('.');
-    const majorVersion = parseInt(versionParts[0], 10);
-    if (majorVersion <= 125) {
-        alert(`您的${result.browser}内核版本过低，可能无法正常使用部分功能，请升级浏览器。`);
-        createToast(`您的${result.browser}内核版本过低，可能无法正常使用部分功能，请升级浏览器。`);
-    }
-} else if (result.browser === "Firefox") {
-    //需要大于125
-    const versionParts = result.version.split('.');
-    const majorVersion = parseInt(versionParts[0], 10);
-    if (majorVersion <= 125) {
-        alert(`您的${result.browser}内核版本过低，可能无法正常使用部分功能，请升级浏览器。`);
-        createToast(`您的${result.browser}内核版本过低，可能无法正常使用部分功能，请升级浏览器。`);
-    }
-} else if (result.browser === "Safari") {
-    //需要大于17.5
-    const versionParts = result.version.split('.');
-    const majorVersion = parseInt(versionParts[0], 10);
-    if (majorVersion <= 17.5) {
-        alert(`您的${result.browser}内核版本过低，可能无法正常使用部分功能，请升级浏览器。`);
-        createToast(`您的${result.browser}内核版本过低，可能无法正常使用部分功能，请升级浏览器。`);
+let ignoreBrowserCheckAlert = localStorage.getItem('ignoreBrowserCheckAlert') == '1';
+if (ignoreBrowserCheckAlert != '1') {
+    if (result.browser === "Chrome") {
+        //需要大于125
+        const versionParts = result.version.split('.');
+        const majorVersion = parseInt(versionParts[0], 10);
+        if (majorVersion <= 125) {
+            createToast(`您的${result.browser}内核版本过低，可能无法正常使用部分功能，请升级浏览器。`);
+        }
+        if (majorVersion <= 105) {
+            alert(`您的${result.browser}内核版本过低，无法正常使用部分功能，请升级浏览器。`);
+        }
+    } else if (result.browser === "Firefox") {
+        //需要大于125
+        const versionParts = result.version.split('.');
+        const majorVersion = parseInt(versionParts[0], 10);
+        if (majorVersion <= 125) {
+            createToast(`您的${result.browser}内核版本过低，可能无法正常使用部分功能，请升级浏览器。`);
+        }
+        if (majorVersion <= 105) {
+            alert(`您的${result.browser}内核版本过低，无法正常使用部分功能，请升级浏览器。`);
+        }
+    } else if (result.browser === "Safari") {
+        //需要大于17.5
+        const versionParts = result.version.split('.');
+        const majorVersion = parseInt(versionParts[0], 10);
+        if (majorVersion <= 17.5) {
+            createToast(`您的${result.browser}内核版本过低，可能无法正常使用部分功能，请升级浏览器。`);
+        }
+        if (majorVersion <= 15.6) {
+            alert(`您的${result.browser}内核版本过低，无法正常使用部分功能，请升级浏览器。`);
+        }
     }
 }

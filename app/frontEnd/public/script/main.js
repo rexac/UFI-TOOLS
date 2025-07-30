@@ -3626,36 +3626,38 @@ function main_func() {
                     isLatest = false;
                 }
 
-                const doUpdateEl = document.querySelector('#doUpdate')
-                const doDownloadAPKEl = document.querySelector('#downloadAPK')
-                if (doUpdateEl && doDownloadAPKEl) {
-                    if (!isLatest) {
-                        doUpdateEl.style.backgroundColor = 'var(--dark-btn-color)'
-                        doDownloadAPKEl.style.backgroundColor = 'var(--dark-btn-color)'
-                        doUpdateEl.onclick = () => handleUpdateSoftware(base_uri + name)
-                        doDownloadAPKEl.onclick = () => handleDownloadSoftwareLink(base_uri + name)
-                    } else {
-                        doUpdateEl.onclick = null
-                        doDownloadAPKEl.onclick = null
-                        doUpdateEl.style.backgroundColor = 'var(--dark-btn-disabled-color)'
-                        doDownloadAPKEl.style.backgroundColor = 'var(--dark-btn-disabled-color)'
+                if (!silent) {
+                    const doUpdateEl = document.querySelector('#doUpdate')
+                    const doDownloadAPKEl = document.querySelector('#downloadAPK')
+                    if (doUpdateEl && doDownloadAPKEl) {
+                        if (!isLatest) {
+                            doUpdateEl.style.backgroundColor = 'var(--dark-btn-color)'
+                            doDownloadAPKEl.style.backgroundColor = 'var(--dark-btn-color)'
+                            doUpdateEl.onclick = () => handleUpdateSoftware(base_uri + name)
+                            doDownloadAPKEl.onclick = () => handleDownloadSoftwareLink(base_uri + name)
+                        } else {
+                            doUpdateEl.onclick = null
+                            doDownloadAPKEl.onclick = null
+                            doUpdateEl.style.backgroundColor = 'var(--dark-btn-disabled-color)'
+                            doDownloadAPKEl.style.backgroundColor = 'var(--dark-btn-disabled-color)'
+                        }
                     }
+                    //获取changeLog
+                    // if (!isLatest) {
+                        changelogTextContent.innerHTML = changelog
+                    // }
+                    OTATextContent.innerHTML = `${isLatest ? `<div>${t('is_latest_version')}：V${app_ver} ${app_ver_code}</div>` : `<div>${t('found_update')}:${name}<br/>${date_str ? `${t('release_date')}：${date_str}` : ''}</div>`}`
+                    return !isLatest ? {
+                        isForceUpdate: name.includes('force'),
+                        text: version + ' ' + date_str
+                    } : null
                 }
-                //获取changeLog
-                if (!isLatest) {
-                    changelogTextContent.innerHTML = changelog
-                }
-                OTATextContent.innerHTML = `${isLatest ? `<div>${t('is_latest_version')}：V${app_ver} ${app_ver_code}</div>` : `<div>${t('found_update')}:${name}<br/>${date_str ? `${t('release_date')}：${date_str}` : ''}</div>`}`
-                return !isLatest ? {
-                    isForceUpdate: name.includes('force'),
-                    text: version + ' ' + date_str
-                } : null
 
             } else {
                 throw new Error(t('error'))
             }
         } catch (e) {
-            OTATextContent.innerHTML = `${t('connect_update_server_failed')}<br>${e.message ? e.message : ''}`
+            !silent && (OTATextContent.innerHTML = `${t('connect_update_server_failed')}<br>${e.message ? e.message : ''}`)
             return null
         }
     }
@@ -5382,7 +5384,7 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
                         const cur_index = data.content.findIndex(plugin => {
                             return plugin.name?.toLowerCase()?.includes(keyword?.toLowerCase())
                         })
-                        
+
                         if (cur_index == -1) {
                             createToast(`${t('no_plugins_found')}：${keyword}`, 'red')
                             return scrollToFirstPage()

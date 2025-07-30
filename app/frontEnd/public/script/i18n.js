@@ -1,7 +1,8 @@
 const AVAILABLE_LANGS = {
     zh: "中文",
     en: "English",
-    ja:'日本語'
+    ja:'日本語',
+    vi: "Tiếng Việt"
 };
 
 const DEFAULT_LANG = "zh";

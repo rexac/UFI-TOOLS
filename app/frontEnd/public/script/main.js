@@ -1591,7 +1591,7 @@ function main_func() {
 
     let cellInfoRequestTimer = null
     initCellInfo()
-    cellInfoRequestTimer = requestInterval(() => initCellInfo(), REFRESH_TIME + 500)
+    cellInfoRequestTimer = requestInterval(() => initCellInfo(), REFRESH_TIME + 1000)
 
     let onSelectCellRow = (pci, earfcn) => {
         let pci_t = document.querySelector('#PCI')
@@ -3625,6 +3625,7 @@ function main_func() {
                 if (name.includes('force')) {
                     isLatest = false;
                 }
+
                 const doUpdateEl = document.querySelector('#doUpdate')
                 const doDownloadAPKEl = document.querySelector('#downloadAPK')
                 if (doUpdateEl && doDownloadAPKEl) {
@@ -5173,21 +5174,30 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
 
     //从插件商店下载插件并安装
     const installPluginFromStore = async (url, name) => {
-        createToast(t('download_ing'), 'pink')
-        const res = await fetchWithTimeout(`${KANO_baseURL}/proxy/--${url}`, {
-            method: 'GET',
-        })
-        if (!res.ok) {
-            createToast(t('download_failed'), 'red')
-            return
-        }
-        const text = await res.text()
-        createToast(t('install_ing'), 'pink')
-        await handlePluginFileUpload({
-            target: {
-                files: [new File([text], name, { type: 'text/plain' })]
+        const { close, el } = createFixedToast('download_ing', t('download_ing'))
+        try {
+            const res = await fetchWithTimeout(`${KANO_baseURL}/proxy/--${url}`, {
+                method: 'GET',
+            })
+            if (!res.ok) {
+                createToast(t('download_failed'), 'red')
+                close()
+                return
             }
-        })
+            const text = await res.text()
+            createToast(t('install_ing'), 'pink', 3000, () => {
+                close() // 关闭下载中提示
+            })
+            await handlePluginFileUpload({
+                target: {
+                    files: [new File([text], name, { type: 'text/plain' })]
+                }
+            })
+        } catch {
+            createToast(t('download_failed'), 'red')
+        } finally {
+            close()
+        }
     }
 
     //渲染插件
@@ -5218,7 +5228,8 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
     const scrollToElement = (elementsName = '#plugin_store .plugin-title', keyword) => {
         let found = false
         document.querySelectorAll(elementsName).forEach(el => {
-            if (el.textContent.includes(keyword)) {
+            const find = el.textContent?.toLowerCase()?.includes(keyword?.toLowerCase())
+            if (find) {
                 // 找到最近的可滚动容器
                 let scrollContainer = el.parentElement;
                 while (scrollContainer && scrollContainer.scrollHeight <= scrollContainer.clientHeight) {
@@ -5309,6 +5320,7 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
 
                     //下一页
                     const nextPageBtn = document.querySelector('#plugin_store_next_page')
+                    nextPageBtn.style.backgroundColor = totalPages <= 1 ? 'var(--dark-btn-disabled-color)' : ''
                     nextPageBtn.onclick = () => {
                         pageNum++
                         if (pageNum >= totalPages - 1) {
@@ -5366,7 +5378,11 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
                         }
 
                         //寻找存在的页面页码并跳转
-                        const cur_index = data.content.findIndex(plugin => plugin.name.includes(keyword))
+
+                        const cur_index = data.content.findIndex(plugin => {
+                            return plugin.name?.toLowerCase()?.includes(keyword?.toLowerCase())
+                        })
+                        
                         if (cur_index == -1) {
                             createToast(`${t('no_plugins_found')}：${keyword}`, 'red')
                             return scrollToFirstPage()

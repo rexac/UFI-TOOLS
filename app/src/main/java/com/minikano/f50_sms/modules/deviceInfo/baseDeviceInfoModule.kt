@@ -1,14 +1,12 @@
 package com.minikano.f50_sms.modules.deviceInfo
 
 import android.content.Context
-import android.os.Build
 import android.os.StatFs
-import android.util.Log
+import com.minikano.f50_sms.configs.AppMeta
 import com.minikano.f50_sms.modules.BASE_TAG
 import com.minikano.f50_sms.modules.PREFS_NAME
 import com.minikano.f50_sms.utils.KanoLog
 import com.minikano.f50_sms.utils.KanoUtils
-import com.minikano.f50_sms.utils.ShellKano
 import com.minikano.f50_sms.utils.calculateCpuUsage
 import com.minikano.f50_sms.utils.getCpuFreqJson
 import com.minikano.f50_sms.utils.getMemoryUsage
@@ -55,9 +53,6 @@ fun Route.baseDeviceInfoModule(context: Context) {
         var cpuTempRes: String? = null
         var cpuTempMax:String? = null
         try {
-//            val temp = ShellKano.executeShellFromAssetsSubfolder(context, "shell/temp.sh")
-//            val temp1 =
-//                ShellKano.runShellCommand("cat /sys/class/thermal/thermal_zone1/temp")
             val (maxTemp,temp) = readThermalZones()
             cpuTempMax = maxTemp.toString()
             KanoLog.d(TAG, "获取CPU温度成功: $temp")
@@ -122,7 +117,7 @@ fun Route.baseDeviceInfoModule(context: Context) {
             val dailyData = KanoUtils.getCachedTodayUsage(context)
 
             // 外部存储（可移动设备）
-            val exStorageInfo = KanoUtils.getRemovableStorageInfo(context)
+            val exStorageInfo = KanoUtils.getCachedRemovableStorageInfo(context)
             val externalTotal = exStorageInfo?.totalBytes ?: 0
             val externalAvailable = exStorageInfo?.availableBytes ?: 0
             val externalUsed = externalTotal - externalAvailable
@@ -159,28 +154,16 @@ fun Route.baseDeviceInfoModule(context: Context) {
         var currentNow :Int? = null
         var votageNow :Int? = null
         try {
-            var model = Build.MODEL
-            if (model.contains("MU5352")){
-                model = "U30 Lite"
-            }
             val batteryLevel: Int = KanoUtils.getBatteryPercentage(context)
-
-            val packageManager = context.packageManager
-            val packageName = context.packageName
-            val packageInfo = packageManager.getPackageInfo(packageName, 0)
-
-            val versionName = packageInfo.versionName
-            val versionCode = packageInfo.versionCode
-
             val batteryStatus = readBatteryStatus()
             currentNow = batteryStatus.current_uA
             votageNow = batteryStatus.voltage_uV
 
-            KanoLog.d(TAG, "型号与电量：$model $batteryLevel")
+            KanoLog.d(TAG, "型号与电量：${AppMeta.model} $batteryLevel")
 
-            versionNameRes = versionName
-            versionCodeRes = versionCode
-            modelRes = model
+            versionNameRes = AppMeta.versionName
+            versionCodeRes = AppMeta.versionCode
+            modelRes = AppMeta.model
             batteryLevelRes = batteryLevel
 
         } catch (e: Exception) {
@@ -223,19 +206,11 @@ fun Route.baseDeviceInfoModule(context: Context) {
     //版本信息获取
     get("/api/version_info") {
         try {
-            val model = Build.MODEL
-            val packageManager = context.packageManager
-            val packageName = context.packageName
-            val packageInfo = packageManager.getPackageInfo(packageName, 0)
-
-            val versionName = packageInfo.versionName
-            val versionCode = packageInfo.versionCode
-
             val jsonResult = """
             {
-                "app_ver": "$versionName",
-                "app_ver_code": "$versionCode",
-                "model":"$model"
+                "app_ver": "${AppMeta.versionName}",
+                "app_ver_code": "${AppMeta.versionCode}",
+                "model":"${AppMeta.model}"
             }
         """.trimIndent()
 

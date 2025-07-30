@@ -98,7 +98,7 @@ class ADBService : Service() {
             } catch (e: Exception) {
                 KanoLog.e("kano_ZTE_LOG", "激活SMB内置脚本错误")
             }
-            handler.postDelayed(this, 15_000)
+            handler.postDelayed(this, 20_000)
         }
     }
 

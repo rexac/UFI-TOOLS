@@ -66,25 +66,27 @@ class KanoUtils {
             return ((level / scale.toFloat()) * 100).toInt()
         }
 
-        fun getRemovableStorageInfo(context: Context): MyStorageInfo? {
-            val dirs = context.getExternalFilesDirs(null)
-            for (file in dirs) {
-                if (file != null) {
-                    val path = file.absolutePath
+        private var lastStorageInfo: MyStorageInfo? = null
+        private var lastStorageUpdateTime: Long = 0
 
-                    // 判断不是内置路径
+        fun getCachedRemovableStorageInfo(context: Context): MyStorageInfo? {
+            val now = System.currentTimeMillis()
+            if (lastStorageInfo == null || now - lastStorageUpdateTime > 10_000) {
+                val dirs = context.getExternalFilesDirs(null)
+                for (file in dirs) {
+                    val path = file?.absolutePath ?: continue
                     if (!path.contains("/storage/emulated/0")) {
                         val statFs = StatFs(path)
                         val total = statFs.blockSizeLong * statFs.blockCountLong
                         val available = statFs.blockSizeLong * statFs.availableBlocksLong
 
-                        return MyStorageInfo(
-                            path = path, totalBytes = total, availableBytes = available
-                        )
+                        lastStorageInfo = MyStorageInfo(path, total, available)
+                        lastStorageUpdateTime = now
+                        break
                     }
                 }
             }
-            return null
+            return lastStorageInfo
         }
 
         fun getStartOfDayMillis(): Long {

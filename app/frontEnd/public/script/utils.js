@@ -164,7 +164,7 @@ function encodeBase64(plainText) {
     return window.btoa(binaryString)
 }
 
-function createToast(text, color, delay = 3000) {
+function createToast(text, color, delay = 3000, fn = null) {
     try {
         const toastContainer = document.querySelector("#toastContainer")
         const toastEl = document.createElement('div')
@@ -200,8 +200,64 @@ function createToast(text, color, delay = 3000) {
             clearTimeout(timer)
             timer = setTimeout(() => {
                 toastContainer.removeChild(toastEl)
+                if (fn && typeof fn === 'function') {
+                    fn()
+                }
             }, 300);
         }, delay);
+    } catch (e) {
+        console.error('创建toast失败:', e);
+    }
+}
+
+function createFixedToast(_id, text, style = {}) {
+    try {
+        const toastContainer = document.querySelector("#toastContainer")
+        const toastEl = document.createElement('div')
+        toastEl.id = _id
+        toastEl.style.padding = '10px'
+        toastEl.style.fontSize = '13px'
+        toastEl.style.width = "fit-content"
+        toastEl.style.position = "relative"
+        toastEl.style.top = "0px"
+        toastEl.style.backgroundColor = 'var(--dark-card-bg)'
+        toastEl.style.transform = `scale(1)`
+        toastEl.style.transition = `all .3s ease`
+        toastEl.style.opacity = `0`
+        toastEl.style.transform = `scale(0)`
+        toastEl.style.transformOrigin = 'top center'
+        toastEl.style.boxShadow = '0 0 10px 0 rgba(135, 207, 235, 0.24)'
+        toastEl.style.fontWeight = 'bold'
+        toastEl.style.backdropFilter = 'blur(10px)'
+        toastEl.style.borderRadius = '6px'
+        if (style && typeof style === 'object') {
+            Object.entries(style).forEach(([key, value]) => {
+                if (toastEl.style[key]) {
+                    toastEl.style[key] = value
+                }
+            })
+        }
+        toastEl.innerHTML = text;
+        const id = 'toastkano'
+        toastEl.setAttribute('class', id);
+        toastContainer.appendChild(toastEl)
+        setTimeout(() => {
+            toastEl.style.opacity = `1`
+            toastEl.style.transform = `scale(1)`
+        }, 50);
+        let timer = null
+        return {
+            el: toastEl,
+            close: () => {
+                toastEl.style.opacity = `0`
+                toastEl.style.transform = `scale(0)`
+                toastEl.style.top = '-' + toastEl.getBoundingClientRect().height + 'px'
+                clearTimeout(timer)
+                timer = setTimeout(() => {
+                    toastEl.remove()
+                }, 300);
+            }
+        }
     } catch (e) {
         console.error('创建toast失败:', e);
     }

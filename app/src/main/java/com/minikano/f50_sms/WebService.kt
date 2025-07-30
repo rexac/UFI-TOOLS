@@ -13,6 +13,7 @@ import android.os.IBinder
 import android.os.PowerManager
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import com.minikano.f50_sms.configs.AppMeta
 import com.minikano.f50_sms.utils.KanoUtils
 import kotlin.concurrent.thread
 
@@ -46,6 +47,7 @@ class WebService : Service() {
 
     override fun onCreate() {
         super.onCreate()
+        AppMeta.init(this)
         startForegroundNotification()
 
         //检测IP变动，适应用户ip网段更改

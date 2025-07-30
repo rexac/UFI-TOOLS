@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import com.minikano.f50_sms.MainActivity.Companion.isEnableLog
+import com.minikano.f50_sms.configs.AppMeta
 import com.minikano.f50_sms.utils.DeviceModelChecker
 import com.minikano.f50_sms.utils.ShellKano
 import kotlin.system.exitProcess
@@ -13,6 +14,7 @@ class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == Intent.ACTION_BOOT_COMPLETED) {
             Log.d("kano_ZTE_LOG", "开机广播接收到，准备启动服务")
+            AppMeta.init(context)
 
             //check
             val isNotUFI = DeviceModelChecker.checkIsNotUFI(context)

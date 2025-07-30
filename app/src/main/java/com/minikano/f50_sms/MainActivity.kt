@@ -44,6 +44,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.TextUnit
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.minikano.f50_sms.configs.AppMeta
 import com.minikano.f50_sms.utils.DeviceModelChecker
 import com.minikano.f50_sms.utils.KanoLog
 import com.minikano.f50_sms.utils.KanoUtils
@@ -79,6 +80,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        AppMeta.init(this)
 
         //阻止非随身WiFi与黑名单设备安装使用
         val isNotUFI = DeviceModelChecker.checkIsNotUFI(applicationContext)

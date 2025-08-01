@@ -653,5 +653,9 @@
     "next_page": "次",
     "plugin_search_reset_btn": "リセット",
     "plugin_search_btn": "検索",
-    "plugin_search_placeholder": "プラグインを検索"
+    "plugin_search_placeholder": "プラグインを検索",
+    "at_force_imei": "強制IMEI取得",
+    "need_advance_func": "高度な機能の有効化が必要です",
+    "not_support_firmware":"お使いのシステムバージョンはサポートされていないため、一部の機能が正しく動作しない可能性があります。ポケットWiFiのシステムを対応バージョンにアップデートしてください！"
+
 }

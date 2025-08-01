@@ -653,5 +653,8 @@
     "next_page": "Tiếp",
     "plugin_search_reset_btn": "Đặt lại",
     "plugin_search_btn": "Tìm kiếm",
-    "plugin_search_placeholder": "Tìm kiếm plugin"
+    "plugin_search_placeholder": "Tìm kiếm plugin",
+    "at_force_imei": "Truy vấn IMEI mạnh",
+    "need_advance_func": "Cần bật chức năng nâng cao",
+    "not_support_firmware":"Phiên bản hệ thống của bạn không được hỗ trợ, một số chức năng có thể không hoạt động đúng. Vui lòng nâng cấp hệ thống WiFi di động của bạn lên phiên bản phù hợp!"
 }

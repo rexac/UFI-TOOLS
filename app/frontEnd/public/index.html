@@ -1160,7 +1160,8 @@
                         <span data-i18n="plugin_store_tip2">有些插件需要开启高级功能才可以使用。</span>
                     </div>
                     <div class="searchBox">
-                        <input onkeyup="handlePluginStoreSearchInput(event)" style="padding-left: 6px;width: 100%;" type="text" placeholder="搜索插件" id="pluginSearchInput"
+                        <input onkeyup="handlePluginStoreSearchInput(event)" style="padding-left: 6px;width: 100%;"
+                            type="text" placeholder="搜索插件" id="pluginSearchInput"
                             data-i18n-placeholder="plugin_search_placeholder">
                         <button id="pluginSearchResetBtn" style="width: fit-content;min-width: 50px;" class="btn"
                             data-i18n="plugin_search_reset_btn">重置</button>
@@ -1295,6 +1296,9 @@
                                     <button class="btn"
                                         onclick="disableButtonWhenExecuteFunc(event,()=>handleAT('AT+CGSN'))"
                                         data-i18n="at_imei">IMEI</button>
+                                    <button class="btn"
+                                        onclick="disableButtonWhenExecuteFunc(event,()=>handleForceIMEI())"
+                                        data-i18n="at_force_imei">强力查串</button>
                                     <button class="btn"
                                         onclick="disableButtonWhenExecuteFunc(event,()=>handleAT('AT+CGMR'))"
                                         data-i18n="at_modem">基带信息</button>
@@ -1474,7 +1478,7 @@
                 </div>
 
                 <div class="btn" style="text-align: right;">
-                    <button id="startSpeedBtn" onclick="startCellularTestRealtime(event)"
+                    <button id="startSpeedBtn" onclick="startCellularTestRealtime(event,true)"
                         data-i18n="speedtest_start_btn">开始测速</button>
                     <button id="loopMode" onclick="handleCellularLoopMode(event)"
                         data-i18n="speedtest_loop_btn">循环测速</button>

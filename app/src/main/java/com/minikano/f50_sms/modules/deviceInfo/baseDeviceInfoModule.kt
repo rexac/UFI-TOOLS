@@ -227,6 +227,29 @@ fun Route.baseDeviceInfoModule(context: Context) {
         }
     }
 
+    //SELinux状态
+    get("/api/SELinux"){
+        try {
+            val res = KanoUtils.getSELinuxStatus()
+            val jsonResult = """
+            {
+                "selinux": "$res"
+            }
+        """.trimIndent()
+
+            call.response.headers.append("Access-Control-Allow-Origin", "*")
+            call.respondText(jsonResult, ContentType.Application.Json)
+        } catch (e: Exception) {
+            KanoLog.d("kano_ZTE_LOG", "获取selinux状态出错：${e.message}")
+            call.response.headers.append("Access-Control-Allow-Origin", "*")
+            call.respondText(
+                """{"error":"获取selinux状态出错"}""",
+                ContentType.Application.Json,
+                HttpStatusCode.InternalServerError
+            )
+        }
+    }
+
     //是否需要token
     get("/api/need_token") {
         try {

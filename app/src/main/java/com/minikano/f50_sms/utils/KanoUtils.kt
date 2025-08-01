@@ -421,5 +421,15 @@ class KanoUtils {
             return cachedTotal
         }
 
+        fun getSELinuxStatus(): String {
+            try {
+                val process = Runtime.getRuntime().exec("getenforce")
+                val reader = process.inputStream.bufferedReader()
+                return reader.readLine().trim()
+            } catch (e: Exception) {
+                e.printStackTrace()
+                return "Unknown"
+            }
+        }
     }
 }

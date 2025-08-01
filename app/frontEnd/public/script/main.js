@@ -763,7 +763,6 @@ function main_func() {
         }
     }
 
-
     let StopStatusRenderTimer = null
     let isNotLoginOnce = true
     let status_login_try_times = 0
@@ -3644,7 +3643,7 @@ function main_func() {
                     }
                     //获取changeLog
                     // if (!isLatest) {
-                        changelogTextContent.innerHTML = changelog
+                    changelogTextContent.innerHTML = changelog
                     // }
                     OTATextContent.innerHTML = `${isLatest ? `<div>${t('is_latest_version')}：V${app_ver} ${app_ver_code}</div>` : `<div>${t('found_update')}:${name}<br/>${date_str ? `${t('release_date')}：${date_str}` : ''}</div>`}`
                     return !isLatest ? {
@@ -4992,8 +4991,12 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
     let cellularSpeedController = null;
     let loopCellularTimer = null;
     let isCellularTestLooping = false;
+    let totalBytes = 0;
 
-    async function startCellularTestRealtime(e) {
+    async function startCellularTestRealtime(e, flag = false) {
+        if (!cellularSpeedFlag) {
+            flag && (totalBytes = 0)
+        }
         const resultEl = document.getElementById('CellularTestResult');
         const url = document.getElementById('CellularTestUrl').value.trim();
         const rawThreadNum = Number(document.querySelector('#thread_num').textContent);
@@ -5027,7 +5030,6 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
         e && (e.target.innerText = t('speedtest_stop_btn'));
         resultEl.innerHTML = `${t('speed_test_ing')} (${threadNum} ${t('thread')})...<br/><span>${t('preparing')}...</span>`;
 
-        let totalBytes = 0;
         let startTime = performance.now();
         let lastUpdateTime = startTime;
         let lastBytes = 0;
@@ -5057,7 +5059,6 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
 
                         if (!firstResponseReceived && value.length > 0) {
                             firstResponseReceived = true;
-                            resultEl.innerHTML += `<br/><span style="color:green;">✅ ${t('cellular_speed_test_start_receive_data')}...</span>`;
                         }
                     }
                 } catch (_) {
@@ -5128,13 +5129,16 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
 
         if (isCellularTestLooping) {
             btn.innerText = t('loop_mode_stop');
+            totalBytes = 0
             startCellularTestRealtime();
         } else {
             btn.innerText = t('loop_mode_start');
             clearTimeout(loopCellularTimer);
             cellularSpeedController?.abort();
             cellularSpeedFlag = false;
-            document.querySelector('#CellularTestResult').innerHTML = t('toast_speed_test_cancel');
+            setTimeout(() => {
+                totalBytes = 0
+            }, 100);
         }
     }
 
@@ -5436,8 +5440,35 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
         }
     }
 
+    const handleForceIMEI = async () => {
+        if (!await checkAdvanceFunc()) return createToast("need_advance_func", 'red')
+        const AT_RESULT = document.querySelector('#AT_RESULT')
+        if (AT_RESULT) {
+            AT_RESULT.innerHTML = t('toast_running_please_wait')
+            try {
+                const res = await runShellWithRoot(`sh /data/data/com.minikano.f50_sms/files/force_query_imei.sh`)
+                AT_RESULT.innerHTML = `<p style="font-weight:bolder;overflow:hidden" onclick="copyText(event)">${res.content}</p>`
+            } catch {
+                AT_RESULT.innerHTML = ""
+            }
+        }
+    }
+
+    const getSELinuxStatus = async () => {
+        try {
+            const res = await (await fetchWithTimeout(`${KANO_baseURL}/SELinux`)).json()
+            let result = res.selinux.toLowerCase()
+            if (result !== "permissive" && result !== "disabled" && result != "0") {
+                createToast(t('not_support_firmware'), "pink", 10000);
+            }
+        } catch {
+        }
+    }
+    getSELinuxStatus()
+
     //挂载方法到window
     const methods = {
+        handleForceIMEI,
         handlePluginStoreSearchInput,
         installPluginFromStore,
         saveCellularTestUrl,

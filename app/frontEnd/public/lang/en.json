@@ -653,5 +653,8 @@
     "next_page": "Next",
     "plugin_search_reset_btn": "Reset",
     "plugin_search_btn": "Search",
-    "plugin_search_placeholder": "Search plugins"
+    "plugin_search_placeholder": "Search plugins",
+    "at_force_imei": "Force IMEI Query",
+    "need_advance_func": "Advanced features need to be enabled",
+    "not_support_firmware":"Your system version is not supported. Some features may not work properly. Please update your Pocket WiFi system to a compatible version!"
 }

@@ -3646,11 +3646,12 @@ function main_func() {
                     changelogTextContent.innerHTML = changelog
                     // }
                     OTATextContent.innerHTML = `${isLatest ? `<div>${t('is_latest_version')}：V${app_ver} ${app_ver_code}</div>` : `<div>${t('found_update')}:${name}<br/>${date_str ? `${t('release_date')}：${date_str}` : ''}</div>`}`
-                    return !isLatest ? {
-                        isForceUpdate: name.includes('force'),
-                        text: version + ' ' + date_str
-                    } : null
+
                 }
+                return !isLatest ? {
+                    isForceUpdate: name.includes('force'),
+                    text: version + ' ' + date_str
+                } : null
 
             } else {
                 throw new Error(t('error'))
@@ -5446,8 +5447,8 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
         if (AT_RESULT) {
             AT_RESULT.innerHTML = t('toast_running_please_wait')
             try {
-                const res = await runShellWithRoot(`sh /data/data/com.minikano.f50_sms/files/force_query_imei.sh`)
-                AT_RESULT.innerHTML = `<p style="font-weight:bolder;overflow:hidden" onclick="copyText(event)">${res.content}</p>`
+                const res = await runShellWithRoot(`/data/data/com.minikano.f50_sms/files/imei_reader`)
+                AT_RESULT.innerHTML = `<p style="font-weight:bolder;overflow:hidden" onclick="copyText(event)">${res.content.replaceAll('\n', "<br>")}</p>`
             } catch {
                 AT_RESULT.innerHTML = ""
             }

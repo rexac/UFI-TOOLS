@@ -255,14 +255,14 @@
                             <table class="nice-table">
                                 <thead>
                                     <tr>
-                                        <th data-i18n="col_select">选择</th>
+                                        <th><input type="checkbox" id="selectAllBand"></th>
                                         <th>Band</th>
                                         <th data-i18n="col_freq_range">频率范围 (MHz)</th>
                                         <th data-i18n="col_mode">制式</th>
                                         <th data-i18n="col_operator">运营商</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody id="bandTable">
                                     <tr>
                                         <td><input type="checkbox" data-type="4G" data-band="1"></td>
                                         <td>B1</td>
@@ -370,10 +370,13 @@
                                     </tr>
                                 </tbody>
                             </table>
-                            <button type="submit" class="btn"
-                                style="margin-top: 6px;;width: 100%;padding: 8px;font-size: 14px;"
+                            <button id="lockBandBtn" type="submit" class="btn"
+                                style="width: 100%;margin-top: 6px;padding: 8px;font-size: 14px;"
                                 data-i18n="btn_lock_band">锁频段!</button>
                         </form>
+                        <button onclick="unlockAllBand()" class="btn"
+                            style="width: 100%;margin-top: 6px;padding: 8px;font-size: 14px;"
+                            data-i18n="btn_unlock_band">解除锁频段!</button>
                     </div>
                 </div>
                 <div class="title" style="margin: 6px 0; margin-top: 10px;">

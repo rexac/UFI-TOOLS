@@ -95,6 +95,7 @@
     "col_mode": "Mode",
     "col_operator": "Carrier",
     "btn_lock_band": "Lock Bands!",
+    "btn_unlock_band": "Unlock Bands!",
     "lock_cell_title": "🔒 Lock Cell",
     "cell_tip": "🚀 Warning: Locking wrong cell may cause no or unstable signal 🚀",
     "network_select": "Network Type: ",
@@ -656,5 +657,6 @@
     "plugin_search_placeholder": "Search plugins",
     "at_force_imei": "Force IMEI Query",
     "need_advance_func": "Advanced features need to be enabled",
-    "not_support_firmware":"Your system version is not supported. Some features may not work properly. Please update your Pocket WiFi system to a compatible version!"
+    "not_support_firmware":"Your system version is not supported. Some features may not work properly. Please update your Pocket WiFi system to a compatible version!",
+    "your_new_imei":"Your new IMEI"
 }

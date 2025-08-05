@@ -763,6 +763,37 @@ function main_func() {
         }
     }
 
+    let cachedDiagImeiQueryResult = ''
+    let diagImeiTimer = null
+    const queryImeiFromDIAG = async () => {
+        if (diagImeiTimer == null) {
+            diagImeiTimer = setTimeout(() => {
+                cachedDiagImeiQueryResult = ''
+                diagImeiTimer = null
+            }, 5 * 60 * 1000);
+        }
+        if (cachedDiagImeiQueryResult && cachedDiagImeiQueryResult != '') {
+            return cachedDiagImeiQueryResult
+        }
+        let isEnabled = await checkAdvanceFunc()
+        if (isEnabled) {
+            try {
+                const res = await runShellWithRoot(`/data/data/com.minikano.f50_sms/files/imei_reader`)
+                const imei = res.content.replace(/IMEI[0-9]:/g, "").split('\n')[0]
+                cachedDiagImeiQueryResult = imei
+                return imei
+            } catch {
+                return ''
+            }
+        }
+    }
+
+    const resetDiagImeiCache = () => {
+        cachedDiagImeiQueryResult = ''
+        diagImeiTimer && clearTimeout(diagImeiTimer)
+        diagImeiTimer = null
+    }
+
     let StopStatusRenderTimer = null
     let isNotLoginOnce = true
     let status_login_try_times = 0
@@ -803,6 +834,8 @@ function main_func() {
                 try {
                     if (await initRequestData()) {
                         console.log('Login timeout keep login...');
+                        //清除diag imei的缓存
+                        resetDiagImeiCache()
                         const res = await login()
                         if (res === null) {
                             console.log('Login faild, try again...');
@@ -828,9 +861,24 @@ function main_func() {
                     }
                 } catch (e) { }
             }
+
+            //如果打开了高级功能，且用户已经处于改串后不显串状态，则使用强力查串补充串号显示
+            if (!res.imei || res.imei.length === 0) {
+                res.imei = await queryImeiFromDIAG()
+            }
+            //如果设备显串，且和缓存不一致，则清空缓存
+            if (res.imei && (res.imei != cachedDiagImeiQueryResult)) {
+                resetDiagImeiCache()
+            }
+            //不管设备是否显串，只要iccid有变更，就清空imei缓存
+            if (window.UFI_DATA["iccid"] !== res.iccid) {
+                resetDiagImeiCache()
+            }
+
             Object.keys(res).forEach(key => {
                 window.UFI_DATA[key] = res[key];
             });
+
             adbQuery()
             isNotLoginOnce = false
             const current_cell = document.querySelector('#CURRENT_CELL')
@@ -1169,16 +1217,16 @@ function main_func() {
     }
     initNetworktype()
 
-    const changeNetwork = async (e) => {
+    const changeNetwork = async (e, silent = false) => {
         const value = e.target.value.trim()
         if (!(await initRequestData()) || !value) {
             return null
         }
-        createToast(t('toast_changing'), '#BF723F')
+        !silent && createToast(t('toast_changing'), '#BF723F')
         try {
             const cookie = await login()
             if (!cookie) {
-                createToast(t('login_failed_check_pwd'), 'red')
+                !silent && createToast(t('login_failed_check_pwd'), 'red')
                 out()
                 return null
             }
@@ -1187,7 +1235,7 @@ function main_func() {
                 BearerPreference: value.trim()
             })).json()
             if (res.result == 'success') {
-                createToast(t('toast_oprate_success'), 'green')
+                !silent && createToast(t('toast_oprate_success'), 'green')
             } else {
                 createToast(t('toast_oprate_failed'), 'red')
             }
@@ -1491,6 +1539,7 @@ function main_func() {
                 }
             }
         }
+        checkBandSelect()
     }
     initBandForm()
 
@@ -1534,6 +1583,23 @@ function main_func() {
             ]))
             if (res[0].result == 'success' || res[1].result == 'success') {
                 createToast(t('toast_set_band_success'), 'green')
+                //切一下网
+                const netType = document.querySelector('#NET_TYPE')
+                if (netType) {
+                    const options = document.querySelectorAll('#NET_TYPE option')
+                    const curValue = netType.value
+                    //切到不同网络
+                    if (options.length) {
+                        const net = Array.from(options).find(el => el.value != curValue)
+                        if (net) {
+                            //切网
+                            createToast(t("toast_changing"))
+                            await changeNetwork({ target: { value: net.value } }, true)
+                            //切回来
+                            await changeNetwork({ target: { value: curValue } })
+                        }
+                    }
+                }
             }
             else {
                 createToast(t('toast_set_band_failed'), 'red')
@@ -1542,6 +1608,17 @@ function main_func() {
             createToast(t('toast_set_band_failed'), 'red')
         } finally {
             await initBandForm()
+        }
+    }
+
+    //解除锁定所有频段
+    const unlockAllBand = () => {
+        //手动全选频段，点击锁定
+        toggleAllBandBox(true)
+        selectAllBand.checked = true
+        const lockBandBtn = document.querySelector('#lockBandBtn')
+        if(lockBandBtn){
+            lockBandBtn.click()
         }
     }
 
@@ -2873,6 +2950,8 @@ function main_func() {
                     createToast(t('toast_exe_failed'), 'red');
                     return;
                 }
+                //清空imei缓存
+                resetDiagImeiCache()
                 AT_RESULT.innerHTML = `<p onclick="copyText(event)"  style="overflow: hidden;">${parseCGEQOSRDP(res.result)}</p>`;
                 createToast(t('toast_exe_success'), 'green');
             } else {
@@ -2929,6 +3008,8 @@ function main_func() {
 
                 AT_RESULT.innerHTML = `<p onclick="copyText(event)"  style="overflow: hidden;">${res.result}</p>`;
                 createToast(t('toast_exe_success'), 'green');
+                //只要执行AT了，就默认清空一次imei展示缓存
+                resetDiagImeiCache()
             } else {
                 createToast(t('toast_exe_failed'), 'red');
             }
@@ -5075,7 +5156,7 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
             }
         }
 
-        // 每 80ms 更新一次速度
+        // 每 100ms 更新一次速度
         const interval = setInterval(() => {
             const now = performance.now();
             const deltaTime = (now - lastUpdateTime) / 1000;
@@ -5442,12 +5523,14 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
     }
 
     const handleForceIMEI = async () => {
-        if (!await checkAdvanceFunc()) return createToast("need_advance_func", 'red')
+        if (!await checkAdvanceFunc()) return createToast(t("need_advance_func"), 'red')
         const AT_RESULT = document.querySelector('#AT_RESULT')
         if (AT_RESULT) {
             AT_RESULT.innerHTML = t('toast_running_please_wait')
             try {
                 const res = await runShellWithRoot(`/data/data/com.minikano.f50_sms/files/imei_reader`)
+                //清空imei展示缓存
+                resetDiagImeiCache()
                 AT_RESULT.innerHTML = `<p style="font-weight:bolder;overflow:hidden" onclick="copyText(event)">${res.content.replaceAll('\n', "<br>")}</p>`
             } catch {
                 AT_RESULT.innerHTML = ""
@@ -5469,6 +5552,7 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
 
     //挂载方法到window
     const methods = {
+        unlockAllBand,
         handleForceIMEI,
         handlePluginStoreSearchInput,
         installPluginFromStore,

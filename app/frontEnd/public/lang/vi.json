@@ -95,6 +95,7 @@
     "col_mode": "Chế độ",
     "col_operator": "Nhà mạng",
     "btn_lock_band": "Khóa băng tần",
+    "btn_unlock_band": "Mở khóa băng tần",
     "lock_cell_title": "🔒 Khóa Cell",
     "cell_tip": "🚀 Cảnh báo: Khóa sai cell có thể gây mất tín hiệu hoặc tín hiệu không ổn định 🚀",
     "network_select": "Loại mạng: ",
@@ -656,5 +657,6 @@
     "plugin_search_placeholder": "Tìm kiếm plugin",
     "at_force_imei": "Truy vấn IMEI mạnh",
     "need_advance_func": "Cần bật chức năng nâng cao",
-    "not_support_firmware":"Phiên bản hệ thống của bạn không được hỗ trợ, một số chức năng có thể không hoạt động đúng. Vui lòng nâng cấp hệ thống WiFi di động của bạn lên phiên bản phù hợp!"
+    "not_support_firmware":"Phiên bản hệ thống của bạn không được hỗ trợ, một số chức năng có thể không hoạt động đúng. Vui lòng nâng cấp hệ thống WiFi di động của bạn lên phiên bản phù hợp!",
+    "your_new_imei":"IMEI mới của bạn"
 }

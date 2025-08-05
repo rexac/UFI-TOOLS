@@ -95,6 +95,7 @@
     "col_mode": "制式",
     "col_operator": "运营商",
     "btn_lock_band": "锁频段!",
+    "btn_unlock_band": "解除锁频段!",
     "lock_cell_title": "🔒 锁定基站",
     "cell_tip": "🚀 注意，选错基站可能会导致信号不稳定/无信号等问题 🚀",
     "network_select": "网络选择：",
@@ -470,7 +471,7 @@
     "toast_changing": "更改中，请稍后",
     "toast_need_login": "需要登录",
     "toast_op_success_reconnect_wifi": "操作成功，请重新连接WiFi！",
-    "toast_set_band_success": "'设置频段成功！'",
+    "toast_set_band_success": "设置频段成功！",
     "toast_set_band_failed": "设置频段失败!",
     "toast_has_selected": "已选择",
     "toast_data_not_filling_done": "请填写完整数据",
@@ -655,6 +656,7 @@
     "plugin_search_btn": "搜索",
     "plugin_search_placeholder": "搜索插件",
     "at_force_imei": "强力查串",
-    "need_advance_func": "需要启用高级功能",
-    "not_support_firmware": "你的系统版本不受支持,可能无法使用部分功能,请升级随身WiFi系统到合适的版本!"
+    "need_advance_func": "需要启用高级功能才可使用",
+    "not_support_firmware": "你的系统版本不受支持,可能无法使用部分功能,请升级随身WiFi系统到合适的版本!",
+    "your_new_imei":"你的新串号"
 }

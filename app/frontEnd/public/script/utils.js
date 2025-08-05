@@ -461,7 +461,7 @@ const collapseGen = (btn_id, collapse_id, storName, callback = undefined) => {
 
 //inputIMEI
 const inputIMEIAT = () => {
-    document.querySelector('#AT_INPUT').value = 'AT+SPIMEI=0,"IMEI"'
+    document.querySelector('#AT_INPUT').value = `AT+SPIMEI=0,"${t('your_new_imei')}"`
 }
 
 //提取apk中日期与时间
@@ -714,5 +714,60 @@ if (ignoreBrowserCheckAlert != '1') {
         if (majorVersion <= 15.6) {
             alert(`您的${result.browser}内核版本过低，无法正常使用部分功能，请升级浏览器。`);
         }
+    }
+}
+
+const bandTableTrList = document.querySelectorAll('#bandTable tr')
+const selectAllBandChkBox = document.querySelector('#selectAllBand')
+
+const toggleAllBandBox = (checked = false) => {
+    if (bandTableTrList) {
+        bandTableTrList.forEach(el => {
+            const input = el.querySelector('input')
+            if (input) {
+                input.checked = checked
+            }
+        })
+    }
+}
+
+const checkBandSelect = () => {
+    if (bandTableTrList && bandTableTrList.length) {
+        let flagCount = 0
+        bandTableTrList.forEach(el => {
+            const input = el.querySelector('input')
+            if (input.checked) {
+                flagCount++
+            }
+        })
+        if (flagCount == bandTableTrList.length) {
+            //全选开关为真
+            selectAllBandChkBox.checked = true
+        } else {
+            //全选开关为假
+            selectAllBandChkBox.checked = false
+        }
+    }
+}
+
+if (bandTableTrList && bandTableTrList.length) {
+    bandTableTrList.forEach(el => {
+        const input = el.querySelector('input')
+        if (input) {
+            input.onclick = (e) => {
+                e.stopPropagation()
+                checkBandSelect()
+            }
+            el.onclick = () => {
+                input.click()
+            }
+        }
+    })
+}
+
+if (selectAllBandChkBox) {
+    selectAllBandChkBox.onclick = (e) => {
+        const checked = e.target.checked
+        toggleAllBandBox(checked)
     }
 }

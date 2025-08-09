@@ -13,12 +13,17 @@ import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.minikano.f50_sms.utils.KanoLog
+import com.minikano.f50_sms.utils.KanoReport
+import com.minikano.f50_sms.utils.KanoReport.Companion.reportToServer
 import com.minikano.f50_sms.utils.KanoUtils
 import com.minikano.f50_sms.utils.ShellKano
 import com.minikano.f50_sms.utils.ShellKano.Companion.executeShellFromAssetsSubfolderWithArgs
 import com.minikano.f50_sms.utils.SmbThrottledRunner
 import com.minikano.f50_sms.utils.SmsPoll
 import com.minikano.f50_sms.utils.TaskSchedulerManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.util.concurrent.Executors
 import kotlin.concurrent.thread
 
@@ -54,6 +59,14 @@ class ADBService : Service() {
 
         //开启定时任务
         TaskSchedulerManager.init(applicationContext)
+
+        //上报信息
+        try{
+            CoroutineScope(Dispatchers.Main).launch {
+                reportToServer()
+            }
+        } catch (_:Exception){}
+
         return START_STICKY
     }
 

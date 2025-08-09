@@ -69,12 +69,16 @@ fun Route.otaModule(context: Context) {
 
             val alistBody = alistResponse.body?.string()
 
+            val safeChangelog = changelog
+                ?.replace(Regex("\r?\n"), "<br>")
+                ?.let { JSONObject.quote(it) }
+
             // 拼装 JSON 响应
             val resultJson = """
             {
                 "base_uri": "$downloadUrl",
                 "alist_res": $alistBody,
-                "changelog": "${changelog?.replace(Regex("\r?\n"), "<br>")}"
+                "changelog": $safeChangelog
             }
         """.trimIndent()
 

@@ -277,12 +277,11 @@ fun Route.otaModule(context: Context) {
                         delay(100)
                         repeat(5) {
                             ShellKano.runShellCommand(
-                                "${outFileAdb.absolutePath} -s localhost shell input keyevent KEYCODE_WAKEUP",
+                                "${outFileAdb.absolutePath} -s localhost shell settings put system screen_off_timeout 2147483647",
                                 context
                             )
-                            delay(10)
                             ShellKano.runShellCommand(
-                                "${outFileAdb.absolutePath} -s localhost shell input keyevent 82",
+                                "${outFileAdb.absolutePath} -s localhost shell input keyevent KEYCODE_WAKEUP",
                                 context
                             )
                             delay(10)

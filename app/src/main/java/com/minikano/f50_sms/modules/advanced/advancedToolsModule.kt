@@ -185,12 +185,12 @@ fun Route.advancedToolsModule(context: Context, targetServerIP: String) {
                 fun click_stage1() {
                     var Eng_result: Any? = null
                     ShellKano.runShellCommand(
-                        "${outFile_adb.absolutePath} -s localhost shell input keyevent KEYCODE_WAKEUP",
+                        "${outFile_adb.absolutePath} -s localhost shell settings put system screen_off_timeout 2147483647",
                         context
                     )
                     Thread.sleep(10)
                     ShellKano.runShellCommand(
-                        "${outFile_adb.absolutePath} -s localhost shell input keyevent 82",
+                        "${outFile_adb.absolutePath} -s localhost shell input keyevent KEYCODE_WAKEUP",
                         context
                     )
                     Thread.sleep(10)

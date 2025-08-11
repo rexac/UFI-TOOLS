@@ -918,6 +918,11 @@ input[type="range"] {
     margin-top: 10px;
 }
 
+.status-container .deviceList strong {
+    white-space: nowrap;
+    overflow: hidden;
+}
+
 .freq-lock-container {
     width: 100%;
     flex-shrink: 0;

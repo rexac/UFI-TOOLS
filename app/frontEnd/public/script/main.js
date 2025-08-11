@@ -931,7 +931,7 @@ function main_func() {
                     return limit_size.split('_')[0] * limit_size.split('_')[1] * Math.pow(1024, 2)
                 })()) : ''}</strong>` : ''}`,
                 daily_data: `${notNullOrundefinedOrIsShow(res, 'daily_data') ? `<strong onclick="copyText(event)"  class="blue">${t('daily_data')}：${formatBytes(res.daily_data)}</strong>` : ''}`,
-                current_now: `${notNullOrundefinedOrIsShow(res, 'current_now') && (res.battery_value != '' || res.battery_vol_percent != '') ? `<strong onclick="copyText(event)"  class="blue">${t('battery_current')}：<span style="width: 8ch;text-align:center">${res.current_now / 1000} mA</span></strong>` : ''}`,
+                current_now: `${notNullOrundefinedOrIsShow(res, 'current_now') && (res.battery_value != '' || res.battery_vol_percent != '') ? `<strong onclick="copyText(event)"  class="blue">${t('battery_current')}：<span style="width: 9ch;text-align:center">${res.current_now / 1000} mA</span></strong>` : ''}`,
                 voltage_now: `${notNullOrundefinedOrIsShow(res, 'voltage_now') && (res.battery_value != '' || res.battery_vol_percent != '') ? `<strong onclick="copyText(event)"  class="blue">${t('battery_voltage')}：${(res.voltage_now / 1000000).toFixed(3)} V</strong>` : ''}`,
                 realtime_rx_thrpt: `${notNullOrundefinedOrIsShow(res, 'realtime_tx_thrpt') || notNullOrundefinedOrIsShow(res, 'realtime_rx_thrpt') ? `<strong onclick="copyText(event)" class="blue">${t("current_network_speed")}: <span style="text-align:center;white-space:nowrap;overflow:hidden;display:inline-block;width: 14ch;">⬇️&nbsp;${formatBytes(Number((res.realtime_rx_thrpt)))}/S</span><span style="white-space:nowrap;overflow:hidden;text-align:center;display:inline-block;width: 14ch;font-weight:bolder">⬆️&nbsp;${formatBytes(Number((res.realtime_tx_thrpt)))}/S</span></strong>` : ''}`,
             }
@@ -1617,7 +1617,7 @@ function main_func() {
         toggleAllBandBox(true)
         selectAllBand.checked = true
         const lockBandBtn = document.querySelector('#lockBandBtn')
-        if(lockBandBtn){
+        if (lockBandBtn) {
             lockBandBtn.click()
         }
     }
@@ -5074,8 +5074,24 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
     let loopCellularTimer = null;
     let isCellularTestLooping = false;
     let totalBytes = 0;
+    let isLoopTesting = false
+    let isSingleTesting = false
+    const singleTest = debounce((e) => {
+        isSingleTesting = true
+        if (cellularSpeedFlag) {
+            isSingleTesting = false
+        }
+        startCellularTestRealtime(e, true)
+    }, 500)
+
+    function runSingleTest(e) {
+        singleTest(e)
+    }
 
     async function startCellularTestRealtime(e, flag = false) {
+        if (isLoopTesting) {
+            return
+        }
         if (!cellularSpeedFlag) {
             flag && (totalBytes = 0)
         }
@@ -5205,16 +5221,22 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
         }, 500);
     }
 
-    function handleCellularLoopMode(event) {
+    const loopTest = debounce((event) => {
         const btn = event.target;
         isCellularTestLooping = !isCellularTestLooping;
+
+        if (isSingleTesting) {
+            return
+        }
 
         if (isCellularTestLooping) {
             btn.innerText = t('loop_mode_stop');
             totalBytes = 0
             startCellularTestRealtime();
+            isLoopTesting = true
         } else {
             btn.innerText = t('loop_mode_start');
+            isLoopTesting = false
             clearTimeout(loopCellularTimer);
             cellularSpeedController?.abort();
             cellularSpeedFlag = false;
@@ -5222,6 +5244,10 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
                 totalBytes = 0
             }, 100);
         }
+    }, 500)
+
+    function handleCellularLoopMode(event) {
+        loopTest(event)
     }
 
     function closeCellularTest(selector) {
@@ -5561,6 +5587,7 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
         closeCellularTest,
         handleCellularLoopMode,
         startCellularTestRealtime,
+        runSingleTest,
         getBoot,
         handleDisableFOTA,
         refreshTask,

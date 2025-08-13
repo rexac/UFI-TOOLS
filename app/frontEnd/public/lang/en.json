@@ -657,6 +657,9 @@
     "plugin_search_placeholder": "Search plugins",
     "at_force_imei": "Force IMEI Query",
     "need_advance_func": "Advanced features need to be enabled",
-    "not_support_firmware":"Your system version is not supported. Some features may not work properly. Please update your Pocket WiFi system to a compatible version!",
-    "your_new_imei":"Your new IMEI"
+    "not_support_firmware": "Your system version is not supported. Some features may not work properly. Please update your Pocket WiFi system to a compatible version!",
+    "your_new_imei": "Your new IMEI",
+    "cell_lock_prompt": "Here: lock 5G = 16, lock 4G = 12",
+    "one_or_zero_prompt": "Here: enable = 1, disable = 0",
+    "on_or_off_prompt": "Here: enable = on, disable = off"
 }

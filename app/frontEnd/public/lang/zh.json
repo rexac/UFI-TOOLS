@@ -658,5 +658,8 @@
     "at_force_imei": "强力查串",
     "need_advance_func": "需要启用高级功能才可使用",
     "not_support_firmware": "你的系统版本不受支持,可能无法使用部分功能,请升级随身WiFi系统到合适的版本!",
-    "your_new_imei":"你的新串号"
+    "your_new_imei":"你的新串号",
+    "cell_lock_prompt":"此处 锁5G填:16 锁4G填:12",
+    "one_or_zero_prompt":"此处 开启填 1 关闭填 0",
+    "on_or_off_prompt":"此处 开启填 on 关闭填 off"
 }

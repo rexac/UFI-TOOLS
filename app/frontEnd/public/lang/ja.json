@@ -657,6 +657,9 @@
     "plugin_search_placeholder": "プラグインを検索",
     "at_force_imei": "強制IMEI取得",
     "need_advance_func": "高度な機能の有効化が必要です",
-    "not_support_firmware":"お使いのシステムバージョンはサポートされていないため、一部の機能が正しく動作しない可能性があります。ポケットWiFiのシステムを対応バージョンにアップデートしてください！",
-    "your_new_imei":"あなたの新しいIMEI"
+    "not_support_firmware": "お使いのシステムバージョンはサポートされていないため、一部の機能が正しく動作しない可能性があります。ポケットWiFiのシステムを対応バージョンにアップデートしてください！",
+    "your_new_imei": "あなたの新しいIMEI",
+    "cell_lock_prompt": "ここ: 5Gロック=16, 4Gロック=12",
+    "one_or_zero_prompt": "ここ: 有効=1, 無効=0",
+    "on_or_off_prompt": "ここ: 有効=on, 無効=off"
 }

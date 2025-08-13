@@ -4588,113 +4588,112 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
         }, 300);
     }
 
-    //动作列表
-    const actionList = {
-        "指示灯": {
-            "goformId": "INDICATOR_LIGHT_SETTING",
-            "indicator_light_switch": '1 or 0'
-        },
-        "NFC": {
-            goformId: 'WIFI_NFC_SET',
-            web_wifi_nfc_switch: '1 or 0'
-        },
-        "文件共享": {
-            goformId: 'SAMBA_SETTING',
-            samba_switch: '1 or 0'
-        },
-        "网络漫游": {
-            goformId: 'SET_CONNECTION_MODE',
-            ConnectionMode: "auto_dial",
-            roam_setting_option: 'on or off',
-            dial_roam_setting_option: 'on or off',
-        },
-        "性能模式": {
-            goformId: 'PERFORMANCE_MODE',
-            performance_mode: '1 or 0',
-        },
-        "USB调试": {
-            goformId: 'USB_PORT_SETTING',
-            usb_port_switch: '1 or 0'
-        },
-        "打开数据": {
-            goformId: 'CONNECT_NETWORK',
-        },
-        "关闭数据": {
-            goformId: 'DISCONNECT_NETWORK',
-        },
-        "关闭WIFI": {
-            goformId: 'switchWiFiModule',
-            SwitchOption: 0
-        },
-        "开启WIFI(5G)": {
-            goformId: 'switchWiFiChip',
-            ChipEnum: 'chip2',
-            GuestEnable: 0
-        },
-        "开启WIFI(2.4G)": {
-            goformId: 'switchWiFiChip',
-            ChipEnum: 'chip1',
-            GuestEnable: 0
-        },
-        "5G/4G/3G": {
-            goformId: 'SET_BEARER_PREFERENCE',
-            BearerPreference: 'WL_AND_5G'
-        },
-        "5G NSA": {
-            goformId: 'SET_BEARER_PREFERENCE',
-            BearerPreference: 'LTE_AND_5G'
-        },
-        "5G SA": {
-            goformId: 'SET_BEARER_PREFERENCE',
-            BearerPreference: 'Only_5G'
-        },
-        "仅4G": {
-            goformId: 'SET_BEARER_PREFERENCE',
-            BearerPreference: 'Only_LTE'
-        },
-        "关机": {
-            goformId: 'SHUTDOWN_DEVICE'
-        },
-        "重启": {
-            goformId: 'REBOOT_DEVICE'
-        },
-        "解锁基站": {
-            goformId: 'UNLOCK_ALL_CELL'
-        },
-        "锁基站": {
-            goformId: 'CELL_LOCK',
-            pci: "912",
-            earfcn: "504990",
-            rat: "5G:16,4G:12"
-        },
-        "切SIM卡1": {
-            goformId: 'SET_SIM_SLOT',
-            sim_slot: 0
-        },
-        "切SIM卡2": {
-            goformId: 'SET_SIM_SLOT',
-            sim_slot: 1
-        },
-        "切移动": {
-            goformId: 'SET_SIM_SLOT',
-            sim_slot: 0
-        },
-        "切联通": {
-            goformId: 'SET_SIM_SLOT',
-            sim_slot: 2
-        },
-        "切电信": {
-            goformId: 'SET_SIM_SLOT',
-            sim_slot: 1
-        },
-        "切外置": {
-            goformId: 'SET_SIM_SLOT',
-            sim_slot: 11
-        }
-    }
-
     const fillAction = (e, actionName) => {
         e.preventDefault()
+        //动作列表
+        const actionList = {
+            "指示灯": {
+                "goformId": "INDICATOR_LIGHT_SETTING",
+                "indicator_light_switch": `${t('one_or_zero_prompt')}`
+            },
+            "NFC": {
+                goformId: 'WIFI_NFC_SET',
+                web_wifi_nfc_switch: `${t('one_or_zero_prompt')}`
+            },
+            "文件共享": {
+                goformId: 'SAMBA_SETTING',
+                samba_switch: `${t('one_or_zero_prompt')}`
+            },
+            "网络漫游": {
+                goformId: 'SET_CONNECTION_MODE',
+                ConnectionMode: "auto_dial",
+                roam_setting_option: `${t('on_or_off_prompt')}`,
+                dial_roam_setting_option: `${t('on_or_off_prompt')}`
+            },
+            "性能模式": {
+                goformId: 'PERFORMANCE_MODE',
+                performance_mode: `${t('one_or_zero_prompt')}`
+            },
+            "USB调试": {
+                goformId: 'USB_PORT_SETTING',
+                usb_port_switch: `${t('one_or_zero_prompt')}`
+            },
+            "打开数据": {
+                goformId: 'CONNECT_NETWORK',
+            },
+            "关闭数据": {
+                goformId: 'DISCONNECT_NETWORK',
+            },
+            "关闭WIFI": {
+                goformId: 'switchWiFiModule',
+                SwitchOption: 0
+            },
+            "开启WIFI(5G)": {
+                goformId: 'switchWiFiChip',
+                ChipEnum: 'chip2',
+                GuestEnable: 0
+            },
+            "开启WIFI(2.4G)": {
+                goformId: 'switchWiFiChip',
+                ChipEnum: 'chip1',
+                GuestEnable: 0
+            },
+            "5G/4G/3G": {
+                goformId: 'SET_BEARER_PREFERENCE',
+                BearerPreference: 'WL_AND_5G'
+            },
+            "5G NSA": {
+                goformId: 'SET_BEARER_PREFERENCE',
+                BearerPreference: 'LTE_AND_5G'
+            },
+            "5G SA": {
+                goformId: 'SET_BEARER_PREFERENCE',
+                BearerPreference: 'Only_5G'
+            },
+            "仅4G": {
+                goformId: 'SET_BEARER_PREFERENCE',
+                BearerPreference: 'Only_LTE'
+            },
+            "关机": {
+                goformId: 'SHUTDOWN_DEVICE'
+            },
+            "重启": {
+                goformId: 'REBOOT_DEVICE'
+            },
+            "解锁基站": {
+                goformId: 'UNLOCK_ALL_CELL'
+            },
+            "锁基站": {
+                goformId: 'CELL_LOCK',
+                pci: "912",
+                earfcn: "504990",
+                rat: `${t('cell_lock_prompt')}`
+            },
+            "切SIM卡1": {
+                goformId: 'SET_SIM_SLOT',
+                sim_slot: 0
+            },
+            "切SIM卡2": {
+                goformId: 'SET_SIM_SLOT',
+                sim_slot: 1
+            },
+            "切移动": {
+                goformId: 'SET_SIM_SLOT',
+                sim_slot: 0
+            },
+            "切联通": {
+                goformId: 'SET_SIM_SLOT',
+                sim_slot: 2
+            },
+            "切电信": {
+                goformId: 'SET_SIM_SLOT',
+                sim_slot: 1
+            },
+            "切外置": {
+                goformId: 'SET_SIM_SLOT',
+                sim_slot: 11
+            }
+        }
         const taskAction = document.querySelector('#taskAction')
         if (!taskAction) return
         const action = actionList[actionName]

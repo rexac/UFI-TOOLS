@@ -657,6 +657,9 @@
     "plugin_search_placeholder": "Tìm kiếm plugin",
     "at_force_imei": "Truy vấn IMEI mạnh",
     "need_advance_func": "Cần bật chức năng nâng cao",
-    "not_support_firmware":"Phiên bản hệ thống của bạn không được hỗ trợ, một số chức năng có thể không hoạt động đúng. Vui lòng nâng cấp hệ thống WiFi di động của bạn lên phiên bản phù hợp!",
-    "your_new_imei":"IMEI mới của bạn"
+    "not_support_firmware": "Phiên bản hệ thống của bạn không được hỗ trợ, một số chức năng có thể không hoạt động đúng. Vui lòng nâng cấp hệ thống WiFi di động của bạn lên phiên bản phù hợp!",
+    "your_new_imei": "IMEI mới của bạn",
+    "cell_lock_prompt": "Tại đây: khóa 5G = 16, khóa 4G = 12",
+    "one_or_zero_prompt": "Tại đây: bật = 1, tắt = 0",
+    "on_or_off_prompt": "Tại đây: bật = on, tắt = off"
 }

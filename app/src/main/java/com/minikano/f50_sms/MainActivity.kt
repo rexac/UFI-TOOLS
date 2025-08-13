@@ -90,6 +90,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         AppMeta.init(this)
         UniqueDeviceIDManager.init(this)
+        val context = this
 
         // 这里用协程异步调用
         lifecycleScope.launch {
@@ -163,30 +164,30 @@ class MainActivity : ComponentActivity() {
 
                 // 忽略电池优化权限
                 val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
-                if (!powerManager.isIgnoringBatteryOptimizations(applicationContext.packageName)) {
+                if (!powerManager.isIgnoringBatteryOptimizations(context.packageName)) {
                     val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
-                    intent.data = Uri.parse("package:${applicationContext.packageName}")
-                    applicationContext.startActivity(intent)
+                    intent.data = Uri.parse("package:${context.packageName}")
+                    context.startActivity(intent)
                 }
 
                 //用户使用量权限
-                if (!hasUsageAccessPermission(applicationContext)) {
+                if (!hasUsageAccessPermission(context)) {
                     val intent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    applicationContext.startActivity(intent)
+                    context.startActivity(intent)
                 }
 
-                val versionName = applicationContext.packageManager.getPackageInfo(applicationContext.packageName, 0).versionName
+                val versionName = context.packageManager.getPackageInfo(context.packageName, 0).versionName
 
                 //每次启动时需要检测IP变动，适应用户ip网段更改
-                KanoUtils.adaptIPChange(applicationContext)
+                KanoUtils.adaptIPChange(context)
 
                 //防止服务重复启动
                 if (!isServiceRunning(WebService::class.java)) {
-                    startForegroundService(Intent(applicationContext, WebService::class.java))
+                    startForegroundService(Intent(context, WebService::class.java))
                 }
                 if (!isServiceRunning(ADBService::class.java)) {
-                    startForegroundService(Intent(applicationContext, ADBService::class.java))
+                    startForegroundService(Intent(context, ADBService::class.java))
                 }
 
                 // 注册广播
@@ -195,7 +196,7 @@ class MainActivity : ComponentActivity() {
                     Context.RECEIVER_EXPORTED
                 )
 
-                val sf = applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                val sf = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
                 isEnableLog = sf.getString(PREF_ISDEBUG,"false").equals("true")
 
                 setContent {

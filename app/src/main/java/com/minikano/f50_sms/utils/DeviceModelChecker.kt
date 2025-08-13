@@ -3,7 +3,6 @@ package com.minikano.f50_sms.utils
 import android.content.Context
 import android.os.Build
 import android.util.Log
-import com.minikano.f50_sms.MainActivity.Companion.isEnableLog
 import com.minikano.f50_sms.utils.KanoReport.Companion.reportToServer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

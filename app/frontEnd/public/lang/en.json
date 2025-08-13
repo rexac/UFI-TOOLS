@@ -191,7 +191,7 @@
     "submit_btn": "Submit",
     "close_btn": "Close",
     "plugin_modal_title": "Plugin Features",
-    "plugin_modal_tip": "The content will be appended to the end of the webpage's head (supports scripts, styles, and meta tags). Max size: 1145KB.",
+    "plugin_modal_tip": "The entered content supports scripts, styles, and meta elements. The total size of all plugins must not exceed 1145KB. Click the plugin name to edit, enable or disable. Drag on the left to sort, delete plugins on the right.",
     "plugin_modal_add_plugin_btn": "Add Plugin (.txt file)",
     "plugin_modal_export_btn": "Export Plugin File",
     "plugin_modal_clear_btn": "Clear All",
@@ -661,5 +661,7 @@
     "your_new_imei": "Your new IMEI",
     "cell_lock_prompt": "Here: lock 5G = 16, lock 4G = 12",
     "one_or_zero_prompt": "Here: enable = 1, disable = 0",
-    "on_or_off_prompt": "Here: enable = on, disable = off"
+    "on_or_off_prompt": "Here: enable = on, disable = off",
+    "on": "On",
+    "off": "Off"
 }

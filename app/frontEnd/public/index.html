@@ -1193,7 +1193,13 @@
             <!-- 编辑插件模态框 -->
             <div class="mask" id="editSinglePluginModal" style="display: none">
                 <div class="modal" style="width: 90%;max-width: 400px; display: flex;flex-direction: column;">
-                    <div class="title" style="margin-bottom: 4px;" data-i18n="edit_plugin">编辑插件</div>
+                    <div class="title" style="display: flex;justify-content: space-between;margin-bottom: 4px;">
+                        <span data-i18n="edit_plugin">编辑插件</span>
+                        <div>
+                            <button data-i18n="off" onclick="disablePlugin()">禁用</button>
+                            <button data-i18n="on" onclick="enablePlugin()">启用</button>
+                        </div>
+                    </div>
                     <p style="font-size: 14px;"><span data-i18n="plugin_current">当前插件</span>：<span
                             id="currentPluginName"></span></p>
                     <div class="content" style="min-height: 400px;">

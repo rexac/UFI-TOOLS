@@ -4864,7 +4864,7 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
             sortBtn.innerHTML = `<svg width="20px" height="20px" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"><path fill="#ffffff" d="M909.3 506.3L781.7 405.6c-4.7-3.7-11.7-0.4-11.7 5.7V476H548V254h64.8c6 0 9.4-7 5.7-11.7L517.7 114.7c-2.9-3.7-8.5-3.7-11.3 0L405.6 242.3c-3.7 4.7-0.4 11.7 5.7 11.7H476v222H254v-64.8c0-6-7-9.4-11.7-5.7L114.7 506.3c-3.7 2.9-3.7 8.5 0 11.3l127.5 100.8c4.7 3.7 11.7 0.4 11.7-5.7V548h222v222h-64.8c-6 0-9.4 7-5.7 11.7l100.8 127.5c2.9 3.7 8.5 3.7 11.3 0l100.8-127.5c3.7-4.7 0.4-11.7-5.7-11.7H548V548h222v64.8c0 6 7 9.4 11.7 5.7l127.5-100.8c3.7-2.9 3.7-8.5 0.1-11.4z" /></svg>`
 
             const text = document.createElement('span')
-            text.innerHTML = item.name
+            text.innerHTML = item.disabed ? `<del style="opacity:.6">${item.name}</del>` : item.name
             text.style.padding = '2px 6px'
 
             text.onclick = () => {
@@ -4880,6 +4880,12 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
                             const index = plugins.findIndex(el => el.name == currentItem.name)
                             if (index != -1 && plugins[index]) {
                                 plugins[index].content = editSinglePlugin.value
+                                const arr = editSinglePlugin.value.split('\n')
+                                if (arr[0].includes("[kano_disabled]") && arr[arr.length - 1].includes("[kano_disabled]")) {
+                                    plugins[index].disabed = true
+                                } else {
+                                    plugins[index].disabed = false
+                                }
                                 renderPluginList()
                                 closeModal('#editSinglePluginModal')
                                 editSinglePlugin.value = ''
@@ -4896,6 +4902,34 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
             el.appendChild(deleteBtn)
             listEl.appendChild(el)
         })
+
+        const enablePlugin = (flag = false) => {
+            const editSinglePlugin = document.querySelector('#editSinglePlugin')
+            if (editSinglePlugin) {
+                const arr = editSinglePlugin.value.split('\n')
+                if (arr[0].includes("[kano_disabled]")) {
+                    arr.shift()
+                }
+                if (arr[arr.length - 1].includes("[kano_disabled]")) {
+                    arr.pop()
+                }
+                editSinglePlugin.value = arr.join('\n')
+                !flag && createToast(t('enabled') + "," + t('save_to_apply'))
+            }
+        }
+
+        const disablePlugin = (flag = false) => {
+            const editSinglePlugin = document.querySelector('#editSinglePlugin')
+            if (editSinglePlugin) {
+                enablePlugin(true)
+                editSinglePlugin.value = "<!-- [kano_disabled]\n" + editSinglePlugin.value + "\n[kano_disabled] -->"
+                !flag && createToast(t('disabled') + "," + t('save_to_apply'))
+            }
+        }
+
+        //挂载
+        window.disablePlugin = disablePlugin
+        window.enablePlugin = enablePlugin
 
         // 初始化或重新绑定拖拽
         if (sortable_plugin && sortable_plugin.destroy) {
@@ -4949,7 +4983,8 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
                 while ((match = pluginRegex.exec(text)) !== null) {
                     const name = match[1].trim()
                     const content = match[2].trim()
-                    plugins.push({ name, content })
+                    const disabed = content.includes('[kano_disabled]')
+                    plugins.push({ name, content, disabed })
                 }
 
                 renderPluginList() // 初始化渲染

@@ -191,7 +191,7 @@
     "submit_btn": "Gửi",
     "close_btn": "Đóng",
     "plugin_modal_title": "Tính năng Plugin",
-    "plugin_modal_tip": "Nội dung sẽ được thêm vào cuối phần head của trang web (hỗ trợ script, style và thẻ meta). Kích thước tối đa: 1145KB.",
+    "plugin_modal_tip": "Nội dung nhập hỗ trợ script, style và phần tử meta. Tổng dung lượng tất cả plugin không được vượt quá 1145KB. Nhấp vào tên plugin để chỉnh sửa, bật hoặc tắt. Kéo bên trái để sắp xếp, xóa plugin ở bên phải.",
     "plugin_modal_add_plugin_btn": "Thêm Plugin (tệp .txt)",
     "plugin_modal_export_btn": "Xuất tệp Plugin",
     "plugin_modal_clear_btn": "Xóa tất cả",
@@ -661,5 +661,7 @@
     "your_new_imei": "IMEI mới của bạn",
     "cell_lock_prompt": "Tại đây: khóa 5G = 16, khóa 4G = 12",
     "one_or_zero_prompt": "Tại đây: bật = 1, tắt = 0",
-    "on_or_off_prompt": "Tại đây: bật = on, tắt = off"
+    "on_or_off_prompt": "Tại đây: bật = on, tắt = off",
+    "on": "Bật",
+    "off": "Tắt"
 }

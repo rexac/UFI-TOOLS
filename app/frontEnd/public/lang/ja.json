@@ -191,7 +191,7 @@
     "submit_btn": "送信",
     "close_btn": "閉じる",
     "plugin_modal_title": "プラグイン機能",
-    "plugin_modal_tip": "入力内容はhead末尾に追加（スクリプト・スタイル・meta対応）、最大1145KB",
+    "plugin_modal_tip": "入力内容はスクリプト、スタイル、meta要素をサポートします。全プラグインの合計サイズは1145KBを超えてはいけません。プラグイン名をクリックすると編集・有効化・無効化できます。左側で並び替え、右側で削除できます。",
     "plugin_modal_add_plugin_btn": "プラグイン追加(.txt)",
     "plugin_modal_export_btn": "プラグイン出力",
     "plugin_modal_clear_btn": "全消去",
@@ -661,5 +661,7 @@
     "your_new_imei": "あなたの新しいIMEI",
     "cell_lock_prompt": "ここ: 5Gロック=16, 4Gロック=12",
     "one_or_zero_prompt": "ここ: 有効=1, 無効=0",
-    "on_or_off_prompt": "ここ: 有効=on, 無効=off"
+    "on_or_off_prompt": "ここ: 有効=on, 無効=off",
+    "on": "オン",
+    "off": "オフ"
 }

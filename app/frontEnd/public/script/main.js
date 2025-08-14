@@ -490,6 +490,8 @@ function main_func() {
         initATBtn()
         initCellularSpeedTestBtn()
         initAdvanceTools()
+        initTerms()
+        initMessage()
         QOSRDPCommand("AT+CGEQOSRDP=1")
     }
 
@@ -5611,6 +5613,9 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
     getSELinuxStatus()
 
     const initTerms = async () => {
+        if (!(await initRequestData())) {
+            return null
+        }
         const cache = localStorage.getItem('read_terms')
         if (cache == "1") return
         try {
@@ -5663,6 +5668,9 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
 
     // 获取消息
     const initMessage = async () => {
+        if (!(await initRequestData())) {
+            return null
+        }
         try {
             const api = 'https://api.kanokano.cn/ufi_tools_report'
             const { device_id: uuid } = await (await fetch(`${KANO_baseURL}/device_id`, {
@@ -5696,12 +5704,20 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
                         if (has_read_message) {
                             close()
                         }
+                    } catch {
+                        try {
+                            const { has_read_message } = await (await fetch(`${api}/set_read_message/${uuid}`, {
+                                method: 'post'
+                            })).json()
+                            if (has_read_message) {
+                                close()
+                            }
+                        } catch { }
                     } finally {
                         close()
                     }
                 }
             }
-
         } catch { }
     }
     initMessage()

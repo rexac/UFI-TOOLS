@@ -3,10 +3,12 @@ package com.minikano.f50_sms.modules.deviceInfo
 import android.content.Context
 import android.os.StatFs
 import com.minikano.f50_sms.configs.AppMeta
+import com.minikano.f50_sms.configs.AppMeta.isReadUseTerms
 import com.minikano.f50_sms.modules.BASE_TAG
 import com.minikano.f50_sms.modules.PREFS_NAME
 import com.minikano.f50_sms.utils.KanoLog
 import com.minikano.f50_sms.utils.KanoUtils
+import com.minikano.f50_sms.utils.UniqueDeviceIDManager
 import com.minikano.f50_sms.utils.calculateCpuUsage
 import com.minikano.f50_sms.utils.getCpuFreqJson
 import com.minikano.f50_sms.utils.getMemoryUsage
@@ -19,6 +21,7 @@ import io.ktor.server.plugins.origin
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
+import io.ktor.server.routing.post
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.double
 import kotlinx.serialization.json.jsonObject
@@ -203,6 +206,25 @@ fun Route.baseDeviceInfoModule(context: Context) {
         call.respondText(jsonResult, ContentType.Application.Json)
     }
 
+    post("/api/accept_terms"){
+        try {
+            val sharedPrefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            AppMeta.isReadUseTerms = true
+            sharedPrefs.edit().putString("isReadUseTerms","true").apply()
+            val jsonResult = """{"result":"success"}""".trimIndent()
+            call.response.headers.append("Access-Control-Allow-Origin", "*")
+            call.respondText(jsonResult, ContentType.Application.Json)
+        } catch (e: Exception) {
+            KanoLog.d("kano_ZTE_LOG", "获取用户协议信息出错：${e.message}")
+            call.response.headers.append("Access-Control-Allow-Origin", "*")
+            call.respondText(
+                """{"error":"获取用户协议信息出错"}""",
+                ContentType.Application.Json,
+                HttpStatusCode.InternalServerError
+            )
+        }
+    }
+
     //版本信息获取
     get("/api/version_info") {
         try {
@@ -210,7 +232,8 @@ fun Route.baseDeviceInfoModule(context: Context) {
             {
                 "app_ver": "${AppMeta.versionName}",
                 "app_ver_code": "${AppMeta.versionCode}",
-                "model":"${AppMeta.model}"
+                "model":"${AppMeta.model}",
+                "accept_terms":${AppMeta.isReadUseTerms}
             }
         """.trimIndent()
 
@@ -221,6 +244,23 @@ fun Route.baseDeviceInfoModule(context: Context) {
             call.response.headers.append("Access-Control-Allow-Origin", "*")
             call.respondText(
                 """{"error":"获取版本信息出错"}""",
+                ContentType.Application.Json,
+                HttpStatusCode.InternalServerError
+            )
+        }
+    }
+
+    get("/api/device_id") {
+        try {
+            val jsonResult = """{"device_id": "${UniqueDeviceIDManager.getUUID()}"}""".trimIndent()
+
+            call.response.headers.append("Access-Control-Allow-Origin", "*")
+            call.respondText(jsonResult, ContentType.Application.Json)
+        } catch (e: Exception) {
+            KanoLog.d("kano_ZTE_LOG", "获取设备id出错：${e.message}")
+            call.response.headers.append("Access-Control-Allow-Origin", "*")
+            call.respondText(
+                """{"error":"获取设备id出错"}""",
                 ContentType.Application.Json,
                 HttpStatusCode.InternalServerError
             )

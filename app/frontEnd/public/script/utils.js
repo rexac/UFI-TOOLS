@@ -771,3 +771,89 @@ if (selectAllBandChkBox) {
         toggleAllBandBox(checked)
     }
 }
+
+
+const createModal = ({ name, noBlur, isMask, title, maxWidth, content, contentStyle, confirmBtnText = t('submit_btn'), closeBtnText = t('close_btn'), onClose, onConfirm }) => {
+    const html = `
+    <div class="title" style="width: 100%;display: flex;justify-content:space-between;">
+    <span>${title}</span>
+    </div>
+    <div class="content" style="${contentStyle ? contentStyle : ''};margin:10px 0;">
+       ${content}
+    </div>
+    <div class="btn" style="text-align: right;margin-top: 6px;">
+        <button id="${name}_confirm" type="button" >${confirmBtnText}</button>
+        <button id="${name}_close" type="button" >${closeBtnText}</button>
+    </div>
+`
+
+    const container = document.querySelector('#BG_OVERLAY .container')
+    if (container) {
+        let mod = document.createElement('div')
+        mod.id = name
+        if (isMask) {
+            mod.className = 'mask'
+            mod.style.display = 'none'
+            mod.onclick = (e) => {
+                if (noBlur) return
+                e.preventDefault()
+                e.stopPropagation()
+                if (e.target.id == name) {
+                    if (onClose) {
+                        let res = onClose()
+                        if (res) {
+                            closeModal("#" + name)
+                            debounceRemoveEl()
+                        }
+                    }
+                }
+            }
+            const inner = document.createElement('div')
+            inner.style.maxWidth = maxWidth ? maxWidth : '600px'
+            inner.style.width = "80%"
+            inner.className = 'modal'
+            mod.appendChild(inner)
+            inner.innerHTML = html
+        } else {
+            mod.className = 'modal'
+            mod.style.display = 'none'
+            mod.style.maxWidth = maxWidth ? maxWidth : '600px'
+            mod.style.width = "80%"
+            mod.innerHTML = html
+        }
+
+        const confirm = mod.querySelector(`#${name}_confirm`)
+        const close = mod.querySelector(`#${name}_close`)
+        const debounceRemoveEl = debounce(() => mod.remove(), 1000)
+        if (confirm) {
+            confirm.onclick = (e) => {
+                e.preventDefault()
+                if (onConfirm) {
+                    let res = onConfirm()
+                    if (res) {
+                        closeModal("#" + name)
+                        debounceRemoveEl()
+                    }
+                }
+            }
+        }
+        if (close) {
+            close.onclick = (e) => {
+                e.preventDefault()
+                if (onClose) {
+                    let res = onClose()
+                    if (res) {
+                        closeModal("#" + name)
+                        debounceRemoveEl()
+                    }
+                }
+            }
+        }
+
+        container.appendChild(mod)
+        return {
+            el: mod,
+            id: "#" + name
+        }
+    }
+}

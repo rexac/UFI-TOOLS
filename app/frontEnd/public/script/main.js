@@ -5610,6 +5610,102 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
     }
     getSELinuxStatus()
 
+    const initTerms = async () => {
+        const cache = localStorage.getItem('read_terms')
+        if (cache == "1") return
+        try {
+            const res = await (await fetchWithTimeout(`${KANO_baseURL}/version_info`)).json()
+            if (res.accept_terms && res.accept_terms.toString() == 'true') {
+                if (cache != "1") {
+                    localStorage.setItem('read_terms', '1')
+                }
+                return
+            }
+            // 用户协议
+            const md = createModal({
+                name: "kano_terms",
+                noBlur: true,
+                isMask: true,
+                title: t('useTermsTitle'),
+                contentStyle: "font-size:12px",
+                confirmBtnText: t('accept'),
+                closeBtnText: t('decline'),
+                onClose: () => {
+                    createToast(t('please_accept_terms'))
+                    return false
+                },
+                onConfirm: () => {
+                    const scroll = md.el.querySelector('.content')
+                    if ((scroll.scrollTop < scroll.clientHeight) || (scroll.scrollTop < 50)) {
+                        // 哎呀，你怎么又没认真看😯
+                        createToast(t('please_read_terms'))
+                        return false
+                    }
+                    fetchWithTimeout(`${KANO_baseURL}/accept_terms`, {
+                        method: "post",
+                        headers: common_headers,
+                    }).then(r => r.json()).then(res => {
+                        if (res.result == "success") {
+                            createToast(t('accept'))
+                        }
+                    })
+                    return true
+                },
+                content: t('useTerms')
+            })
+            showModal(md.id)
+        } catch {
+            //
+        }
+    }
+    initTerms()
+
+
+    // 获取消息
+    const initMessage = async () => {
+        try {
+            const api = 'https://api.kanokano.cn/ufi_tools_report'
+            const { device_id: uuid } = await (await fetch(`${KANO_baseURL}/device_id`, {
+                headers: common_headers
+            })).json()
+            if (uuid) {
+                const { message, has_read_message } = await (await fetch(`${KANO_baseURL}/proxy/--${api}/get_message/${uuid}`, {
+                    headers: common_headers
+                })).json()
+                if (has_read_message == true || has_read_message == "true") return
+                const { el, close } = createFixedToast('kano_message', `
+                    <div style="pointer-events:all;width:80vw;max-width:300px">
+                        <div class="title" style="margin:0" data-i18n="system_notice">${t('system_notice')}</div>
+                        <div style="margin:10px 0">${message}</div>
+                        <div style="text-align:right">
+                            <button style="font-size:.64rem" id="close_message_btn" data-i18n="pay_btn_dismiss">${t('pay_btn_dismiss')}</button>
+                        </div>
+                    </div>
+                    `)
+                const btn = el.querySelector('#close_message_btn')
+                if (!btn) {
+                    close()
+                    return
+                }
+                btn.onclick = async () => {
+                    try {
+                        const { has_read_message } = await (await fetch(`${KANO_baseURL}/proxy/--${api}/set_read_message/${uuid}`, {
+                            method: 'post',
+                            headers: common_headers
+                        })).json()
+                        if (has_read_message) {
+                            close()
+                        }
+                    } finally {
+                        close()
+                    }
+                }
+            }
+
+        } catch { }
+    }
+    initMessage()
+
     //挂载方法到window
     const methods = {
         unlockAllBand,

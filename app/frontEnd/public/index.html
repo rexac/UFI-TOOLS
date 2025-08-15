@@ -1244,11 +1244,41 @@
             <div class="mask" id="TTYDModal" style="display: none">
                 <div class="modal" style="width: 90%;max-width: 400px; display: flex;flex-direction: column;">
                     <form id="TTYDForm" onsubmit="handleTTYDFormSubmit(event)">
-                        <div class="title" style="margin-bottom: 4px;">TTYD</div>
-                        <div style="text-align: left;">
-                            <p>TTYD Port：<input name="ttyd_port" placeholder="1145" type="number" id="TTYD_INPUT"
+                        <div class="title" style="margin-bottom: 4px;">Development Menu</div>
+                        <div style="text-align: left;margin-top: 10px;font-size: .8rem;">
+                            <div style="font-size: .75rem;margin-bottom: 10px;" class="title"><i>Some options need
+                                    advanced function</i>
+                            </div>
+                            <div style="display: flex;gap: 10px;;">
+                                <label style="display: flex;align-items: center;">
+                                    Boot up <input type="checkbox" name="" id="dev_bootup">
+                                </label>
+                                <label style="display: flex;align-items: center;">
+                                    Also IPV6 <input type="checkbox" name="" id="dev_ipv6">
+                                </label>
+                            </div>
+                            <div style="display: flex;gap: 10px;margin: 10px 0;">
+                                <input placeholder="1234" id="port_iptables" style="padding: 6px;flex: 1;width: 100%;" type="number">
+                                <button onclick="event.preventDefault();setPort(true)">Accept</button>
+                                <button onclick="event.preventDefault();setPort(false)">Deny</button>
+                            </div>
+                            <div style="display: flex;gap: 10px;margin: 10px 0;">
+                                <button onclick="event.preventDefault();toggleTTYD(true)">Enable
+                                    TTYD</button>
+                                <button onclick="event.preventDefault();toggleTTYD(false)">Disable
+                                    TTYD</button>
+                            </div>
+                            <div style="display: flex;gap: 10px;margin: 10px 0;">
+                                <button onclick="event.preventDefault();toggleADBIP(true)">Enable ADB
+                                    5555</button>
+                                <button onclick="event.preventDefault();toggleADBIP(false)">Disable ADB
+                                    5555</button>
+                            </div>
+                            <p>TTYD Port (default:1146)：<input name="ttyd_port" placeholder="1145" type="number"
+                                    id="TTYD_INPUT"
                                     style="width: 100%;max-width: 100px;padding: 6px 10px;margin: 4px 0;">
                             </p>
+                            <button onclick="event.preventDefault();resetTTYDPort()">RESET TTYD PORT</button>
                             <button class="btn" onclick="OP(event)">?</button>
                         </div>
                         <div class="btn" style="text-align: right;margin-top: 6px;">

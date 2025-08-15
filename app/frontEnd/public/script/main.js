@@ -5722,8 +5722,121 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
     }
     initMessage()
 
+    const togglePort = async (port, flag, isBootup = false, v6 = false) => {
+        try {
+            if (!await checkAdvanceFunc()) {
+                createToast(t("need_advance_func"), 'red');
+                return false;
+            }
+
+            const addCmd = (useV6) => {
+                const bin = useV6 ? 'ip6tables' : 'iptables';
+                return `${bin} -A INPUT -p tcp --dport ${port} -j DROP`;
+            };
+
+            const delCmd = (useV6) => addCmd(useV6).replace('-A', '-D');
+
+            // 删除当前系统中的 DROP 规则
+            const cleanupCmd = (useV6) => {
+                const bin = useV6 ? 'ip6tables' : 'iptables';
+                return `for table in filter nat mangle raw security; do ${bin}-save -t $table | grep -- '--dport ${port} .*DROP' | sed 's/-A/-D/' | while read line; do ${bin} $line; done; done`;
+            };
+
+            let r0 = await runShellWithRoot(cleanupCmd(false));
+            if (!r0.success) return false;
+            if (v6) {
+                let r0v6 = await runShellWithRoot(cleanupCmd(true));
+                if (!r0v6.success) return false;
+            }
+
+            const saveBootup = async (cmd, proto) => {
+                const line = `${cmd} # UFI-TOOLS ${proto} ${port}`;
+                const shell = `grep -qxF '${line}' /sdcard/ufi_tools_boot.sh || echo '${line}' >> /sdcard/ufi_tools_boot.sh`;
+                await runShellWithRoot(shell);
+            };
+
+            const removeBootup = async (proto) => {
+                const pattern = `# UFI-TOOLS ${proto} ${port}`;
+                await runShellWithRoot(`sed -i '/${pattern}/d' /sdcard/ufi_tools_boot.sh`);
+            };
+
+            const removeAllBootup = async () => {
+                await runShellWithRoot(`sed -i '/# UFI-TOOLS .* ${port}/d' /sdcard/ufi_tools_boot.sh`);
+            };
+
+            if (!isBootup) {
+                await removeAllBootup();
+            }
+
+            if (flag) {
+                await runShellWithRoot(delCmd(false));
+                if (v6) await runShellWithRoot(delCmd(true));
+                await removeBootup('v4');
+                if (v6) await removeBootup('v6');
+            } else {
+                await runShellWithRoot(addCmd(false));
+                if (v6) await runShellWithRoot(addCmd(true));
+                if (isBootup) {
+                    await saveBootup(addCmd(false), 'v4');
+                    if (v6) await saveBootup(addCmd(true), 'v6');
+                }
+            }
+
+            return true;
+        } catch (e) {
+            createToast(e);
+            return false;
+        }
+    };
+
+    const port_iptables = document.querySelector('#port_iptables')
+    const dev_bootup = document.querySelector("#dev_bootup")
+    const dev_ipv6 = document.querySelector("#dev_ipv6")
+
+    const toggleTTYD = async (flag) => {
+        if (!await checkAdvanceFunc()) return createToast(t("need_advance_func"), 'red')
+        const bootUp = dev_bootup.checked
+        const v6 = dev_ipv6.checked
+        const res = togglePort("1146", flag, bootUp, v6)
+        if (!res) createToast(t("toast_oprate_failed"), "red")
+        createToast(t("toast_oprate_success"), 'green')
+    }
+    const toggleADBIP = async (flag) => {
+        if (!await checkAdvanceFunc()) return createToast(t("need_advance_func"), 'red')
+        const bootUp = dev_bootup.checked
+        const v6 = dev_ipv6.checked
+        const res = togglePort("5555", flag, bootUp, v6)
+        if (!res) createToast(t("toast_oprate_failed"), "red")
+        createToast(t("toast_oprate_success"), 'green')
+    }
+
+    const resetTTYDPort = () => {
+        const port = localStorage.getItem('ttyd_port')
+        if (port != '1146') {
+            localStorage.setItem('ttyd_port', '1146')
+            initTTYD && initTTYD()
+        }
+    }
+
+    const setPort = async (flag) => {
+        if (!await checkAdvanceFunc()) return createToast(t("need_advance_func"), 'red')
+        const port = port_iptables.value
+        const bootUp = dev_bootup.checked
+        const v6 = dev_ipv6.checked
+        if (!port) return createToast("Please input a valid port (1 - 65535)")
+        const res = await togglePort(port, flag, bootUp, v6)
+        if (!res) createToast(t("toast_oprate_failed"), "red")
+        createToast(t("toast_oprate_success"), 'green')
+    }
+
     //挂载方法到window
     const methods = {
+        setPort,
+        resetTTYDPort,
+        initTTYD,
+        togglePort,
+        toggleTTYD,
+        toggleADBIP,
         unlockAllBand,
         handleForceIMEI,
         handlePluginStoreSearchInput,

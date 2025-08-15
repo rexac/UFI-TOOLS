@@ -10,6 +10,7 @@ SOCKET_DIR="/data/data/com.minikano.f50_sms/files"
 SOCKET_FILE="$SOCKET_DIR/kano_root_shell.sock"
 SOCAT_PATH="/data/data/com.minikano.f50_sms/files/socat"
 TTYD_PATH="/data/data/com.minikano.f50_sms/files/ttyd"
+LOGIN_PATH="/data/data/com.minikano.f50_sms/files/login.sh"
 BOOTUP_SCRIPT_PATH="/sdcard/ufi_tools_boot.sh"
 SCHEDULE_SCRIPT_PATH="/sdcard/ufi_tools_schedule.sh"
 
@@ -45,10 +46,10 @@ check_log_file(){
 
 check_ttyd_running(){
   # check ttyd running
-  if ! ps -ef | grep "ttyd --writable --port 1146 /system/bin/sh" | grep -v grep > /dev/null; then
+  if ! ps -ef | grep "ttyd --writable --port 1146 $LOGIN_PATH" | grep -v grep > /dev/null; then
       echo "[`date`] start ttyd..." >> "$LOG_FILE"
       export PATH="/data/data/com.termux/files/usr/bin:$PATH"
-      "$TTYD_PATH" --writable --port 1146 /system/bin/sh &
+      "$TTYD_PATH" --writable --port 1146 $LOGIN_PATH &
   else
       echo "[`date`] ttyd already running." >> "$LOG_FILE"
   fi

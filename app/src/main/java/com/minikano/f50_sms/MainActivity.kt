@@ -92,6 +92,24 @@ class MainActivity : ComponentActivity() {
         UniqueDeviceIDManager.init(this)
         val context = this
 
+        //第一次启动初始化login_token
+        val spf = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        if(!spf.contains(PREF_LOGIN_TOKEN)){
+            spf.edit().putString(PREF_LOGIN_TOKEN, "admin").apply()
+        }
+        if(!spf.contains(PREF_ISDEBUG)){
+            spf.edit().putString(PREF_ISDEBUG, "false").apply()
+        }
+        if(!spf.contains(PREF_GATEWAY_IP)){
+            spf.edit().putString(PREF_GATEWAY_IP, "192.168.0.1:8080").apply()
+        }
+        if(!spf.contains(PREF_TOKEN_ENABLED)){
+            spf.edit().putString(PREF_TOKEN_ENABLED, true.toString()).apply()
+        }
+        if(!spf.contains(PREF_AUTO_IP_ENABLED)){
+            spf.edit().putString(PREF_AUTO_IP_ENABLED, true.toString()).apply()
+        }
+
         // 这里用协程异步调用
         lifecycleScope.launch {
             UniqueDeviceIDManager.init(applicationContext)

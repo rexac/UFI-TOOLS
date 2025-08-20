@@ -165,6 +165,45 @@ needToken(true, 30).then(() => {
 })
 
 function main_func() {
+
+    const result = getBrowserVersion();
+    console.log(`${result.browser} ${result.version}`);
+    let ignoreBrowserCheckAlert = localStorage.getItem('ignoreBrowserCheckAlert') == '1';
+
+    if (ignoreBrowserCheckAlert != '1') {
+        if (result.browser === "Chrome") {
+            //需要大于125
+            const versionParts = result.version.split('.');
+            const majorVersion = parseInt(versionParts[0], 10);
+            if (majorVersion <= 125) {
+                createToast(`${t('your')}${result.browser}${t('browser_version_low')}`);
+            }
+            if (majorVersion <= 105) {
+                alert(`${t('your')}${result.browser}${t('browser_version_very_low')}`);
+            }
+        } else if (result.browser === "Firefox") {
+            //需要大于125
+            const versionParts = result.version.split('.');
+            const majorVersion = parseInt(versionParts[0], 10);
+            if (majorVersion <= 125) {
+                createToast(`${t('your')}${result.browser}${t('browser_version_low')}`);
+            }
+            if (majorVersion <= 105) {
+                alert(`${t('your')}${result.browser}${t('browser_version_very_low')}`);
+            }
+        } else if (result.browser === "Safari") {
+            //需要大于17.5
+            const versionParts = result.version.split('.');
+            const majorVersion = parseInt(versionParts[0], 10);
+            if (majorVersion <= 17.5) {
+                createToast(`${t('your')}${result.browser}${t('browser_version_low')}`);
+            }
+            if (majorVersion <= 15.6) {
+                alert(`${t('your')}${result.browser}${t('browser_version_very_low')}`);
+            }
+        }
+    }
+
     //读取展示列表
     const _stor = localStorage.getItem('showList')
     const showList = _stor != null ? JSON.parse(_stor) : {
@@ -491,7 +530,6 @@ function main_func() {
         initCellularSpeedTestBtn()
         initAdvanceTools()
         initTerms()
-        initMessage()
         QOSRDPCommand("AT+CGEQOSRDP=1")
     }
 
@@ -579,6 +617,7 @@ function main_func() {
             localStorage.setItem('kano_sms_token', SHA256(token.trim()).toLowerCase())
             closeModal('#tokenModal')
             initRenderMethod()
+            initMessage()
         }
         catch (e) {
             toastTimer && clearTimeout(toastTimer)
@@ -5681,10 +5720,11 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
                     headers: common_headers
                 })).json()
                 if (has_read_message == true || has_read_message == "true") return
+                const { text } = parseDOM(message) //过滤掉远程任何的script脚本，防止远程任意代码自动执行
                 const { el, close } = createFixedToast('kano_message', `
                     <div style="pointer-events:all;width:80vw;max-width:300px">
                         <div class="title" style="margin:0" data-i18n="system_notice">${t('system_notice')}</div>
-                        <div style="margin:10px 0">${message}</div>
+                        <div style="margin:10px 0" id="kano_message_inner">${text}</div>
                         <div style="text-align:right">
                             <button style="font-size:.64rem" id="close_message_btn" data-i18n="pay_btn_dismiss">${t('pay_btn_dismiss')}</button>
                         </div>

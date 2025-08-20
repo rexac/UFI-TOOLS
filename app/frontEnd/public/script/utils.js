@@ -680,42 +680,6 @@ function getBrowserVersion() {
         version: 'Unknown'
     };
 }
-const result = getBrowserVersion();
-console.log(`${result.browser} ${result.version}`);
-let ignoreBrowserCheckAlert = localStorage.getItem('ignoreBrowserCheckAlert') == '1';
-if (ignoreBrowserCheckAlert != '1') {
-    if (result.browser === "Chrome") {
-        //需要大于125
-        const versionParts = result.version.split('.');
-        const majorVersion = parseInt(versionParts[0], 10);
-        if (majorVersion <= 125) {
-            createToast(`您的${result.browser}内核版本过低，可能无法正常使用部分功能，请升级浏览器。`);
-        }
-        if (majorVersion <= 105) {
-            alert(`您的${result.browser}内核版本过低，无法正常使用部分功能，请升级浏览器。`);
-        }
-    } else if (result.browser === "Firefox") {
-        //需要大于125
-        const versionParts = result.version.split('.');
-        const majorVersion = parseInt(versionParts[0], 10);
-        if (majorVersion <= 125) {
-            createToast(`您的${result.browser}内核版本过低，可能无法正常使用部分功能，请升级浏览器。`);
-        }
-        if (majorVersion <= 105) {
-            alert(`您的${result.browser}内核版本过低，无法正常使用部分功能，请升级浏览器。`);
-        }
-    } else if (result.browser === "Safari") {
-        //需要大于17.5
-        const versionParts = result.version.split('.');
-        const majorVersion = parseInt(versionParts[0], 10);
-        if (majorVersion <= 17.5) {
-            createToast(`您的${result.browser}内核版本过低，可能无法正常使用部分功能，请升级浏览器。`);
-        }
-        if (majorVersion <= 15.6) {
-            alert(`您的${result.browser}内核版本过低，无法正常使用部分功能，请升级浏览器。`);
-        }
-    }
-}
 
 const bandTableTrList = document.querySelectorAll('#bandTable tr')
 const selectAllBandChkBox = document.querySelector('#selectAllBand')
@@ -856,4 +820,58 @@ const createModal = ({ name, noBlur, isMask, title, maxWidth, content, contentSt
             id: "#" + name
         }
     }
+}
+
+// 安全DOM
+const parseDOM = (text) => {
+    try {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(text, 'text/html');
+        // 获取除了 script 的其他内容
+        let clone = doc.body.cloneNode(true);
+        clone.querySelectorAll('script').forEach(el => el.remove());
+        const remainingHTML = clone.innerHTML.trim();
+
+        return { text: remainingHTML };
+    } catch (e) {
+        return { text: "" };
+    }
+};
+
+const fillCurl = (kind) => {
+    const curl_text = document.querySelector('#curl_text')
+    let message = ''
+    switch (kind) {
+        case 'tg':
+            message = message = t('tg_sms_help')
+            curl_text.value = `curl -s -X POST https://api.telegram.org/bot<你的token>/sendMessage -H "Content-Type: application/json" -d '{"chat_id":<你的聊天会话id>,"text":"{{sms-body}} {{sms-time}} {{sms-from}}","parse_mode":"HTML"}'`
+            break;
+        case 'wechat':
+            message = t('wechat_sms_help')
+            curl_text.value = `curl -X POST "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=<输入你的key>" -H "Content-Type: application/json" -d '{"msgtype": "text", "text": {"content": "【号码】{{sms-from}}\\n【短信内容】{{sms-body}}\\n【时间】{{sms-time}}"}}'`
+            break;
+        case 'pushplus':
+            message = t('pushplus_sms_help')
+            curl_text.value = `curl -s -X POST https://www.pushplus.plus/send/  -H "Content-Type: application/x-www-form-urlencoded" -d "token=<你的token>&title=有新消息！！&content=**【短信内容】**%0A{{sms-body}}%0A%0A**【时间】**%0A{{sms-time}}%0A%0A**【号码】**%0A{{sms-from}}&template=markdown"`
+            break;
+    }
+
+    const { el, close } = createFixedToast('kano_message', `
+                    <div style="pointer-events:all;width:80vw;max-width:300px">
+                        <div class="title" style="margin:0" data-i18n="system_notice">💡 Tips</div>
+                        <div style="margin:10px 0;font-size:.64rem;max-height:300px;overflow:auto" id="kano_message_inner">${message}</div>
+                        <div style="text-align:right">
+                            <button style="font-size:.64rem" id="close_message_btn" data-i18n="close_btn">${t('close_btn')}</button>
+                        </div>
+                    </div>
+                    `)
+    const btn = el.querySelector('#close_message_btn')
+    if (!btn) {
+        close()
+    } else {
+        btn.onclick = () => {
+            close()
+        }
+    }
+
 }

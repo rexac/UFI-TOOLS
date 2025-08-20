@@ -301,7 +301,7 @@
     "advance_feature_list": "TTYD端口为1146(三击标题区域可更改)\n如去除高级功能报错，可以在TTYD上执行 sh /sdcard/unlock_samba.sh 重启生效\n添加高级功能包括:\n1.优化Samba目录(添加sd卡目录，设备根目录)\n2.添加TTYD，自带RootShell\n3.默认阻止官方后台 TTYD 网络ADB SMB 的ipv6访问，提升安全性\n4.添加定时脚本(30s左右定时执行一次，脚本在内部存储目录下ufi_tools_schedule.sh)\n5.添加开机自启脚本(脚本在内部存储目录下ufi_tools_boot.sh)\n(感谢酷安 @QuTick @AiCherub @atwat 提供的思路)",
     "advance_add": "添加高级功能",
     "advance_remove": "移除高级功能(重启生效)",
-    "advance_disable_update": "禁用更新",
+    "advance_disable_update": "禁用ZTE固件更新",
     "advance_run_shell": "一键执行shell脚本(非root)\n(脚本需在/sdcard/one_click_shell.sh)",
     "advance_disable_little_core": "关闭小核",
     "advance_enable_little_core": "开启小核",
@@ -595,7 +595,7 @@
     "toast_get_plugin_failed": "获取插件失败，请检查网络",
     "disable_update_ing": "正在禁用系统更新",
     "toast_advanced_checked": "检测到高级功能，使用ROOT方式执行",
-    "advanced_checked_disabled_update": "已使用ROOT方式禁用系统更新,请检查是否生效！",
+    "advanced_checked_disabled_update": "已使用ROOT方式禁用系统更新,执行成功！",
     "toast_not_enabled_advanced_tools": "未开启高级功能，使用ADB方式执行",
     "update_has_disabled": "系统更新已禁用",
     "update_disabled_failed": "禁用系统更新失败",
@@ -670,5 +670,12 @@
     "decline": "拒绝",
     "please_accept_terms":"请同意「用户协议与免责条款」",
     "please_read_terms":"请认真阅读完「用户协议」",
-    "system_notice":"系统提示"
+    "system_notice":"系统提示",
+    "your":"您的",
+    "browser_version_low":"内核版本过低，无法正常使用部分功能，请升级浏览器。",
+    "browser_version_very_low":"内核版本过低，无法正常使用部分功能，请升级浏览器。",
+    "wechat_group":"企业微信",
+    "tg_sms_help": "UFITOOLS TG机器人短信转发请求方法：<br>示例代码（CURL方式）：<br>curl -s -X POST https://api.telegram.org/bot<你的token>/sendMessage -H \"Content-Type: application/json\" -d '{\"chat_id\":你的聊天会话id,\"text\":\"{{sms-body}} {{sms-time}} {{sms-from}}\",\"parse_mode\":\"HTML\"}'<br>创建一个新 Bot<br>在 Telegram 里找 @BotFather<br>这是 Telegram 官方管理机器人的账号<br>打开搜索，输入 @BotFather，点它头像进入<br>和 BotFather 对话，先输入：/start<br>再输入：/newbot<br><br>按提示输入：<br>机器人的显示名称（随便取，比如 MyTestBot）<br>机器人的用户名（必须以 bot 结尾，比如 mytest_robot_bot）<br><br>BotFather 会返回一段信息，其中最重要的是：<br>Use this token to access the HTTP API:<br>123456789:ABCdefGhIJKlmNoPQRstuVWXyz<br>这一长串就是 Bot Token（发消息必须用它）<br><br>获取 Chat ID（收消息的人）<br>先用 Telegram 给你创建的 Bot 发送一条任意消息<br>然后访问：https://api.telegram.org/bot<你的BotToken>/getUpdates<br><br>在返回的 JSON 里找到：\"chat\": {<br>    \"id\": 987654321,<br>    \"first_name\": \"...\",<br>    ...<br>}<br>id 就是你的 chat_id",
+    "wechat_sms_help": "企业微信 Webhook 短信转发教程：<br><br>获取群机器人 Key：在企业微信群里添加机器人，复制生成的 Webhook URL，形如 https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=你的key<br><br>使用 curl 发送短信，命令一行输入，不换行、不用 \\：<br>curl -X POST \"https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=<输入你的key>\" -H \"Content-Type: application/json\" -d '{\"msgtype\": \"text\", \"text\": {\"content\": \"【号码】{{sms-from}}\\n【短信内容】{{sms-body}}\\n【时间】{{sms-time}}\"}}'<br><br>参数说明：{{sms-from}} 短信来源号码，{{sms-body}} 短信内容，{{sms-time}} 接收时间。收到短信后替换变量即可发送到企业微信群。",
+    "pushplus_sms_help": "PushPlus 短信转发教程：<br><br>获取 PushPlus Token：登录 https://www.pushplus.plus/ 注册账号，创建推送机器人，复制生成的 Token。<br><br>使用 curl 发送短信，命令一行输入，不换行、不用 \\：<br>curl -s -X POST https://www.pushplus.plus/send/ -H \"Content-Type: application/x-www-form-urlencoded\" -d \"token=<你的token>&title=有新消息！！&content=【短信内容】%0A{{sms-body}}%0A%0A**【时间】%0A{{sms-time}}%0A%0A【号码】**%0A{{sms-from}}&template=markdown\"<br><br>参数说明：{{sms-from}} 短信来源号码，{{sms-body}} 短信内容，{{sms-time}} 接收时间。收到短信后替换变量即可发送到 PushPlus。"
 }

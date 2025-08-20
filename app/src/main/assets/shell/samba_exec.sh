@@ -119,11 +119,17 @@ boot_up_script() {
   ip6tables -A INPUT -p tcp --dport 139 -j DROP
   ip6tables -A INPUT -p tcp --dport 445 -j DROP
   ip6tables -A INPUT -p tcp --dport 5555 -j DROP
+  ip6tables -A INPUT -p tcp --dport 5201 -j DROP
+  ip6tables -A INPUT -p tcp --dport 5001 -j DROP
+  ip6tables -A INPUT -p tcp --dport 5002 -j DROP
   ip6tables -A INPUT -p udp --dport 8080 -j DROP
   ip6tables -A INPUT -p udp --dport 1146 -j DROP
   ip6tables -A INPUT -p udp --dport 139 -j DROP
   ip6tables -A INPUT -p udp --dport 445 -j DROP
   ip6tables -A INPUT -p udp --dport 5555 -j DROP
+  ip6tables -A INPUT -p udp --dport 5201 -j DROP
+  ip6tables -A INPUT -p udp --dport 5001 -j DROP
+  ip6tables -A INPUT -p udp --dport 5002 -j DROP
 
   echo "$UNLOCK_SAMBA_CONF" > /cache/unlock_samba.sh
   echo "$UNLOCK_SAMBA_CONF" > /sdcard/unlock_samba.sh

@@ -1258,7 +1258,8 @@
                                 </label>
                             </div>
                             <div style="display: flex;gap: 10px;margin: 10px 0;">
-                                <input placeholder="1234" id="port_iptables" style="padding: 6px;flex: 1;width: 100%;" type="number">
+                                <input placeholder="1234" id="port_iptables" style="padding: 6px;flex: 1;width: 100%;"
+                                    type="number">
                                 <button onclick="event.preventDefault();setPort(true)">Accept</button>
                                 <button onclick="event.preventDefault();setPort(false)">Deny</button>
                             </div>
@@ -1640,6 +1641,14 @@
                                             短信内容占位符：</span>
                                         <span onclick="copyText(event)">{{sms-body}} {{sms-time}}
                                             {{sms-from}}</span>
+                                    </div>
+                                    <div style="display: flex;gap: 10px;margin-top: 10px;">
+                                        <button style="width: 100%;"
+                                            onclick="event.preventDefault();fillCurl('tg')">Telegram</button>
+                                        <button style="width: 100%;" onclick="event.preventDefault();fillCurl('wechat')"
+                                            data-i18n="wechat_group">企业微信</button>
+                                        <button style="width: 100%;"
+                                            onclick="event.preventDefault();fillCurl('pushplus')">PushPlus</button>
                                     </div>
                                     <div class="item" style="margin: 10px auto;">
                                         <div style="

@@ -37,6 +37,7 @@ class ADBService : Service() {
     companion object {
         @Volatile
         var adbIsReady: Boolean = false
+        var isExecutedDisabledFOTA = false
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -152,6 +153,13 @@ class ADBService : Service() {
 
                     if (result?.contains("localhost:5555\tdevice") == true) {
                         KanoLog.d("kano_ZTE_LOG", "adb存活，无需启动")
+                        if(!isExecutedDisabledFOTA) {
+                            val res = KanoUtils.disableFota(applicationContext)
+                            if(res){
+                                KanoLog.d("kano_ZTE_LOG", "使用adb禁用FOTA完成")
+                            }
+                            isExecutedDisabledFOTA = true
+                        }
                         adbIsReady = true
                     } else {
                         KanoLog.w("kano_ZTE_LOG", "adb无设备或已退出，尝试启动")

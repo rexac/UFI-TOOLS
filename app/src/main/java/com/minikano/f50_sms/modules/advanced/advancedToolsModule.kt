@@ -103,30 +103,11 @@ fun Route.advancedToolsModule(context: Context, targetServerIP: String) {
     //禁用系统更新
     get("/api/disable_fota") {
         try {
-            // 复制依赖文件
-            val outFileAdb = KanoUtils.copyFileToFilesDir(context, "shell/adb")
-                ?: throw Exception("复制 adb 到 filesDir 失败")
+            val res = KanoUtils.disableFota(context)
 
-            // 设置执行权限
-            outFileAdb.setExecutable(true)
+            if(!res) throw Exception("禁用系统更新失败")
 
-            val cmd = "${outFileAdb.absolutePath} -s localhost shell pm disable-user --user 0 com.zte.zdm"
-            val cmd1 = "${outFileAdb.absolutePath} -s localhost shell pm uninstall -k --user 0 com.zte.zdm"
-            val cmd2 = "${outFileAdb.absolutePath} -s localhost shell pm uninstall -k --user 0 cn.zte.aftersale"
-            val cmd3 = "${outFileAdb.absolutePath} -s localhost shell pm uninstall -k --user 0 com.zte.zdmdaemon"
-            val cmd4 = "${outFileAdb.absolutePath} -s localhost shell pm uninstall -k --user 0 com.zte.zdmdaemon.install"
-            val cmd5 = "${outFileAdb.absolutePath} -s localhost shell pm uninstall -k --user 0 com.zte.analytics"
-            val cmd6 = "${outFileAdb.absolutePath} -s localhost shell pm uninstall -k --user 0 com.zte.neopush"
-
-            ShellKano.runShellCommand(cmd, context = context)
-            ShellKano.runShellCommand(cmd1, context = context)
-            ShellKano.runShellCommand(cmd2, context = context)
-            ShellKano.runShellCommand(cmd3, context = context)
-            ShellKano.runShellCommand(cmd4, context = context)
-            ShellKano.runShellCommand(cmd5, context = context)
-            ShellKano.runShellCommand(cmd6, context = context)
-
-            var jsonResult = """{"result":"执行成功,如需强力禁用请使用高级功能！"}"""
+            val jsonResult = """{"result":"执行成功,如需强力禁用请使用高级功能！"}"""
 
             call.respondText(jsonResult, ContentType.Application.Json)
 

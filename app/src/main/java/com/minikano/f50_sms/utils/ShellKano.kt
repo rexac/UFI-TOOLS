@@ -635,6 +635,18 @@ class ShellKano {
                                         )
                                     )
                                     KanoLog.d("kano_ZTE_LOG", "开启ADBD结果: $result2")
+
+                                    val result3 = req.postData(
+                                        cookie, mapOf(
+                                            "goformId" to "SetUpgAutoSetting",
+                                            "UpgMode" to "0",
+                                            "UpgIntervalDay" to "114514",
+                                            "UpgRoamPermission" to "0"
+                                        )
+                                    )
+
+                                    KanoLog.d("kano_ZTE_LOG", "禁用FOTA结果: $result3")
+
                                     req.logout(cookie)
                                     if (result1?.getString("result") == "success" && result2?.getString("result") == "success") {
                                         KanoLog.d("kano_ZTE_LOG", "ADB_WIFI自启动执行成功")

@@ -38,6 +38,7 @@ class ADBService : Service() {
         @Volatile
         var adbIsReady: Boolean = false
         var isExecutedDisabledFOTA = false
+        var isExecutedSambaMount = false
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {

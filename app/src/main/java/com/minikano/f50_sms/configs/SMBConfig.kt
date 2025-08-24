@@ -20,7 +20,7 @@ object SMBConfig {
 
             [$model]
             	comment = Android Server
-            	path = /storage
+            	path = /data/SAMBA_SHARE
             	browseable = yes
             	writable = yes
             	public = yes
@@ -28,13 +28,21 @@ object SMBConfig {
 
             [internal_storage]
             	comment = Android Server
-            	path = /sdcard
+            	path = /sdcard/DCIM
+            	browseable = yes
+            	writable = yes
+            	public = yes
+            	guest ok = yes
+            
+            [外置存储]
+            	comment = Android Server
+            	path = /mnt/media_rw
             	browseable = yes
             	writable = yes
             	public = yes
             	guest ok = yes
 
-            [sdcard]
+            [SD卡]
             	comment = Android Server
             	path = /storage/sdcard0
             	browseable = yes

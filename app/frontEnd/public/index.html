@@ -403,7 +403,8 @@
                         </table>
                         <div class="title" style="margin: 10px 0 ;">
                             <strong data-i18n="cell_list">基站列表</strong>
-                            <button class="btn REFRESH_BTN" style="padding: 4px;margin-left: 10px;"
+                            <button class="btn" data-toggle="1" id="lkCellRefreshBtn"
+                                onclick="toggleCellInfoRefresh(event)" style="padding: 4px;margin-left: 10px;"
                                 data-i18n="stop_refresh">停止刷新</button>
                         </div>
                         <div class="title" id="CURRENT_CELL" style="display: block;margin: 10px 0;font-size:14px">
@@ -1398,9 +1399,8 @@
 
                                     <div id="socat_status" class="title"
                                         style="font-size: 12px;margin: 8px 0;margin-bottom: 0;"></div>
-                                    <div class="adb_status title" style="font-size: 12px;margin: 8px 0;margin-top: 0;">
+                                    <div class="adb_status title" style="font-size: 12px;margin: 4px 0;margin-top: 0;">
                                     </div>
-
                                     <div class="advanced-btns">
                                         <button class="btn"
                                             onclick="disableButtonWhenExecuteFunc(event,()=>handleSambaPath())"

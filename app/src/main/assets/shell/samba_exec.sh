@@ -102,6 +102,37 @@ net_accelerate(){
       done
 }
 
+disable_fota(){
+  pm disable com.zte.zdm
+  pm uninstall -k --user 0 com.zte.zdm
+  pm uninstall -k --user 0 cn.zte.aftersale
+  pm uninstall -k --user 0 com.zte.zdmdaemon
+  pm uninstall -k --user 0 com.zte.zdmdaemon.install
+  pm uninstall -k --user 0 com.zte.analytics
+  pm uninstall -k --user 0 com.zte.neopush
+}
+
+samba_path(){
+  SRC_LIST="/sdcard/DCIM /mnt/media_rw /storage/sdcard0"
+  TGT_LIST="/data/SAMBA_SHARE/机内存储 /data/SAMBA_SHARE/外部存储 /data/SAMBA_SHARE/SD卡"
+
+  i=1
+  for src in $SRC_LIST; do
+      tgt=$(echo $TGT_LIST | cut -d' ' -f$i)
+      i=$((i + 1))
+
+      [ ! -d "$tgt" ] && mkdir -p "$tgt"
+
+      mount | grep " $tgt " >/dev/null 2>&1
+      if [ $? -ne 0 ]; then
+          mount --bind "$src" "$tgt"
+          echo "[`date`] Mounted $src -> $tgt" >> "$LOG_FILE"
+      else
+          echo "[`date`] $tgt already mounted" >> "$LOG_FILE"
+      fi
+  done
+}
+
 #boot_script
 boot_up_script() {
   if [ -f "$BOOTUP_SCRIPT_PATH" ]; then
@@ -134,11 +165,13 @@ boot_up_script() {
   echo "$UNLOCK_SAMBA_CONF" > /cache/unlock_samba.sh
   echo "$UNLOCK_SAMBA_CONF" > /sdcard/unlock_samba.sh
 
+  samba_path
   lock_smb_conf
   check_log_file
   check_ttyd_running
   check_socat_running
   net_accelerate
+  disable_fota
 }
 
 #schedule_script(30s per time)

@@ -1708,7 +1708,34 @@ function main_func() {
 
     let cellInfoRequestTimer = null
     initCellInfo()
-    cellInfoRequestTimer = requestInterval(() => initCellInfo(), REFRESH_TIME + 1000)
+
+    const toggleLkcellOpen = (isOpen = false) => {
+        const lkCellRefreshBtn = document.querySelector('#lkCellRefreshBtn')
+        if (!lkCellRefreshBtn) return
+        if (isOpen) {
+            cellInfoRequestTimer && cellInfoRequestTimer()
+            cellInfoRequestTimer = requestInterval(() => initCellInfo(), REFRESH_TIME + 1500)
+            lkCellRefreshBtn.dataset.toggle = "1"
+            lkCellRefreshBtn.innerHTML = t('stop_refresh')
+        } else {
+            cellInfoRequestTimer && cellInfoRequestTimer()
+            lkCellRefreshBtn.dataset.toggle = "0"
+            cellInfoRequestTimer = null
+            lkCellRefreshBtn.innerHTML = t('start_refresh')
+        }
+    }
+
+    const toggleCellInfoRefresh = (e) => {
+        const target = e.target
+        if (target) {
+            const data = e.target.dataset.toggle
+            if (data != "1") {
+                toggleLkcellOpen(true)
+            } else {
+                toggleLkcellOpen(false)
+            }
+        }
+    }
 
     let onSelectCellRow = (pci, earfcn) => {
         let pci_t = document.querySelector('#PCI')
@@ -1910,13 +1937,11 @@ function main_func() {
     }
 
     const startRefresh = () => {
-        cellInfoRequestTimer = requestInterval(() => initCellInfo(), REFRESH_TIME + 500)
         StopStatusRenderTimer = requestInterval(() => handlerStatusRender(), REFRESH_TIME)
         QORSTimer = requestInterval(() => { QOSRDPCommand("AT+CGEQOSRDP=1") }, 10000)
     }
     const stopRefresh = () => {
         StopStatusRenderTimer && StopStatusRenderTimer()
-        cellInfoRequestTimer && cellInfoRequestTimer()
         QORSTimer && QORSTimer()
     }
 
@@ -3547,7 +3572,19 @@ function main_func() {
 
     //展开收起
     // 配置观察器_锁基站
-    collapseGen("#collapse_lkcell_btn", "#collapse_lkcell", "collapse_lkcell")
+    const collapse_lkcell_stor = localStorage.getItem('collapse_lkcell') || 'close'
+    if (collapse_lkcell_stor == 'open') {
+        toggleLkcellOpen(true)
+    } else {
+        toggleLkcellOpen(false)
+    }
+    collapseGen("#collapse_lkcell_btn", "#collapse_lkcell", "collapse_lkcell", (isOpen) => {
+        if (isOpen == 'open') {
+            toggleLkcellOpen(true)
+        } else {
+            toggleLkcellOpen(false)
+        }
+    })
 
     //软件更新
     const queryUpdate = async () => {
@@ -5949,7 +5986,8 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
         handleAT,
         setOrRemoveDeviceFromBlackList,
         onSelectCellRow,
-        handleClosePayModal
+        handleClosePayModal,
+        toggleCellInfoRefresh
     }
 
     try {

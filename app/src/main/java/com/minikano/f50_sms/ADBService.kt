@@ -33,11 +33,13 @@ class ADBService : Service() {
     private lateinit var handler: Handler
     private val adbExecutor = Executors.newSingleThreadExecutor()
     private val iperfExecutor = Executors.newSingleThreadExecutor()
+    private var disableFOTATimes = 3
 
     companion object {
         @Volatile
         var adbIsReady: Boolean = false
         var isExecutedDisabledFOTA = false
+        var isExecutingDisabledFOTA = false
         var isExecutedSambaMount = false
     }
 
@@ -154,14 +156,19 @@ class ADBService : Service() {
 
                     if (result?.contains("localhost:5555\tdevice") == true) {
                         KanoLog.d("kano_ZTE_LOG", "adb存活，无需启动")
+                        adbIsReady = true
                         if(!isExecutedDisabledFOTA) {
+                            disableFOTATimes --
+                            if(disableFOTATimes <= 0){
+                                KanoLog.d("kano_ZTE_LOG", "已连续3次尝试使用adb禁用FOTA，强制isExecutingDisabledFOTA = true")
+                                isExecutingDisabledFOTA = true
+                            }
                             val res = KanoUtils.disableFota(applicationContext)
                             if(res){
                                 KanoLog.d("kano_ZTE_LOG", "使用adb禁用FOTA完成")
                             }
                             isExecutedDisabledFOTA = true
                         }
-                        adbIsReady = true
                     } else {
                         KanoLog.w("kano_ZTE_LOG", "adb无设备或已退出，尝试启动")
                         adbIsReady = false

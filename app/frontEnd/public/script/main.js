@@ -166,43 +166,7 @@ needToken(true, 30).then(() => {
 
 function main_func() {
 
-    const result = getBrowserVersion();
-    console.log(`${result.browser} ${result.version}`);
-    let ignoreBrowserCheckAlert = localStorage.getItem('ignoreBrowserCheckAlert') == '1';
-
-    if (ignoreBrowserCheckAlert != '1') {
-        if (result.browser === "Chrome") {
-            //需要大于125
-            const versionParts = result.version.split('.');
-            const majorVersion = parseInt(versionParts[0], 10);
-            if (majorVersion <= 125) {
-                createToast(`${t('your')}${result.browser}${t('browser_version_low')}`);
-            }
-            if (majorVersion <= 105) {
-                alert(`${t('your')}${result.browser}${t('browser_version_very_low')}`);
-            }
-        } else if (result.browser === "Firefox") {
-            //需要大于125
-            const versionParts = result.version.split('.');
-            const majorVersion = parseInt(versionParts[0], 10);
-            if (majorVersion <= 125) {
-                createToast(`${t('your')}${result.browser}${t('browser_version_low')}`);
-            }
-            if (majorVersion <= 105) {
-                alert(`${t('your')}${result.browser}${t('browser_version_very_low')}`);
-            }
-        } else if (result.browser === "Safari") {
-            //需要大于17.5
-            const versionParts = result.version.split('.');
-            const majorVersion = parseInt(versionParts[0], 10);
-            if (majorVersion <= 17.5) {
-                createToast(`${t('your')}${result.browser}${t('browser_version_low')}`);
-            }
-            if (majorVersion <= 15.6) {
-                alert(`${t('your')}${result.browser}${t('browser_version_very_low')}`);
-            }
-        }
-    }
+    checkBroswer()
 
     //读取展示列表
     const _stor = localStorage.getItem('showList')
@@ -478,23 +442,6 @@ function main_func() {
         let isReadable = obj[dicName] != null && obj[dicName] != undefined && obj[dicName] != ''
         //这里需要遍历一下是否显示的字段
         return isReadable && isIncludeInShowList(dicName)
-    }
-
-    //rootShell
-    const runShellWithRoot = async (cmd = '', timeout = 10000) => {
-        try {
-            const res = await fetchWithTimeout(`${KANO_baseURL}/root_shell`, {
-                method: "POST",
-                headers: common_headers,
-                body: JSON.stringify({
-                    command: cmd.trim()
-                })
-            }, timeout)
-            const { result, error } = await res.json()
-            return error ? { success: false, content: error } : { success: true, content: result }
-        } catch (e) {
-            return { success: false, content: e.message }
-        }
     }
 
     //初始化所有按钮
@@ -5937,7 +5884,6 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
         pluginExport,
         closeAdvanceToolsModal,
         syncTheme,
-        runShellWithRoot,
         switchCpuCore,
         changeRefreshRate,
         onPluginBtn,

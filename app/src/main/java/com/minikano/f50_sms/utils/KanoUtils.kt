@@ -12,6 +12,7 @@ import android.os.BatteryManager
 import android.os.StatFs
 import android.util.Log
 import android.widget.Toast
+import com.minikano.f50_sms.ADBService.Companion.isExecutingDisabledFOTA
 import com.minikano.f50_sms.modules.deviceInfo.MyStorageInfo
 import kotlinx.coroutines.runBlocking
 import java.io.File
@@ -433,7 +434,12 @@ class KanoUtils {
         }
 
         fun disableFota(context: Context):Boolean{
+            if(isExecutingDisabledFOTA){
+                KanoLog.w("kano_ZTE_LOG", "禁用FOTA操作正在执行..无需重复执行")
+                return false
+            }
             try {
+                isExecutingDisabledFOTA = true
                 // 复制依赖文件
                 val outFileAdb = copyFileToFilesDir(context, "shell/adb")
                     ?: throw Exception("复制 adb 到 filesDir 失败")
@@ -441,31 +447,22 @@ class KanoUtils {
                 // 设置执行权限
                 outFileAdb.setExecutable(true)
 
-                val cmd =
-                    "${outFileAdb.absolutePath} -s localhost shell pm disable-user --user 0 com.zte.zdm"
-                val cmd1 =
-                    "${outFileAdb.absolutePath} -s localhost shell pm uninstall -k --user 0 com.zte.zdm"
-                val cmd2 =
-                    "${outFileAdb.absolutePath} -s localhost shell pm uninstall -k --user 0 cn.zte.aftersale"
-                val cmd3 =
-                    "${outFileAdb.absolutePath} -s localhost shell pm uninstall -k --user 0 com.zte.zdmdaemon"
-                val cmd4 =
-                    "${outFileAdb.absolutePath} -s localhost shell pm uninstall -k --user 0 com.zte.zdmdaemon.install"
-                val cmd5 =
-                    "${outFileAdb.absolutePath} -s localhost shell pm uninstall -k --user 0 com.zte.analytics"
-                val cmd6 =
+                val cmds = listOf(
+                    "${outFileAdb.absolutePath} -s localhost shell pm disable-user --user 0 com.zte.zdm",
+                    "${outFileAdb.absolutePath} -s localhost shell pm uninstall -k --user 0 com.zte.zdm",
+                    "${outFileAdb.absolutePath} -s localhost shell pm uninstall -k --user 0 cn.zte.aftersale",
+                    "${outFileAdb.absolutePath} -s localhost shell pm uninstall -k --user 0 com.zte.zdmdaemon",
+                    "${outFileAdb.absolutePath} -s localhost shell pm uninstall -k --user 0 com.zte.zdmdaemon.install",
+                    "${outFileAdb.absolutePath} -s localhost shell pm uninstall -k --user 0 com.zte.analytics",
                     "${outFileAdb.absolutePath} -s localhost shell pm uninstall -k --user 0 com.zte.neopush"
+                )
 
-                ShellKano.runShellCommand(cmd, context = context)
-                ShellKano.runShellCommand(cmd1, context = context)
-                ShellKano.runShellCommand(cmd2, context = context)
-                ShellKano.runShellCommand(cmd3, context = context)
-                ShellKano.runShellCommand(cmd4, context = context)
-                ShellKano.runShellCommand(cmd5, context = context)
-                ShellKano.runShellCommand(cmd6, context = context)
+                cmds.forEach{item->ShellKano.runShellCommand(item, context = context)}
                 return true
             } catch (e:Exception){
                 return false
+            } finally {
+                isExecutingDisabledFOTA = false
             }
         }
     }

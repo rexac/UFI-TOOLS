@@ -21,6 +21,7 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.security.MessageDigest
 import java.util.Calendar
+import java.util.concurrent.TimeUnit
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 
@@ -430,6 +431,55 @@ class KanoUtils {
             } catch (e: Exception) {
                 e.printStackTrace()
                 return "Unknown"
+            }
+        }
+
+        fun sendShellCmd(cmd: String, timeoutSeconds: Long = 300): String? {
+            if (cmd.isEmpty()) return null
+            return try {
+                val process = Runtime.getRuntime().exec(arrayOf("sh", "-c", cmd))
+
+                val output = StringBuilder()
+                val error = StringBuilder()
+
+                val reader = process.inputStream.bufferedReader()
+                val errorReader = process.errorStream.bufferedReader()
+
+                // 启动两个线程读取输出，避免阻塞
+                val outThread = Thread {
+                    reader.useLines { lines ->
+                        lines.forEach { line -> output.appendLine(line) }
+                    }
+                }
+                val errThread = Thread {
+                    errorReader.useLines { lines ->
+                        lines.forEach { line -> error.appendLine(line) }
+                    }
+                }
+
+                outThread.start()
+                errThread.start()
+
+                // 等待执行，最多 timeoutSeconds 秒
+                val finished = process.waitFor(timeoutSeconds, TimeUnit.SECONDS)
+
+                if (!finished) {
+                    process.destroyForcibly() // 超时杀掉进程
+                    return "Error: Command timed out after $timeoutSeconds seconds"
+                }
+
+                // 确保输出线程结束
+                outThread.join()
+                errThread.join()
+
+                return if (output.isNotEmpty()) {
+                    output.toString().trim()
+                } else {
+                    error.toString().trim()
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                null
             }
         }
 

@@ -5,6 +5,7 @@ import com.minikano.f50_sms.configs.SMBConfig
 import com.minikano.f50_sms.modules.BASE_TAG
 import com.minikano.f50_sms.utils.KanoLog
 import com.minikano.f50_sms.utils.KanoUtils
+import com.minikano.f50_sms.utils.KanoUtils.Companion.sendShellCmd
 import com.minikano.f50_sms.utils.RootShell
 import com.minikano.f50_sms.utils.ShellKano
 import com.minikano.f50_sms.utils.SmbThrottledRunner
@@ -61,11 +62,19 @@ fun Route.advancedToolsModule(context: Context, targetServerIP: String) {
             var jsonResult = """{"result":"执行成功，重启生效！"}"""
 
             if (enabled == "1") {
-                val cmd =
-                    "${outFileAdb.absolutePath} -s localhost shell cat $smbPath > /data/samba/etc/smb.conf"
-                val result = ShellKano.runShellCommand(cmd, context = context)
-                    ?: throw Exception("修改 smb.conf 失败")
-                jsonResult = """{"result":"执行成功，等待1-2分钟即可生效！"}"""
+                try{
+                    val cmd =
+                        "cat $smbPath > /data/samba/etc/smb.conf"
+                    val result = sendShellCmd(cmd,3)
+                        ?: throw Exception("修改 smb.conf 失败")
+                    jsonResult = """{"result":"执行成功，等待1-2分钟即可生效！"}"""
+                } catch (e:Exception){
+                    val cmd =
+                        "${outFileAdb.absolutePath} -s localhost shell cat $smbPath > /data/samba/etc/smb.conf"
+                    val result = ShellKano.runShellCommand(cmd, context = context)
+                        ?: throw Exception("修改 smb.conf 失败,请开启ADB后再试")
+                    jsonResult = """{"result":"执行成功，等待1-2分钟即可生效！"}"""
+                }
             } else {
                 val script = """
                 sh /sdcard/ufi_tools_boot.sh
@@ -145,6 +154,53 @@ fun Route.advancedToolsModule(context: Context, targetServerIP: String) {
             call.response.headers.append("Access-Control-Allow-Origin", "*")
             call.respondText(
                 """{"error":"获取TTYD信息出错:${e.message}"}""",
+                ContentType.Application.Json,
+                HttpStatusCode.InternalServerError
+            )
+        }
+    }
+
+    //用户shell
+    post("/api/user_shell") {
+        try {
+            val body = call.receiveText()
+
+            val json = try {
+                JSONObject(body)
+            } catch (e: Exception) {
+                throw Exception("解析请求的json出错")
+            }
+
+            val text = json.optString("command", "").trim()
+
+            KanoLog.d(TAG, "获取到的command： ${text}")
+
+            if (text.isNotEmpty()) {
+
+                val result =
+                    sendShellCmd(text)
+                        ?: throw Exception("请检查命令输入格式")
+
+                KanoLog.d(TAG, "执行结果： ${result}")
+
+                val parsedResult = Json.encodeToString(result)
+
+                call.response.headers.append("Access-Control-Allow-Origin", "*")
+                call.respondText(
+                    """{"result":$parsedResult}""",
+                    ContentType.Application.Json,
+                    HttpStatusCode.OK
+                )
+
+            } else {
+                throw Exception("命令不能为空")
+            }
+
+        } catch (e: Exception) {
+            KanoLog.d(TAG, "shell执行出错： ${e.message}")
+            call.response.headers.append("Access-Control-Allow-Origin", "*")
+            call.respondText(
+                """{"error":"shell执行出错: ${e.message}"}""",
                 ContentType.Application.Json,
                 HttpStatusCode.InternalServerError
             )

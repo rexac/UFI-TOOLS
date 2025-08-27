@@ -3089,11 +3089,11 @@ function main_func() {
     //执行高级功能更改 1为启用0为禁用
     const handleSambaPath = async (flag = '1') => {
         const AT_RESULT = document.querySelector('#AD_RESULT')
-        let adb_status = await adbKeepAlive()
-        if (!adb_status) {
-            AT_RESULT.innerHTML = ""
-            return createToast(t('toast_ADB_not_init'), 'red')
-        }
+        // let adb_status = await adbKeepAlive()
+        // if (!adb_status) {
+        //     AT_RESULT.innerHTML = ""
+        //     return createToast(t('toast_ADB_not_init'), 'red')
+        // }
 
         AT_RESULT.innerHTML = t('toast_running_please_wait')
 

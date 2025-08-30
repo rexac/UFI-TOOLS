@@ -66,7 +66,7 @@ fun Route.advancedToolsModule(context: Context, targetServerIP: String) {
                     val cmd =
                         "cat $smbPath > /data/samba/etc/smb.conf"
                     val result = sendShellCmd(cmd,3)
-                        ?: throw Exception("修改 smb.conf 失败")
+                    if(!result.done) throw Exception(result.content)
                     jsonResult = """{"result":"执行成功，等待1-2分钟即可生效！"}"""
                 } catch (e:Exception){
                     val cmd =
@@ -177,9 +177,9 @@ fun Route.advancedToolsModule(context: Context, targetServerIP: String) {
 
             if (text.isNotEmpty()) {
 
-                val result =
-                    sendShellCmd(text)
-                        ?: throw Exception("请检查命令输入格式")
+                val result = sendShellCmd(text)
+
+                if(!result.done) throw Exception(result.content)
 
                 KanoLog.d(TAG, "执行结果： ${result}")
 
@@ -200,7 +200,7 @@ fun Route.advancedToolsModule(context: Context, targetServerIP: String) {
             KanoLog.d(TAG, "shell执行出错： ${e.message}")
             call.response.headers.append("Access-Control-Allow-Origin", "*")
             call.respondText(
-                """{"error":"shell执行出错: ${e.message}"}""",
+                """{"error":${JSONObject.quote("shell执行出错: ${e.message}")}}""",
                 ContentType.Application.Json,
                 HttpStatusCode.InternalServerError
             )

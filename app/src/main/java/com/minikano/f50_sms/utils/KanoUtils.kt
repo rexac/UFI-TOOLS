@@ -15,6 +15,7 @@ import android.widget.Toast
 import com.minikano.f50_sms.ADBService.Companion.isExecutingDisabledFOTA
 import com.minikano.f50_sms.modules.deviceInfo.MyStorageInfo
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.Serializable
 import java.io.File
 import java.io.FileOutputStream
 import java.net.HttpURLConnection
@@ -434,8 +435,15 @@ class KanoUtils {
             }
         }
 
-        fun sendShellCmd(cmd: String, timeoutSeconds: Long = 300): String? {
-            if (cmd.isEmpty()) return null
+        @Serializable
+        data class ShellResult(
+            val done: Boolean,   // true: 正常输出; false: 报错或超时
+            val content: String  // 输出内容或错误信息
+        )
+
+        fun sendShellCmd(cmd: String, timeoutSeconds: Long = 300): ShellResult {
+            if (cmd.isEmpty()) return ShellResult(done = false, content = "Error: empty command")
+
             return try {
                 val process = Runtime.getRuntime().exec(arrayOf("sh", "-c", cmd))
 
@@ -465,21 +473,21 @@ class KanoUtils {
 
                 if (!finished) {
                     process.destroyForcibly() // 超时杀掉进程
-                    return "Error: Command timed out after $timeoutSeconds seconds"
+                    return ShellResult(done = false, content = "Error: Command timed out after $timeoutSeconds seconds")
                 }
 
                 // 确保输出线程结束
                 outThread.join()
                 errThread.join()
 
-                return if (output.isNotEmpty()) {
-                    output.toString().trim()
+                return if (error.isNotEmpty()) {
+                    ShellResult(done = false, content = error.toString().trim())
                 } else {
-                    error.toString().trim()
+                    ShellResult(done = true, content = output.toString().trim())
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
-                null
+                ShellResult(done = false, content = "Exception: ${e.message}")
             }
         }
 

@@ -13,7 +13,7 @@ android {
         minSdk = 21
         targetSdk = 34
         versionCode = 1
-        versionName = "2.4.0"
+        versionName = "Pocket Edition"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

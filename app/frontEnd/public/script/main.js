@@ -559,6 +559,11 @@ function main_func() {
                 toastTimer && clearTimeout(toastTimer)
                 return null
             }
+            //更新后端ADMIN_PWD字段
+            const update_res = await updateAdminPsw(password.trim())
+            if (!update_res || update_res.result != 'success') {
+                console.error('Update admin password failed:', update_res ? update_res.message : 'No response');
+            }
             createToast(t('toast_login_success'), 'green')
             localStorage.setItem('kano_sms_pwd', password.trim())
             localStorage.setItem('kano_sms_token', SHA256(token.trim()).toLowerCase())
@@ -3167,6 +3172,13 @@ function main_func() {
                 if (res?.result == 'success') {
                     createToast(t('toast_change_success'), 'green')
                     form.reset()
+                    //更新后端ADMIN_PWD字段
+                    const update_res = await updateAdminPsw(newPassword.trim())
+                    if (!update_res || update_res.result != 'success') {
+                        console.error('Update admin password failed:', update_res ? update_res.message : 'No response');
+                    }
+                    KANO_PASSWORD = newPassword.trim()
+                    localStorage.setItem('kano_sms_pwd', newPassword.trim())
                     closeModal('#changePassModal')
                 } else {
                     throw t('toast_change_failed')

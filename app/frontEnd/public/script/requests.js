@@ -493,3 +493,19 @@ const runShellWithUser = async (cmd = '', timeout = 10000) => {
         return { success: false, content: e.message }
     }
 }
+
+const updateAdminPsw = async (newPsw) => {
+    try {
+        const res = await fetchWithTimeout(`${KANO_baseURL}/update_admin_pwd`, {
+            method: "POST",
+            headers: common_headers,
+            body: JSON.stringify({
+                password: newPsw
+            })
+        }, 5000)
+        const { result, error } = await res.json()
+        return { result, error }
+    } catch (e) {
+        return { result: null, error: e.message }
+    }
+}

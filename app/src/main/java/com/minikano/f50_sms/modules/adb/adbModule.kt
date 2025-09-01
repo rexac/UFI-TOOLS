@@ -5,6 +5,8 @@ import com.minikano.f50_sms.ADBService
 import com.minikano.f50_sms.utils.KanoLog
 import com.minikano.f50_sms.modules.BASE_TAG
 import com.minikano.f50_sms.modules.PREFS_NAME
+import com.minikano.f50_sms.utils.ShellKano
+import com.minikano.f50_sms.utils.ShellKano.Companion
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
@@ -18,6 +20,39 @@ import org.json.JSONObject
 //静态资源
 fun Route.adbModule(context: Context) {
     val TAG = "[$BASE_TAG]_adbModule"
+
+    //更新ADMIN_PWD
+    post("/api/update_admin_pwd"){
+        try {
+            // 获取 JSON Body
+            val body = call.receiveText()
+            val json = JSONObject(body)
+
+            val password = json.optString("password", "")
+
+            val sharedPrefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+
+            // 保存配置
+            sharedPrefs.edit()
+                .putString("ADMIN_PWD", password)
+                .apply()
+
+            // 响应
+            call.response.headers.append("Access-Control-Allow-Origin", "*")
+            call.respondText(
+                """{"result":"success"}""",
+                ContentType.Application.Json
+            )
+        } catch (e: Exception) {
+            KanoLog.d(TAG, "解析ADB_WIFI POST 请求出错：${e.message}")
+            call.response.headers.append("Access-Control-Allow-Origin", "*")
+            call.respondText(
+                """{"error":"参数解析失败"}""",
+                ContentType.Application.Json,
+                HttpStatusCode.InternalServerError
+            )
+        }
+    }
 
     //获取网络ADB自启状态
     get("/api/adb_wifi_setting") {

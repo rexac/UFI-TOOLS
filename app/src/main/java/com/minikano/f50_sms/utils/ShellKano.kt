@@ -570,8 +570,7 @@ class ShellKano {
                             sharedPrefs.getString("gateway_ip", "")?.substringBefore(":")
                                 ?: throw Exception("没有ADMIN_IP")
                         val ADMIN_PWD =
-                            sharedPrefs.getString("ADMIN_PWD", "")
-                                ?: throw Exception("没有ADMIN_PWD")
+                            sharedPrefs.getString("ADMIN_PWD","Wa@9w+YWRtaW4=") ?: "Wa@9w+YWRtaW4="
 
                         Log.d(
                             "kano_ZTE_LOG", "读取网络ADB所需配置：ADB_IP:${

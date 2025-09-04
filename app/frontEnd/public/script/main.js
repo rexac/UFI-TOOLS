@@ -2935,6 +2935,30 @@ function main_func() {
     QOSRDPCommand("AT+CGEQOSRDP=1")
     let QORSTimer = requestInterval(() => { QOSRDPCommand("AT+CGEQOSRDP=1") }, 10000)
 
+    const initHighRailBtn = async () => {
+        const highRailModeBtn = document.querySelector('#highRailModeBtn')
+        if (highRailModeBtn) {
+            try {
+                const params = "AT+SP5GCMDS=\"get nr synch_param\",44"
+                const res = await executeATCommand(params);
+                highRailModeBtn.dataset.enabled = '0'
+                if (res) {
+                    if (res.error) {
+                        AT_RESULT.innerHTML = `<p style="overflow: hidden;">${res.error}</p>`;
+                        !silent && createToast(t('toast_exe_failed'), 'red');
+                        return false
+                    }
+                    if (res.result.includes('synch_param,44,1')) {
+                        highRailModeBtn.dataset.enabled = '1'
+                        highRailModeBtn.style.backgroundColor = 'var(--dark-btn-color-active)'
+                    }
+                }
+            } catch {
+                highRailModeBtn.dataset.enabled = '0'
+            }
+        }
+    }
+
     let initATBtn = async () => {
         const el = document.querySelector('#AT')
         if (!(await initRequestData()) || !el) {
@@ -2944,6 +2968,7 @@ function main_func() {
         }
         el.style.backgroundColor = ''
         el.onclick = () => {
+            initHighRailBtn()
             showModal('#ATModal')
         }
     }
@@ -3010,7 +3035,7 @@ function main_func() {
         }
     };
 
-    const handleAT = async (params) => {
+    const handleAT = async (params, silent = false) => {
         if (!params) return
         // 执行AT
         const AT_RESULT = document.querySelector('#AT_RESULT')
@@ -3020,32 +3045,36 @@ function main_func() {
             if (res) {
                 if (res.error) {
                     AT_RESULT.innerHTML = `<p style="overflow: hidden;">${res.error}</p>`;
-                    createToast(t('toast_exe_failed'), 'red');
-                    return;
+                    !silent && createToast(t('toast_exe_failed'), 'red');
+                    return false
                 }
 
                 AT_RESULT.innerHTML = `<p onclick="copyText(event)"  style="overflow: hidden;">${res.result}</p>`;
-                createToast(t('toast_exe_success'), 'green');
+                !silent && createToast(t('toast_exe_success'), 'green');
                 //只要执行AT了，就默认清空一次imei展示缓存
                 resetDiagImeiCache()
+                return true
             } else {
-                createToast(t('toast_exe_failed'), 'red');
+                !silent && createToast(t('toast_exe_failed'), 'red');
+                return false
             }
         } catch (err) {
             const error = err?.error || t('toast_unknow_err');
             AT_RESULT.innerHTML = `<p style="overflow: hidden;">${error}</p>`;
-            createToast(t('toast_exe_failed'), 'red');
+            !silent && createToast(t('toast_exe_failed'), 'red');
+            return false
         }
     }
 
     //执行时禁用按钮
     const disableButtonWhenExecuteFunc = async (e, func) => {
         const target = e.currentTarget
-
         target.setAttribute("disabled", "true");
         target.style.opacity = '.5'
         try {
-            func && await func()
+            if (func) {
+                await func()
+            }
         } finally {
             target.removeAttribute("disabled");
             target.style.opacity = ''
@@ -5865,8 +5894,37 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
         createToast(t("toast_oprate_success"), 'green')
     }
 
+    //高铁模式
+    handleHighRailMode = async (e) => {
+        if (!(await initRequestData())) {
+            return null
+        }
+        const HighRailModeAT = "AT+SP5GCMDS=\"set nr param\",35,"
+        const target = e.target
+        const isEnabled = target.dataset.enabled === '1'
+        try {
+            if (isEnabled) {
+                //关闭高铁模式
+                const res = await handleAT(HighRailModeAT + "0", true)
+                if (!res) throw new Error('Failed to enable High Rail Mode')
+                target.dataset.enabled = '0'
+                target.style.backgroundColor = ''
+            } else {
+                //开启高铁模式
+                const res = await handleAT(HighRailModeAT + "1", true)
+                if (!res) throw new Error('Failed to enable High Rail Mode')
+                target.dataset.enabled = '1'
+                target.style.backgroundColor = 'var(--dark-btn-color-active)'
+            }
+            createToast(t("toast_oprate_success_reboot"), 'green')
+        } catch {
+            createToast(t('toast_exe_failed'), 'red')
+        }
+    }
+
     //挂载方法到window
     const methods = {
+        handleHighRailMode,
         setPort,
         resetTTYDPort,
         initTTYD,

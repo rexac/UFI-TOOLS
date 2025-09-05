@@ -1116,3 +1116,17 @@ input[type="range"] {
     -webkit-backdrop-filter: none !important;
     backdrop-filter: none !important;
 }
+
+.slider {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.slider input {
+    flex: 1;
+}
+
+.slider>span {
+    flex-shrink: 0;
+}

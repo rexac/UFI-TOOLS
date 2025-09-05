@@ -17,6 +17,8 @@ let overlaySwitch = true;
 
 // 调色盘
 function getColorByPercent(e) {
+    const HValue = document.querySelector("#HValue")
+    if (HValue) HValue.innerText = (+e.target.value / 100 * 255).toFixed(0)
     const value = e.target.value; // 0 ~ 100
     const h = (value / 100) * 300;
     currentHue = h;
@@ -27,6 +29,8 @@ function getColorByPercent(e) {
 
 //亮度
 function getValueByPercent(e) {
+    const LValue = document.querySelector("#LValue")
+    if (LValue) LValue.innerText = (+e.target.value / 100 * 255).toFixed(0)
     const value = e.target.value;
     currentValue = value / 100;
     updateColor();
@@ -35,6 +39,8 @@ function getValueByPercent(e) {
 
 // 透明度
 function getOpacityByPercent(e) {
+    const opacityValue = document.querySelector("#opacityValue")
+    if (opacityValue) opacityValue.innerText = (+e.target.value / 100 * 255).toFixed(0)
     const value = e.target.value; // 0 ~ 100
     currentOpacity = value / 100;
     updateColor();
@@ -44,6 +50,8 @@ function getOpacityByPercent(e) {
 
 //饱和度
 function getSaturationByPercent(e) {
+    const SValue = document.querySelector("#SValue")
+    if (SValue) SValue.innerText = (+e.target.value / 100 * 255).toFixed(0)
     const value = e.target.value; // 0 ~ 100
     currentSaturation = value / 100;
     updateColor();
@@ -53,6 +61,8 @@ function getSaturationByPercent(e) {
 
 //字体颜色
 function updateTextColor(e) {
+    const fontColorValue = document.querySelector("#fontColorValue")
+    if (fontColorValue) fontColorValue.innerText = (+e.target.value / 100 * 255).toFixed(0)
     const value = e.target.value; // 0 ~ 100
     const gray = Math.round((value / 100) * 255);
     const color = `rgb(${gray}, ${gray}, ${gray})`;
@@ -126,14 +136,14 @@ function updateColor() {
     document.documentElement.style.setProperty('--blur-rate', homeBlurSwitch ? "4px" : "0");
 
     //针对Safari -webkit-backdrop-filter 不支持css变量 进行修复
-    document.querySelectorAll('.statusCard,thead,tbody,input')?.forEach(el=>{
-       homeBlurSwitch ?  el.classList.add('blur-px') :  el.classList.remove('blur-px')
+    document.querySelectorAll('.statusCard,thead,tbody,input')?.forEach(el => {
+        homeBlurSwitch ? el.classList.add('blur-px') : el.classList.remove('blur-px')
     })
     const _style = document.createElement('style')
     _style.innerHTML = `.deviceList li {backdrop-filter: blur(${homeBlurSwitch ? "4px" : "0"}) !important;-webkit-backdrop-filter: blur(${homeBlurSwitch ? "4px" : "0"}) !important;}`
-    document.querySelector('.status-container')?.insertAdjacentElement('beforebegin',_style)
+    document.querySelector('.status-container')?.insertAdjacentElement('beforebegin', _style)
 
-    
+
     const el = document.querySelector('body');
     el.style.transform = 'translateZ(0)';  // 强制 GPU 图层
 
@@ -223,13 +233,22 @@ const initTheme = async (sync = false) => {
     currentSaturation = saturation / 100;
     currentTextColor = textColor;
     updateColor();
-    document.querySelector("#colorEl").value = colorPer;
-    document.querySelector("#opacityEl").value = opacityPer;
-    document.querySelector("#brightEl").value = value;
-    document.querySelector("#saturationEl").value = saturation;
-    document.querySelector("#textColorEl").value = textColorPer;
-    document.querySelector("#blurSwitch").checked = homeBlurSwitch;
-    document.querySelector("#overlaySwitch").checked = overlaySwitch;
+    try {
+        document.querySelector("#colorEl").value = colorPer;
+        document.querySelector("#opacityEl").value = opacityPer;
+        document.querySelector("#brightEl").value = value;
+        document.querySelector("#saturationEl").value = saturation;
+        document.querySelector("#textColorEl").value = textColorPer;
+        document.querySelector("#blurSwitch").checked = homeBlurSwitch;
+        document.querySelector("#overlaySwitch").checked = overlaySwitch;
+        document.querySelector("#fontColorValue").innerText = (+textColorPer / 100 * 255).toFixed(0)
+        document.querySelector("#HValue").innerText = (+colorPer / 100 * 255).toFixed(0)
+        document.querySelector("#SValue").innerText = (+saturation / 100 * 255).toFixed(0)
+        document.querySelector("#LValue").innerText = (+value / 100 * 255).toFixed(0)
+        document.querySelector("#opacityValue").innerText = (+opacityPer / 100 * 255).toFixed(0)
+    } catch (e) {
+        createToast(e.message, 'red')
+    }
     isCloudSync.checked = isSync == "true"
 }
 initTheme();

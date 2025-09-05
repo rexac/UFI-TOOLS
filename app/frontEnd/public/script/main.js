@@ -612,13 +612,14 @@ function main_func() {
         try {
             let res = await getSmsInfo()
             if (!res) {
-                out()
-                createToast(res.error, 'red')
+                // out()
+                createToast(t('client_mgmt_fetch_error') + res.error, 'red')
                 return null
             }
             return res.messages
         } catch {
-            out()
+            // out()
+            createToast(t('client_mgmt_fetch_error') + res.error, 'red')
             return null
         }
     }
@@ -645,7 +646,7 @@ function main_func() {
                 }
             } catch {
                 createToast(t('toast_sms_send_failed_network'), 'red')
-                out()
+                // out()
             }
             isDisabledSendSMS = false
         } else {
@@ -750,7 +751,8 @@ function main_func() {
             }).join('')
         } else {
             if (!res) {
-                out()
+                createToast(t('client_mgmt_fetch_error'), 'red')
+                // out()
             }
             list.innerHTML = ` <li> <h2 style="padding: 30px;text-align:center;">${t('no_sms')}</h2></li >`
         }
@@ -1140,9 +1142,9 @@ function main_func() {
     }
     handlerPerformaceStatus()
 
-    function init() {
+    async function init() {
         smsSender && smsSender()
-        if (!localStorage.getItem('kano_sms_pwd')) {
+        if (!(await initRequestData())) {
             showModal('#tokenModal')
         } else {
             isFirstRender = true

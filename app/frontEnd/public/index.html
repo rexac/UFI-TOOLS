@@ -1078,11 +1078,13 @@
                                 <input onchange="updateOverlaySwitch(event)" id="overlaySwitch" type="checkbox">
                             </label>
                         </p>
-                        <p data-i18n="bg_setting_text_color">字体颜色(黑-白)</p>
+                        <p><span data-i18n="bg_setting_text_color">字体颜色(黑-白)</span>&nbsp;：&nbsp;<span
+                                id="fontColorValue"></span></p>
                         <input id="textColorEl" oninput="updateTextColor(event)"
                             style="width: 100%;margin-left: 0;margin-right: 0;" min="0" max="100" type="range">
-
                         <p data-i18n="bg_setting_theme_color">主题颜色(颜色、饱和度、亮度)</p>
+                        <p>H：<span id="HValue">255</span>&nbsp;&nbsp;S：<span
+                                id="SValue">255</span>&nbsp;&nbsp;L：<span id="LValue">255</span></p>
                         <div class="color-panel"></div>
                         <input id="colorEl" oninput="getColorByPercent(event)"
                             style="width: 100%;margin-left: 0;margin-right: 0;" min="0" max="100" type="range">
@@ -1090,8 +1092,7 @@
                             style="width: 100%;margin-left: 0;margin-right: 0;" min="0" max="100" type="range">
                         <input id="brightEl" oninput="getValueByPercent(event)"
                             style="width: 100%;margin-left: 0;margin-right: 0;" min="0" max="100" type="range">
-
-                        <p data-i18n="bg_setting_opacity">主题透明度</p>
+                        <p><span data-i18n="bg_setting_opacity">主题透明度</span>&nbsp;：&nbsp;<span id="opacityValue">255</span></p>
                         <input id="opacityEl" oninput="getOpacityByPercent(event)"
                             style="width: 100%;margin-left: 0;margin-right: 0;" type="range" min="0" max="100">
                     </div>
@@ -1347,8 +1348,7 @@
                                     <button class="btn" style="margin-top: 6px;"
                                         onclick="disableButtonWhenExecuteFunc(event,()=>handleAT('AT+CIMI'))"
                                         data-i18n="at_imsi">IMSI</button>
-                                    <button class="btn"
-                                        id="highRailModeBtn"
+                                    <button class="btn" id="highRailModeBtn"
                                         onclick="disableButtonWhenExecuteFunc(event,()=>handleHighRailMode(event))"
                                         data-i18n="at_high_rail_mode">高铁模式</button>
                                 </div>

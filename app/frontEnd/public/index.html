@@ -483,9 +483,8 @@
                 </div>
             </div>
             <!-- 短信模态框 -->
-            <div class="modal h100" id="smsList" style="display: none;">
+            <div class="modal" id="smsList" style="display: none;">
                 <div class="title" data-i18n="sms_modal_title" style="margin-bottom: 6px;">短信列表</div>
-
                 <div class="action" style="margin-top: 10px;background-color: #00ffdd17;">
                     <span data-i18n="sms_modal_recipient">收件人：</span>
                     <input id="PhoneInput" type="number" style="flex: 1;margin-right: 6px" placeholder="手机号"
@@ -1348,7 +1347,7 @@
                                     <button class="btn" style="margin-top: 6px;"
                                         onclick="disableButtonWhenExecuteFunc(event,()=>handleAT('AT+CIMI'))"
                                         data-i18n="at_imsi">IMSI</button>
-                                    <button class="btn" id="highRailModeBtn"
+                                    <button class="btn" style="margin-top: 6px;" id="highRailModeBtn"
                                         onclick="disableButtonWhenExecuteFunc(event,()=>handleHighRailMode(event))"
                                         data-i18n="at_high_rail_mode">高铁模式</button>
                                 </div>

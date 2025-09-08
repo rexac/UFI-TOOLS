@@ -293,10 +293,10 @@ const readSmsByIds = async (ids) => {
 };
 
 //获取短信列表（base64编码）
-const getSmsInfo = async () => {
+const getSmsInfo = async (page = 0, pageSize = 500) => {
     const params = new URLSearchParams()
     params.append('_', Date.now().toString())
-    const res = await fetch(KANO_baseURL + "/goform/goform_get_cmd_process?multi_data=1&isTest=false&cmd=sms_data_total&page=0&data_per_page=500&mem_store=1&tags=100&order_by=order by id desc&" + params, {
+    const res = await fetch(KANO_baseURL + `/goform/goform_get_cmd_process?multi_data=1&isTest=false&cmd=sms_data_total&page=${page}&data_per_page=${pageSize}&mem_store=1&tags=100&order_by=order by id desc&` + params, {
         headers: {
             ...common_headers
         }

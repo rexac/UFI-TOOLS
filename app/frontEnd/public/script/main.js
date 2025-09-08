@@ -714,7 +714,7 @@ function main_func() {
             let ids = res.map(item => item.id).join('')
             if (ids === lastRequestSmsIds) return
             lastRequestSmsIds = ids
-            const dateStrArr = [t('year'), t('month'), t('day'), ':', ':', '']
+            const dateStrArr = [t('year'), t('month'), '&nbsp;', ':', ':', '']
             res.sort((a, b) => {
                 let date_a = a.date.split(',')
                 let date_b = b.date.split(',')

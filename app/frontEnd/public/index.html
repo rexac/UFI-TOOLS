@@ -454,26 +454,33 @@
             </div>
             <!-- 登录模态框 -->
             <div class="mask" id="tokenModal" style="display: none">
-                <div class="modal" style="width: 77%;max-width: 300px;">
-                    <div class="title" data-i18n="token_title">请输入口令与密码</div>
+                <div class="modal" style="width: 90vw;max-width: 450px;">
+                    <div class="title" style="display: flex;justify-content: space-between;">
+                        <span data-i18n="token_title">请输入口令与密码</span>
+                        <button style="border-radius: 50%;" onclick="showLoginHelp()">?</button>
+                    </div>
                     <div class="title" style="margin: 10px 0;">
                         <p style="font-size: 12px;margin: 0;">
                             <i>
                                 <span data-i18n="token_note_1">注：请在UFI-TOOLS_WEB</span><br>
-                                <span data-i18n="token_note_2">后台App查看口令(默认为admin)</span><br>
+                                <span data-i18n="token_note_2">后台App内查看口令(默认为admin)</span><br>
                                 <span data-i18n="token_note_3">密码为设备的管理密码(默认在机器背面)</span><br>
-                                <span data-i18n="token_note_4">如果忘记了密码,请重置设备或联系作者</span>
+                                <span data-i18n="token_note_4">如果出现密码错误，请换一个登录方式</span>
                             </i>
                         </p>
                     </div>
                     <form class="content"
-                        style="padding: 15px 4px 0 4px;display: flex;flex-direction: column;align-items: center;">
+                        style="padding: 0px 4px 0 4px;display: flex;flex-direction: column;align-items: center;">
                         <input type="text" name="username" autocomplete="username" style="display: none;">
+                        <select style="width: 100%;margin-bottom: 10px;" class="select" name="" value="1" id="login_method">
+                            <option value="1" data-i18n="login_method_1">登录方式1</option>
+                            <option value="0" data-i18n="login_method_2">登录方式2</option>
+                        </select>
                         <input name="backend_password" autocomplete="current-password" id="TOKEN" type="password"
-                            data-i18n-placeholder="token_placeholder_token" placeholder="请在后台App查看"
+                            data-i18n-placeholder="token_placeholder_token" placeholder="口令(UFI-TOOLS后台应用中查看)"
                             style="width: 100%;text-indent: .5em;margin:0 4px;margin-bottom: 10px;height: 30px;">
                         <input name="web_password" autocomplete="new-password" id="tokenInput" type="password"
-                            data-i18n-placeholder="token_placeholder_pwd" placeholder="设备的WEB管理密码"
+                            data-i18n-placeholder="token_placeholder_pwd" placeholder="官方后台的管理密码"
                             style="width: 100%;text-indent: .5em; margin:0 4px;margin-bottom: 20px;height: 30px;">
                     </form>
                     <div class="btn" style="text-align: right;">
@@ -1382,9 +1389,9 @@
                         <div style="margin-top: 2px;margin-bottom: 10px;">
                             <div style="display: flex;flex-wrap: wrap; gap: 10px;">
                                 <div>
-                                    <div class="title" style="font-size: 10px;margin-bottom: 10px;">
+                                    <div class="title" style="font-size: 11px;margin-bottom: 10px;">
                                         <div data-i18n="advance_feature_list">
-                                            <i>TTYD端口为1146(三击标题区域可更改)</i><br>
+                                            <b>注意，开启高级功能后不可关闭文件共享，否则高级功能会失效</b><br>
                                             <i class="user_select">如去除高级功能报错，可以在TTYD上执行 sh /sdcard/unlock_samba.sh
                                                 重启生效</i>
                                             <i><br>添加高级功能包括:<br>

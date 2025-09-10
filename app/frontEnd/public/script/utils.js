@@ -925,3 +925,24 @@ const checkBroswer = () => {
         }
     }
 }
+
+const showLoginHelp = () => {
+    const message = t("login_help_text").replaceAll('\n', "<br>")
+    const { el, close } = createFixedToast('kano_login_help_message', `
+                    <div style="pointer-events:all;width:80vw;max-width:600px">
+                        <div class="title" style="margin:0">🔑 登录帮助说明</div>
+                        <div style="margin:10px 0;max-height:400px;overflow:auto">${message}</div>
+                        <div style="text-align:right">
+                            <button style="font-size:.64rem" id="close_login_help_btn" data-i18n="pay_btn_dismiss">${t('pay_btn_dismiss')}</button>
+                        </div>
+                    </div>
+                    `)
+    const btn = el.querySelector('#close_login_help_btn')
+    if (!btn) {
+        close()
+        return
+    }
+    btn.onclick = async () => {
+        close()
+    }
+}

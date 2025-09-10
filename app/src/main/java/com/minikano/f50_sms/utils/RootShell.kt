@@ -10,7 +10,7 @@ import java.io.OutputStreamWriter
 
 object RootShell {
 
-    fun sendCommandToSocket(command: String, socketPath: String): String? {
+    fun sendCommandToSocket(command: String, socketPath: String,timeout:Int = 60*1000): String? {
         val socket = LocalSocket()
         val socketAddress = LocalSocketAddress(socketPath, LocalSocketAddress.Namespace.FILESYSTEM)
 
@@ -18,7 +18,7 @@ object RootShell {
             KanoLog.d("kano_ZTE_LOG", "开始发送socket,目录：${socketPath},命令:${command}")
 
             socket.connect(socketAddress)
-            socket.soTimeout = 60*1000 // 60 秒超时
+            socket.soTimeout = timeout // 60 秒超时
 
             KanoLog.d("kano_ZTE_LOG", "Socket")
 

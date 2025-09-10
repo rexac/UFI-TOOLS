@@ -4,6 +4,7 @@ function gsmEncode(text) { function encodeText(text) { let encoded = []; for (le
 let KANO_baseURL = '/api'
 let KANO_PASSWORD = null
 let KANO_TOKEN = null;
+let loginMethod = localStorage.getItem('login_method') == "1" ? "1" : "0"; //1新方法，0旧方法
 
 const originFetch = window.fetch;
 
@@ -104,7 +105,7 @@ const login1 = async () => {
     }
 }
 
-let login = async () => {
+let login2 = async () => {
     try {
         const { LD } = await getLD()
         if (!LD) throw new Error('无法获取LD')
@@ -134,6 +135,13 @@ let login = async () => {
     catch {
         return undefined
     }
+}
+
+let login = async () => {
+    if (loginMethod == '1') {
+        return await login2()
+    }
+    return await login1()
 }
 
 const logout = async (cookie) => {

@@ -498,6 +498,13 @@ function main_func() {
         }, 2000)
         // psw_fail_num_str
         try {
+            // 检测登录方法
+            const login_method = document.querySelector('#login_method')
+            if (login_method) {
+                loginMethod = login_method.value == '1' ? "1" : "0"
+                //持久化
+                localStorage.setItem('login_method', loginMethod)
+            }
             toastTimer && clearTimeout(toastTimer)
             createToast(t('toast_login_checking'), '', 2000)
             toastTimer = createTimer()

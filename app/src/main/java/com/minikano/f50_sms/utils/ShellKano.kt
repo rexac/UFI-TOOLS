@@ -2,7 +2,9 @@ package com.minikano.f50_sms.utils
 
 import android.content.Context
 import android.util.Log
+import com.minikano.f50_sms.ADBService.Companion.adbIsReady
 import com.minikano.f50_sms.modules.TAG
+import com.minikano.f50_sms.utils.KanoUtils.Companion.sendShellCmd
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.w3c.dom.Document
@@ -646,6 +648,18 @@ class ShellKano {
 
                                     KanoLog.d("kano_ZTE_LOG", "禁用FOTA结果: $result3")
 
+                                    val samba_result = sendShellCmd("cat /data/samba/etc/smb.conf | grep internal_storage")
+
+                                    if(samba_result.done && samba_result.content.contains("internal_storage")){
+                                        val result = req.postData(
+                                            cookie, mapOf(
+                                                "goformId" to "SAMBA_SETTING",
+                                                "samba_switch" to "1",
+                                            )
+                                        )
+                                        KanoLog.d("kano_ZTE_LOG", "开启samba结果: $result")
+                                    }
+
                                     req.logout(cookie)
                                     if (result1?.getString("result") == "success" && result2?.getString("result") == "success") {
                                         KanoLog.d("kano_ZTE_LOG", "ADB_WIFI自启动执行成功")
@@ -670,6 +684,38 @@ class ShellKano {
                 )
                 ensureAdbAlive(context)
             }.start()
+        }
+
+        fun openSMB (context: Context){
+            //samba开关关闭了，立马拉起
+            try {
+                val open_command = "settings put global samba_enable 1"
+                val socketPath = File(context.filesDir, "kano_root_shell.sock")
+
+                if (adbIsReady) {
+                    val outFile_adb = KanoUtils.copyFileToFilesDir(context, "shell/adb")
+                    if(outFile_adb != null){
+                        outFile_adb.setExecutable(true)
+                        KanoLog.d("kano_ZTE_LOG", "samba被关闭了，尝试打开(使用adb方式)...")
+                        val res = runShellCommand(
+                            "${outFile_adb.absolutePath} -s localhost shell $open_command",
+                            context
+                        )
+                        KanoLog.d("kano_ZTE_LOG", "使用adb方式打开samba结果：$res")
+                    }
+                }
+
+                if (socketPath.exists()) {
+                    KanoLog.d("kano_ZTE_LOG", "samba被关闭了，尝试打开(使用root方式)...")
+                    val res =  RootShell.sendCommandToSocket(open_command.trimIndent(),
+                        socketPath.absolutePath,
+                        2000
+                    )
+                    KanoLog.d("kano_ZTE_LOG", "使用root方式打开samba结果：$res")
+                }
+            } catch (e: Exception) {
+                KanoLog.e("kano_ZTE_LOG", "smb打开执行失败", e)
+            }
         }
     }
 }

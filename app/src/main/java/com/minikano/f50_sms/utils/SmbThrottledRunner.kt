@@ -2,7 +2,11 @@ package com.minikano.f50_sms.utils
 
 import android.content.Context
 import android.os.Build
+import com.minikano.f50_sms.ADBService.Companion.adbIsReady
 import com.minikano.f50_sms.ADBService.Companion.isExecutedSambaMount
+import com.minikano.f50_sms.utils.KanoUtils.Companion.sendShellCmd
+import com.minikano.f50_sms.utils.ShellKano.Companion.executeShellFromAssetsSubfolderWithArgs
+import com.minikano.f50_sms.utils.ShellKano.Companion.openSMB
 import java.util.concurrent.atomic.AtomicBoolean
 import jcifs.smb.SmbFile
 import jcifs.context.SingletonContext
@@ -29,23 +33,31 @@ object SmbThrottledRunner {
         running.set(true)
 
         Thread {
-            try {
-                KanoLog.d("kano_ZTE_LOG", "开始执行 SMB 命令,连接到：\"smb://$host/internal_storage/\"")
+            val samba_result = sendShellCmd("cat /data/samba/etc/smb.conf | grep internal_storage")
+            val advancedIsEnable =
+                samba_result.done && samba_result.content.contains("internal_storage")
+            var needOpenSMB = false
+            if(advancedIsEnable) {
+                try {
+                    KanoLog.d(
+                        "kano_ZTE_LOG",
+                        "开始执行 SMB 命令,连接到：\"smb://$host/internal_storage/\""
+                    )
 
-                val ctx = SingletonContext.getInstance()
-                val smbFile = SmbFile("smb://$host/internal_storage/", ctx)
+                    val ctx = SingletonContext.getInstance()
+                    val smbFile = SmbFile("smb://$host/internal_storage/", ctx)
 
-                if (smbFile.exists()) {
-                    KanoLog.d("kano_ZTE_LOG", "SMB路径存在")
-                    if(!isExecutedSambaMount) {
-                        try {
-                            val socketPath = File(context.filesDir, "kano_root_shell.sock")
-                            if (!socketPath.exists()) {
-                                throw Exception("执行命令失败，没有找到 socat 创建的 sock (高级功能是否开启？)")
-                            }
-                            val result =
-                                RootShell.sendCommandToSocket(
-                                    """
+                    if (smbFile.exists()) {
+                        KanoLog.d("kano_ZTE_LOG", "SMB路径存在")
+                        if (!isExecutedSambaMount) {
+                            try {
+                                val socketPath = File(context.filesDir, "kano_root_shell.sock")
+                                if (!socketPath.exists()) {
+                                    throw Exception("执行命令失败，没有找到 socat 创建的 sock (高级功能是否开启？)")
+                                }
+                                val result =
+                                    RootShell.sendCommandToSocket(
+                                        """
 SRC_LIST="/sdcard/DCIM /mnt/media_rw /storage/sdcard0"
 TGT_LIST="/data/SAMBA_SHARE/机内存储 /data/SAMBA_SHARE/外部存储 /data/SAMBA_SHARE/SD卡"
 
@@ -65,24 +77,33 @@ for src in ${'$'}SRC_LIST; do
   fi
 done
                         """.trimIndent(),
-                                    socketPath.absolutePath
-                                )
-                                    ?: throw Exception("请检查命令输入格式")
+                                        socketPath.absolutePath
+                                    )
+                                        ?: throw Exception("请检查命令输入格式")
 
-                            KanoLog.d("kano_ZTE_LOG", "smb挂载执行结果： $result")
-                            isExecutedSambaMount = true
-                        } catch (e: Exception) {
-                            KanoLog.e("kano_ZTE_LOG", "smb挂载执行失败", e)
+                                KanoLog.d("kano_ZTE_LOG", "smb挂载执行结果： $result")
+                                isExecutedSambaMount = true
+                            } catch (e: Exception) {
+                                KanoLog.e("kano_ZTE_LOG", "smb挂载执行失败", e)
+                            }
                         }
+                    } else {
+                        KanoLog.d("kano_ZTE_LOG", "SMB路径不存在")
+                        needOpenSMB = true
                     }
-                } else {
-                    KanoLog.d("kano_ZTE_LOG", "SMB路径不存在")
+                } catch (e: Exception) {
+                    KanoLog.e("kano_ZTE_LOG", "SMB命令错误：${e.message}")
+                    needOpenSMB = true
+                } finally {
+                    running.set(false)
+                    KanoLog.d("kano_ZTE_LOG", "SMB 命令执行完成")
                 }
-            } catch (e: Exception) {
-                KanoLog.e("kano_ZTE_LOG", "SMB命令错误：${e.message}")
-            } finally {
+                if (needOpenSMB) {
+                    openSMB(context)
+                }
+            } else {
+                KanoLog.d("kano_ZTE_LOG", "没有检测到smb配置更改，高级功能未开启，无需执行")
                 running.set(false)
-                KanoLog.d("kano_ZTE_LOG", "SMB 命令执行完成")
             }
         }.start()
     }

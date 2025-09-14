@@ -693,7 +693,7 @@ function main_func() {
             const res = await removeSmsById(id);
             if (res?.result === 'success') {
                 createToast(t('toast_delete_success'), 'green');
-                handleSmsRender();
+                setTimeout(()=>handleSmsRender(),300)
             } else {
                 createToast(res?.message || t('toast_delete_failed'), 'red');
             }
@@ -758,7 +758,7 @@ function main_func() {
             }).join('')
         } else {
             if (!res) {
-                createToast(t('client_mgmt_fetch_error'), 'red')
+                return createToast(t('client_mgmt_fetch_error'), 'red')
                 // out()
             }
             list.innerHTML = ` <li> <h2 style="padding: 30px;text-align:center;">${t('no_sms')}</h2></li >`

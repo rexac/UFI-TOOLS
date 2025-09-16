@@ -211,7 +211,7 @@ const postData = async (cookie, data = {}) => {
         isTest: false,
         "AD": AD
     })
-    const res = await fetch(KANO_baseURL + "/goform/goform_set_cmd_process", {
+    const res = await fetchWithTimeout(KANO_baseURL + "/goform/goform_set_cmd_process", {
         method: "POST",
         headers: {
             ...common_headers,

@@ -681,5 +681,12 @@
     "wechat_sms_help": "企業WeChat Webhook SMS転送チュートリアル：<br><br>グループボットKeyを取得：企業WeChatグループにボットを追加し、生成されたWebhook URLをコピー、例 https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=あなたのkey<br><br>curlでSMS送信、一行で入力、改行不要、\\不要：<br>curl -X POST \"https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=<あなたのkey>\" -H \"Content-Type: application/json\" -d '{\"msgtype\": \"text\", \"text\": {\"content\": \"【番号】{{sms-from}}\\n【SMS内容】{{sms-body}}\\n【時間】{{sms-time}}\"}}'<br><br>パラメータ説明：{{sms-from}} 送信元番号、{{sms-body}} メッセージ内容、{{sms-time}} 受信時間。SMS受信後に変数を置き換えて企業WeChatに送信可能。",
     "pushplus_sms_help": "PushPlus SMS転送チュートリアル：<br><br>PushPlusトークンを取得：https://www.pushplus.plus/ にログイン、アカウント登録、プッシュボット作成、生成されたトークンをコピー。<br><br>curlでSMS送信、一行で入力、改行不要、\\不要：<br>curl -s -X POST https://www.pushplus.plus/send/ -H \"Content-Type: application/x-www-form-urlencoded\" -d \"token=<あなたのtoken>&title=新しいメッセージ！！&content=【SMS内容】%0A{{sms-body}}%0A%0A**【時間】%0A{{sms-time}}%0A%0A【番号】**%0A{{sms-from}}&template=markdown\"<br><br>パラメータ説明：{{sms-from}} 送信元番号、{{sms-body}} メッセージ内容、{{sms-time}} 受信時間。SMS受信後に変数を置き換えてPushPlusに送信可能。",
     "at_high_rail_mode": "高速鉄道モード",
-    "login_help_text": "デバイスの安全を確保するため、バックエンドにログインする際は「口令」と「管理パスワード」を入力する必要があります。\n1.\t口令\n•\t初期値は「admin」です。必ず複雑なパスワードに変更してください。\n•\t画面をミラーリングして UFI-TOOLS_WEB アプリを開き、そこで変更可能です。\n•\t「サービス停止」をクリックすると変更入力欄が表示されます。\n\n2.\t管理パスワード\n•\tデバイスのバックエンド管理用パスワードです。\n•\t初期値はデバイス背面に印字されています。\n\n3.\tログイン方法\n•\tプルダウンから「方式1」または「方式2」を選択できます。\n•\t片方で「パスワードエラー」が出た場合は、もう一方を試してください。\n•\t方式1は有効期限なし、高性能、中程度の互換性。\n•\t方式2は互換性が高いですが、有効期限は5分（自動再ログイン、データが0.5秒ほど止まる）。\n\n4.\tよくある問題\n•\t「パスワードエラー」が表示された場合：\n•\t入力内容を確認してください（大文字小文字に注意）。\n•\tログイン方式を切り替えてみてください。\n•\t忘れた場合はデバイス背面の出荷情報を確認するか、管理者に連絡してください。"
+    "login_help_text": "デバイスの安全を確保するため、バックエンドにログインする際は「口令」と「管理パスワード」を入力する必要があります。\n1.\t口令\n•\t初期値は「admin」です。必ず複雑なパスワードに変更してください。\n•\t画面をミラーリングして UFI-TOOLS_WEB アプリを開き、そこで変更可能です。\n•\t「サービス停止」をクリックすると変更入力欄が表示されます。\n\n2.\t管理パスワード\n•\tデバイスのバックエンド管理用パスワードです。\n•\t初期値はデバイス背面に印字されています。\n\n3.\tログイン方法\n•\tプルダウンから「方式1」または「方式2」を選択できます。\n•\t片方で「パスワードエラー」が出た場合は、もう一方を試してください。\n•\t方式1は有効期限なし、高性能、中程度の互換性。\n•\t方式2は互換性が高いですが、有効期限は5分（自動再ログイン、データが0.5秒ほど止まる）。\n\n4.\tよくある問題\n•\t「パスワードエラー」が表示された場合：\n•\t入力内容を確認してください（大文字小文字に注意）。\n•\tログイン方式を切り替えてみてください。\n•\t忘れた場合はデバイス背面の出荷情報を確認するか、管理者に連絡してください。",
+    "sleep_never": "なし",
+    "sleep_5_min": "5分",
+    "sleep_10_min": "10分",
+    "sleep_20_min": "20分",
+    "sleep_30_min": "30分",
+    "sleep_1_hr": "1時間",
+    "sleep_2_hr": "2時間"
 }

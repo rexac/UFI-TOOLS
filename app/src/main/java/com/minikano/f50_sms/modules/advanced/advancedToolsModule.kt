@@ -1,6 +1,7 @@
 package com.minikano.f50_sms.modules.advanced
 
 import android.content.Context
+import com.minikano.f50_sms.ADBService.Companion.adbIsReady
 import com.minikano.f50_sms.configs.SMBConfig
 import com.minikano.f50_sms.modules.BASE_TAG
 import com.minikano.f50_sms.utils.KanoLog
@@ -32,7 +33,7 @@ import java.io.PipedOutputStream
 fun Route.advancedToolsModule(context: Context, targetServerIP: String) {
     val TAG = "[$BASE_TAG]_advanceToolsModule"
 
-    //更改samba分享地址为根目录
+    //开启高级功能
     get("/api/smbPath") {
         try {
             val enabled = call.request.queryParameters["enable"]
@@ -59,34 +60,59 @@ fun Route.advancedToolsModule(context: Context, targetServerIP: String) {
             outFileSocat.setExecutable(true)
             outFileSmbSh.setExecutable(true)
 
-            var jsonResult = """{"result":"执行成功，重启生效！"}"""
+            var jsonResult = """{"result":"执行成功<br>Execution successful！"}"""
 
             if (enabled == "1") {
-                try{
-                    val cmd =
-                        "cat $smbPath > /data/samba/etc/smb.conf"
-                    val result = sendShellCmd(cmd,3)
-                    if(!result.done) throw Exception(result.content)
-                    jsonResult = """{"result":"执行成功，等待1-2分钟即可生效！"}"""
-                } catch (e:Exception){
-                    val cmd =
-                        "${outFileAdb.absolutePath} -s localhost shell cat $smbPath > /data/samba/etc/smb.conf"
-                    val result = ShellKano.runShellCommand(cmd, context = context)
-                        ?: throw Exception("修改 smb.conf 失败,请开启ADB后再试")
-                    jsonResult = """{"result":"执行成功，等待1-2分钟即可生效！"}"""
+                val cmdShell =
+                    "cat $smbPath > /data/samba/etc/smb.conf"
+                val cmdAdb =
+                    "${outFileAdb.absolutePath} -s localhost shell cat $smbPath > /data/samba/etc/smb.conf"
+
+                val resultShell = sendShellCmd(cmdShell,3)
+                var resultAdb:String? = null
+
+                if(adbIsReady) {
+                    resultAdb = ShellKano.runShellCommand(cmdAdb, context = context)
                 }
+
+                KanoLog.d(TAG, "使用shell开启高级模式结果 是否成功：${resultShell.done} 内容：${resultShell.content}")
+                KanoLog.d(TAG, "使用ADB开启高级模式结果$resultAdb")
+
+                val queryShell = "grep 'samba_exec.sh' /data/samba/etc/smb.conf"
+                val sambaResult =  sendShellCmd(queryShell,3)
+                var sambaAdbResult:String? = null
+
+                if(adbIsReady) {
+                    sambaAdbResult = ShellKano.runShellCommand("${outFileAdb.absolutePath} -s localhost shell $queryShell", context = context)
+                }
+
+                KanoLog.d(TAG, "shell查询高级功能开启结果:${sambaResult.done} ${sambaResult.content}")
+                KanoLog.d(TAG, "ADB查询高级功能开启结果:$sambaAdbResult")
+
+                if( resultAdb == null && !resultShell.done){
+                    throw Exception("开启高级功能失败(Adb与Shell方式执行不成功)，请打开网络ADB后再试<br>Failed to enable advanced features (resultAdb and resultShell execution unsuccessful)")
+                }
+
+                val queryShellIsDone = sambaResult.done && sambaResult.content.contains("samba_exec.sh")
+                val queryAdbIsDone = sambaAdbResult != null && sambaAdbResult.contains("samba_exec.sh")
+
+                if(!queryShellIsDone && !queryAdbIsDone){
+                    throw Exception("开启高级功能失败(配置文件没有更改或不存在)，请打开网络ADB后再试<br>Failed to enable advanced features (conf not changed or does not exist),please enable ADB")
+                }
+
+                jsonResult = """{"result":"执行成功，等待1-2分钟即可生效！<br>Execution successful, please wait 1–2 minutes for it to take effect!"}"""
             } else {
                 val script = """
-                sh /sdcard/ufi_tools_boot.sh
                 chattr -i /data/samba/etc/smb.conf
-                chmod 644 /data/samba/etc/smb.conf
+                chmod 777 /data/samba/etc/smb.conf
+                chattr -i /data/samba/etc/smb.conf
                 rm -f /data/samba/etc/smb.conf
                 sync
             """.trimIndent()
 
                 val socketPath = File(context.filesDir, "kano_root_shell.sock")
                 if (!socketPath.exists()) {
-                    throw Exception("执行命令失败，没有找到 socat 创建的 sock (高级功能是否开启？)")
+                    throw Exception("执行命令失败，没有找到 socat 创建的 sock (高级功能是否开启？)<br>Command execution failed, could not find the sock created by socat (are advanced features enabled?)")
                 }
 
                 val result = RootShell.sendCommandToSocket(script, socketPath.absolutePath)
@@ -102,7 +128,7 @@ fun Route.advancedToolsModule(context: Context, targetServerIP: String) {
         } catch (e: Exception) {
             KanoLog.d(TAG, "smbPath 执行出错：${e.message}")
             call.respondText(
-                """{"error":"执行错误：${e.message}"}""",
+                """{"error":"Error：${e.message}"}""",
                 ContentType.Application.Json,
                 HttpStatusCode.InternalServerError
             )

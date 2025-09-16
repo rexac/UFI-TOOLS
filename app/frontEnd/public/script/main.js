@@ -475,6 +475,7 @@ function main_func() {
         initShutdownBtn()
         initATBtn()
         initCellularSpeedTestBtn()
+        initSleepTime()
         initAdvanceTools()
         initTerms()
         QOSRDPCommand("AT+CGEQOSRDP=1")
@@ -693,7 +694,7 @@ function main_func() {
             const res = await removeSmsById(id);
             if (res?.result === 'success') {
                 createToast(t('toast_delete_success'), 'green');
-                setTimeout(()=>handleSmsRender(),300)
+                setTimeout(() => handleSmsRender(), 300)
             } else {
                 createToast(res?.message || t('toast_delete_failed'), 'red');
             }
@@ -5931,8 +5932,63 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
         }
     }
 
+    //初始化休眠选项卡     
+    const initSleepTime = async () => {
+        const target = document.querySelector("#SLEEP_TIME")
+        if (!target) return
+        if (!(await initRequestData())) {
+            target.disabed = true
+            target.style.background = "var(--dark-btn-disabled-color)"
+            return null
+        }
+        target.disabed = false
+        target.style.background = ""
+        // 从设备获取数据
+        const { sleep_sysIdleTimeToSleep } = await getData(new URLSearchParams({
+            cmd: "sleep_sysIdleTimeToSleep"
+        }))
+        if (sleep_sysIdleTimeToSleep == "") {
+            target.style.display = 'none'
+        } else {
+            target.style.display = ''
+        }
+        target.value = sleep_sysIdleTimeToSleep
+
+    }
+    initSleepTime()
+
+    const changeSleepTime = async (e) => {
+        if (!(await initRequestData())) {
+            createToast(t("toast_need_login"), 'red');
+            e.preventDefault()
+            return false;
+        }
+        const target = e.target
+        if (!target) return
+
+        try {
+
+            const res = await postData(await login(), {
+                goformId: "SET_WIFI_SLEEP_INFO",
+                sleep_sysIdleTimeToSleep: target.value
+            })
+
+            const { result } = await res.json()
+
+            if (result != "success") {
+                throw new Error("fail!")
+            }
+
+            createToast(t('toast_oprate_success'), 'green')
+            initSleepTime()
+        } catch {
+            createToast(t('toast_oprate_failed'), 'red')
+        }
+    }
+
     //挂载方法到window
     const methods = {
+        changeSleepTime,
         handleHighRailMode,
         setPort,
         resetTTYDPort,

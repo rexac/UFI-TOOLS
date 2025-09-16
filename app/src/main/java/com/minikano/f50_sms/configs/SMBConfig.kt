@@ -10,45 +10,45 @@ object SMBConfig {
         val model = Build.MODEL
         val fileName = "smb.conf"
         val presetString = """[global]
-            	workgroup = SAMBA
-            	netbios name = Android
-            	server string = Android Samber Server
-            	security = user
-            	passdb backend = smbpasswd:/data/samba/etc/smbpasswd
-            	map to guest = bad user
-                root preexec = $command
+    workgroup = SAMBA
+    netbios name = Android
+    server string = Android Samber Server
+    security = user
+    passdb backend = smbpasswd:/data/samba/etc/smbpasswd
+    map to guest = bad user
+    root preexec = $command
 
-            [$model]
-            	comment = Android Server
-            	path = /data/SAMBA_SHARE
-            	browseable = yes
-            	writable = yes
-            	public = yes
-            	guest ok = yes
+[$model]
+    comment = Android Server
+    path = /data/SAMBA_SHARE
+    browseable = yes
+    writable = yes
+    public = yes
+    guest ok = yes
 
-            [internal_storage]
-            	comment = Android Server
-            	path = /sdcard/DCIM
-            	browseable = yes
-            	writable = yes
-            	public = yes
-            	guest ok = yes
-            
-            [外置存储]
-            	comment = Android Server
-            	path = /mnt/media_rw
-            	browseable = yes
-            	writable = yes
-            	public = yes
-            	guest ok = yes
+[internal_storage]
+    comment = Android Server
+    path = /sdcard/DCIM
+    browseable = yes
+    writable = yes
+    public = yes
+    guest ok = yes
 
-            [SD卡]
-            	comment = Android Server
-            	path = /storage/sdcard0
-            	browseable = yes
-            	writable = yes
-            	public = yes
-            	guest ok = yes
+[外置存储]
+    comment = Android Server
+    path = /mnt/media_rw
+    browseable = yes
+    writable = yes
+    public = yes
+    guest ok = yes
+
+[SD卡]
+    comment = Android Server
+    path = /storage/sdcard0
+    browseable = yes
+    writable = yes
+    public = yes
+    guest ok = yes
             """.trimIndent()
         return try {
             val dir = context.getExternalFilesDir(null)

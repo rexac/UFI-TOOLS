@@ -16,7 +16,7 @@ SCHEDULE_SCRIPT_PATH="/sdcard/ufi_tools_schedule.sh"
 
 UNLOCK_SAMBA_CONF='#!/system/bin/sh
 chattr -i /data/samba/etc/smb.conf
-chmod 644 /data/samba/etc/smb.conf
+chmod 777 /data/samba/etc/smb.conf
 rm -f /data/samba/etc/smb.conf
 sync'
 
@@ -70,7 +70,7 @@ check_socat_running(){
 
 lock_smb_conf(){
     #lock samba conf
-    chmod 444 /data/samba/etc/smb.conf
+    chmod 777 /data/samba/etc/smb.conf
     chattr +i /data/samba/etc/smb.conf
     echo "[`date`] samba_file LOCKED! to unlock samba_file run [sh /sdcard/unlock_samba.sh]" >> "$LOG_FILE"
 }

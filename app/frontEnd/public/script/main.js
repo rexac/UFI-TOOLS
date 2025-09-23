@@ -474,6 +474,7 @@ function main_func() {
         initScheduleRebootStatus()
         initShutdownBtn()
         initATBtn()
+        initAPNManagement()
         initCellularSpeedTestBtn()
         initSleepTime()
         initAdvanceTools()
@@ -5986,8 +5987,138 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
         }
     }
 
+    // APN设置
+    const initAPNManagement = async () => {
+        const btn = document.querySelector('#APNManagement')
+        if (!(await initRequestData())) {
+            btn.onclick = () => createToast(t('toast_please_login'), 'red')
+            btn.style.background = "var(--dark-btn-disabled-color)"
+            return null
+        }
+        btn.style.background = ""
+        btn.onclick = async () => {
+            showModal('#APNManagementModal')
+            // 加载数据
+            const res = await getAPNData()
+            console.log(res);
+
+            const APNManagementForm = document.querySelector('#APNManagementForm .content')
+            if (!APNManagementForm) return
+
+            const autoProfileEl = APNManagementForm.querySelector('#autoProfileEl')
+            const profileEl = APNManagementForm.querySelector('#profileEl')
+            if (autoProfileEl && profileEl) {
+                if (res.apn_mode == "auto") {
+                    autoProfileEl.style.display = ""
+                    profileEl.style.display = "none"
+                } else {
+                    autoProfileEl.style.display = "none"
+                    profileEl.style.display = ""
+                }
+            }
+
+            const currentAPNEl = APNManagementForm.querySelector('span[name="apn_wan_apn"]')
+            if (currentAPNEl) currentAPNEl.textContent = res.apn_wan_apn
+
+            const autoApnModeEl = APNManagementForm.querySelector('#autoAPNMode')
+            const apnModeEl = APNManagementForm.querySelector('#apnMode')
+            if (apnModeEl) {
+                if (res.apn_mode == "auto") {
+                    autoApnModeEl.checked = true
+                } else {
+                    apnModeEl.checked = true
+                }
+            }
+
+            const autoProfile = APNManagementForm.querySelector('#autoProfile')
+            if (autoProfile) {
+                const option = document.createElement('option')
+                option.value = res.apn_auto_profile
+                option.textContent = res.apn_m_profile_name || res.m_profile_name || res.profile_name
+                autoProfile.innerHTML = res.apn_m_profile_name || res.m_profile_name || res.profile_name
+                autoProfile.appendChild(option)
+
+            }
+
+            //手动配置文件下拉列表渲染
+            const profile = APNManagementForm.querySelector('select[name="profile"]')
+            if (profile) {
+                profile.innerHTML = ''
+                for (let i = 0; i < 20; i++) {
+                    if (!res["APN_config" + i]) return
+                    const configs = res["APN_config" + i].split('($)')
+                    const configs_v6 = res["ipv6_APN_config" + i]
+                    console.log(configs);
+
+                    if (configs && configs.length) {
+                        // for (let key in configs) {
+                        const option = document.createElement('option')
+                        option.value = configs[0] //第一个值为APN名称
+                        option.textContent = configs[0]
+                        profile.appendChild(option)
+                        // }
+                    }
+                }
+
+            }
+
+            //渲染APN列表（预览）
+            renderAPNViewModalContet(res)
+        }
+    }
+    initAPNManagement()
+
+    //查看APN
+    const onViewAPNProfile = async (e) => {
+        e.preventDefault()
+        if (!(await initRequestData())) {
+            createToast(t("toast_need_login"), 'red');
+            return false;
+        }
+        closeModal('#APNManagementModal', 300, () => {
+            showModal('#APNViewModal')
+            //异步加载数据
+
+        })
+    }
+
+    //添加APN
+    const onAddAPNProfile = async (e) => {
+        e.preventDefault()
+        if (!(await initRequestData())) {
+            createToast(t("toast_need_login"), 'red');
+            return false;
+        }
+        closeModal('#APNManagementModal', 300, () => {
+            showModal('#APNEditModal')
+            //异步加载数据
+
+        })
+    }
+
+    // 编辑APN
+    const onEditAPNProfile = async (e) => {
+        e.preventDefault()
+        if (!(await initRequestData())) {
+            createToast(t("toast_need_login"), 'red');
+            return false;
+        }
+        closeModal('#APNManagementModal', 300, () => {
+            showModal('#APNEditModal')
+            //异步加载数据
+
+        })
+    }
+
+    //删除APN
+    const onDeleteAPNProfile = async (e) => { }
+
     //挂载方法到window
     const methods = {
+        onDeleteAPNProfile,
+        onEditAPNProfile,
+        onAddAPNProfile,
+        onViewAPNProfile,
         changeSleepTime,
         handleHighRailMode,
         setPort,

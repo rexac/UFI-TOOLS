@@ -101,6 +101,7 @@
                             onclick="createToast('请登录','red')">短信转发</button>
                         <button id="ScheduledTaskManagement" class="btn" data-i18n="scheduled_task"
                             onclick="createToast('请登录','red')">定时任务</button>
+                        <button id="APNManagement" class="btn" onclick="createToast('请登录','red')">APN设置</button>
                         <button id="OTA" class="btn" data-i18n="ota" onclick="createToast('请登录','red')">软件更新</button>
 
                         <select class="select" style="display: none;" id="SLEEP_TIME" onchange="changeSleepTime(event)">
@@ -1728,6 +1729,161 @@
 
                 </div>
             </div>
+
+            <!-- APN设置模态框 -->
+            <div class="mask user_select_none" id="APNManagementModal" style="display: none">
+                <form id="APNManagementForm" class="modal"
+                    style="max-width: 440px;display: block;box-sizing: border-box;">
+                    <div class="title" data-i18n="">APN设置</div>
+                    <div class="title" style="font-style: italic;;font-size: .62rem;margin-top: 10px;">
+                        接入点名称(APN)用于您设备连接运营商网络的名称，该信息会根据您的sim卡自动匹配。如果无法上网可以尝试修改这组参数，参数的请咨询当地运营商。
+                    </div>
+                    <div class="content flex"
+                        style="flex-direction: column;gap: 10px;overflow-y: scroll; padding: 10px 0;font-size: 14px; width: 66vw; max-width: 400px;">
+                        <div class="flex" style="gap: 15px;">
+                            <span>当前APN:</span><span name="apn_wan_apn"></span>
+                        </div>
+                        <div class="flex" style="gap: 10px;">
+                            <span>自动APN:</span>
+                            <label class="flex items-center"><input id="autoAPNMode"
+                                    onclick="onChangeIsAutoFrofile(true)" name="apn_mode" type="radio"
+                                    checked><span>自动</span></label>
+                            <label class="flex items-center"><input id="apnMode" onclick="onChangeIsAutoFrofile(false)"
+                                    name="apn_mode" type="radio"><span>手动</span></label>
+                        </div>
+                        <div id="autoProfileEl" class="flex items-center" style="gap: 10px;">
+                            <span>配置文件:</span>
+                            <div class="profileItems flex items-center" style="flex-wrap: wrap;flex: 1;gap: 10px;">
+                                <div style="flex: 1">
+                                    <select class="select" style="min-width: 100px;width: 100%;" name="autoProfile"
+                                        id="autoProfile">
+                                    </select>
+                                </div>
+                                <div class="options" style="justify-self: start;">
+                                    <button class="btn" onclick="onViewAPNProfile(event)">查看</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="profileEl" class="flex items-center" style="display: none;gap: 10px;">
+                            <span>配置文件:</span>
+                            <div class="profileItems flex items-center" style="flex-wrap: wrap;flex: 1;gap: 10px;">
+                                <div style="flex: 1">
+                                    <select class="select" name="profile" style="min-width: 100px;width: 100%;"
+                                        id="">
+                                    </select>
+                                </div>
+                                <div class="options">
+                                    <button class="btn" onclick="onAddAPNProfile(event)">添加</button>
+                                    <button class="btn" onclick="onEditAPNProfile(event)">编辑</button>
+                                    <button class="btn" onclick="onDeleteAPNProfile(event)">删除</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="btn" style="text-align: right;">
+                        <button name="submit" id="" data-i18n="btn_sumbit">提交</button>
+                        <button type="button" onclick="closeModal('#APNManagementModal')"
+                            data-i18n="close_btn">关闭</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- APN查看模态框 -->
+            <div class="mask user_select_none" id="APNViewModal" style="display: none">
+                <div class="modal" style="max-width: 300px;display: block;box-sizing: border-box;">
+                    <div class="title" data-i18n="">APN信息</div>
+                    <div class="content flex"
+                        style="flex-direction: column;gap: 10px;overflow-y: scroll; padding: 10px 0;font-size: 14px; width: 66vw; max-width: 400px;">
+                        <div class="flex items-center" style="gap: 10px;">
+                            <span style="min-width: 80px;">配置名称</span>
+                            <input class="fw max-150" style="padding: 6px 10px;" type="text" disabled
+                                name="profile_name">
+                        </div>
+                        <div class="flex items-center" style="gap: 10px;">
+                            <span style="min-width: 80px;">APN</span>
+                            <input class="fw max-150" style="padding: 6px 10px;" type="text" disabled name="apn">
+                        </div>
+                        <div class="flex items-center" style="gap: 10px;">
+                            <span style="min-width: 80px;">用户名</span>
+                            <input class="fw max-150" style="padding: 6px 10px;" type="text" disabled name="username">
+                        </div>
+                        <div class="flex items-center" style="gap: 10px;">
+                            <span style="min-width: 80px;">密码</span>
+                            <input class="fw max-150" style="padding: 6px 10px;" type="text" disabled name="password">
+                        </div>
+                        <div class="flex items-center" style="gap: 10px;">
+                            <span style="min-width: 80px;">鉴权方式</span>
+                            <input class="fw max-150" style="padding: 6px 10px;" type="text" disabled
+                                name="auth_method">
+                        </div>
+                        <div class="flex items-center" style="gap: 10px;">
+                            <span style="min-width: 80px;">PDP类型</span>
+                            <input class="fw max-150" style="padding: 6px 10px;" type="text" disabled name="pdp_method">
+                        </div>
+                    </div>
+                    <div class="btn" style="text-align: right;">
+                        <button type="button"
+                            onclick="closeModal('#APNViewModal',300,()=>{showModal('#APNManagementModal')})"
+                            data-i18n="close_btn">关闭</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 添加、修改APN -->
+            <div class="mask user_select_none" id="APNEditModal" style="display: none">
+                <div class="modal" style="max-width: 300px;display: block;box-sizing: border-box;">
+                    <div class="title" data-i18n="">新增APN / 修改APN</div>
+                    <div class="content flex"
+                        style="flex-direction: column;gap: 10px;overflow-y: scroll; padding: 10px 0;font-size: 14px; width: 66vw; max-width: 400px;">
+                        <div class="flex items-center" style="gap: 10px;">
+                            <span style="min-width: 80px;">配置名称</span>
+                            <input class="fw max-150" style="padding: 6px 10px;" type="text" name=""
+                                value="China Mobile">
+                        </div>
+                        <div class="flex items-center" style="gap: 10px;">
+                            <span style="min-width: 80px;">APN</span>
+                            <input class="fw max-150" style="padding: 6px 10px;" type="text" name="" value="cmnet">
+                        </div>
+                        <div class="flex items-center" style="gap: 10px;">
+                            <span style="min-width: 80px;">用户名</span>
+                            <input class="fw max-150" style="padding: 6px 10px;" type="text" name="" value="cmnet">
+                        </div>
+                        <div class="flex items-center" style="gap: 10px;">
+                            <span style="min-width: 80px;">密码</span>
+                            <input class="fw max-150" style="padding: 6px 10px;" type="text" name="" value="cmnet">
+                        </div>
+                        <div class="flex items-center" style="gap: 10px;">
+                            <span style="min-width: 80px;">鉴权方式</span>
+                            <select class="select fw max-150" name="" id="">
+                                <option value="none">NONE</option>
+                                <option value="chap">CHAP</option>
+                                <option value="pap">PAP</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center" style="gap: 10px;">
+                            <span style="min-width: 80px;">PDP类型</span>
+                            <select class="select fw max-150" name="" id="">
+                                <option value="IP">IPv4</option>
+                                <option value="IPv6">IPv6</option>
+                                <option value="IPv4v6">IPv4v6</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center" style="gap: 10px;">
+                            <label class="flex items-center" style="gap: 10px;">
+                                <input style="margin-left: 0;" type="checkbox" name="" id="">
+                                <span>设为默认</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="btn" style="text-align: right;">
+                        <button name="submit" id="" data-i18n="btn_sumbit">提交</button>
+                        <button type="button"
+                            onclick="closeModal('#APNEditModal',300,()=>{showModal('#APNManagementModal')})"
+                            data-i18n="close_btn">关闭</button>
+                    </div>
+                </div>
+            </div>
+
             <!-- ❤️ -->
             <div class="mask" id="payModal" style="display: none" onclick="handleClosePayModal(event)">
                 <div class="modal">

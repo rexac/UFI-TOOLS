@@ -14,9 +14,53 @@
     --blur-rate: 4px;
 }
 
+.flex {
+    display: flex;
+}
+
+.items-center {
+    align-items: center;
+}
+
+.justify-center {
+    justify-content: center;
+}
+
 .blur-px {
     backdrop-filter: blur(4px) !important;
     -webkit-backdrop-filter: blur(4px) !important;
+}
+
+.fw {
+    width: 100%;
+}
+
+.max-150 {
+    max-width: 150px;
+}
+
+.max-120 {
+    max-width: 120px;
+}
+
+.max-100 {
+    max-width: 100px;
+}
+
+.max-80 {
+    max-width: 80px;
+}
+
+.max-60 {
+    max-width: 60px;
+}
+
+.max-40 {
+    max-width: 40px;
+}
+
+.max-20 {
+    max-width: 20px;
 }
 
 @keyframes spin {
@@ -32,6 +76,11 @@
 .user_select {
     user-select: all !important;
     -webkit-user-select: all !important;
+}
+
+.user_select_none {
+    user-select: none !important;
+    -webkit-user-select: none !important;
 }
 
 html {
@@ -398,7 +447,7 @@ input {
 
 #smsList {
     display: flex;
-    flex-direction: column;    
+    flex-direction: column;
     width: 98%;
     max-width: 600px;
     height: 90%;
@@ -1130,4 +1179,16 @@ input[type="range"] {
 
 .slider>span {
     flex-shrink: 0;
+}
+
+@media (max-width: 510px) {
+    #profileEl .profileItems {
+        flex-direction: column;
+        align-items: start;
+        gap: 4px !important;
+    }
+
+    #profileEl .profileItems button {
+        margin: 6px 0;
+    }
 }

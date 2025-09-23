@@ -264,7 +264,7 @@ function createFixedToast(_id, text, style = {}) {
 }
 
 let modalTimer = null
-function closeModal(txt, time = 300) {
+function closeModal(txt, time = 300, cb = null) {
     if (txt == '#smsList') smsSender && smsSender()
     let el = document.querySelector(txt)
     if (!el) return
@@ -272,6 +272,9 @@ function closeModal(txt, time = 300) {
     modalTimer && clearTimeout(modalTimer)
     modalTimer = setTimeout(() => {
         el.style.display = 'none'
+        setTimeout(() => {
+            cb && cb()
+        }, 30)
     }, time)
 }
 
@@ -603,7 +606,7 @@ Array.from(document.querySelectorAll('.mask'))?.forEach(el => {
         const classList = Array.from(e?.target?.classList || [])
         const id = e.target.id
         //维护一个黑名单，黑名单内的模态框不受影响
-        const blackList = ['updateSoftwareModal', "plugin_store"]
+        const blackList = ['updateSoftwareModal', "plugin_store", "APNViewModal", "APNEditModal"]
         const isCloseable = !blackList.includes(id)
         if (classList && classList.includes('mask') && isCloseable) {
             if (id) {
@@ -944,5 +947,53 @@ const showLoginHelp = () => {
     }
     btn.onclick = async () => {
         close()
+    }
+}
+
+//初始化APN信息框内容
+const renderAPNViewModalContet = (res = {}) => {
+    // 信息框初始化
+    const APNViewModal = document.querySelector('#APNViewModal')
+    if (APNViewModal) {
+        const profileNameEl = APNViewModal.querySelector('input[name="profile_name"]')
+        const apnEl = APNViewModal.querySelector('input[name="apn"]')
+        const unameEl = APNViewModal.querySelector('input[name="username"]')
+        const pwdEl = APNViewModal.querySelector('input[name="password"]')
+        const authMethodEl = APNViewModal.querySelector('input[name="auth_method"]')
+        const pdpMethodEl = APNViewModal.querySelector('input[name="pdp_method"]')
+
+        if (profileNameEl) {
+            profileNameEl.value = res.apn_m_profile_name || res.m_profile_name || res.profile_name
+        }
+        if (apnEl) {
+            apnEl.value = res.apn_wan_apn || apn_ipv6_wan_apn
+        }
+        if (unameEl) {
+            unameEl.value = res.ppp_username_ui || res.apn_ppp_username
+        }
+        if (pwdEl) {
+            pwdEl.value = res.ppp_passwd_ui || res.apn_ppp_passwd
+        }
+        if (authMethodEl) {
+            authMethodEl.value = res.ppp_auth_mode_ui.toLowerCase() || res.apn_ppp_auth_mode.toLowerCase()
+        }
+        if (pdpMethodEl) {
+            pdpMethodEl.value = res.apn_pdp_type
+        }
+    }
+}
+
+//APN手动与自动切换的点击事件
+const onChangeIsAutoFrofile = async (flag) => {
+    const autoProfileEl = document.querySelector('#APNManagementForm #autoProfileEl')
+    const profileEl = document.querySelector('#APNManagementForm #profileEl')
+    if (autoProfileEl && profileEl) {
+        if (flag) {
+            autoProfileEl.style.display = ""
+            profileEl.style.display = "none"
+        } else {
+            autoProfileEl.style.display = "none"
+            profileEl.style.display = ""
+        }
     }
 }

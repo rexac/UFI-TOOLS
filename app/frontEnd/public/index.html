@@ -1736,7 +1736,7 @@
                     style="max-width: 440px;display: block;box-sizing: border-box;">
                     <div class="title" data-i18n="">APN设置</div>
                     <div class="title" style="font-style: italic;;font-size: .62rem;margin-top: 10px;">
-                        接入点名称(APN)用于您设备连接运营商网络的名称，该信息会根据您的sim卡自动匹配。如果无法上网可以尝试修改这组参数，参数的请咨询当地运营商。
+                        接入点名称(APN)用于您设备连接运营商网络的名称，该信息会根据您的sim卡自动匹配。如果无法上网可以尝试修改这组参数，参数作用请咨询当地运营商。
                     </div>
                     <div class="content flex"
                         style="flex-direction: column;gap: 10px;overflow-y: scroll; padding: 10px 0;font-size: 14px; width: 66vw; max-width: 400px;">
@@ -1768,14 +1768,13 @@
                             <span>配置文件:</span>
                             <div class="profileItems flex items-center" style="flex-wrap: wrap;flex: 1;gap: 10px;">
                                 <div style="flex: 1">
-                                    <select class="select" name="profile" style="min-width: 100px;width: 100%;"
-                                        id="">
+                                    <select class="select" name="profile" style="min-width: 100px;width: 100%;" id="">
                                     </select>
                                 </div>
                                 <div class="options">
-                                    <button class="btn" onclick="onAddAPNProfile(event)">添加</button>
-                                    <button class="btn" onclick="onEditAPNProfile(event)">编辑</button>
-                                    <button class="btn" onclick="onDeleteAPNProfile(event)">删除</button>
+                                    <button class="btn" id="addAPNProfile">添加</button>
+                                    <button class="btn" id="editAPNProfile">编辑</button>
+                                    <button class="btn" id="delAPNProfile">删除</button>
                                 </div>
                             </div>
                         </div>
@@ -1837,24 +1836,24 @@
                         style="flex-direction: column;gap: 10px;overflow-y: scroll; padding: 10px 0;font-size: 14px; width: 66vw; max-width: 400px;">
                         <div class="flex items-center" style="gap: 10px;">
                             <span style="min-width: 80px;">配置名称</span>
-                            <input class="fw max-150" style="padding: 6px 10px;" type="text" name=""
-                                value="China Mobile">
+                            <input class="fw max-150" style="padding: 6px 10px;" type="text" name="profile_name"
+                                value="">
                         </div>
                         <div class="flex items-center" style="gap: 10px;">
                             <span style="min-width: 80px;">APN</span>
-                            <input class="fw max-150" style="padding: 6px 10px;" type="text" name="" value="cmnet">
+                            <input class="fw max-150" style="padding: 6px 10px;" type="text" name="apn" value="">
                         </div>
                         <div class="flex items-center" style="gap: 10px;">
                             <span style="min-width: 80px;">用户名</span>
-                            <input class="fw max-150" style="padding: 6px 10px;" type="text" name="" value="cmnet">
+                            <input class="fw max-150" style="padding: 6px 10px;" type="text" name="username" value="">
                         </div>
                         <div class="flex items-center" style="gap: 10px;">
                             <span style="min-width: 80px;">密码</span>
-                            <input class="fw max-150" style="padding: 6px 10px;" type="text" name="" value="cmnet">
+                            <input class="fw max-150" style="padding: 6px 10px;" type="text" name="password" value="">
                         </div>
                         <div class="flex items-center" style="gap: 10px;">
                             <span style="min-width: 80px;">鉴权方式</span>
-                            <select class="select fw max-150" name="" id="">
+                            <select class="select fw max-150" name="auth_method">
                                 <option value="none">NONE</option>
                                 <option value="chap">CHAP</option>
                                 <option value="pap">PAP</option>
@@ -1862,7 +1861,7 @@
                         </div>
                         <div class="flex items-center" style="gap: 10px;">
                             <span style="min-width: 80px;">PDP类型</span>
-                            <select class="select fw max-150" name="" id="">
+                            <select class="select fw max-150" name="pdp_method">
                                 <option value="IP">IPv4</option>
                                 <option value="IPv6">IPv6</option>
                                 <option value="IPv4v6">IPv4v6</option>
@@ -1870,13 +1869,13 @@
                         </div>
                         <div class="flex items-center" style="gap: 10px;">
                             <label class="flex items-center" style="gap: 10px;">
-                                <input style="margin-left: 0;" type="checkbox" name="" id="">
+                                <input style="margin-left: 0;" type="checkbox" name="is_default_profile">
                                 <span>设为默认</span>
                             </label>
                         </div>
                     </div>
                     <div class="btn" style="text-align: right;">
-                        <button name="submit" id="" data-i18n="btn_sumbit">提交</button>
+                        <button name="submit" data-i18n="btn_sumbit">提交</button>
                         <button type="button"
                             onclick="closeModal('#APNEditModal',300,()=>{showModal('#APNManagementModal')})"
                             data-i18n="close_btn">关闭</button>

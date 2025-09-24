@@ -530,3 +530,15 @@ const getAPNData = async () => {
         return null
     }
 }
+
+//deleteAPNProfile
+const deleteAPNProfile = async (index) => {
+    if(index == undefined || index == null) throw new Error('请提供index')
+    const res = await postData(await login(), {
+        goformId: "APN_PROC_EX",
+        index,
+        apn_mode: "manual",
+        apn_action: "delete"
+    })
+    return res.json()
+}

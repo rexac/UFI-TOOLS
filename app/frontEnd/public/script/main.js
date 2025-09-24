@@ -5987,6 +5987,93 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
         }
     }
 
+    //初始化APN信息框内容
+    const renderAPNViewModalContet = (res = {}) => {
+        // 信息框初始化
+        const APNViewModal = document.querySelector('#APNViewModal')
+        if (APNViewModal) {
+            const profileNameEl = APNViewModal.querySelector('input[name="profile_name"]')
+            const apnEl = APNViewModal.querySelector('input[name="apn"]')
+            const unameEl = APNViewModal.querySelector('input[name="username"]')
+            const pwdEl = APNViewModal.querySelector('input[name="password"]')
+            const authMethodEl = APNViewModal.querySelector('input[name="auth_method"]')
+            const pdpMethodEl = APNViewModal.querySelector('input[name="pdp_method"]')
+
+
+            if (profileNameEl) {
+                profileNameEl.value = res.apn_m_profile_name || res.m_profile_name || res.profile_name
+            }
+            if (apnEl) {
+                apnEl.value = res.apn_wan_apn || apn_ipv6_wan_apn
+            }
+            if (unameEl) {
+                unameEl.value = res.ppp_username_ui || res.apn_ppp_username
+            }
+            if (pwdEl) {
+                pwdEl.value = res.ppp_passwd_ui || res.apn_ppp_passwd
+            }
+            if (authMethodEl) {
+                authMethodEl.value = res.ppp_auth_mode_ui.toLowerCase() || res.apn_ppp_auth_mode.toLowerCase()
+            }
+            if (pdpMethodEl) {
+                pdpMethodEl.value = res.apn_pdp_type
+            }
+        }
+    }
+
+    //初始化APN修改框内容
+    const renderAPNEditModalContet = (res = {}) => {
+        // 信息框初始化
+        const APNEditModal = document.querySelector('#APNEditModal')
+        if (APNEditModal) {
+            const profileNameEl = APNEditModal.querySelector('input[name="profile_name"]')
+            const apnEl = APNEditModal.querySelector('input[name="apn"]')
+            const unameEl = APNEditModal.querySelector('input[name="username"]')
+            const pwdEl = APNEditModal.querySelector('input[name="password"]')
+            const authMethodEl = APNEditModal.querySelector('select[name="auth_method"]')
+            const pdpMethodEl = APNEditModal.querySelector('select[name="pdp_method"]')
+            const isDefaultEl = APNEditModal.querySelector('input[name="is_default_profile"]')
+
+
+            if (profileNameEl) {
+                profileNameEl.value = res.apn_m_profile_name || res.m_profile_name || res.profile_name
+            }
+            if (apnEl) {
+                apnEl.value = res.apn_wan_apn || apn_ipv6_wan_apn
+            }
+            if (unameEl) {
+                unameEl.value = res.apn_ppp_username || ""
+            }
+            if (pwdEl) {
+                pwdEl.value = res.apn_ppp_passwd || ""
+            }
+            if (authMethodEl) {
+                authMethodEl.value = res.apn_ppp_auth_mode.toLowerCase()
+            }
+            if (pdpMethodEl) {
+                pdpMethodEl.value = res.apn_pdp_type
+            }
+            if (isDefaultEl) {
+                // isDefaultEl.checked = res.apn_pdp_type
+            }
+        }
+    }
+
+    //APN手动与自动切换的点击事件
+    const onChangeIsAutoFrofile = async (flag) => {
+        const autoProfileEl = document.querySelector('#APNManagementForm #autoProfileEl')
+        const profileEl = document.querySelector('#APNManagementForm #profileEl')
+        if (autoProfileEl && profileEl) {
+            if (flag) {
+                autoProfileEl.style.display = ""
+                profileEl.style.display = "none"
+            } else {
+                autoProfileEl.style.display = "none"
+                profileEl.style.display = ""
+            }
+        }
+    }
+
     // APN设置
     const initAPNManagement = async () => {
         const btn = document.querySelector('#APNManagement')
@@ -5996,11 +6083,10 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
             return null
         }
         btn.style.background = ""
-        btn.onclick = async () => {
+        const renderData = async () => {
             showModal('#APNManagementModal')
             // 加载数据
             const res = await getAPNData()
-            console.log(res);
 
             const APNManagementForm = document.querySelector('#APNManagementForm .content')
             if (!APNManagementForm) return
@@ -6045,11 +6131,10 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
             if (profile) {
                 profile.innerHTML = ''
                 for (let i = 0; i < 20; i++) {
-                    if (!res["APN_config" + i]) return
+                    if (!res["APN_config" + i]) continue
                     const configs = res["APN_config" + i].split('($)')
                     const configs_v6 = res["ipv6_APN_config" + i]
                     console.log(configs);
-
                     if (configs && configs.length) {
                         // for (let key in configs) {
                         const option = document.createElement('option')
@@ -6059,12 +6144,84 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
                         // }
                     }
                 }
-
             }
 
             //渲染APN列表（预览）
             renderAPNViewModalContet(res)
+
+            // 手动模式
+            // 绑定添加的事件
+            const addAPNBtn = APNManagementForm.querySelector('#addAPNProfile')
+            if (addAPNBtn) addAPNBtn.onclick = async (e) => {
+                e.preventDefault()
+                if (!(await initRequestData())) {
+                    createToast(t("toast_need_login"), 'red');
+                    return false;
+                }
+                closeModal('#APNManagementModal', 300, () => {
+                    showModal('#APNEditModal')
+                    //异步加载数据
+
+                })
+            }
+
+            // 绑定编辑的事件
+            const editAPNBtn = APNManagementForm.querySelector('#editAPNProfile')
+            if (editAPNBtn) editAPNBtn.onclick = async (e) => {
+                e.preventDefault()
+                if (!(await initRequestData())) {
+                    createToast(t("toast_need_login"), 'red');
+                    return false;
+                }
+                closeModal('#APNManagementModal', 300, () => {
+                    showModal('#APNEditModal')
+                    // 获取当前选中的配置文件index
+                    const profileEl = APNManagementForm.querySelector('#profileEl select[name="profile"]')
+                    if (profileEl) {
+                        const index = profileEl.selectedIndex
+                        const config = res["APN_config" + index].split('($)')
+                        const config_v6 = res["ipv6_APN_config" + index].split('($)')
+                        console.log(config, config_v6);
+                        renderAPNEditModalContet({
+                            profile_name: config[0] || "",
+                            apn_wan_apn: config[1] || "",
+                            apn_ppp_username: config[5] || "",
+                            apn_ppp_passwd: config[6] || "",
+                            apn_ppp_auth_mode: config[4] || "",
+                            apn_pdp_type: config[7] || "",
+                        })
+                    }
+                })
+            }
+
+            // 绑定删除的事件
+            const delAPNBtn = APNManagementForm.querySelector('#delAPNProfile')
+            if (delAPNBtn) delAPNBtn.onclick = async (e) => {
+                e.preventDefault()
+                if (!(await initRequestData())) {
+                    createToast(t("toast_need_login"), 'red');
+                    return false;
+                }
+                // 获取当前选中的配置文件index
+                const profileEl = APNManagementForm.querySelector('#profileEl select[name="profile"]')
+                if (profileEl) {
+                    const index = profileEl.selectedIndex
+                    try {
+                        const res = await deleteAPNProfile(index)
+                        console.log(res);
+                        if (res && res.result == "success") {
+                            createToast(t('toast_delete_success'), 'green')
+                            // 重新加载
+                            renderData()
+                        }
+                    } catch (e) {
+                        createToast(e.message, 'red')
+                    }
+                }
+            }
+
         }
+        btn.onclick = renderData
     }
     initAPNManagement()
 
@@ -6082,42 +6239,9 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
         })
     }
 
-    //添加APN
-    const onAddAPNProfile = async (e) => {
-        e.preventDefault()
-        if (!(await initRequestData())) {
-            createToast(t("toast_need_login"), 'red');
-            return false;
-        }
-        closeModal('#APNManagementModal', 300, () => {
-            showModal('#APNEditModal')
-            //异步加载数据
-
-        })
-    }
-
-    // 编辑APN
-    const onEditAPNProfile = async (e) => {
-        e.preventDefault()
-        if (!(await initRequestData())) {
-            createToast(t("toast_need_login"), 'red');
-            return false;
-        }
-        closeModal('#APNManagementModal', 300, () => {
-            showModal('#APNEditModal')
-            //异步加载数据
-
-        })
-    }
-
-    //删除APN
-    const onDeleteAPNProfile = async (e) => { }
-
     //挂载方法到window
     const methods = {
-        onDeleteAPNProfile,
-        onEditAPNProfile,
-        onAddAPNProfile,
+        onChangeIsAutoFrofile,
         onViewAPNProfile,
         changeSleepTime,
         handleHighRailMode,

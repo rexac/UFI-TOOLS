@@ -533,12 +533,41 @@ const getAPNData = async () => {
 
 //deleteAPNProfile
 const deleteAPNProfile = async (index) => {
-    if(index == undefined || index == null) throw new Error('请提供index')
+    if (index == undefined || index == null) throw new Error('请提供index')
     const res = await postData(await login(), {
         goformId: "APN_PROC_EX",
         index,
         apn_mode: "manual",
         apn_action: "delete"
     })
+    return res.json()
+}
+
+//saveAPNProfile
+const saveAPNProfile = async (data) => {
+    const res = await postData(await login(), {
+        goformId: "APN_PROC_EX",
+        apn_mode: "manual",
+        apn_action: "save",
+        ...data
+    })
+    return res.json()
+}
+
+//switchAPNAuto
+const switchAPNAuto = async ({ isAuto = true, index = 0 }) => {
+    const formData = {
+        goformId: "APN_PROC_EX",
+        apn_mode: isAuto ? "auto" : "manual",
+
+    }
+    const manualData = {
+        apn_action: "set_default",
+        set_default_flag: '1',
+        apn_pdp_type: '',
+        index
+    }
+    const data = isAuto ? formData : { ...formData, ...manualData }
+    const res = await postData(await login(), data)
     return res.json()
 }

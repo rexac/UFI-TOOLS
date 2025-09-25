@@ -6087,11 +6087,15 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
 
         const baseProfile = {
             "profile_name": profileNameEl.value ? profileNameEl.value.trim() : "",
+            "wan_dial": "*99#",
             "apn_wan_dial": "*99#",
             "apn_select": "manual",
             "apn_pdp_type": pdpMethodEl.value ? pdpMethodEl.value : "IPv4v6",
+            "pdp_type": pdpMethodEl.value ? pdpMethodEl.value : "IPv4v6",
             "apn_pdp_select": "auto",
             "apn_pdp_addr": "",
+            "pdp_select": "auto",
+            "pdp_addr": "",
             "index": index,
         }
 
@@ -6100,6 +6104,10 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
             "apn_ppp_auth_mode": authMethodEl.value ? authMethodEl.value : "none",
             "apn_ppp_username": unameEl.value ? unameEl.value.trim() : "",
             "apn_ppp_passwd": pwdEl.value ? pwdEl.value.trim() : "",
+            "wan_apn": apnEl.value ? apnEl.value.trim() : "",
+            "ppp_auth_mode": authMethodEl.value ? authMethodEl.value : "none",
+            "ppp_username": unameEl.value ? unameEl.value.trim() : "",
+            "ppp_passwd": pwdEl.value ? pwdEl.value.trim() : "",
             "dns_mode": "auto",
             "prefer_dns_manual": "",
             "standby_dns_manual": "",
@@ -6109,6 +6117,10 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
             "apn_ipv6_ppp_auth_mode": authMethodEl.value ? authMethodEl.value : "none",
             "apn_ipv6_ppp_username": unameEl.value ? unameEl.value.trim() : "",
             "apn_ipv6_ppp_passwd": pwdEl.value ? pwdEl.value.trim() : "",
+            "ipv6_wan_apn": apnEl.value ? apnEl.value.trim() : "",
+            "ipv6_ppp_auth_mode": authMethodEl.value ? authMethodEl.value : "none",
+            "ipv6_ppp_username": unameEl.value ? unameEl.value.trim() : "",
+            "ipv6_ppp_passwd": pwdEl.value ? pwdEl.value.trim() : "",
             "ipv6_dns_mode": "auto",
             "ipv6_prefer_dns_manual": "",
             "ipv6_standby_dns_manual": "",

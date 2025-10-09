@@ -79,7 +79,7 @@ function DragList(listId, callback) {
         currentLi.style.left = "0px";
         //   currentLi.style.width = "100%";
         currentLi.style.top = `${e.touches[0].clientY - offsetY - list.getBoundingClientRect().top}px`;
-    }, { passive: true });
+    }, { passive: false });
 
     list.addEventListener("touchmove", (e) => {
         if (!currentLi) return;
@@ -104,7 +104,7 @@ function DragList(listId, callback) {
                 break;
             }
         }
-    }, { passive: true });
+    }, { passive: false });
 
     list.addEventListener("touchend", () => {
         toggleDictionaryModal(true)

@@ -277,7 +277,7 @@ fun Route.otaModule(context: Context) {
                         delay(100)
                         repeat(5) {
                             ShellKano.runShellCommand(
-                                "${outFileAdb.absolutePath} -s localhost shell settings put system screen_off_timeout 2147483647",
+                                "${outFileAdb.absolutePath} -s localhost shell settings put system screen_off_timeout 300000",
                                 context
                             )
                             ShellKano.runShellCommand(

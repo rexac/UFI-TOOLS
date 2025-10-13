@@ -10,11 +10,8 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.os.PowerManager
 import android.provider.Settings
-import android.util.Log
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -52,7 +49,7 @@ import com.minikano.f50_sms.utils.KanoLog
 import com.minikano.f50_sms.utils.KanoUtils
 import com.minikano.f50_sms.utils.ShellKano
 import com.minikano.f50_sms.utils.UniqueDeviceIDManager
-import kotlinx.coroutines.CoroutineScope
+import com.minikano.f50_sms.utils.WakeLock
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -73,6 +70,7 @@ class MainActivity : ComponentActivity() {
     private val PREF_TOKEN_ENABLED = "login_token_enabled"
     private val PREF_AUTO_IP_ENABLED = "auto_ip_enabled"
     private val PREF_ISDEBUG = "kano_is_debug"
+    private val PREF_WAKELOCK = "wakeLock"
     private val serverStatusLiveData = MutableLiveData<Boolean>()
     private val SERVER_INTENT = "com.minikano.f50_sms.SERVER_STATUS_CHANGED"
     private val UI_INTENT = "com.minikano.f50_sms.UI_STATUS_CHANGED"
@@ -108,6 +106,9 @@ class MainActivity : ComponentActivity() {
         }
         if(!spf.contains(PREF_AUTO_IP_ENABLED)){
             spf.edit().putString(PREF_AUTO_IP_ENABLED, true.toString()).apply()
+        }
+        if(!spf.contains(PREF_WAKELOCK)){
+            spf.edit().putString(PREF_WAKELOCK,"lock").apply()
         }
 
         // 这里用协程异步调用
@@ -219,6 +220,7 @@ class MainActivity : ComponentActivity() {
 
                 setContent {
                     val context = this@MainActivity
+
                     val sharedPrefs = remember {
                         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
                     }
@@ -267,6 +269,15 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
+                    var wakeLock by remember {
+                        mutableStateOf(
+                            sharedPrefs.getString(
+                                PREF_WAKELOCK,
+                                "lock"
+                            ) ?: "lock"
+                        )
+                    }
+
                     if (isServerRunning) {
                         ServerUI(
                             serverAddress = "http://${gatewayIp.substringBefore(":")}:$port",
@@ -284,10 +295,15 @@ class MainActivity : ComponentActivity() {
                             onGatewayIpChange = { gatewayIp = it },
                             loginToken = loginToken,
                             versionName = versionName ?: "unknown",
-                            onLoginTokenChange = { loginToken = it },
+                            onLoginTokenChange = {
+                                loginToken = it.ifBlank {
+                                    ""
+                                }
+                            },
                             isTokenEnabled = isTokenEnabled == true.toString(),
                             isAutoCheckIp = isAutoIpEnabled == true.toString(),
                             isDebug = isDebugLog == true.toString(),
+                            isWkLock = wakeLock == "lock",
                             onTokenEnableChange = { isTokenEnabled = it.toString() },
                             onAutoCheckIpChange = {
                                 isAutoIpEnabled = it.toString()
@@ -302,13 +318,26 @@ class MainActivity : ComponentActivity() {
                                 isDebugLog = it.toString()
                                 sharedPrefs.edit().putString(PREF_ISDEBUG, isEnableLog.toString()).apply()
                             },
+                            onIsWkLockChange = {
+                                wakeLock = if(it){
+                                    "lock"
+                                } else{
+                                    "unlock"
+                                }
+                            },
                             onConfirm = {
                                 // 保存并重启服务器
                                 sharedPrefs.edit().putString(PREF_GATEWAY_IP, gatewayIp).apply()
-                                sharedPrefs.edit().putString(PREF_LOGIN_TOKEN, loginToken).apply()
+                                sharedPrefs.edit().putString(PREF_LOGIN_TOKEN, loginToken.ifBlank { "admin" }).apply()
                                 sharedPrefs.edit().putString(PREF_TOKEN_ENABLED, isTokenEnabled).apply()
-                                sharedPrefs.edit().putString(PREF_AUTO_IP_ENABLED, isAutoIpEnabled)
-                                    .apply()
+                                sharedPrefs.edit().putString(PREF_AUTO_IP_ENABLED, isAutoIpEnabled).apply()
+                                sharedPrefs.edit().putString(PREF_WAKELOCK, wakeLock).apply()
+                                //更新唤醒锁
+                                if(wakeLock != "lock"){
+                                    WakeLock.releaseWakeLock()
+                                } else {
+                                    WakeLock.execWakeLock(getSystemService(Context.POWER_SERVICE) as PowerManager)
+                                }
                                 sendBroadcast(Intent(UI_INTENT).putExtra("status", true))
                                 serverStatusLiveData.postValue(true)
                                 KanoLog.d("kano_ZTE_LOG", "user touched start btn")
@@ -429,9 +458,11 @@ fun InputUI(
     isTokenEnabled: Boolean,
     isAutoCheckIp: Boolean,
     isDebug:Boolean,
+    isWkLock:Boolean,
     onTokenEnableChange: (Boolean) -> Unit,
     onAutoCheckIpChange: (Boolean) -> Unit,
-    onDebugChange:(Boolean) -> Unit
+    onDebugChange:(Boolean) -> Unit,
+    onIsWkLockChange:(Boolean) -> Unit
 ) {
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Card(
@@ -498,7 +529,7 @@ fun InputUI(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("自动检测IP\nAuto detect IP",fontSize = 12.sp)
+                        Text("自动检测IP\nAuto IP",fontSize = 12.sp)
                         Spacer(modifier = Modifier.width(8.dp))
                         Switch(
                             checked = isAutoCheckIp,
@@ -517,14 +548,24 @@ fun InputUI(
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Start
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text("调试日志\nDebug logs",fontSize = 12.sp)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Switch(
-                        checked = isDebug,
-                        onCheckedChange = onDebugChange
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("调试日志\nDebug logs",fontSize = 12.sp)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Switch(
+                            checked = isDebug,
+                            onCheckedChange = onDebugChange
+                        )
+                    }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("屏幕常亮\nWake Lock",fontSize = 12.sp)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Switch(
+                            checked = isWkLock,
+                            onCheckedChange = onIsWkLockChange
+                        )
+                    }
                 }
                 Spacer(modifier = Modifier.height(6.dp))
                 Button(
@@ -586,7 +627,7 @@ fun ServerUI(
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 HyperlinkText(
-                    "页面地址/Link: $serverAddress",
+                    "前端地址/Link: $serverAddress",
                     serverAddress,
                     fontSize = 16.sp,
                     url = serverAddress
@@ -599,14 +640,7 @@ fun ServerUI(
                     url = "http://$gatewayIP"
                 )
                 Spacer(modifier = Modifier.height(20.dp))
-                Text("可点击停止服务更改网关和口令密码(默认admin)\nClick to stop the service and change the gateway and password (default: admin)",
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth())
-                Spacer(modifier = Modifier.height(10.dp))
-                Text(
-                    "本软件需安装在随身WiFi机内，请勿安装到手机上\nThis software must be installed inside the portable WiFi device. Please do not install it on your phone.",
+                Text("点击停止服务更改网关和口令密码(默认admin)\nClick to stop the service and change the gateway and password (default: admin)",
                     fontSize = 10.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,

@@ -16,14 +16,17 @@ import com.minikano.f50_sms.utils.KanoLog
 import com.minikano.f50_sms.utils.KanoReport
 import com.minikano.f50_sms.utils.KanoReport.Companion.reportToServer
 import com.minikano.f50_sms.utils.KanoUtils
+import com.minikano.f50_sms.utils.RootShell
 import com.minikano.f50_sms.utils.ShellKano
 import com.minikano.f50_sms.utils.ShellKano.Companion.executeShellFromAssetsSubfolderWithArgs
+import com.minikano.f50_sms.utils.ShellKano.Companion.killProcessByName
 import com.minikano.f50_sms.utils.SmbThrottledRunner
 import com.minikano.f50_sms.utils.SmsPoll
 import com.minikano.f50_sms.utils.TaskSchedulerManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.io.File
 import java.util.concurrent.Executors
 import kotlin.concurrent.thread
 
@@ -122,20 +125,21 @@ class ADBService : Service() {
     private fun startIperfTask(context: Context){
         iperfExecutor.execute {
             try{
-            KanoLog.d("kano_ZTE_LOG", "iperf3启动中...")
-            //启动iperf3
-            var result =
-                executeShellFromAssetsSubfolderWithArgs(
-                    applicationContext,
-                    "shell/iperf3",
-                    "-s",
-                    "-D",
-                )
-            if (result != null) {
-                KanoLog.d("kano_ZTE_LOG", "iperf3已启动")
-            } else {
-                KanoLog.e("kano_ZTE_LOG", "iperf3启动失败")
-            }}catch (e:Exception){
+                KanoLog.d("kano_ZTE_LOG", "iperf3启动中...")
+                killProcessByName("iperf3")
+                val result =
+                    executeShellFromAssetsSubfolderWithArgs(
+                        applicationContext,
+                        "shell/iperf3",
+                        "-s",
+                        "-D",
+                    )
+                if (result != null) {
+                    KanoLog.d("kano_ZTE_LOG", "iperf3已启动")
+                } else {
+                    KanoLog.e("kano_ZTE_LOG", "iperf3启动失败(用户模式)")
+                }
+            }catch (e:Exception){
                 KanoLog.e("kano_ZTE_LOG", "iperf3命令执行出错",e)
             }
         }

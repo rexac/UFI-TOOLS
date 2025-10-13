@@ -14,8 +14,10 @@ import android.os.PowerManager
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.minikano.f50_sms.configs.AppMeta
+import com.minikano.f50_sms.utils.KanoLog
 import com.minikano.f50_sms.utils.KanoUtils
 import com.minikano.f50_sms.utils.UniqueDeviceIDManager
+import com.minikano.f50_sms.utils.WakeLock
 import kotlin.concurrent.thread
 
 class WebService : Service() {
@@ -23,9 +25,6 @@ class WebService : Service() {
     private val port = 2333
     private val SERVER_INTENT = "com.minikano.f50_sms.SERVER_STATUS_CHANGED"
     private val UI_INTENT = "com.minikano.f50_sms.UI_STATUS_CHANGED"
-    private var wakeLock: PowerManager.WakeLock? = null
-    private var wakeLock2: PowerManager.WakeLock? = null
-    private var wakeLock3: PowerManager.WakeLock? = null
 
     @Volatile
     private var allowAutoStart = true
@@ -56,28 +55,16 @@ class WebService : Service() {
         //检测IP变动，适应用户ip网段更改
         KanoUtils.adaptIPChange(applicationContext)
 
+        val prefs = getSharedPreferences("kano_ZTE_store", Context.MODE_PRIVATE)
+        val needWakeLock = prefs.getString("wakeLock", "lock") ?: "lock"
         val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
-        wakeLock = pm.newWakeLock(
-            PowerManager.SCREEN_DIM_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP,
-            "ZTE-UFI-TOOLS::WakeLock"
-        )
-        wakeLock?.acquire()
-        Log.d("kano_ZTE_LOG", "已开启唤醒锁，防止屏幕熄灭!")
-
-        wakeLock2 = pm.newWakeLock(
-            PowerManager.FULL_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP,
-            "ZTE-UFI-TOOLS::FULL_WAKE_LOCK"
-        )
-        wakeLock2?.acquire()
-        Log.d("kano_ZTE_LOG", "已开启更强的唤醒锁，保持屏幕常亮并唤醒!")
-
-        wakeLock3 = pm.newWakeLock(
-            PowerManager.SCREEN_BRIGHT_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP,
-            "ZTE-UFI-TOOLS::BrightWakeLock"
-        )
-        wakeLock3?.acquire()
-        Log.d("kano_ZTE_LOG", "已开启屏幕亮度唤醒锁，保持屏幕常亮并唤醒!")
-
+        if(needWakeLock != "lock") {
+            KanoLog.d("kano_ZTE_LOG","不需要唤醒锁，正在释放...")
+            WakeLock.releaseWakeLock()
+        } else {
+            KanoLog.d("kano_ZTE_LOG","需要唤醒锁，正在执行...")
+            WakeLock.execWakeLock(pm)
+        }
 
         // 注册广播接收器
         registerReceiver(statusReceiver, IntentFilter(UI_INTENT), Context.RECEIVER_EXPORTED)

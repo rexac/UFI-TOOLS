@@ -5,18 +5,19 @@
 > 同时也提供其他中兴展锐Android手机/平板支持  
 
 > 本项目完全开源免费，如果你喜欢这个项目的话，也可以请我喝一杯咖啡~
-> <div>
->     <img src="./images/ali_pay.jpeg" style="max-width:300px" />
->     <img src="./images/wechat_pay.webp" style="max-width:300px" />
-> </div>
+>
+> | ![ali_pay](./images/ali_pay.jpeg) | ![wechat_pay](./images/wechat_pay.webp) |
+> | ------------------------------- | ------------------------------- |
+>
+
 
 > 欢迎加入群聊一起讨论！
 > TG：[t.me/ufi_tools_chat](https://github.com/kanoqwq/UFI-TOOLS/tree/http-server-version)
 >
-> <div>
-> 	<img src="./images/group_2.jpg" style="max-width:300px" />
-> 	<img src="./images/group_3.jpg"  style="max-width:300px" />
-> </div>
+> | ![group2](./images/group_2.jpg) | ![group3](./images/group_3.jpg) |
+> | ------------------------------- | ------------------------------- |
+>
+
 
 
 ---

@@ -3,8 +3,20 @@
 > 一款面向中兴随身WIFI（F50/U30 Air）的多功能管理与扩展工具  
 > 支持远程管理、信号监控、系统控制、插件扩展等丰富功能  
 > 同时也提供其他中兴展锐Android手机/平板支持  
-> 本项目完全开源免费，如果你喜欢这个项目的话，也可以请我喝一杯咖啡~
 
+> 本项目完全开源免费，如果你喜欢这个项目的话，也可以请我喝一杯咖啡~
+> <div>
+>     <img src="./images/ali_pay.jpeg" style="max-width:300px" />
+>     <img src="./images/wechat_pay.webp" style="max-width:300px" />
+> </div>
+
+> 欢迎加入群聊一起讨论！
+> TG：[t.me/ufi_tools_chat](https://github.com/kanoqwq/UFI-TOOLS/tree/http-server-version)
+>
+> <div>
+> 	<img src="./images/group_2.jpg" style="max-width:300px" />
+> 	<img src="./images/group_3.jpg"  style="max-width:300px" />
+> </div>
 
 
 ---

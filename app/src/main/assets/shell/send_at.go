@@ -9,6 +9,25 @@ import (
 	"strconv"
 )
 
+// getAndroidAPILevel 获取Android API等级
+func getAndroidAPILevel() int {
+	cmd := exec.Command("getprop", "ro.build.version.sdk")
+	out, err := cmd.Output()
+	if err != nil {
+		// 如果获取失败，默认使用Android 13的API等级(33)
+		return 33
+	}
+
+	// 解析API等级
+	sdkStr := bytes.TrimSpace(out)
+	level, err := strconv.Atoi(string(sdkStr))
+	if err != nil {
+		// 解析失败，默认使用33
+		return 33
+	}
+	return level
+}
+
 func parse(input string) string {
 	hexWordPattern := regexp.MustCompile(`\b[0-9a-fA-F]{8}\b`)
 	var result bytes.Buffer
@@ -56,6 +75,7 @@ func main() {
 		case "-c":
 			cmdArg = os.Args[i+1]
 		case "-n":
+			// 默认值是 0 (Go int 的零值)，如果用户指定 -n 1，这里会正确解析
 			numArg, _ = strconv.Atoi(os.Args[i+1])
 		}
 	}
@@ -65,10 +85,34 @@ func main() {
 		os.Exit(1)
 	}
 
-	// 转义整条 sendAt 命令
-	quotedCmd := strconv.Quote("sendAt " + strconv.Itoa(numArg) + " " + cmdArg)
-	// 构造完整 shell 命令
-	cmdString := `/system/bin/service call vendor.sprd.hardware.log.ILogControl/default 1 s16 "miscserver" s16 ` + quotedCmd
+	// ------------------- [!! 修改点 !!] -------------------
+	//
+	// 旧的 (安卓13) 命令:
+	// quotedCmd := strconv.Quote("sendAt " + strconv.Itoa(numArg) + " " + cmdArg)
+	// cmdString := `/system/bin/service call vendor.sprd.hardware.log.ILogControl/default 1 s16 "miscserver" s16 ` + quotedCmd
+	//
+	// 新的 (安卓15) 命令 (基于 Frida hook 和 IToolControl.java):
+	// 服务: vendor.sprd.hardware.tool.IToolControl/default
+	// 事务码: 3 (对应 sendAtCmd)
+	// 参数1: i32 (phoneId)
+	// 参数2: s16 (at command)
+	//
+	// 我们不再需要 "miscserver" 或 "sendAt" 字符串，直接传递纯 AT 命令
+
+	// 根据Android API等级选择合适的命令字符串
+	var cmdString string
+	if getAndroidAPILevel() > 33 {
+		// Android 14+ (API > 33): 使用新的 IToolControl 接口
+		cmdString = "/system/bin/service call vendor.sprd.hardware.tool.IToolControl/default 3 i32 " +
+			strconv.Itoa(numArg) +
+			" s16 " +
+			strconv.Quote(cmdArg)
+	} else {
+		// Android 13及以下 (API <= 33): 使用旧的 ILogControl 接口
+		cmdString = `/system/bin/service call vendor.sprd.hardware.log.ILogControl/default 1 s16 "miscserver" s16 ` +
+			strconv.Quote("sendAt "+strconv.Itoa(numArg)+" "+cmdArg)
+	}
+	// ----------------------------------------------------
 
 	// 执行命令
 	cmd := exec.Command("sh", "-c", cmdString)

@@ -293,6 +293,7 @@
     "at_quick_label": "Lệnh nhanh",
     "at_qos": "Tốc độ QoS",
     "at_imei": "IMEI",
+    "at_modem_reboot": "Khởi động lại modem",
     "at_modem": "Thông tin Modem",
     "at_imsi": "IMSI",
     "at_fill_imei": "Nhập IMEI cần sửa",

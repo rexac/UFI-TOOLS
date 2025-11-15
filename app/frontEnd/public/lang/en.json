@@ -293,6 +293,7 @@
     "at_quick_label": "Quick Commands",
     "at_qos": "QoS Rate",
     "at_imei": "IMEI",
+    "at_modem_reboot": "Reboot Modem",
     "at_modem": "Modem Info",
     "at_imsi": "IMSI",
     "at_fill_imei": "Input Modify IMEI",

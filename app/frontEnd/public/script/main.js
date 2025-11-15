@@ -5111,12 +5111,15 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
             if (await checkAdvanceFunc()) {
                 createToast(t('toast_advanced_checked'), '')
                 let res0 = await runShellWithRoot("pm disable com.zte.zdm")
-                let res1 = await runShellWithRoot("pm uninstall -k --user 0 com.zte.zdm ")
-                let res2 = await runShellWithRoot("pm uninstall -k --user 0 cn.zte.aftersale")
-                let res3 = await runShellWithRoot("pm uninstall -k --user 0 com.zte.zdmdaemon")
-                let res4 = await runShellWithRoot("pm uninstall -k --user 0 com.zte.zdmdaemon.install")
-                let res5 = await runShellWithRoot("pm uninstall -k --user 0 com.zte.analytics")
-                let res6 = await runShellWithRoot("pm uninstall -k --user 0 com.zte.neopush")
+                let res1 = await runShellWithRoot("pm hide com.zte.zdm")
+                let res2 = await runShellWithRoot("pm uninstall -k --user 0 com.zte.zdm ")
+                let res3 = await runShellWithRoot("pm uninstall -k --user 0 cn.zte.aftersale")
+                let res4 = await runShellWithRoot("pm uninstall -k --user 0 com.zte.zdmdaemon")
+                let res5 = await runShellWithRoot("pm uninstall -k --user 0 com.zte.zdmdaemon.install")
+                let res6 = await runShellWithRoot("pm uninstall -k --user 0 com.zte.analytics")
+                let res7 = await runShellWithRoot("pm uninstall -k --user 0 com.zte.neopush")
+                let res8 = await runShellWithRoot("am force-stop com.zte.zdm")
+                let res9 = await runShellWithRoot("pm clear com.zte.zdm")
                 AD_RESULT.innerHTML = `
                 <div style="min-width:200px;font-size:12px">
                 <p>${t('advanced_checked_disabled_update')}</p>
@@ -5127,6 +5130,9 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
                 <p>${res4.content}</p>
                 <p>${res5.content}</p>
                 <p>${res6.content}</p>
+                <p>${res7.content}</p>
+                <p>${res8.content}</p>
+                <p>${res9.content}</p>
                 </div>`
             } else {
                 createToast(t('toast_not_enabled_advanced_tools'), '')

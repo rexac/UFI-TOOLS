@@ -293,6 +293,7 @@
     "at_quick_label": "クイックコマンド",
     "at_qos": "契約速度",
     "at_imei": "IMEI",
+    "at_modem_reboot": "モデムを再起動",
     "at_modem": "モデム情報",
     "at_imsi": "IMSI",
     "at_fill_imei": "IMEI変更",

@@ -506,7 +506,6 @@ class KanoUtils {
                 outFileAdb.setExecutable(true)
 
                 val cmds = listOf(
-                    "${outFileAdb.absolutePath} -s localhost shell pm clear com.zte.zdm",
                     "${outFileAdb.absolutePath} -s localhost shell pm disable-user --user 0 com.zte.zdm",
                     "${outFileAdb.absolutePath} -s localhost shell pm uninstall -k --user 0 com.zte.zdm",
                     "${outFileAdb.absolutePath} -s localhost shell pm uninstall -k --user 0 cn.zte.aftersale",

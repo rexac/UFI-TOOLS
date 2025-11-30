@@ -719,5 +719,14 @@
     "new_token": "New Token：",
     "new_token_placeholder": "New Token",
     "confirm_token": "Confirm：",
-    "confirm_token_placeholder": "Confirm Token"
+    "confirm_token_placeholder": "Confirm Token",
+    "usb_status": "USB Status",
+    "no_usb_list": "No USB Devices",
+    "max_speed": "Maximum Speed",
+    "path": "Path",
+    "device_name": "Device Name",
+    "speed": "Speed",
+    "usb_status_notice": "Only displays devices connected through the Type-C port. Data is for reference only.",
+    "host_usb_exp": "Host Mode (peripherals/network adapter)",
+    "device_usb_exp": "Device Mode (connect to PC)"
 }

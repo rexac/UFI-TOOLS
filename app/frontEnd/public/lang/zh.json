@@ -720,5 +720,14 @@
     "new_token": "新的口令：",
     "new_token_placeholder": "新口令",
     "confirm_token": "确认口令：",
-    "confirm_token_placeholder": "确认口令"
+    "confirm_token_placeholder": "确认口令",
+    "usb_status":"USB状态",
+    "no_usb_list":"暂无USB设备",
+    "max_speed":"最大速度",
+    "path":"路径",
+    "device_name":"设备名",
+    "speed":"速度",
+    "usb_status_notice":"仅展示机器Type-C口连接的设备列表，数据仅供参考",
+    "host_usb_exp":"主机模式（接外设/转网口）",
+    "device_usb_exp":"设备模式（连接电脑）"
 }

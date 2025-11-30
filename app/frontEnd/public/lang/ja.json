@@ -719,5 +719,14 @@
     "new_token": "新しいトークン：",
     "new_token_placeholder": "新しいトークン",
     "confirm_token": "確認トークン：",
-    "confirm_token_placeholder": "確認トークン"
+    "confirm_token_placeholder": "確認トークン",
+    "usb_status": "USB 状態",
+    "no_usb_list": "USB デバイスがありません",
+    "max_speed": "最大速度",
+    "path": "パス",
+    "device_name": "デバイス名",
+    "speed": "速度",
+    "usb_status_notice": "Type-C ポートに接続されたデバイスのみを表示します。データは参考用です。",
+    "host_usb_exp": "ホストモード（周辺機器／LAN アダプタ）",
+    "device_usb_exp": "デバイスモード（PC 接続）"
 }

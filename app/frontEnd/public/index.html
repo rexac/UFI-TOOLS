@@ -56,19 +56,19 @@
                         <button id="CLEAR" class="btn" data-i18n="login_btn">登录/登出</button>
                         <button class="btn REFRESH_BTN" data-i18n="stop_refresh">停止刷新</button>
                         <button id="CHANGETOKEN" class="btn" data-i18n="change_token"
-                            onclick="createToast('请登录','red')">更改口令</button>
+                            onclick="createToast(t('please_login'),'red')">更改口令</button>
                         <button id="CHANGEPWD" class="btn" data-i18n="change_password"
-                            onclick="createToast('请登录','red')">更改密码</button>
+                            onclick="createToast(t('please_login'),'red')">更改密码</button>
                         <button id="REBOOT" class="btn" data-i18n="reboot"
-                            onclick="createToast('请登录','red')">重启设备</button>
+                            onclick="createToast(t('please_login'),'red')">重启设备</button>
                         <button id="SCHEDULE_REBOOT" class="btn" data-i18n="schedule_reboot"
-                            onclick="createToast('请登录','red')">定时重启</button>
+                            onclick="createToast(t('please_login'),'red')">定时重启</button>
                         <button id="SHUTDOWN" style="display: none;" class="btn" data-i18n="shutdown"
-                            onclick="createToast('请登录','red')">关机</button>
+                            onclick="createToast(t('please_login'),'red')">关机</button>
                         <button id="BG_SETTING" class="btn" data-i18n="bg_setting"
-                            onclick="createToast('请登录','red')">主题背景</button>
+                            onclick="createToast(t('please_login'),'red')">主题背景</button>
                         <button id="PLUGIN_SETTING" class="btn" data-i18n="plugin_setting"
-                            onclick="createToast('请登录','red')">插件功能</button>
+                            onclick="createToast(t('please_login'),'red')">插件功能</button>
                         <div style="display: inline-block;position: relative;">
                             <div class="tip" style="display: none;" id="UNREAD_SMS">0</div>
                             <button id="SMS" class="btn" data-i18n="sms">短信收发</button>
@@ -77,35 +77,40 @@
                         <button id="SpeedTestBtn" class="btn" data-i18n="speed_test"
                             onclick="showModal('#speedTestModal')">内网测速</button>
                         <button id="CellularSpeedTestBtn" class="btn" data-i18n="cellular_speed_test"
-                            onclick="createToast('请登录','red')">流量测速</button>
+                            onclick="createToast(t('please_login'),'red')">流量测速</button>
                         <button id="ClientManagement" class="btn" data-i18n="client_mgmt">接入设备</button>
                         <button id="WIFIManagement" class="btn" data-i18n="wifi_mgmt">WIFI设置</button>
                         <button id="LANManagement" class="btn" data-i18n="lan_mgmt">内网设置</button>
-                        <button id="AT" class="btn" data-i18n="at_cmd" onclick="createToast('请登录','red')">AT指令</button>
+                        <button id="AT" class="btn" data-i18n="at_cmd"
+                            onclick="createToast(t('please_login'),'red')">AT指令</button>
                         <button id="ADVANCE" class="btn" data-i18n="advanced"
-                            onclick="createToast('请登录','red')">高级功能</button>
+                            onclick="createToast(t('please_login'),'red')">高级功能</button>
                         <button id="CECULLAR" class="btn" data-i18n="cellular"
-                            onclick="createToast('请登录','red')">数据流量</button>
-                        <button id="ADB" class="btn" data-i18n="adb" onclick="createToast('请登录','red')">USB调试</button>
+                            onclick="createToast(t('please_login'),'red')">数据流量</button>
+                        <button id="ADB" class="btn" data-i18n="adb"
+                            onclick="createToast(t('please_login'),'red')">USB调试</button>
                         <button id="ADB_NET" class="btn" data-i18n="adb_autostart"
-                            onclick="createToast('请登录','red')">ADB自启</button>
+                            onclick="createToast(t('please_login'),'red')">ADB自启</button>
                         <button id="PERF" class="btn" data-i18n="performance_mode"
-                            onclick="createToast('请登录','red')">性能模式</button>
+                            onclick="createToast(t('please_login'),'red')">性能模式</button>
                         <button id="LIGHT" class="btn" data-i18n="indicator"
-                            onclick="createToast('请登录','red')">指示灯</button>
+                            onclick="createToast(t('please_login'),'red')">指示灯</button>
                         <button id="NFC" style="display: none;" class="btn" data-i18n="nfc"
-                            onclick="createToast('请登录','red')">NFC</button>
+                            onclick="createToast(t('please_login'),'red')">NFC</button>
                         <button id="SMB" class="btn" data-i18n="file_sharing"
-                            onclick="createToast('请登录','red')">文件共享</button>
+                            onclick="createToast(t('please_login'),'red')">文件共享</button>
                         <button id="ROAM" class="btn" data-i18n="network_roam"
-                            onclick="createToast('请登录','red')">网络漫游</button>
+                            onclick="createToast(t('please_login'),'red')">网络漫游</button>
                         <button id="smsForward" class="btn" data-i18n="sms_forward"
-                            onclick="createToast('请登录','red')">短信转发</button>
+                            onclick="createToast(t('please_login'),'red')">短信转发</button>
                         <button id="ScheduledTaskManagement" class="btn" data-i18n="scheduled_task"
-                            onclick="createToast('请登录','red')">定时任务</button>
+                            onclick="createToast(t('please_login'),'red')">定时任务</button>
                         <button id="APNManagement" data-i18n="apn_setting" class="btn"
-                            onclick="createToast('请登录','red')">APN设置</button>
-                        <button id="OTA" class="btn" data-i18n="ota" onclick="createToast('请登录','red')">软件更新</button>
+                            onclick="createToast(t('please_login'),'red')">APN设置</button>
+                        <button id="USBStatusManagement" data-i18n="usb_status" class="btn"
+                            onclick="createToast(t('please_login'),'red')">USB状态</button>
+                        <button id="OTA" class="btn" data-i18n="ota"
+                            onclick="createToast(t('please_login'),'red')">软件更新</button>
 
                         <select class="select" style="display: none;" id="SLEEP_TIME" onchange="changeSleepTime(event)">
                             <option value="-1" data-i18n="sleep_never">从不休眠</option>
@@ -1598,6 +1603,19 @@
                         data-i18n="speedtest_loop_btn">循环测速</button>
                     <button type="button" onclick="closeCellularTest('#CellularTestModal')"
                         data-i18n="close_btn">关闭</button>
+                </div>
+            </div>
+            <!-- usb状态 -->
+            <div class="modal" id="USBStatusModal" style="display: none;">
+                <div class="title" data-i18n="usb_status">USB状态</div>
+                <div class="title" style="font-size: 12px;margin: 10px 0"><i
+                        data-i18n="usb_status_notice">仅展示机器Type-C口连接的设备列表，数据仅供参考</i></div>
+                <div class="content"
+                    style="font-size: .7rem;overflow-y: auto; padding: 10px 0;margin-bottom: 10px;; width: 66vw; max-width: 500px;">
+                </div>
+
+                <div class="btn" style="text-align: right;">
+                    <button type="button" onclick="closeUSBStatusModal('#USBStatusModal')" data-i18n="close_btn">关闭</button>
                 </div>
             </div>
             <!-- 版本更新模态框 -->

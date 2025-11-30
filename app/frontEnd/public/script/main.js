@@ -477,6 +477,7 @@ function main_func() {
         initATBtn()
         initAPNManagement()
         initCellularSpeedTestBtn()
+        initUSBStatusManagementBtn()
         initSleepTime()
         initAdvanceTools()
         initTerms()
@@ -6545,8 +6546,55 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
         })
     }
 
+    const fetchUSBStatusList = async (el) => {
+        try {
+            const res = await (await fetchWithTimeout(`${KANO_baseURL}/usb_status`, {
+                method: "GET",
+                headers: common_headers
+            })).json()
+            if (!res) { throw new Error('No data') }
+            el.innerHTML = `<div style="display: flex;margin-bottom:10px;flex-direction:column"><div>${t('max_speed')}：${formatSpeed(res.maxSpeed)}</div><div>${t('usb_status')}：${res.details.typec_mode}/${res.details.typec_mode == "host" ? t('host_usb_exp'):t('device_usb_exp')}</div></div>
+                    <ul class="deviceList" style="display: flex;flex-direction: column;gap: 10px;">
+                        ${res.details.devices.map(device => `<li style="padding: 10px;">
+                            <div>${t('path')}：${device.path}</div>
+                            <div>${t('device_name')}： ${device.product}</div>
+                            <div>${t('speed')}：${formatSpeed(device.speed)}</div>
+                        </li>`).join('')}
+                    </ul>`.trim()
+        } catch {
+            el.innerHTML = `<div style="text-align:center;padding:20px 0">${t('no_usb_list')}</div>`
+        }
+    }
+
+    //usb管理
+    let stopRefreshUSBStatusInterval = null
+    const initUSBStatusManagementBtn = async () => {
+        const btn = document.querySelector('#USBStatusManagement')
+        if (!(await initRequestData())) {
+            btn.onclick = () => createToast(t('toast_please_login'), 'red')
+            return null
+        }
+        btn.onclick = async () => {
+            showModal('#USBStatusModal')
+            //加载数据
+            const el = document.querySelector('#USBStatusModal .content')
+            if (!el) return
+            el.innerHTML = `<div style="text-align:center;padding:20px 0">Loading...</div>`
+            stopRefreshUSBStatusInterval && stopRefreshUSBStatusInterval()
+            fetchUSBStatusList(el)
+            stopRefreshUSBStatusInterval = requestInterval(() => fetchUSBStatusList(el), REFRESH_TIME + 1000)
+        }
+    }
+    initUSBStatusManagementBtn()
+
+    const closeUSBStatusModal = () => {
+        closeModal('#USBStatusModal', 300, () => {
+            stopRefreshUSBStatusInterval && stopRefreshUSBStatusInterval()
+        })
+    }
     //挂载方法到window
     const methods = {
+        closeUSBStatusModal,
         onCloseChangeTokenForm,
         handleChangeToken,
         toggleLogCat,

@@ -949,3 +949,21 @@ const showLoginHelp = () => {
         close()
     }
 }
+
+function formatSpeed(bps, base = 1000 * 1000) {
+    if (bps == null || isNaN(bps)) return "0 kbps";
+
+    bps = base * bps;
+
+    const kbps = bps / 1_000;
+    const mbps = bps / 1_000_000;
+    const gbps = bps / 1_000_000_000;
+
+    if (bps >= 1_000_000_000) {
+        return gbps.toFixed(gbps >= 10 ? 0 : 1) + " Gbps";
+    } else if (bps >= 1_000_000) {
+        return mbps.toFixed(mbps >= 10 ? 0 : 1) + " Mbps";
+    } else {
+        return kbps.toFixed(kbps >= 10 ? 0 : 1) + " kbps";
+    }
+}

@@ -1,10 +1,14 @@
 package com.minikano.f50_sms.utils
 
+import androidx.compose.ui.text.toUpperCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
+import java.util.Locale
+import java.util.Locale.getDefault
 
 /*
 * 感谢群内 执念 大哥提供的思路
@@ -22,6 +26,12 @@ data class MemoryInfo(
     val swapFree: Long,
     val swapUsed: Long,
     val swapUsagePercent: Double
+)
+
+data class UsbDevice(
+    val path: String,
+    val product: String,
+    val speed: Int
 )
 
 fun buildJsonObject(block: JSONObject.() -> Unit): JSONObject {
@@ -227,3 +237,51 @@ private fun parseMicroVolt(text: String): Int {
     return text.toIntOrNull() ?: -1
 }
 
+suspend fun readUsbDevices(): Pair<Int, String> = withContext(Dispatchers.IO) {
+    val usbDir = File("/sys/bus/usb/devices")
+    val devices = mutableListOf<UsbDevice>()
+    var maxSpeed = 0
+
+    usbDir.listFiles()?.forEach { deviceDir ->
+        val productFile = File(deviceDir, "product")
+        val speedFile = File(deviceDir, "speed")
+
+        if (productFile.exists() && speedFile.exists()) {
+            try {
+                val product = productFile.readText().trim()
+                val speed = speedFile.readText().trim().toIntOrNull() ?: 0
+                devices.add(UsbDevice(deviceDir.name, product, speed))
+                //排除掉不是 真正 USB-C 的设备
+                if (speed > maxSpeed &&
+                    !(deviceDir.name.startsWith("usb")) &&
+                    !(product.contains("Host Controller", ignoreCase = true)) &&
+                    !(product.contains("HDRC", ignoreCase = true))
+                    ) maxSpeed = speed
+            } catch (_: Exception) {}
+        }
+    }
+
+    // 顺便获取 Type-C host/gadget 模式
+    // cat /sys/class/android_usb/android0/state
+    var typeCMode = "unknown"
+    val portStateFile = File("/sys/class/android_usb/android0/state")
+    if (portStateFile.exists()) {
+        val state = portStateFile.readText().trim().uppercase(Locale.getDefault())
+        typeCMode = if (state == "DISCONNECTED") "host" else "gadget"
+    }
+
+    // 构建 JSON
+    val jsonArray = JSONArray()
+    devices.forEach { dev ->
+        val obj = JSONObject()
+        obj.put("path", dev.path)
+        obj.put("product", dev.product)
+        obj.put("speed", dev.speed)
+        jsonArray.put(obj)
+    }
+    val jsonRoot = JSONObject()
+    jsonRoot.put("typec_mode", typeCMode)
+    jsonRoot.put("devices", jsonArray)
+
+    return@withContext Pair(maxSpeed, jsonRoot.toString())
+}

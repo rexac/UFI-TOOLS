@@ -719,5 +719,14 @@
     "new_token": "Mã Mới：",
     "new_token_placeholder": "Mã Mới",
     "confirm_token": "Xác Mã：",
-    "confirm_token_placeholder": "Xác Mã"
+    "confirm_token_placeholder": "Xác Mã",
+    "usb_status": "Trạng Thái USB",
+    "no_usb_list": "Không có thiết bị USB",
+    "max_speed": "Tốc Độ Tối Đa",
+    "path": "Đường Dẫn",
+    "device_name": "Tên Thiết Bị",
+    "speed": "Tốc Độ",
+    "usb_status_notice": "Chỉ hiển thị thiết bị kết nối qua cổng Type-C. Dữ liệu chỉ mang tính tham khảo.",
+    "host_usb_exp": "Chế Độ Host (kết nối ngoại vi / adapter mạng)",
+    "device_usb_exp": "Chế Độ Device (kết nối máy tính)"
 }

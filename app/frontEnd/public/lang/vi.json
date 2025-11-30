@@ -710,5 +710,14 @@
     "pdp_type": "PDP Type",
     "profile_name": "CFG Name",
     "add_apn": "Add APN",
-    "edit_apn": "Edit APN"
+    "edit_apn": "Edit APN",
+    "change_token": "Đổi Mã",
+    "toast_please_input_new_token": "Vui lòng nhập mã mới",
+    "toast_please_input_new_conform_token": "Vui lòng xác nhận mã",
+    "toast_token_not_eqal": "Hai lần nhập không khớp",
+    "change_token_title": "Đổi Mã Đăng Nhập",
+    "new_token": "Mã Mới：",
+    "new_token_placeholder": "Mã Mới",
+    "confirm_token": "Xác Mã：",
+    "confirm_token_placeholder": "Xác Mã"
 }

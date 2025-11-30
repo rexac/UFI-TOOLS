@@ -60,8 +60,6 @@ class MainActivity : ComponentActivity() {
     companion object {
         const val REQUEST_CODE_NOTIFICATION = 114514
         const val REQUEST_CODE_SMS = 1919810
-        @Volatile
-        var isEnableLog = false
     }
     private val port = 2333
     private val PREFS_NAME = "kano_ZTE_store"
@@ -96,7 +94,7 @@ class MainActivity : ComponentActivity() {
             spf.edit().putString(PREF_LOGIN_TOKEN, "admin").apply()
         }
         if(!spf.contains(PREF_ISDEBUG)){
-            spf.edit().putString(PREF_ISDEBUG, "false").apply()
+            spf.edit().putBoolean(PREF_ISDEBUG, false).apply()
         }
         if(!spf.contains(PREF_GATEWAY_IP)){
             spf.edit().putString(PREF_GATEWAY_IP, "192.168.0.1:8080").apply()
@@ -216,7 +214,7 @@ class MainActivity : ComponentActivity() {
                 )
 
                 val sf = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-                isEnableLog = sf.getString(PREF_ISDEBUG,"false").equals("true")
+                AppMeta.setIsEnableLog(context,sf.getBoolean(PREF_ISDEBUG,false))
 
                 setContent {
                     val context = this@MainActivity
@@ -262,10 +260,10 @@ class MainActivity : ComponentActivity() {
 
                     var isDebugLog by remember {
                         mutableStateOf(
-                            sharedPrefs.getString(
+                            sharedPrefs.getBoolean(
                                 PREF_ISDEBUG,
-                                false.toString()
-                            ) ?: false.toString()
+                                false
+                            )
                         )
                     }
 
@@ -286,6 +284,36 @@ class MainActivity : ComponentActivity() {
                             onStopServer = {
                                 sendBroadcast(Intent(UI_INTENT).putExtra("status", false))
                                 serverStatusLiveData.postValue(false)
+
+                                gatewayIp = sharedPrefs.getString(
+                                            PREF_GATEWAY_IP,
+                                            "192.168.0.1:8080"
+                                        ) ?: "192.168.0.1:8080"
+
+                                loginToken = sharedPrefs.getString(
+                                            PREF_LOGIN_TOKEN,
+                                            "admin"
+                                        ) ?: "admin"
+
+                                isTokenEnabled = sharedPrefs.getString(
+                                            PREF_TOKEN_ENABLED,
+                                            true.toString()
+                                        ) ?: true.toString()
+
+                                isAutoIpEnabled = sharedPrefs.getString(
+                                            PREF_AUTO_IP_ENABLED,
+                                            true.toString()
+                                        ) ?: true.toString()
+
+                                isDebugLog = sharedPrefs.getBoolean(
+                                        PREF_ISDEBUG,
+                                        false)
+
+                                wakeLock  = sharedPrefs.getString(
+                                    PREF_WAKELOCK,
+                                    "lock"
+                                ) ?: "lock"
+
                                 KanoLog.d("kano_ZTE_LOG", "user touched stop btn")
                             }
                         )
@@ -302,7 +330,7 @@ class MainActivity : ComponentActivity() {
                             },
                             isTokenEnabled = isTokenEnabled == true.toString(),
                             isAutoCheckIp = isAutoIpEnabled == true.toString(),
-                            isDebug = isDebugLog == true.toString(),
+                            isDebug = isDebugLog == true,
                             isWkLock = wakeLock == "lock",
                             onTokenEnableChange = { isTokenEnabled = it.toString() },
                             onAutoCheckIpChange = {
@@ -314,9 +342,8 @@ class MainActivity : ComponentActivity() {
                                 }
                             },
                             onDebugChange = {
-                                isEnableLog = it
-                                isDebugLog = it.toString()
-                                sharedPrefs.edit().putString(PREF_ISDEBUG, isEnableLog.toString()).apply()
+                                AppMeta.setIsEnableLog(sharedPrefs,it)
+                                isDebugLog = it
                             },
                             onIsWkLockChange = {
                                 wakeLock = if(it){

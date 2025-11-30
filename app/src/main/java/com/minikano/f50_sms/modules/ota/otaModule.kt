@@ -1,6 +1,7 @@
 package com.minikano.f50_sms.modules.ota
 
 import android.content.Context
+import com.minikano.f50_sms.configs.AppMeta
 import com.minikano.f50_sms.modules.BASE_TAG
 import com.minikano.f50_sms.utils.KanoLog
 import com.minikano.f50_sms.utils.KanoRequest
@@ -45,8 +46,8 @@ fun Route.otaModule(context: Context) {
     get("/api/check_update") {
         try {
             val path = "/UFI-TOOLS-UPDATE"
-            val downloadUrl = "https://pan.kanokano.cn/d$path/"
-            val changelogUrl = "https://pan.kanokano.cn/d$path/changelog.txt"
+            val downloadUrl = "${AppMeta.GLOBAL_SERVER_URL}/d$path/"
+            val changelogUrl = "${AppMeta.GLOBAL_SERVER_URL}/d$path/changelog.txt"
 
             // 拉取 changelog 文本
             val changelog = KanoRequest.getTextFromUrl(changelogUrl)
@@ -63,7 +64,7 @@ fun Route.otaModule(context: Context) {
         """.trimIndent()
 
             val alistResponse = KanoRequest.postJson(
-                "https://pan.kanokano.cn/api/fs/list",
+                "${AppMeta.GLOBAL_SERVER_URL}/api/fs/list",
                 requestBody
             )
 

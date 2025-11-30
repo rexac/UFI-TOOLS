@@ -710,5 +710,14 @@
     "pdp_type": "PDP Type",
     "profile_name": "CFG Name",
     "add_apn": "Add APN",
-    "edit_apn": "Edit APN"
+    "edit_apn": "Edit APN",
+    "change_token": "Change Token",
+    "toast_please_input_new_token": "Please enter new token",
+    "toast_please_input_new_conform_token": "Please confirm token",
+    "toast_token_not_eqal": "The two entries do not match",
+    "change_token_title": "Change Login Token",
+    "new_token": "New Token：",
+    "new_token_placeholder": "New Token",
+    "confirm_token": "Confirm：",
+    "confirm_token_placeholder": "Confirm Token"
 }

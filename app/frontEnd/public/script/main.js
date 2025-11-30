@@ -453,6 +453,7 @@ function main_func() {
         initLANSettings()
         initSmsForwardModal()
         initChangePassData()
+        initChangeTokenData()
         adbQuery()
         loadTitle()
         initUpdateSoftware()
@@ -2854,6 +2855,7 @@ function main_func() {
         click_count_ttyd++
         if (click_count_ttyd == 4) {
             // 启用ttyd弹窗
+            initResServer()
             showModal('#TTYDModal')
         }
         ttyd_timer && clearInterval(ttyd_timer)
@@ -2873,10 +2875,40 @@ function main_func() {
         // 保存ttyd port
         localStorage.setItem('ttyd_port', ttyd_port)
         createToast(t('toast_save_success'), 'green')
-        closeModal('#TTYDModal')
         initTTYD()
     }
 
+    let changeResServer = async (e) => {
+        e.preventDefault()
+        const RES_SERVER_INPUT = document.querySelector('#RES_SERVER_INPUT')
+        if (!RES_SERVER_INPUT) return
+        const url = RES_SERVER_INPUT.value.trim()
+        if (!url || url.length == 0) return createToast("Please input res server!", 'red')
+        const res = await (await fetchWithTimeout(`${KANO_baseURL}/set_res_server`, {
+            method: 'POST',
+            headers: common_headers,
+            body: JSON.stringify({ res_server: url })
+        }, 5000)).json()
+        if (res.result != "success") {
+            return createToast(t('toast_save_failed'), 'red')
+        }
+        createToast(t('toast_save_success'), 'green')
+        closeModal('#resServerModal')
+    }
+
+    let initResServer = async () => {
+        const RES_SERVER_INPUT = document.querySelector('#RES_SERVER_INPUT')
+        if (!RES_SERVER_INPUT) return
+        try {
+            const { res_server } = await (await fetchWithTimeout(`${KANO_baseURL}/get_res_server`, {
+                method: 'GET',
+                headers: common_headers
+            })).json()
+            RES_SERVER_INPUT.value = res_server || ''
+        } catch {
+            // no handle
+        }
+    }
 
     function parseCGEQOSRDP(input) {
         const match = input.match(/\+CGEQOSRDP:\s*(.+?)\s*OK/);
@@ -3229,9 +3261,6 @@ function main_func() {
         } catch {
             createToast(t('toast_login_failed_check_network_and_pwd'), 'red')
             closeModal('#changePassModal')
-            setTimeout(() => {
-                out()
-            }, 310);
         }
     }
 
@@ -3239,6 +3268,68 @@ function main_func() {
         const form = document.querySelector("#changePassForm")
         form && form.reset()
         closeModal("#changePassModal")
+    }
+
+
+    //更改口令
+    initChangeTokenData = async () => {
+        const el = document.querySelector("#CHANGETOKEN")
+        if (!(await initRequestData()) || !el) {
+            el.onclick = () => createToast(t('toast_please_login'), 'red')
+            el.style.backgroundColor = 'var(--dark-btn-disabled-color)'
+            return null
+        }
+        el.style.backgroundColor = ''
+        el.onclick = async () => {
+            showModal('#changeTokenModal')
+        }
+    }
+    initChangeTokenData()
+
+    //更改口令
+    const handleChangeToken = async (e) => {
+        e.preventDefault()
+        const form = e.target
+        const formData = new FormData(form);
+        const newToken = formData.get('newToken')
+        const confirmToken = formData.get('confirmToken')
+        if (!newToken || newToken.trim() == '') return createToast(t('toast_please_input_new_token'), 'red')
+        if (!confirmToken || confirmToken.trim() == '') return createToast(t('toast_please_input_new_conform_token'), 'red')
+        if (newToken != confirmToken) return createToast(t('toast_token_not_eqal'), 'red')
+
+        try {
+            try {
+                const res = await (await fetchWithTimeout(`${KANO_baseURL}/set_token`, {
+                    method: 'POST',
+                    headers: common_headers,
+                    body: JSON.stringify({
+                        token: newToken.trim()
+                    })
+                })).json()
+                if (res && res.result == 'success') {
+                    createToast(t('toast_change_success'), 'green')
+                    const new_token = SHA256(newToken.trim()).toLowerCase()
+                    KANO_TOKEN = new_token
+                    common_headers.authorization = KANO_TOKEN
+                    localStorage.setItem('kano_sms_token', new_token)
+                    form.reset()
+                    closeModal('#changeTokenModal', 300)
+                } else {
+                    throw t('toast_change_failed')
+                }
+            } catch {
+                createToast(t('toast_change_failed'), 'red')
+            }
+        } catch {
+            createToast(t('toast_login_failed_check_network_and_pwd'), 'red')
+            closeModal('#changeTokenModal')
+        }
+    }
+
+    const onCloseChangeTokenForm = () => {
+        const form = document.querySelector("#changeTokenForm")
+        form && form.reset()
+        closeModal("#changeTokenModal")
     }
 
     //sim卡切换
@@ -5879,6 +5970,7 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
         if (!res) createToast(t("toast_oprate_failed"), "red")
         createToast(t("toast_oprate_success"), 'green')
     }
+
     const toggleADBIP = async (flag) => {
         if (!await checkAdvanceFunc()) return createToast(t("need_advance_func"), 'red')
         const bootUp = dev_bootup.checked
@@ -5886,6 +5978,23 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
         const res = togglePort("5555", flag, bootUp, v6)
         if (!res) createToast(t("toast_oprate_failed"), "red")
         createToast(t("toast_oprate_success"), 'green')
+    }
+
+    const toggleLogCat = async (flag) => {
+        try {
+            const { result } = await (await fetchWithTimeout(`${KANO_baseURL}/set_log_status`, {
+                method: "POST",
+                headers: common_headers,
+                body: JSON.stringify({ debug_log_enabled: flag ? true : false })
+            })).json()
+            if (result.success) {
+                throw new Error('Failed to toggle LogCat')
+            }
+            createToast(t("toast_oprate_success"), 'green')
+        }
+        catch {
+            if (!res) createToast(t("toast_oprate_failed"), "red")
+        }
     }
 
     const resetTTYDPort = () => {
@@ -6438,6 +6547,10 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
 
     //挂载方法到window
     const methods = {
+        onCloseChangeTokenForm,
+        handleChangeToken,
+        toggleLogCat,
+        changeResServer,
         onChangeIsAutoFrofile,
         onViewAPNProfile,
         changeSleepTime,

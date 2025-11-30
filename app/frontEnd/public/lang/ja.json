@@ -710,5 +710,14 @@
     "pdp_type": "PDP Type",
     "profile_name": "CFG Name",
     "add_apn": "Add APN",
-    "edit_apn": "Edit APN"
+    "edit_apn": "Edit APN",
+    "change_token": "トークン変更",
+    "toast_please_input_new_token": "新しいトークンを入力してください",
+    "toast_please_input_new_conform_token": "トークンを確認してください",
+    "toast_token_not_eqal": "入力が一致しません",
+    "change_token_title": "ログイントークン変更",
+    "new_token": "新しいトークン：",
+    "new_token_placeholder": "新しいトークン",
+    "confirm_token": "確認トークン：",
+    "confirm_token_placeholder": "確認トークン"
 }

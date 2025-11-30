@@ -1,8 +1,10 @@
 package com.minikano.f50_sms.configs
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.os.Build
 import com.minikano.f50_sms.modules.PREFS_NAME
+import com.minikano.f50_sms.utils.DeviceModelChecker
 
 import com.minikano.f50_sms.utils.KanoLog
 import java.io.File
@@ -18,8 +20,42 @@ object AppMeta {
         private set
     var isReadUseTerms:Boolean = false
 
+    var isEnableLog:Boolean = false
+        private set
+
+    var GLOBAL_SERVER_URL = "https://pan.kanokano.cn"
+        private set
+    private const val PREFS_NAME = "kano_ZTE_store"
+    private const val GLOBAL_SERVER_URL_KEY = "GLOBAL_SERVER_URL"
+
+    private val PREF_ISDEBUG = "kano_is_debug"
+
+    fun setGlobalServerUrl(context: Context,url: String) {
+        if(url.isEmpty() || url.isBlank()) throw Exception("url is empty")
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putString(GLOBAL_SERVER_URL_KEY, url).apply()
+        GLOBAL_SERVER_URL = url
+    }
+
+    fun setIsEnableLog(context: Context,flag: Boolean) {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putBoolean(PREF_ISDEBUG, flag).apply()
+        isEnableLog = flag
+    }
+
+    fun setIsEnableLog(prefs: SharedPreferences, flag: Boolean) {
+        prefs.edit().putBoolean(PREF_ISDEBUG, flag).apply()
+        isEnableLog = flag
+    }
+
     fun init(context: Context) {
         try {
+            val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            val globalServerAddress = prefs.getString(GLOBAL_SERVER_URL_KEY, null)
+            if (globalServerAddress != null) {
+                GLOBAL_SERVER_URL = globalServerAddress
+            }
+
             val pkgInfo = context.applicationContext.packageManager.getPackageInfo(context.packageName, 0)
             versionName = pkgInfo.versionName.toString()
             @Suppress("DEPRECATION")
@@ -29,6 +65,7 @@ object AppMeta {
             isDeviceRooted = socketPath.exists()
             val sharedPrefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             isReadUseTerms = sharedPrefs.getString("isReadUseTerms", "false").toBoolean()
+            isEnableLog = prefs.getBoolean(PREF_ISDEBUG, false)
         } catch (e: Exception) {
             KanoLog.e("kano_ZTE_LOG","AppMeta init failed！！")
         }

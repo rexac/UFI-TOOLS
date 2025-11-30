@@ -1,6 +1,7 @@
 package com.minikano.f50_sms.modules.plugins
 
 import android.content.Context
+import com.minikano.f50_sms.configs.AppMeta
 import com.minikano.f50_sms.utils.KanoLog
 import com.minikano.f50_sms.modules.BASE_TAG
 import com.minikano.f50_sms.modules.auth.authenticatedRoute
@@ -61,8 +62,8 @@ fun Route.pluginsModule(context: Context) {
         //从插件市场获取插件
         get("/api/plugins_store"){
             try {
-                val download_url = "https://pan.kanokano.cn/d/UFI-TOOLS-UPDATE/plugins/ufi-tools-plugins"
-                val url = "https://pan.kanokano.cn/api/fs/list"
+                val download_url = "${AppMeta.GLOBAL_SERVER_URL}/d/UFI-TOOLS-UPDATE/plugins/ufi-tools-plugins"
+                val url = "${AppMeta.GLOBAL_SERVER_URL}/api/fs/list"
                 val path = "/UFI-TOOLS-UPDATE/plugins/ufi-tools-plugins"
 
                 // 请求 alist 的 API

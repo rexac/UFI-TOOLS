@@ -6,6 +6,7 @@ import com.minikano.f50_sms.modules.advanced.advancedToolsModule
 import com.minikano.f50_sms.modules.at.anyProxyModule
 import com.minikano.f50_sms.modules.at.atModule
 import com.minikano.f50_sms.modules.auth.authenticatedRoute
+import com.minikano.f50_sms.modules.config.configModule
 import com.minikano.f50_sms.modules.deviceInfo.baseDeviceInfoModule
 import com.minikano.f50_sms.modules.ota.otaModule
 import com.minikano.f50_sms.modules.plugins.pluginsModule
@@ -34,6 +35,8 @@ fun Application.mainModule(context: Context, proxyServerIp: String) {
         staticFileModule(context)
 
         authenticatedRoute(context) {
+
+            configModule(context)
 
             anyProxyModule(context)
 

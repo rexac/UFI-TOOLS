@@ -1,7 +1,7 @@
 package com.minikano.f50_sms.utils
 
 import android.util.Log
-import com.minikano.f50_sms.MainActivity.Companion.isEnableLog
+import com.minikano.f50_sms.configs.AppMeta.isEnableLog
 
 object KanoLog {
     fun d(tag: String, message: () -> String) {

@@ -50,6 +50,7 @@ import com.minikano.f50_sms.utils.KanoUtils
 import com.minikano.f50_sms.utils.ShellKano
 import com.minikano.f50_sms.utils.UniqueDeviceIDManager
 import com.minikano.f50_sms.utils.WakeLock
+import com.minikano.f50_sms.utils.getBooleanCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -214,7 +215,7 @@ class MainActivity : ComponentActivity() {
                 )
 
                 val sf = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-                AppMeta.setIsEnableLog(context,sf.getBoolean(PREF_ISDEBUG,false))
+                AppMeta.setIsEnableLog(context,sf.getBooleanCompat(PREF_ISDEBUG,false))
 
                 setContent {
                     val context = this@MainActivity
@@ -260,7 +261,7 @@ class MainActivity : ComponentActivity() {
 
                     var isDebugLog by remember {
                         mutableStateOf(
-                            sharedPrefs.getBoolean(
+                            sharedPrefs.getBooleanCompat(
                                 PREF_ISDEBUG,
                                 false
                             )
@@ -305,7 +306,7 @@ class MainActivity : ComponentActivity() {
                                             true.toString()
                                         ) ?: true.toString()
 
-                                isDebugLog = sharedPrefs.getBoolean(
+                                isDebugLog = sharedPrefs.getBooleanCompat(
                                         PREF_ISDEBUG,
                                         false)
 

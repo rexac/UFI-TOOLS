@@ -2957,14 +2957,30 @@ function main_func() {
             //单卡用户默认0槽位
             sim_slot = 0
         }
+
+        // For F50Pro
+        if (UFI_DATA && UFI_DATA.model == "MU3356" && (sim_slot == '0' || sim_slot == '1')) {
+            sim_slot = sim_slot == 1 ? 0 : 1
+        }
+
         // V50 内置卡1(移动)slot=0 内置卡2(电信)slot=1 内置卡3(联通)slot=2 外置卡slot=11 外置卡 slot需要设置为0 联通内置卡slot设置为1
         // For V50
         if (sim_slot == "11") {
-            sim_slot = 0
+            //可恶的F50Pro两个卡槽居然是反过来的
+            if (UFI_DATA && UFI_DATA.model == "MU3356") {
+                sim_slot = 1
+            } else {
+                sim_slot = 0
+            }
         }
         if (sim_slot == "2") {
             sim_slot = 1
         }
+        // For F50Pro
+        if (sim_slot == "12") {
+            sim_slot = 0
+        }
+
         let res = await executeATCommand(cmd, sim_slot)
         //如果是单卡用户，0槽位又获取不到数据，那就尝试1槽位
         if (res.result && res.result.includes('ERROR')) {
@@ -6553,7 +6569,7 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
                 headers: common_headers
             })).json()
             if (!res) { throw new Error('No data') }
-            el.innerHTML = `<div style="display: flex;margin-bottom:10px;flex-direction:column"><div>${t('max_speed')}：${formatSpeed(res.maxSpeed)}</div><div>${t('usb_status')}：${res.details.typec_mode}/${res.details.typec_mode == "host" ? t('host_usb_exp'):t('device_usb_exp')}</div></div>
+            el.innerHTML = `<div style="display: flex;margin-bottom:10px;flex-direction:column"><div>${t('max_speed')}：${formatSpeed(res.maxSpeed)}</div><div>${t('usb_status')}：${res.details.typec_mode}/${res.details.typec_mode == "host" ? t('host_usb_exp') : t('device_usb_exp')}</div></div>
                     <ul class="deviceList" style="display: flex;flex-direction: column;gap: 10px;">
                         ${res.details.devices.map(device => `<li style="padding: 10px;">
                             <div>${t('path')}：${device.path}</div>

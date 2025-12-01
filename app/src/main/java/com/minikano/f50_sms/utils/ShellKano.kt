@@ -548,13 +548,13 @@ class ShellKano {
             //adb setprop service.adb.tcp.port 5555
             Thread {
                 try {
-                    ShellKano.runShellCommand("/system/bin/setprop persist.service.adb.tcp.port 5555")
-                    ShellKano.runShellCommand("/system/bin/setprop service.adb.tcp.port 5555")
+                    runShellCommand("/system/bin/setprop persist.service.adb.tcp.port 5555")
+                    runShellCommand("/system/bin/setprop service.adb.tcp.port 5555")
                     Log.d("kano_ZTE_LOG", "网络adb调试prop执行成功")
                 } catch (e: Exception) {
                     try {
-                        ShellKano.runShellCommand("/system/bin/setprop service.adb.tcp.port 5555")
-                        ShellKano.runShellCommand("/system/bin/setprop persist.service.adb.tcp.port 5555")
+                        runShellCommand("/system/bin/setprop service.adb.tcp.port 5555")
+                        runShellCommand("/system/bin/setprop persist.service.adb.tcp.port 5555")
                         Log.d("kano_ZTE_LOG", "网络adb调试prop执行成功")
                     } catch (e: Exception) {
                         Log.d("kano_ZTE_LOG", "网络adb调试prop执行出错： ${e.message}")
@@ -562,10 +562,14 @@ class ShellKano {
                 }
                 Thread.sleep(500)
                 try {
+                    Log.d("kano_ZTE_LOG", "开始进入adb_ip激活流程")
+
                     val sharedPrefs =
                         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
                     val ADB_IP_ENABLED = sharedPrefs.getString("ADB_IP_ENABLED", "") ?: null
+
+                    Log.d("kano_ZTE_LOG", "ADB_IP_ENABLED:${ADB_IP_ENABLED}")
 
                     if (ADB_IP_ENABLED == "true") {
                         val ADB_IP =
@@ -578,7 +582,7 @@ class ShellKano {
                             "kano_ZTE_LOG", "读取网络ADB所需配置：ADB_IP:${
                                 ADB_IP
                             } ADMIN_PWD:${
-                                ADMIN_PWD
+                                ADMIN_PWD.take(2)
                             }"
                         )
 

@@ -7,6 +7,7 @@ import com.minikano.f50_sms.modules.PREFS_NAME
 import com.minikano.f50_sms.utils.DeviceModelChecker
 
 import com.minikano.f50_sms.utils.KanoLog
+import com.minikano.f50_sms.utils.getBooleanCompat
 import java.io.File
 
 object AppMeta {
@@ -65,7 +66,7 @@ object AppMeta {
             isDeviceRooted = socketPath.exists()
             val sharedPrefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             isReadUseTerms = sharedPrefs.getString("isReadUseTerms", "false").toBoolean()
-            isEnableLog = prefs.getBoolean(PREF_ISDEBUG, false)
+            isEnableLog = prefs.getBooleanCompat(PREF_ISDEBUG, false)
         } catch (e: Exception) {
             KanoLog.e("kano_ZTE_LOG","AppMeta init failed！！")
         }

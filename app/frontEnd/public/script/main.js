@@ -6569,7 +6569,8 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
                 headers: common_headers
             })).json()
             if (!res) { throw new Error('No data') }
-            el.innerHTML = `<div style="display: flex;margin-bottom:10px;flex-direction:column"><div>${t('max_speed')}：${formatSpeed(res.maxSpeed)}</div><div>${t('usb_status')}：${res.details.typec_mode}/${res.details.typec_mode == "host" ? t('host_usb_exp') : t('device_usb_exp')}</div></div>
+            let isGadgetMode = res.details.typec_mode == "gadget"
+            el.innerHTML = `<div style="display: flex;margin-bottom:10px;flex-direction:column"><div>${t('max_speed')}：${isGadgetMode ? res.details.gadget_speed : formatSpeed(res.maxSpeed)}</div><div>${t('usb_status')}：${res.details.typec_mode}/${!isGadgetMode ? t('host_usb_exp') : t('device_usb_exp')}</div></div>
                     <ul class="deviceList" style="display: flex;flex-direction: column;gap: 10px;">
                         ${res.details.devices.map(device => `<li style="padding: 10px;">
                             <div>${t('path')}：${device.path}</div>

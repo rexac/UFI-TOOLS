@@ -9,6 +9,7 @@ import org.json.JSONObject
 import java.io.File
 import java.util.Locale
 import java.util.Locale.getDefault
+import kotlin.math.max
 
 /*
 * 感谢群内 执念 大哥提供的思路
@@ -241,6 +242,7 @@ suspend fun readUsbDevices(): Pair<Int, String> = withContext(Dispatchers.IO) {
     val usbDir = File("/sys/bus/usb/devices")
     val devices = mutableListOf<UsbDevice>()
     var maxSpeed = 0
+    var gadgetSpeed = "unknown"
 
     usbDir.listFiles()?.forEach { deviceDir ->
         val productFile = File(deviceDir, "product")
@@ -250,13 +252,15 @@ suspend fun readUsbDevices(): Pair<Int, String> = withContext(Dispatchers.IO) {
             try {
                 val product = productFile.readText().trim()
                 val speed = speedFile.readText().trim().toIntOrNull() ?: 0
-                devices.add(UsbDevice(deviceDir.name, product, speed))
                 //排除掉不是 真正 USB-C 的设备
-                if (speed > maxSpeed &&
+                if (
                     !(deviceDir.name.startsWith("usb")) &&
                     !(product.contains("Host Controller", ignoreCase = true)) &&
                     !(product.contains("HDRC", ignoreCase = true))
-                    ) maxSpeed = speed
+                    ) {
+                    if(speed > maxSpeed) maxSpeed = speed
+                    devices.add(UsbDevice(deviceDir.name, product, speed))
+                }
             } catch (_: Exception) {}
         }
     }
@@ -270,6 +274,31 @@ suspend fun readUsbDevices(): Pair<Int, String> = withContext(Dispatchers.IO) {
         typeCMode = if (state == "DISCONNECTED") "host" else "gadget"
     }
 
+    //如果是gadget模式，从另一个地方获取速度
+    if(typeCMode == "gadget"){
+        val udcDir = File("/sys/class/udc")
+        if (udcDir.exists()){
+            var speed = "Unknown"
+            udcDir.listFiles()?.forEach { udc ->
+                val speedFile = File(udc, "current_speed")
+                if (speedFile.exists()) {
+                    val raw = speedFile.readText().trim()
+                    if(raw != "UNKNOWN") {
+                        speed = when (raw) {
+                            "low-speed" -> "USB 1.0 (1.5Mbps)"
+                            "full-speed" -> "USB 1.1 (12Mbps)"
+                            "high-speed" -> "USB 2.0 (480Mbps)"
+                            "super-speed" -> "USB 3.0 (5Gbps)"
+                            "super-speed-plus" -> "USB 3.1 (10Gbps)"
+                            else -> raw
+                        }
+                    }
+                }
+            }
+            gadgetSpeed = speed
+        }
+    }
+
     // 构建 JSON
     val jsonArray = JSONArray()
     devices.forEach { dev ->
@@ -281,6 +310,7 @@ suspend fun readUsbDevices(): Pair<Int, String> = withContext(Dispatchers.IO) {
     }
     val jsonRoot = JSONObject()
     jsonRoot.put("typec_mode", typeCMode)
+    jsonRoot.put("gadget_speed", gadgetSpeed)
     jsonRoot.put("devices", jsonArray)
 
     return@withContext Pair(maxSpeed, jsonRoot.toString())

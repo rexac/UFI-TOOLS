@@ -480,8 +480,9 @@ function main_func() {
         initUSBStatusManagementBtn()
         initSleepTime()
         initAdvanceTools()
-        initTerms()
         QOSRDPCommand("AT+CGEQOSRDP=1")
+        initTerms()
+        initCheckWeakToken()
     }
 
     //检测是否启用高级功能
@@ -3310,10 +3311,12 @@ function main_func() {
         const formData = new FormData(form);
         const newToken = formData.get('newToken')
         const confirmToken = formData.get('confirmToken')
+        const exp = /^(?=.*[a-zA-Z])(?=.*\d).{1,9}$/
         if (!newToken || newToken.trim() == '') return createToast(t('toast_please_input_new_token'), 'red')
         if (!confirmToken || confirmToken.trim() == '') return createToast(t('toast_please_input_new_conform_token'), 'red')
         if (newToken != confirmToken) return createToast(t('toast_token_not_eqal'), 'red')
-
+        if (newToken.trim().length < 8) return createToast(t('toast_token_too_short'), 'red')
+        if (!exp.test(newToken)) return createToast(t('toast_token_invalid'), 'red')
         try {
             try {
                 const res = await (await fetchWithTimeout(`${KANO_baseURL}/set_token`, {
@@ -5828,6 +5831,9 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
                     if (res.result == "success") {
                         createToast(t('accept'))
                     }
+                }).finally((res) => {
+                    //同意后检查弱口令
+                    initCheckWeakToken()
                 })
                 return true
             },
@@ -5835,8 +5841,7 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
         })
         const cache = localStorage.getItem('read_terms')
         try {
-            const res = await (await fetchWithTimeout(`${KANO_baseURL}/version_info`)).json()
-            if (res.accept_terms && res.accept_terms.toString() == 'true') {
+            if (await getTermsAcceptance()) {
                 if (cache != "1") {
                     localStorage.setItem('read_terms', '1')
                 }
@@ -5851,6 +5856,36 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
     }
     initTerms()
 
+    const initCheckWeakToken = async () => {
+        if (!(await initRequestData())) {
+            return null
+        }
+
+        // 没同意用户许可就不要显示
+        if (!(await getTermsAcceptance())) {
+            return null
+        }
+
+        if (checkWeakToken()) {
+            const { el, close } = createFixedToast('weak_token_toast', `
+                <div style="pointer-events:all;width:80vw;max-width:300px;">
+                <div class="title" style="margin:0" data-i18n="system_notice">${t('system_notice')}</div>
+                <p>${t("weak_token_detected")}</p>
+                <button id="close_weak_token_toast_btn" style="width:100%;font-size:.64rem;margin-top:5px" data-i18n="change_token_now">${t("change_token_now")}</button>
+                </div>
+                `, 'red')
+            const btn = el.querySelector('#close_weak_token_toast_btn')
+            if (!btn) {
+                close()
+                return
+            }
+            btn.onclick = () => {
+                close()
+                showModal("#changeTokenModal")
+            }
+        }
+    }
+    initCheckWeakToken()
 
     // 获取消息
     const initMessage = async () => {

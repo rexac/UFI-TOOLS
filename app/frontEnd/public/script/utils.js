@@ -212,6 +212,10 @@ function createToast(text, color, delay = 3000, fn = null) {
 
 function createFixedToast(_id, text, style = {}) {
     try {
+        const oldEl = document.getElementById(_id)
+        if (oldEl) {
+            oldEl.remove()
+        }
         const toastContainer = document.querySelector("#toastContainer")
         const toastEl = document.createElement('div')
         toastEl.id = _id
@@ -965,5 +969,22 @@ function formatSpeed(bps, base = 1000 * 1000) {
         return mbps.toFixed(mbps >= 10 ? 0 : 1) + " Mbps";
     } else {
         return kbps.toFixed(kbps >= 10 ? 0 : 1) + " kbps";
+    }
+}
+
+const checkWeakToken = () => {
+    if (SHA256) {
+        let weakTokenList = [
+            "admin",
+            "password",
+            "666",
+            "root",
+        ]
+        for (let token of weakTokenList) {
+            if (SHA256(token) == KANO_TOKEN.toUpperCase()) {
+                return true
+            }
+        }
+        return false
     }
 }

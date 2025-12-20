@@ -728,5 +728,10 @@
     "speed": "Speed",
     "usb_status_notice": "Only displays devices connected through the Type-C port. Data is for reference only.",
     "host_usb_exp": "Host Mode (peripherals/network adapter)",
-    "device_usb_exp": "Device Mode (connect to PC)"
+    "device_usb_exp": "Device Mode (connect to PC)",
+    "weak_token_detected": "A weak password was detected. You must change it to keep your device secure.",
+    "change_token_now": "Change Now",
+    "token_change_notice": "Password must be at least 8 characters and include letters and numbers.",
+    "toast_token_invalid": "Password must include letters and numbers!",
+    "toast_token_too_short": "Password must be at least 8 characters!"
 }

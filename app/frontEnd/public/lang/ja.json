@@ -728,5 +728,10 @@
     "speed": "速度",
     "usb_status_notice": "Type-C ポートに接続されたデバイスのみを表示します。データは参考用です。",
     "host_usb_exp": "ホストモード（周辺機器／LAN アダプタ）",
-    "device_usb_exp": "デバイスモード（PC 接続）"
+    "device_usb_exp": "デバイスモード（PC 接続）",
+    "weak_token_detected": "弱いパスワードが検出されました。デバイスの安全のため変更してください。",
+    "change_token_now": "今すぐ変更",
+    "token_change_notice": "パスワードは8文字以上で、英字と数字を含める必要があります。",
+    "toast_token_invalid": "英字と数字を含めてください！",
+    "toast_token_too_short": "パスワードは8文字以上必要です！"
 }

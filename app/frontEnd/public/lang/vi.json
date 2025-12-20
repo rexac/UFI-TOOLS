@@ -728,5 +728,10 @@
     "speed": "Tốc Độ",
     "usb_status_notice": "Chỉ hiển thị thiết bị kết nối qua cổng Type-C. Dữ liệu chỉ mang tính tham khảo.",
     "host_usb_exp": "Chế Độ Host (kết nối ngoại vi / adapter mạng)",
-    "device_usb_exp": "Chế Độ Device (kết nối máy tính)"
+    "device_usb_exp": "Chế Độ Device (kết nối máy tính)",
+    "weak_token_detected": "Phát hiện mật khẩu yếu. Bạn phải thay đổi để đảm bảo an toàn thiết bị.",
+    "change_token_now": "Thay đổi ngay",
+    "token_change_notice": "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ và số.",
+    "toast_token_invalid": "Mật khẩu phải bao gồm chữ và số!",
+    "toast_token_too_short": "Mật khẩu phải có ít nhất 8 ký tự!"
 }

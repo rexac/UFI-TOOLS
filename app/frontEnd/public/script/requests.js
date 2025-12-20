@@ -4,6 +4,8 @@ function gsmEncode(text) { function encodeText(text) { let encoded = []; for (le
 let KANO_baseURL = '/api'
 let KANO_PASSWORD = null
 let KANO_TOKEN = null;
+let ACCEPT_TERMS = false
+
 let loginMethod = localStorage.getItem('login_method') == "1" ? "1" : "0"; //1新方法，0旧方法
 
 const originFetch = window.fetch;
@@ -570,4 +572,18 @@ const switchAPNAuto = async ({ isAuto = true, index = 0 }) => {
     const data = isAuto ? formData : { ...formData, ...manualData }
     const res = await postData(await login(), data)
     return res.json()
+}
+
+// check Terms acceptance
+const getTermsAcceptance = async () => {
+    try {
+        const res = await (await fetchWithTimeout(`${KANO_baseURL}/version_info`)).json()
+        ACCEPT_TERMS = res.accept_terms && res.accept_terms.toString() == 'true'
+        if (ACCEPT_TERMS) {
+            return true
+        }
+    } catch {
+        ACCEPT_TERMS = false
+        return false
+    }
 }

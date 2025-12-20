@@ -3311,7 +3311,7 @@ function main_func() {
         const formData = new FormData(form);
         const newToken = formData.get('newToken')
         const confirmToken = formData.get('confirmToken')
-        const exp = /^(?=.*[a-zA-Z])(?=.*\d).{1,9}$/
+        const exp = /^(?=.*[a-zA-Z])(?=.*\d).{8,128}$/
         if (!newToken || newToken.trim() == '') return createToast(t('toast_please_input_new_token'), 'red')
         if (!confirmToken || confirmToken.trim() == '') return createToast(t('toast_please_input_new_conform_token'), 'red')
         if (newToken != confirmToken) return createToast(t('toast_token_not_eqal'), 'red')

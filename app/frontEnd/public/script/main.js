@@ -5801,8 +5801,39 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
         if (!(await initRequestData())) {
             return null
         }
+        // 用户协议
+        const md = createModal({
+            name: "kano_terms",
+            noBlur: true,
+            isMask: true,
+            title: t('useTermsTitle'),
+            contentStyle: "font-size:12px",
+            confirmBtnText: t('accept'),
+            closeBtnText: t('decline'),
+            onClose: () => {
+                createToast(t('please_accept_terms'))
+                return false
+            },
+            onConfirm: () => {
+                const scroll = md.el.querySelector('.content')
+                if ((scroll.scrollTop < scroll.clientHeight) || (scroll.scrollTop < 50)) {
+                    // 哎呀，你怎么又没认真看😯
+                    createToast(t('please_read_terms'))
+                    return false
+                }
+                fetchWithTimeout(`${KANO_baseURL}/accept_terms`, {
+                    method: "post",
+                    headers: common_headers,
+                }).then(r => r.json()).then(res => {
+                    if (res.result == "success") {
+                        createToast(t('accept'))
+                    }
+                })
+                return true
+            },
+            content: t('useTerms')
+        })
         const cache = localStorage.getItem('read_terms')
-        if (cache == "1") return
         try {
             const res = await (await fetchWithTimeout(`${KANO_baseURL}/version_info`)).json()
             if (res.accept_terms && res.accept_terms.toString() == 'true') {
@@ -5811,41 +5842,11 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
                 }
                 return
             }
-            // 用户协议
-            const md = createModal({
-                name: "kano_terms",
-                noBlur: true,
-                isMask: true,
-                title: t('useTermsTitle'),
-                contentStyle: "font-size:12px",
-                confirmBtnText: t('accept'),
-                closeBtnText: t('decline'),
-                onClose: () => {
-                    createToast(t('please_accept_terms'))
-                    return false
-                },
-                onConfirm: () => {
-                    const scroll = md.el.querySelector('.content')
-                    if ((scroll.scrollTop < scroll.clientHeight) || (scroll.scrollTop < 50)) {
-                        // 哎呀，你怎么又没认真看😯
-                        createToast(t('please_read_terms'))
-                        return false
-                    }
-                    fetchWithTimeout(`${KANO_baseURL}/accept_terms`, {
-                        method: "post",
-                        headers: common_headers,
-                    }).then(r => r.json()).then(res => {
-                        if (res.result == "success") {
-                            createToast(t('accept'))
-                        }
-                    })
-                    return true
-                },
-                content: t('useTerms')
-            })
             showModal(md.id)
         } catch {
-            //
+            if (cache != "1") {
+                showModal(md.id)
+            }
         }
     }
     initTerms()

@@ -354,7 +354,7 @@
     "action_sim1": "Switch to SIM 1",
     "action_sim2": "Switch to SIM 2",
     "update_title": "UFI-TOOLS Software Update",
-    "update_notice_1": "Software update requires USB debugging + network ADB enabled (reboot, or toggle USB debugging). If the one-click update doesn't work, please download and install the package manually.",
+    "update_notice_1": "Software updates require enabling Advanced Features (for fast installation) or Network ADB debugging (restart the device, or disable and re-enable USB debugging). If the one-click update function does not work properly, you can click to download the installation package and install it manually.",
     "update_notice_2": "Due to Android's package management system, do not power off during update. Make sure the device enters the system properly after update before restarting.",
     "update_checking": "Checking for updates...",
     "btn_update": "One-Click Update",

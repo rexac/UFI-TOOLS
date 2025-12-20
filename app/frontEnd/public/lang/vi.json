@@ -88,7 +88,11 @@
     "token_note_4": "Nếu xảy ra lỗi mật khẩu, vui lòng thử phương thức đăng nhập khác.",
     "token_placeholder_token": "Token (xem trong ứng dụng backend UFI-TOOLS)",
     "token_placeholder_pwd": "Mật khẩu quản trị backend chính thức của ZTE",
+<<<<<<< HEAD
     "token_div_1": "Token:",
+=======
+    "token_div_1": "UFI Token:",
+>>>>>>> 831af28 (fix:登录界面介绍不清晰问题)
     "token_div_2": "Mật khẩu backend ZTE:",
     "confirm_btn": "Xác nhận",
     "cancel_btn": "Hủy",
@@ -354,7 +358,7 @@
     "action_sim1": "Chuyển sang SIM 1",
     "action_sim2": "Chuyển sang SIM 2",
     "update_title": "Cập nhật phần mềm UFI-TOOLS",
-    "update_notice_1": "Cập nhật phần mềm yêu cầu bật gỡ lỗi USB + ADB qua mạng (khởi động lại hoặc bật/tắt gỡ lỗi USB). Nếu cập nhật nhanh không hoạt động, vui lòng tải và cài đặt gói thủ công.",
+    "update_notice_1": "Việc cập nhật phần mềm yêu cầu bật tính năng nâng cao (cài đặt nhanh) hoặc chức năng gỡ lỗi ADB qua mạng (khởi động lại thiết bị hoặc tắt rồi bật lại gỡ lỗi USB). Nếu chức năng cập nhật một chạm không hoạt động bình thường, bạn có thể nhấp để tải gói cài đặt và cài đặt thủ công.",
     "update_notice_2": "Do hệ thống quản lý gói của Android, vui lòng không tắt nguồn trong khi cập nhật. Đảm bảo thiết bị hoạt động bình thường sau khi cập nhật trước khi khởi động lại.",
     "update_checking": "Đang kiểm tra cập nhật...",
     "btn_update": "Cập nhật nhanh",

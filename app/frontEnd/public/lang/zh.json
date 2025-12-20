@@ -88,7 +88,11 @@
     "token_note_4": "如果出现密码错误，请换一个登录方式",
     "token_placeholder_token": "口令(UFI-TOOLS后台应用中查看)",
     "token_placeholder_pwd": "中兴官方后台的管理密码",
+<<<<<<< HEAD
     "token_div_1": "UFI口令：",
+=======
+    "token_div_1": "UFI 口令：",
+>>>>>>> 831af28 (fix:登录界面介绍不清晰问题)
     "token_div_2": "中兴后台密码：",
     "confirm_btn": "确认",
     "cancel_btn": "取消",
@@ -362,7 +366,7 @@
     "action_sim1": "切SIM卡1",
     "action_sim2": "切SIM卡2",
     "update_title": "UFI-TOOLS 软件更新",
-    "update_notice_1": "软件更新需要启用USB调试+网络ADB调试功能(重启，或者关闭开启一下USB调试),如无法正常使用一键更新功能,可以点击下载安装包自行下载安装。",
+    "update_notice_1": "软件更新需要启用高级功能（享受极速安装）或者网络ADB调试功能(重启，或者关闭开启一下USB调试),如无法正常使用一键更新功能,可以点击下载安装包自行下载安装。",
     "update_notice_2": "由于Android的包管理机制,更新过程中请不要断电，请确保更新完成后能正常进入后台再重启。",
     "update_checking": "正在检查更新...",
     "btn_update": "一键更新",

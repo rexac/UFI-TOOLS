@@ -88,11 +88,7 @@
     "token_note_4": "Nếu xảy ra lỗi mật khẩu, vui lòng thử phương thức đăng nhập khác.",
     "token_placeholder_token": "Token (xem trong ứng dụng backend UFI-TOOLS)",
     "token_placeholder_pwd": "Mật khẩu quản trị backend chính thức của ZTE",
-<<<<<<< HEAD
-    "token_div_1": "Token:",
-=======
     "token_div_1": "UFI Token:",
->>>>>>> 831af28 (fix:登录界面介绍不清晰问题)
     "token_div_2": "Mật khẩu backend ZTE:",
     "confirm_btn": "Xác nhận",
     "cancel_btn": "Hủy",

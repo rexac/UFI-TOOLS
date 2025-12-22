@@ -628,7 +628,7 @@ function main_func() {
                 createToast(t('client_mgmt_fetch_error') + res.error, 'red')
                 return null
             }
-            return res.messages
+            return res.messages ? res.messages : []
         } catch {
             // out()
             createToast(t('client_mgmt_fetch_error') + res.error, 'red')

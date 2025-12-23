@@ -1,6 +1,7 @@
 package com.minikano.f50_sms.modules.plugins
 
 import android.content.Context
+import androidx.core.content.edit
 import com.minikano.f50_sms.configs.AppMeta
 import com.minikano.f50_sms.utils.KanoLog
 import com.minikano.f50_sms.modules.BASE_TAG
@@ -36,9 +37,8 @@ fun Route.pluginsModule(context: Context) {
 
                 val sharedPref =
                     context.getSharedPreferences("kano_ZTE_store", Context.MODE_PRIVATE)
-                sharedPref.edit().apply {
+                sharedPref.edit(commit = true){
                     putString("kano_custom_head", text)
-                    apply()
                 }
 
                 call.response.headers.append("Access-Control-Allow-Origin", "*")

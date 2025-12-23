@@ -1,6 +1,7 @@
 package com.minikano.f50_sms.modules.smsForward
 
 import android.content.Context
+import androidx.core.content.edit
 import com.minikano.f50_sms.utils.KanoLog
 import com.minikano.f50_sms.utils.SmsInfo
 import com.minikano.f50_sms.utils.SmsPoll
@@ -51,14 +52,13 @@ fun Route.smsModule(context: Context) {
 
             val sharedPrefs =
                 context.getSharedPreferences("kano_ZTE_store", Context.MODE_PRIVATE)
-            sharedPrefs.edit().apply {
+            sharedPrefs.edit(commit = true) {
                 putString("kano_sms_forward_method", "SMTP")
                 putString("kano_smtp_host", smtpHost)
                 putString("kano_smtp_port", smtpPort)
                 putString("kano_smtp_to", smtpTo)
                 putString("kano_smtp_username", smtpUsername)
                 putString("kano_smtp_password", smtpPassword)
-                apply()
             }
 
             KanoLog.d(TAG, "SMTP配置已保存：$smtpHost:$smtpPort [$smtpUsername]")
@@ -126,10 +126,9 @@ fun Route.smsModule(context: Context) {
             // 存储到 SharedPreferences
             val sharedPrefs =
                 context.getSharedPreferences("kano_ZTE_store", Context.MODE_PRIVATE)
-            sharedPrefs.edit().apply {
+            sharedPrefs.edit(commit = true) {
                 putString("kano_sms_forward_method", "CURL")
                 putString("kano_sms_curl", originalCurl)
-                apply()
             }
 
             // 发送测试消息
@@ -181,9 +180,8 @@ fun Route.smsModule(context: Context) {
 
             val sharedPrefs =
                 context.getSharedPreferences("kano_ZTE_store", Context.MODE_PRIVATE)
-            sharedPrefs.edit().apply {
+            sharedPrefs.edit(commit = true) {
                 putString("kano_sms_forward_enabled", enable)
-                apply()
             }
 
             call.response.headers.append("Access-Control-Allow-Origin", "*")
@@ -243,11 +241,10 @@ fun Route.smsModule(context: Context) {
             // 存储到 SharedPreferences
             val sharedPrefs =
                 context.getSharedPreferences("kano_ZTE_store", Context.MODE_PRIVATE)
-            sharedPrefs.edit().apply {
+            sharedPrefs.edit(commit = true) {
                 putString("kano_sms_forward_method", "DINGTALK")
                 putString("kano_dingtalk_webhook", webhookUrl)
                 putString("kano_dingtalk_secret", secret)
-                apply()
             }
 
             KanoLog.d(TAG, "钉钉配置已保存：$webhookUrl")

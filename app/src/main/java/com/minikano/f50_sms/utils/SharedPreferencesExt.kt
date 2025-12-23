@@ -16,7 +16,7 @@ fun SharedPreferences.getBooleanCompat(key: String, default: Boolean): Boolean {
             else -> s.toBooleanStrictOrNull() ?: default // best-effort parse
         }
         // migrate to boolean to avoid future ClassCastException
-        edit().putBoolean(key, parsed).apply()
+        edit().putBoolean(key, parsed).commit()
         parsed
     }
 }

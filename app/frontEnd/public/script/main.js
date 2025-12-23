@@ -515,10 +515,10 @@ function main_func() {
             toastTimer = createTimer()
             await needToken()
             toastTimer && clearTimeout(toastTimer)
-            let tkInput = document.querySelector('#tokenInput')
             let tokenInput = document.querySelector('#TOKEN')
-            let password = tkInput && (tkInput.value)
+            let pwdInput = document.querySelector('#PWDINPUT')
             let token = tokenInput && (tokenInput.value)
+            let password = pwdInput && (pwdInput.value)
             if (!password || !password?.trim()) return createToast(t('toast_please_input_pwd'), 'red')
             KANO_PASSWORD = password.trim()
             if (isNeedToken) {
@@ -1602,6 +1602,7 @@ function main_func() {
                             //切网
                             createToast(t("toast_changing"))
                             await changeNetwork({ target: { value: net.value } }, true)
+                            await new Promise(resolve => setTimeout(resolve, 800))
                             //切回来
                             await changeNetwork({ target: { value: curValue } })
                         }
@@ -2331,7 +2332,12 @@ function main_func() {
         }
     }
 
-    document.querySelector('#tokenInput').addEventListener('keydown', (event) => {
+    document.querySelector('#PWDINPUT').addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+            onTokenConfirm()
+        }
+    });
+    document.querySelector('#TOKEN').addEventListener('keydown', (event) => {
         if (event.key === 'Enter') {
             onTokenConfirm()
         }
@@ -5866,7 +5872,7 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
             return null
         }
 
-        if (checkWeakToken()) {
+        if (await checkWeakToken()) {
             const { el, close } = createFixedToast('weak_token_toast', `
                 <div style="pointer-events:all;width:80vw;max-width:300px;">
                 <div class="title" style="margin:0" data-i18n="system_notice">${t('system_notice')}</div>
@@ -6645,6 +6651,107 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
             stopRefreshUSBStatusInterval && stopRefreshUSBStatusInterval()
         })
     }
+
+    //官方后台貌似对PIN超出次数的判定有问题，PIN次数用完后提示输入PUK，此时换卡也不会变更状态，用户只能恢复出厂设置，所以此功能不会继续实现
+    // let simCardPinDisabled = false
+    // const initSimCardPin = async () => {
+    //     if (!initRequestData()) {
+    //         return null
+    //     }
+    //     //检测是否有SIM卡锁定
+    //     const res = await getSimPinStatus()
+
+    //     if (res.pinnumber <= 0 || res.modem_main_state == "modem_waitpuk") {
+    //         createToast("您的PIN次数已用尽，请前往官方后台输入PUK码解锁", 'red', 10000)
+    //         return null
+    //     }
+
+    //     if (!(res.modem_main_state == "modem_waitpin")) {
+    //         return null
+    //     }
+
+    //     //暂停数据刷新
+    //     stopRefresh()
+
+    //     const md = createModal({
+    //         name: "kano_pin_modal",
+    //         isMask: true,
+    //         title: "请输入SIM卡PIN码",
+    //         maxWidth: "400px",
+    //         contentStyle: "font-size:12px",
+    //         onClose: () => {
+    //             return true
+    //         },
+    //         onConfirm: async () => {
+    //             //再次获取数据
+    //             const res1 = await getSimPinStatus()
+    //             if (res1.pinnumber <= 0) {
+    //                 createToast("您的PIN次数已用尽，请前往官方后台输入PUK码解锁", 'red')
+    //                 return false
+    //             }
+    //             const el = document.querySelector('#simPinInput')
+    //             if (!el) {
+    //                 console.error("没有找到#simPinInput元素")
+    //                 return false
+    //             }
+    //             const pinNumber = el.value.trim()
+    //             if (pinNumber.length < 4) {
+    //                 createToast("PIN不得小于4位数", 'pink')
+    //                 return false
+    //             }
+    //             //解锁
+    //             if (simCardPinDisabled) {
+    //                 createToast("正在解锁中，请勿重复点击", 'pink')
+    //                 return false
+    //             }
+
+    //             simCardPinDisabled = true
+
+    //             const { close: closeLoadingEl } = createFixedToast("unlocking_toast", '解锁中...')
+    //             try {
+    //                 if (!(await initRequestData())) {
+    //                     return false
+    //                 }
+    //                 const cookie = await login()
+    //                 if (!cookie) {
+    //                     createToast(t('toast_request_error'), 'red')
+    //                     return false
+    //                 }
+    //                 let res1 = await (await postData(cookie, {
+    //                     goformId: 'ENTER_PIN',
+    //                     PinNumber: pinNumber,
+    //                 })).json()
+
+    //                 if (res1.result == 'success') {
+    //                     createToast("PIN解锁成功", 'green')
+    //                     startRefresh()
+    //                     return true
+    //                 } else {
+    //                     createToast("PIN解锁失败，请重试", 'red')
+    //                 }
+    //                 //更新Pin次数
+    //                 const pinNumEl = document.querySelector('#pinNumber')
+    //                 const res_refresh = await getSimPinStatus()
+    //                 if (pinNumEl) {
+    //                     pinNumEl.textContent = res_refresh.pinnumber
+    //                 }
+    //                 return false
+    //             } catch (e) {
+    //                 console.error(e.message)
+    //                 return false
+    //             } finally {
+    //                 simCardPinDisabled = false
+    //                 closeLoadingEl()
+    //             }
+    //         },
+    //         content: `<div class="content" style="font-size:12px;margin:10px 0;padding:0 4px;">
+    //    <p style="color:red;margin-top:0" >PIN 剩余次数：<strong id="pinNumber">${res.pinnumber}</strong></p>
+    //    <input type="password" id="simPinInput" placeholder="SIM卡PIN码" style="width:100%;padding:8px">
+    // </div>`
+    //     })
+    //     showModal(md.id)
+    // }
+    // initSimCardPin()
     //挂载方法到window
     const methods = {
         closeUSBStatusModal,

@@ -56,6 +56,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.system.exitProcess
+import androidx.core.content.edit
+import com.minikano.f50_sms.configs.AppMeta.updateIsDefaultOrWeakToken
 
 class MainActivity : ComponentActivity() {
     companion object {
@@ -91,23 +93,26 @@ class MainActivity : ComponentActivity() {
 
         //第一次启动初始化login_token
         val spf = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        if(!spf.contains(PREF_LOGIN_TOKEN)){
-            spf.edit().putString(PREF_LOGIN_TOKEN, "admin").apply()
-        }
-        if(!spf.contains(PREF_ISDEBUG)){
-            spf.edit().putBoolean(PREF_ISDEBUG, false).apply()
-        }
-        if(!spf.contains(PREF_GATEWAY_IP)){
-            spf.edit().putString(PREF_GATEWAY_IP, "192.168.0.1:8080").apply()
-        }
-        if(!spf.contains(PREF_TOKEN_ENABLED)){
-            spf.edit().putString(PREF_TOKEN_ENABLED, true.toString()).apply()
-        }
-        if(!spf.contains(PREF_AUTO_IP_ENABLED)){
-            spf.edit().putString(PREF_AUTO_IP_ENABLED, true.toString()).apply()
-        }
-        if(!spf.contains(PREF_WAKELOCK)){
-            spf.edit().putString(PREF_WAKELOCK,"lock").apply()
+        val existing = spf.all
+        spf.edit(commit = true) {
+            if (!existing.containsKey(PREF_LOGIN_TOKEN)) {
+                putString(PREF_LOGIN_TOKEN, "admin")
+            }
+            if (!existing.containsKey(PREF_ISDEBUG)) {
+                putBoolean(PREF_ISDEBUG, false)
+            }
+            if (!existing.containsKey(PREF_GATEWAY_IP)) {
+                putString(PREF_GATEWAY_IP, "192.168.0.1:8080")
+            }
+            if (!existing.containsKey(PREF_TOKEN_ENABLED)) {
+                putString(PREF_TOKEN_ENABLED, true.toString())
+            }
+            if (!existing.containsKey(PREF_AUTO_IP_ENABLED)) {
+                putString(PREF_AUTO_IP_ENABLED, true.toString())
+            }
+            if (!existing.containsKey(PREF_WAKELOCK)) {
+                putString(PREF_WAKELOCK, "lock")
+            }
         }
 
         // 这里用协程异步调用
@@ -355,11 +360,14 @@ class MainActivity : ComponentActivity() {
                             },
                             onConfirm = {
                                 // 保存并重启服务器
-                                sharedPrefs.edit().putString(PREF_GATEWAY_IP, gatewayIp).apply()
-                                sharedPrefs.edit().putString(PREF_LOGIN_TOKEN, loginToken.ifBlank { "admin" }).apply()
-                                sharedPrefs.edit().putString(PREF_TOKEN_ENABLED, isTokenEnabled).apply()
-                                sharedPrefs.edit().putString(PREF_AUTO_IP_ENABLED, isAutoIpEnabled).apply()
-                                sharedPrefs.edit().putString(PREF_WAKELOCK, wakeLock).apply()
+                                sharedPrefs.edit(commit = true) {
+                                    putString(PREF_GATEWAY_IP, gatewayIp)
+                                    putString(PREF_LOGIN_TOKEN, loginToken.ifBlank { "admin" })
+                                    putString(PREF_TOKEN_ENABLED, isTokenEnabled)
+                                    putString(PREF_AUTO_IP_ENABLED, isAutoIpEnabled)
+                                    putString(PREF_WAKELOCK, wakeLock)
+                                    updateIsDefaultOrWeakToken(KanoUtils.isWeakToken(loginToken.ifBlank { "admin" }))
+                                }
                                 //更新唤醒锁
                                 if(wakeLock != "lock"){
                                     WakeLock.releaseWakeLock()

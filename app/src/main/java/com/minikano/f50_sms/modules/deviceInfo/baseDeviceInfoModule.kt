@@ -27,6 +27,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.double
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import androidx.core.content.edit
 
 data class MyStorageInfo(
     val path: String, val totalBytes: Long, val availableBytes: Long
@@ -211,7 +212,7 @@ fun Route.baseDeviceInfoModule(context: Context) {
         try {
             val sharedPrefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             AppMeta.isReadUseTerms = true
-            sharedPrefs.edit().putString("isReadUseTerms","true").apply()
+            sharedPrefs.edit(commit = true) { putString("isReadUseTerms", "true") }
             val jsonResult = """{"result":"success"}""".trimIndent()
             call.response.headers.append("Access-Control-Allow-Origin", "*")
             call.respondText(jsonResult, ContentType.Application.Json)

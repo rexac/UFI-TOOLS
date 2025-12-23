@@ -15,11 +15,30 @@ import io.ktor.server.routing.post
 import org.json.JSONObject
 import androidx.core.content.edit
 import com.minikano.f50_sms.configs.AppMeta
+import com.minikano.f50_sms.utils.KanoUtils
 
 fun Route.configModule(context: Context) {
     val TAG = "[$BASE_TAG]_configModule"
     val PREFS_NAME = "kano_ZTE_store"
     val PREF_LOGIN_TOKEN = "login_token"
+
+    //检查是否默认口令
+    get("/api/is_weak_token") {
+        try {
+            val jsonResult = """{"is_weak_token":${AppMeta.isDefaultOrWeakToken}}""".trimIndent()
+
+            call.response.headers.append("Access-Control-Allow-Origin", "*")
+            call.respondText(jsonResult, ContentType.Application.Json)
+        } catch (e: Exception) {
+            KanoLog.d("kano_ZTE_LOG", "获取是否弱Token出错：${e.message}")
+            call.response.headers.append("Access-Control-Allow-Origin", "*")
+            call.respondText(
+                """{"error":"获取是否弱Token出错"}""",
+                ContentType.Application.Json,
+                HttpStatusCode.InternalServerError
+            )
+        }
+    }
 
     //设置口令
     post("/api/set_token") {
@@ -32,12 +51,21 @@ fun Route.configModule(context: Context) {
                 throw IllegalArgumentException("请提供 token")
             }
 
+            val regex = Regex("^(?=.*[a-zA-Z])(?=.*\\d).{8,128}$")
+            if(token.length < 8) {
+                throw IllegalArgumentException("token 需要至少8位")
+            }
+            else if(!regex.matches(token)) {
+                throw IllegalArgumentException("口令需要至少同时包含数字和字母")
+            }
+
             KanoLog.d(TAG, "接收到 token=$token")
 
-            val perf = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            perf.edit {
+            val pref = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            pref.edit(commit = true) {
                 putString(PREF_LOGIN_TOKEN, token)
             }
+            AppMeta.updateIsDefaultOrWeakToken(KanoUtils.isWeakToken(token = token))
 
             call.response.headers.append("Access-Control-Allow-Origin", "*")
             call.respondText(

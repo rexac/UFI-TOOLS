@@ -587,3 +587,21 @@ const getTermsAcceptance = async () => {
         return false
     }
 }
+
+// check sim pin
+const getSimPinStatus = async () => {
+    try {
+        const res = await getData(new URLSearchParams({
+            cmd: "modem_main_state,mc_modem_main_state,puknumber,pinnumber,sim_pinnumber"
+        }))
+        return {
+            modem_main_state: res.modem_main_state || res.mc_modem_main_state,
+            puknumber: res.puknumber,
+            pinnumber: res.pinnumber || res.sim_pinnumber
+        }
+    }
+    catch (e) {
+        console.error("getSimPinStatus Error:", e)
+        return null
+    }
+}

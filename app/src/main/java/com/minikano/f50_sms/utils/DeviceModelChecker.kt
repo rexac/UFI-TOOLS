@@ -7,6 +7,7 @@ import com.minikano.f50_sms.utils.KanoReport.Companion.reportToServer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import androidx.core.content.edit
 
 object DeviceModelChecker {
     private var isUnSupportDevice = false
@@ -36,7 +37,7 @@ object DeviceModelChecker {
                 return false
             } else {
                 Log.d("kano_ZTE_LOG_devcheck", "错误的白名单字符串，跳过")
-                prefs.edit().remove("is_device_white_list").apply()
+                prefs.edit(commit = true) { remove("is_device_white_list") }
             }
         }
 
@@ -49,7 +50,7 @@ object DeviceModelChecker {
                 Log.d("kano_ZTE_LOG_devcheck", "线上数据返回:$res")
                 if (res != null && res.isWhiteList) {
                     Log.d("kano_ZTE_LOG_devcheck", "线上白名单，永久放行")
-                    prefs.edit().putString("is_device_white_list", "kano").apply()
+                    prefs.edit(commit = true) { putString("is_device_white_list", "kano") }
                     return false
                 }
                 //上报信息

@@ -743,6 +743,14 @@ if (selectAllBandChkBox) {
     }
 }
 
+const isPromise = (obj = null) => {
+    if (!obj) return false
+    return obj !== null && (
+        (obj instanceof Promise) || 
+        ((typeof obj === 'object' || typeof obj === 'function') && typeof obj.then === 'function') ||
+        Object.prototype.toString.call(obj) === '[object AsyncFunction]'
+    )
+}
 
 const createModal = ({ name, noBlur, isMask, title, maxWidth, content, contentStyle, confirmBtnText = t('submit_btn'), closeBtnText = t('close_btn'), onClose, onConfirm }) => {
     const html = `
@@ -797,10 +805,15 @@ const createModal = ({ name, noBlur, isMask, title, maxWidth, content, contentSt
         const close = mod.querySelector(`#${name}_close`)
         const debounceRemoveEl = debounce(() => mod.remove(), 1000)
         if (confirm) {
-            confirm.onclick = (e) => {
+            confirm.onclick = async (e) => {
                 e.preventDefault()
                 if (onConfirm) {
-                    let res = onConfirm()
+                    let res = null
+                    if (isPromise(onConfirm)) {
+                        res = await onConfirm()
+                    } else {
+                        res = onConfirm()
+                    }
                     if (res) {
                         closeModal("#" + name)
                         debounceRemoveEl()
@@ -809,10 +822,15 @@ const createModal = ({ name, noBlur, isMask, title, maxWidth, content, contentSt
             }
         }
         if (close) {
-            close.onclick = (e) => {
+            close.onclick = async (e) => {
                 e.preventDefault()
                 if (onClose) {
-                    let res = onClose()
+                    let res = null
+                    if (isPromise(onClose)) {
+                        res = await onClose()
+                    } else {
+                        res = onClose()
+                    }
                     if (res) {
                         closeModal("#" + name)
                         debounceRemoveEl()
@@ -972,19 +990,13 @@ function formatSpeed(bps, base = 1000 * 1000) {
     }
 }
 
-const checkWeakToken = () => {
-    if (SHA256) {
-        let weakTokenList = [
-            "admin",
-            "password",
-            "666",
-            "root",
-        ]
-        for (let token of weakTokenList) {
-            if (SHA256(token) == KANO_TOKEN.toUpperCase()) {
-                return true
-            }
-        }
-        return false
+const checkWeakToken = async () => {
+    try {
+        const res = await (await fetchWithTimeout(`${KANO_baseURL}/is_weak_token`)).json();
+        const is_weak_token = res && res.is_weak_token;
+        return is_weak_token === true;
+    } catch (e) {
+        console.error('checkWeakToken error:', e);
+        return false;
     }
 }

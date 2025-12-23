@@ -1,6 +1,7 @@
 package com.minikano.f50_sms.modules.theme
 
 import android.content.Context
+import androidx.core.content.edit
 import com.minikano.f50_sms.modules.BASE_TAG
 import com.minikano.f50_sms.modules.auth.authenticatedRoute
 import com.minikano.f50_sms.utils.KanoLog
@@ -153,9 +154,8 @@ fun Route.themeModule(context: Context) {
 
                 val sharedPref =
                     context.getSharedPreferences("kano_ZTE_store", Context.MODE_PRIVATE)
-                sharedPref.edit().apply {
+                sharedPref.edit(commit = true) {
                     putString("kano_theme", jsonStore)
-                    apply()
                 }
 
                 call.response.headers.append("Access-Control-Allow-Origin", "*")

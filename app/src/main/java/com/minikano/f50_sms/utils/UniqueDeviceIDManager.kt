@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import java.io.File
 import java.util.UUID
+import androidx.core.content.edit
 
 object UniqueDeviceIDManager {
 
@@ -39,7 +40,7 @@ object UniqueDeviceIDManager {
                 return storedUUID
             }
             val newUUID = UUID.randomUUID().toString()
-            prefs.edit().putString("device_uuid", newUUID).apply()
+            prefs.edit(commit = true) { putString("device_uuid", newUUID) }
             newUUID
         } catch (e: Exception) {
             Log.e("kano_ZTE_LOG", "设备唯一标识符读取失败", e)

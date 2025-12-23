@@ -16,6 +16,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import org.json.JSONObject
+import androidx.core.content.edit
 
 //静态资源
 fun Route.adbModule(context: Context) {
@@ -33,9 +34,9 @@ fun Route.adbModule(context: Context) {
             val sharedPrefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
             // 保存配置
-            sharedPrefs.edit()
-                .putString("ADMIN_PWD", password)
-                .apply()
+            sharedPrefs.edit(commit = true) {
+                putString("ADMIN_PWD", password)
+            }
 
             // 响应
             call.response.headers.append("Access-Control-Allow-Origin", "*")
@@ -94,15 +95,15 @@ fun Route.adbModule(context: Context) {
 
             // 保存配置
             if (enabled) {
-                sharedPrefs.edit()
-                    .putString("ADMIN_PWD", password)
-                    .putString("ADB_IP_ENABLED", "true")
-                    .apply()
+                sharedPrefs.edit(commit = true) {
+                    putString("ADMIN_PWD", password)
+                    putString("ADB_IP_ENABLED", "true")
+                }
             } else {
-                sharedPrefs.edit()
-                    .remove("ADMIN_PWD")
-                    .putString("ADB_IP_ENABLED", "false")
-                    .apply()
+                sharedPrefs.edit(commit = true) {
+                    remove("ADMIN_PWD")
+                    putString("ADB_IP_ENABLED", "false")
+                }
             }
 
             KanoLog.d(TAG, "ADMIN_PWD:${sharedPrefs.getString("ADMIN_PWD", "")}")

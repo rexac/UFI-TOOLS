@@ -25,6 +25,7 @@ import java.util.Calendar
 import java.util.concurrent.TimeUnit
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
+import androidx.core.content.edit
 
 class KanoUtils {
     companion object {
@@ -295,14 +296,14 @@ class KanoUtils {
                             Toast.LENGTH_SHORT
                         ).show()
                     }
-                    prefs.edit().putString("gateway_ip", currentIp).apply()
+                    prefs.edit(commit = true) { putString("gateway_ip", currentIp) }
                     if (currentIp != null) {
                         onIpChanged?.invoke(currentIp)
                     } // 通知 Compose 更新 UI
                 }
             } else if (need_auto_ip == "true") {
                 //说明可能是第一次启动
-                prefs.edit().putString("gateway_ip", currentIp).apply()
+                prefs.edit(commit = true) { putString("gateway_ip", currentIp) }
                 KanoLog.d("kano_ZTE_LOG", "可能是第一次启动，自动修改IP网关为:$currentIp")
             }
         }
@@ -522,6 +523,19 @@ class KanoUtils {
             } finally {
                 isExecutingDisabledFOTA = false
             }
+        }
+
+        fun isWeakToken(token: String): Boolean {
+            val t = token.ifBlank { "admin" }
+
+            val rules: List<(String) -> Boolean> = listOf(
+                { it == "admin" },           // 默认弱口令
+                { it.length < 8 },           // 最小长度
+                { !it.any { c -> c.isDigit() } }, // 没有数字
+                { !it.any { c -> c.isLetter() } } // 没有字母
+            )
+
+            return rules.any { rule -> rule(t) }
         }
     }
 }

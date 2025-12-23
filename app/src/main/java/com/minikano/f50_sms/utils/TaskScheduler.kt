@@ -9,6 +9,7 @@ import kotlinx.serialization.json.Json
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
+import androidx.core.content.edit
 
 // 定时任务管理器
 object TaskSchedulerManager {
@@ -211,7 +212,7 @@ class TaskScheduler(
     private fun persistTasks() {
         val list = taskMap.values.map { it.copy(task = {}) }
         val jsonStr = json.encodeToString(list)
-        prefs.edit().putString("kano_scheduled_tasks", jsonStr).apply()
+        prefs.edit(commit = true) { putString("kano_scheduled_tasks", jsonStr) }
     }
 
     @OptIn(DelicateCoroutinesApi::class)

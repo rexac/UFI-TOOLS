@@ -1755,6 +1755,7 @@ function main_func() {
                 pciEl.value = ''
                 earfcnEl.value = ''
                 createToast(t('toast_set_cell_success'), 'green')
+                //刷新基站列表
             } else {
                 throw t('toast_set_cell_failed')
             }
@@ -3686,14 +3687,7 @@ function main_func() {
     // 配置观察器_锁频
     collapseGen("#collapse_lkband_btn", "#collapse_lkband", "collapse_lkband")
 
-    //展开收起
     // 配置观察器_锁基站
-    const collapse_lkcell_stor = localStorage.getItem('collapse_lkcell') || 'close'
-    if (collapse_lkcell_stor == 'open') {
-        toggleLkcellOpen(true)
-    } else {
-        toggleLkcellOpen(false)
-    }
     collapseGen("#collapse_lkcell_btn", "#collapse_lkcell", "collapse_lkcell", (isOpen) => {
         if (isOpen == 'open') {
             toggleLkcellOpen(true)
@@ -3701,6 +3695,10 @@ function main_func() {
             toggleLkcellOpen(false)
         }
     })
+
+    //展开收起
+    const collapse_lkcell_stor = localStorage.getItem('collapse_lkcell') || 'open'
+    collapse_lkcell_stor == 'open' ? toggleLkcellOpen(true) : toggleLkcellOpen(false)
 
     //软件更新
     const queryUpdate = async () => {
@@ -5855,7 +5853,7 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
             }
             showModal(md.id)
         } catch {
-            if (cache != "1") {
+            if (cache != "1" && cache != null && cache != undefined) {
                 showModal(md.id)
             }
         }

@@ -576,16 +576,12 @@ const switchAPNAuto = async ({ isAuto = true, index = 0 }) => {
 
 // check Terms acceptance
 const getTermsAcceptance = async () => {
-    try {
-        const res = await (await fetchWithTimeout(`${KANO_baseURL}/version_info`)).json()
-        ACCEPT_TERMS = res.accept_terms && res.accept_terms.toString() == 'true'
-        if (ACCEPT_TERMS) {
-            return true
-        }
-    } catch {
-        ACCEPT_TERMS = false
-        return false
+    const res = await (await fetchWithTimeout(`${KANO_baseURL}/version_info`)).json()
+    ACCEPT_TERMS = res.accept_terms && res.accept_terms.toString() == 'true'
+    if (ACCEPT_TERMS) {
+        return true
     }
+    return false
 }
 
 // check sim pin

@@ -431,7 +431,14 @@ const collapseGen = (btn_id, collapse_id, storName, callback = undefined) => {
     try {
         const { el: collapseMenuEl } = createCollapseObserver(document.querySelector(collapse_id));
         if (storName) {
-            collapseMenuEl.dataset.name = localStorage.getItem(storName) || 'open';
+            const storVal = localStorage.getItem(storName)
+            if (storVal) {
+                collapseMenuEl.dataset.name = storVal;
+                localStorage.setItem(storName, storVal)
+            } else {
+                collapseMenuEl.dataset.name = 'open';
+                localStorage.setItem(storName, 'open')
+            }
         } else {
             collapseMenuEl.dataset.name = 'open'; // 默认打开
         }
@@ -746,7 +753,7 @@ if (selectAllBandChkBox) {
 const isPromise = (obj = null) => {
     if (!obj) return false
     return obj !== null && (
-        (obj instanceof Promise) || 
+        (obj instanceof Promise) ||
         ((typeof obj === 'object' || typeof obj === 'function') && typeof obj.then === 'function') ||
         Object.prototype.toString.call(obj) === '[object AsyncFunction]'
     )

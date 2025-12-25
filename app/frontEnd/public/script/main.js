@@ -139,10 +139,13 @@ const needToken = async (shouldThrowError = false, fetchMaxRetries = 3) => {
     }
 
     let tkInput = document.querySelector('#TOKEN')
+    let tkLabel = document.querySelector("#TOKEN_LABEL")
     if (isNeedToken) {
         tkInput && (tkInput.style.display = "")
+        tkLabel && (tkLabel.style.display = "")
     } else {
         tkInput && (tkInput.style.display = "none")
+        tkLabel && (tkLabel.style.display = "none")
     }
 };
 
@@ -483,6 +486,7 @@ function main_func() {
         QOSRDPCommand("AT+CGEQOSRDP=1")
         initTerms()
         initCheckWeakToken()
+        initTTYD()
     }
 
     //检测是否启用高级功能

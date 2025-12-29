@@ -101,7 +101,8 @@
     "btn_lock_band": "锁频段!",
     "btn_unlock_band": "解除锁频段!",
     "lock_cell_title": "🔒 锁定基站",
-    "cell_tip": "🚀 注意，选错基站可能会导致信号不稳定/无信号等问题 🚀",
+    "cell_tip": "⚠️ 注意，选错基站可能会导致信号不稳定/无信号等问题",
+    "cell_tip1":"提示：暂停刷新后可以依次锁定多个基站",
     "network_select": "网络选择：",
     "btn_lock_cell": "锁基站!",
     "btn_unlock_cell": "解除锁定基站",
@@ -736,5 +737,7 @@
     "change_token_now":"立即更改",
     "token_change_notice":"口令最短为8位，至少包含字母和数字",
     "toast_token_invalid":"口令至少包含字母和数字!",
-    "toast_token_too_short":"口令至少需要8位!"
+    "toast_token_too_short":"口令至少需要8位!",
+    "three_days_later":"推迟三天",
+    "three_days_later_info":"为了确保用户修改口令，三天后会继续提示"
 }

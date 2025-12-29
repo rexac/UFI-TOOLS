@@ -102,6 +102,7 @@
     "btn_unlock_band": "バンド固定解除!",
     "lock_cell_title": "🔒 基地局固定",
     "cell_tip": "🚀 間違うと電波が不安定になる恐れあり 🚀",
+    "cell_tip1": "ヒント：更新を一時停止すると、複数の基地局を順番にロックできます。",
     "network_select": "ネットワーク選択：",
     "btn_lock_cell": "セル固定！",
     "btn_unlock_cell": "セル解除",
@@ -735,5 +736,7 @@
     "change_token_now": "今すぐ変更",
     "token_change_notice": "パスワードは8文字以上で、英字と数字を含める必要があります。",
     "toast_token_invalid": "英字と数字を含めてください！",
-    "toast_token_too_short": "パスワードは8文字以上必要です！"
+    "toast_token_too_short": "パスワードは8文字以上必要です！",
+    "three_days_later": "3日後に再通知",
+    "three_days_later_info": "ユーザーが口令を変更するよう促すため、3日後に再度通知します。"
 }

@@ -102,6 +102,7 @@
     "btn_unlock_band": "Mở khóa băng tần",
     "lock_cell_title": "🔒 Khóa Cell",
     "cell_tip": "🚀 Cảnh báo: Khóa sai cell có thể gây mất tín hiệu hoặc tín hiệu không ổn định 🚀",
+    "cell_tip1": "Gợi ý: Sau khi tạm dừng làm mới, bạn có thể lần lượt khóa nhiều trạm gốc.",
     "network_select": "Loại mạng: ",
     "btn_lock_cell": "Khóa Cell!",
     "btn_unlock_cell": "Mở khóa tất cả Cell",
@@ -735,5 +736,7 @@
     "change_token_now": "Thay đổi ngay",
     "token_change_notice": "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ và số.",
     "toast_token_invalid": "Mật khẩu phải bao gồm chữ và số!",
-    "toast_token_too_short": "Mật khẩu phải có ít nhất 8 ký tự!"
+    "toast_token_too_short": "Mật khẩu phải có ít nhất 8 ký tự!",
+    "three_days_later": "Nhắc lại sau 3 ngày",
+    "three_days_later_info": "Để đảm bảo người dùng thay đổi mật khẩu, hệ thống sẽ tiếp tục nhắc lại sau 3 ngày."
 }

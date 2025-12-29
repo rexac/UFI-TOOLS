@@ -402,8 +402,14 @@
                 </div>
                 <div class="collapse" id="collapse_lkcell" style="overflow: visible;margin: 10px 0;margin-top: 20px;">
                     <div class="collapse_box">
-                        <p class="title"><i style="font-size: 12px;" data-i18n="cell_tip">🚀 注意，选错基站可能会导致信号不稳定/无信号等问题
-                                🚀</i></p>
+                        <div class="title">
+                            <div>
+                                <i style="font-size: 12px;" data-i18n="cell_tip">🚀 注意，选错基站可能会导致信号不稳定/无信号等问题
+                                    🚀</i>
+                                <br>
+                                <i style="font-size: 12px;" data-i18n="cell_tip1">提示：暂停刷新后可以依次锁定多个基站</i>
+                            </div>
+                        </div>
                         <div class="title" style="margin: 10px 0 ;margin-top: 20px;"><strong
                                 data-i18n="locked_cell">已锁基站</strong></div>
                         <table class="nice-table" id="LOCKED_CELL_FORM">
@@ -496,12 +502,14 @@
                             <option value="1" data-i18n="login_method_1">登录方式1</option>
                             <option value="0" data-i18n="login_method_2">登录方式2</option>
                         </select>
-                        <div id="TOKEN_LABEL" style="align-self: start;margin-bottom: 10px;font-size: .85rem;" data-i18n="token_div_1">UFI 口令：</div>
+                        <div id="TOKEN_LABEL" style="align-self: start;margin-bottom: 10px;font-size: .85rem;"
+                            data-i18n="token_div_1">UFI 口令：</div>
                         <input name="backend_password" autocomplete="current-password" id="TOKEN" type="password"
                             data-i18n-placeholder="token_placeholder_token" placeholder="口令(UFI-TOOLS后台应用中查看)"
                             style="width: 100%;text-indent: .5em;margin:0 4px;margin-bottom: 10px;height: 30px;">
-                        <div style="align-self: start;margin-bottom: 10px;font-size: .85rem;" data-i18n="token_div_2">中兴后台密码：</div>
-                            <input name="web_password" autocomplete="new-password" id="PWDINPUT" type="password"
+                        <div style="align-self: start;margin-bottom: 10px;font-size: .85rem;" data-i18n="token_div_2">
+                            中兴后台密码：</div>
+                        <input name="web_password" autocomplete="new-password" id="PWDINPUT" type="password"
                             data-i18n-placeholder="token_placeholder_pwd" placeholder="官方后台的管理密码"
                             style="width: 100%;text-indent: .5em; margin:0 4px;margin-bottom: 20px;height: 30px;">
                     </form>
@@ -1294,7 +1302,7 @@
                                 <button onclick="event.preventDefault();setPort(true)">Accept</button>
                                 <button onclick="event.preventDefault();setPort(false)">Deny</button>
                             </div>
-                            <hr style="background-color: pink;"/>
+                            <hr style="background-color: pink;" />
                             <div style="display: flex;gap: 10px;margin: 10px 0;">
                                 <button style="width: 100%;" onclick="event.preventDefault();toggleTTYD(true)">Enable
                                     TTYD</button>
@@ -1531,7 +1539,8 @@
                 <div class="modal">
                     <div class="title" data-i18n="change_token_title">更改登录口令</div>
 
-                    <div class="title" style="margin-top: 10px;font-size: .7rem;" data-i18n="token_change_notice">密码最短为8位，至少包含字母和数字</div>
+                    <div class="title" style="margin-top: 10px;font-size: .7rem;" data-i18n="token_change_notice">
+                        密码最短为8位，至少包含字母和数字</div>
                     <form onsubmit="handleChangeToken(event)" id="changeTokenForm">
                         <div class="content" style="overflow-y: scroll; padding: 15px; width: 66vw; max-width: 400px;">
                             <div class="item" style="margin: 10px auto;">
@@ -1620,7 +1629,8 @@
                 </div>
 
                 <div class="btn" style="text-align: right;">
-                    <button type="button" onclick="closeUSBStatusModal('#USBStatusModal')" data-i18n="close_btn">关闭</button>
+                    <button type="button" onclick="closeUSBStatusModal('#USBStatusModal')"
+                        data-i18n="close_btn">关闭</button>
                 </div>
             </div>
             <!-- 版本更新模态框 -->
@@ -1984,7 +1994,8 @@
                     </div>
                     <div class="donate_content"
                         style="display: flex; flex-direction: row; justify-content: space-between; padding: 15px; width: 66vw; max-width: 400px; flex-wrap: wrap;">
-                        <img src="https://api.kanokano.cn/pay/zsm.png" style="width: 48%; height: auto; border-radius: 20px;"
+                        <img src="https://api.kanokano.cn/pay/zsm.png"
+                            style="width: 48%; height: auto; border-radius: 20px;"
                             onerror="this.onerror=null; this.src='/img/zsm.png'" alt="">
                         <img src="/img/qq_group.png" style="width: 48%; height: auto; border-radius: 20px;"
                             onerror="this.onerror=null; this.src='/img/zsm.webp'" alt="">

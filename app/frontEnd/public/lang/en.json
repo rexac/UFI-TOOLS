@@ -102,6 +102,7 @@
     "btn_unlock_band": "Unlock Bands!",
     "lock_cell_title": "🔒 Lock Cell",
     "cell_tip": "🚀 Warning: Locking wrong cell may cause no or unstable signal 🚀",
+    "cell_tip1": "Tip: After pausing refresh, you can lock multiple base stations one by one.",
     "network_select": "Network Type: ",
     "btn_lock_cell": "Lock Cell!",
     "btn_unlock_cell": "Unlock All Cells",
@@ -735,5 +736,7 @@
     "change_token_now": "Change Now",
     "token_change_notice": "Password must be at least 8 characters and include letters and numbers.",
     "toast_token_invalid": "Password must include letters and numbers!",
-    "toast_token_too_short": "Password must be at least 8 characters!"
+    "toast_token_too_short": "Password must be at least 8 characters!",
+    "three_days_later": "Remind me in three days",
+    "three_days_later_info": "To ensure the user updates the passcode, this reminder will appear again in three days."
 }

@@ -1635,7 +1635,7 @@ function main_func() {
     }
 
     //锁基站
-    let initCellInfo = async () => {
+    let initCellInfo = async (onlyRefreshLockedInfoList = false) => {
         try {
             //已锁基站信息
             //基站信息
@@ -1643,7 +1643,7 @@ function main_func() {
                 cmd: 'neighbor_cell_info,locked_cell_info'
             }))
 
-            if (neighbor_cell_info) {
+            if (neighbor_cell_info && !onlyRefreshLockedInfoList) {
                 const cellBodyEl = document.querySelector('#cellForm tbody')
                 cellBodyEl.innerHTML = neighbor_cell_info.map(item => {
                     const { band, earfcn, pci, rsrp, rsrq, sinr } = item
@@ -1760,6 +1760,7 @@ function main_func() {
                 earfcnEl.value = ''
                 createToast(t('toast_set_cell_success'), 'green')
                 //刷新基站列表
+                initCellInfo(true)
             } else {
                 throw t('toast_set_cell_failed')
             }
@@ -5875,14 +5876,37 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
         }
 
         if (await checkWeakToken()) {
+            const stor_name = 'weakTokenToastLater'
+            const threeDaysMill = 259200000
+            try {
+                const now_exp = localStorage.getItem(stor_name)
+                if (now_exp) {
+                    if (now_exp - Date.now() > 0) {
+                        const t = new Date(now_exp - Date.now())
+                        console.log(`弱口令弹窗还剩：${t.getTime() / 1000 / 60 / 60 / 24} 天`);
+                        //三天内不提示
+                        return
+                    }
+                } else {
+                    throw new Error("now_exp为空")
+                }
+            } catch {
+                console.error("weakTokenToastLater格式不合法,即将删除此stor");
+                localStorage.removeItem(stor_name)
+            }
             const { el, close } = createFixedToast('weak_token_toast', `
                 <div style="pointer-events:all;width:80vw;max-width:300px;">
                 <div class="title" style="margin:0" data-i18n="system_notice">${t('system_notice')}</div>
                 <p>${t("weak_token_detected")}</p>
-                <button id="close_weak_token_toast_btn" style="width:100%;font-size:.64rem;margin-top:5px" data-i18n="change_token_now">${t("change_token_now")}</button>
+                <div style="display:flex;gap:10px">
+                    <button id="close_weak_token_toast_btn" style="width:100%;font-size:.64rem;margin-top:5px" data-i18n="change_token_now">${t("change_token_now")}</button>
+                    <button id="close_3_days_weak_token_toast_btn" style="width:100%;font-size:.64rem;margin-top:5px" data-i18n="three_days_later">${t("three_days_later")}</button>
+                </div>
                 </div>
                 `, 'red')
             const btn = el.querySelector('#close_weak_token_toast_btn')
+            const btn3Days = el.querySelector('#close_3_days_weak_token_toast_btn')
+
             if (!btn) {
                 close()
                 return
@@ -5890,6 +5914,16 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
             btn.onclick = () => {
                 close()
                 showModal("#changeTokenModal")
+            }
+
+            if (!btn3Days) {
+                close()
+                return
+            }
+            btn3Days.onclick = () => {
+                localStorage.setItem(stor_name, Date.now() + threeDaysMill)
+                createToast(t('three_days_later_info'))
+                close()
             }
         }
     }

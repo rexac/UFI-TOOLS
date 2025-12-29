@@ -1788,10 +1788,11 @@ function main_func() {
 
             if (res.result == 'success') {
                 createToast(t('toast_unlock_cell_success'), 'green')
+                //刷新基站列表
+                initCellInfo(true)
             } else {
                 throw t('toast_unlock_cell_failed')
             }
-
         } catch {
             createToast(t('toast_unlock_cell_failed'), 'red')
         }

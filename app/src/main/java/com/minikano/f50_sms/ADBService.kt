@@ -176,6 +176,7 @@ class ADBService : Service() {
                     val isDebugEnabled = isUsbDebuggingEnabled(context)
                     if (!isDebugEnabled){
                         KanoLog.d("kano_ZTE_LOG", "没有开启ADB，不执行ADB保活")
+                        adbIsReady = false
                     }
                     else {
                         KanoLog.d("kano_ZTE_LOG", "保活ADB服务中...")

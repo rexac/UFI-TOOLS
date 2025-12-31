@@ -16,6 +16,7 @@ import com.minikano.f50_sms.utils.KanoLog
 import com.minikano.f50_sms.utils.KanoReport
 import com.minikano.f50_sms.utils.KanoReport.Companion.reportToServer
 import com.minikano.f50_sms.utils.KanoUtils
+import com.minikano.f50_sms.utils.KanoUtils.Companion.isUsbDebuggingEnabled
 import com.minikano.f50_sms.utils.RootShell
 import com.minikano.f50_sms.utils.ShellKano
 import com.minikano.f50_sms.utils.ShellKano.Companion.executeShellFromAssetsSubfolderWithArgs
@@ -172,67 +173,76 @@ class ADBService : Service() {
                 val adbPath = "shell/adb"
 
                 while (!Thread.currentThread().isInterrupted) {
-                    KanoLog.d("kano_ZTE_LOG", "保活ADB服务中...")
+                    val isDebugEnabled = isUsbDebuggingEnabled(context)
+                    if (!isDebugEnabled){
+                        KanoLog.d("kano_ZTE_LOG", "没有开启ADB，不执行ADB保活")
+                    }
+                    else {
+                        KanoLog.d("kano_ZTE_LOG", "保活ADB服务中...")
 
-                    var result =
-                        executeShellFromAssetsSubfolderWithArgs(context, adbPath, "devices") {
-                            ShellKano.killProcessByName("adb")
-                        }
-
-                    if (result?.contains("localhost:5555\tdevice") == true) {
-                        KanoLog.d("kano_ZTE_LOG", "adb存活，无需启动")
-                        adbIsReady = true
-                        if(!isExecutedDisabledFOTA) {
-                            disableFOTATimes --
-                            if(disableFOTATimes <= 0){
-                                KanoLog.d("kano_ZTE_LOG", "已连续3次尝试使用adb禁用FOTA，强制isExecutingDisabledFOTA = true")
-                                isExecutingDisabledFOTA = true
+                        var result =
+                            executeShellFromAssetsSubfolderWithArgs(context, adbPath, "devices") {
+                                ShellKano.killProcessByName("adb")
                             }
-                            val res = KanoUtils.disableFota(applicationContext)
-                            if(res){
-                                KanoLog.d("kano_ZTE_LOG", "使用adb禁用FOTA完成")
+
+                        if (result?.contains("localhost:5555\tdevice") == true) {
+                            KanoLog.d("kano_ZTE_LOG", "adb存活，无需启动")
+                            adbIsReady = true
+                            if (!isExecutedDisabledFOTA) {
+                                disableFOTATimes--
+                                if (disableFOTATimes <= 0) {
+                                    KanoLog.d(
+                                        "kano_ZTE_LOG",
+                                        "已连续3次尝试使用adb禁用FOTA，强制isExecutingDisabledFOTA = true"
+                                    )
+                                    isExecutingDisabledFOTA = true
+                                }
+                                val res = KanoUtils.disableFota(applicationContext)
+                                if (res) {
+                                    KanoLog.d("kano_ZTE_LOG", "使用adb禁用FOTA完成")
+                                }
+                                isExecutedDisabledFOTA = true
                             }
-                            isExecutedDisabledFOTA = true
-                        }
-                    } else {
-                        KanoLog.w("kano_ZTE_LOG", "adb无设备或已退出，尝试启动")
-                        adbIsReady = false
+                        } else {
+                            KanoLog.w("kano_ZTE_LOG", "adb无设备或已退出，尝试启动")
+                            adbIsReady = false
 
-                        ShellKano.killProcessByName("adb")
-                        Thread.sleep(1000)
-
-                        executeShellFromAssetsSubfolderWithArgs(
-                            context,
-                            adbPath,
-                            "connect",
-                            "localhost"
-                        ) {
                             ShellKano.killProcessByName("adb")
-                        }
+                            Thread.sleep(1000)
 
-                        val maxWaitMs = 5_000
-                        val interval = 500
-                        var waited = 0
-
-                        while (waited < maxWaitMs) {
-                            result = executeShellFromAssetsSubfolderWithArgs(
+                            executeShellFromAssetsSubfolderWithArgs(
                                 context,
                                 adbPath,
-                                "devices"
+                                "connect",
+                                "localhost"
                             ) {
                                 ShellKano.killProcessByName("adb")
                             }
 
-                            if (result?.contains("localhost:5555\tdevice") == true) {
-                                KanoLog.d("kano_ZTE_LOG", "ADB连接成功: $result")
-                                adbIsReady = true
-                                break
-                            } else {
-                                KanoLog.d("kano_ZTE_LOG", "ADB未连接: $result")
-                            }
+                            val maxWaitMs = 5_000
+                            val interval = 500
+                            var waited = 0
 
-                            Thread.sleep(interval.toLong())
-                            waited += interval
+                            while (waited < maxWaitMs) {
+                                result = executeShellFromAssetsSubfolderWithArgs(
+                                    context,
+                                    adbPath,
+                                    "devices"
+                                ) {
+                                    ShellKano.killProcessByName("adb")
+                                }
+
+                                if (result?.contains("localhost:5555\tdevice") == true) {
+                                    KanoLog.d("kano_ZTE_LOG", "ADB连接成功: $result")
+                                    adbIsReady = true
+                                    break
+                                } else {
+                                    KanoLog.d("kano_ZTE_LOG", "ADB未连接: $result")
+                                }
+
+                                Thread.sleep(interval.toLong())
+                                waited += interval
+                            }
                         }
                     }
                     // 每 11 秒轮询一次

@@ -10,6 +10,7 @@ import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.os.BatteryManager
 import android.os.StatFs
+import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
 import com.minikano.f50_sms.ADBService.Companion.isExecutingDisabledFOTA
@@ -536,6 +537,19 @@ class KanoUtils {
             )
 
             return rules.any { rule -> rule(t) }
+        }
+
+        fun isUsbDebuggingEnabled(context: Context): Boolean {
+            return try {
+                Settings.Global.getInt(context.contentResolver, Settings.Global.ADB_ENABLED, 0) == 1
+            } catch (e: Exception) {
+                try {
+                    Settings.Secure.getInt(context.contentResolver, Settings.Secure.ADB_ENABLED, 0) == 1
+                } catch (e: Exception) {
+                    //防止权限原因读取不到，默认是Enabled
+                    true
+                }
+            }
         }
     }
 }

@@ -56,8 +56,7 @@ android {
         minSdk = 26
         targetSdk = 33
         // 动态生成 versionCode 为 yyyyMMdd 格式
-        versionCode = 20251230
-        //SimpleDateFormat("yyyyMMdd").format(Date()).toInt()
+        versionCode = SimpleDateFormat("yyyyMMdd").format(Date()).toInt()
         versionName = "3.8.6"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

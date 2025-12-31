@@ -5,12 +5,35 @@ import com.minikano.f50_sms.configs.AppMeta
 import com.minikano.f50_sms.configs.AppMeta.isDeviceRooted
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import okhttp3.Dns
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Request
 import org.json.JSONObject
+import java.net.InetAddress
+import java.net.UnknownHostException
+import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
+
+class TimeoutDns(
+    private val timeoutMs: Long = 3000
+) : Dns {
+
+    override fun lookup(hostname: String): List<InetAddress> {
+        val executor = Executors.newSingleThreadExecutor()
+        return try {
+            val future = executor.submit<List<InetAddress>> {
+                InetAddress.getAllByName(hostname).toList()
+            }
+            future.get(timeoutMs, TimeUnit.MILLISECONDS)
+        } catch (e: Exception) {
+            throw UnknownHostException("DNS timeout: $hostname")
+        } finally {
+            executor.shutdown()
+        }
+    }
+}
 
 class KanoReport {
     companion object {
@@ -79,7 +102,9 @@ class KanoReport {
 
         suspend fun getRemoteDeviceRegisterItem(uuid: String): Report? = withContext(Dispatchers.IO) {
             val client = OkHttpClient.Builder()
-                .connectTimeout(1, TimeUnit.SECONDS)  // 连接超时
+                .dns(TimeoutDns(3000))
+                .callTimeout(3, TimeUnit.SECONDS)
+                .connectTimeout(2, TimeUnit.SECONDS)  // 连接超时
                 .readTimeout(1, TimeUnit.SECONDS)     // 读取超时
                 .writeTimeout(1, TimeUnit.SECONDS)    // 写入超时
                 .retryOnConnectionFailure(false)  // 关闭失败重试

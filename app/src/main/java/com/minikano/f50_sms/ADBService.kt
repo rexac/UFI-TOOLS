@@ -25,9 +25,11 @@ import com.minikano.f50_sms.utils.SmsPoll
 import com.minikano.f50_sms.utils.TaskSchedulerManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import java.io.File
 import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
 
 class ADBService : Service() {
@@ -59,20 +61,14 @@ class ADBService : Service() {
             // 等文件拷贝完成后再继续
             startAdbKeepAliveTask(applicationContext)
             startIperfTask(applicationContext)
-            val executor = Executors.newFixedThreadPool(2)
+            val executor = Executors.newFixedThreadPool(3)
             executor.execute(runnableSMS)
             executor.execute(runnableSMB)
+            executor.execute(runnableRPT)
         }
 
         //开启定时任务
         TaskSchedulerManager.init(applicationContext)
-
-        //上报信息
-        try{
-            CoroutineScope(Dispatchers.Main).launch {
-                reportToServer()
-            }
-        } catch (_:Exception){}
 
         return START_STICKY
     }
@@ -107,6 +103,31 @@ class ADBService : Service() {
                 }
             }
             handler.postDelayed(this, 5000)
+        }
+    }
+
+    private val rptScope =
+        CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    @Volatile
+    private var rptRunning = false
+    private val runnableRPT = object : Runnable {
+        override fun run() {
+            if (rptRunning) {
+                KanoLog.w("kano_ZTE_LOG", "上一次 RPT 还未完成，跳过本次")
+            } else {
+                rptScope.launch {
+                    rptRunning = true
+                    try {
+                        KanoLog.d("kano_ZTE_LOG", "周期性发送状态中...")
+                        reportToServer()
+                    } catch (e: Exception) {
+                        KanoLog.e("kano_ZTE_LOG", "发送状态时发生错误：", e)
+                    } finally {
+                        rptRunning = false
+                    }
+                }
+            }
+            handler.postDelayed(this, TimeUnit.HOURS.toMillis(5))
         }
     }
 

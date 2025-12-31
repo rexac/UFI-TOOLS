@@ -119,6 +119,32 @@ class MainActivity : ComponentActivity() {
         lifecycleScope.launch {
             UniqueDeviceIDManager.init(applicationContext)
 
+            Toast.makeText(applicationContext, "Loading...", Toast.LENGTH_SHORT).show()
+            setContent {
+                Card(
+                    shape = RoundedCornerShape(16.dp),
+                    elevation = CardDefaults.cardElevation(8.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+
+                        CircularProgressIndicator()
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        Text("加载数据中(Loading)...", fontSize = 16.sp)
+                    }
+                }
+            }
+
             val isNotUFI = withContext(Dispatchers.IO) { DeviceModelChecker.checkIsNotUFI(applicationContext) }
 
             if (isNotUFI) {

@@ -346,7 +346,7 @@ class MainActivity : ComponentActivity() {
                                     "lock"
                                 ) ?: "lock"
 
-                                KanoLog.d("kano_ZTE_LOG", "user touched stop btn")
+                                KanoLog.d("UFI_TOOLS_LOG", "user touched stop btn")
                             }
                         )
                     } else {
@@ -402,7 +402,7 @@ class MainActivity : ComponentActivity() {
                                 }
                                 sendBroadcast(Intent(UI_INTENT).putExtra("status", true))
                                 serverStatusLiveData.postValue(true)
-                                KanoLog.d("kano_ZTE_LOG", "user touched start btn")
+                                KanoLog.d("UFI_TOOLS_LOG", "user touched start btn")
                                 runADB()
                             }
                         )
@@ -469,14 +469,14 @@ class MainActivity : ComponentActivity() {
             try {
                 ShellKano.runShellCommand("/system/bin/setprop persist.service.adb.tcp.port 5555")
                 ShellKano.runShellCommand("/system/bin/setprop service.adb.tcp.port 5555")
-                KanoLog.d("kano_ZTE_LOG", "网络adb调试执行成功")
+                KanoLog.d("UFI_TOOLS_LOG", "网络adb调试执行成功")
             } catch (e: Exception) {
                 try {
                     ShellKano.runShellCommand("/system/bin/setprop service.adb.tcp.port 5555")
                     ShellKano.runShellCommand("/system/bin/setprop persist.service.adb.tcp.port 5555")
-                    KanoLog.d("kano_ZTE_LOG", "网络adb调试执行成功")
+                    KanoLog.d("UFI_TOOLS_LOG", "网络adb调试执行成功")
                 } catch (e: Exception) {
-                    KanoLog.d("kano_ZTE_LOG", "网络adb调试出错： ${e.message}")
+                    KanoLog.d("UFI_TOOLS_LOG", "网络adb调试出错： ${e.message}")
                 }
             }
         }.start()
@@ -487,7 +487,7 @@ class MainActivity : ComponentActivity() {
             val action = intent?.action
             if (action == SERVER_INTENT) {
                 val isRunning = intent.getBooleanExtra("status", false) ?: false
-                KanoLog.d("kano_ZTE_LOG", "isServerRunning is $isRunning")
+                KanoLog.d("UFI_TOOLS_LOG", "isServerRunning is $isRunning")
                 serverStatusLiveData.postValue(isRunning)
             }
         }

@@ -33,7 +33,7 @@ class WebService : Service() {
     private val statusReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             val action = intent?.action
-            Log.d("kano_ZTE_LOG", "WebService 收到 Intent")
+            Log.d("UFI_TOOLS_LOG", "WebService 收到 Intent")
             if (action == UI_INTENT) {
                 val shouldStart = intent.getBooleanExtra("status", false)
                 if (shouldStart) {
@@ -59,10 +59,10 @@ class WebService : Service() {
         val needWakeLock = prefs.getString("wakeLock", "lock") ?: "lock"
         val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
         if(needWakeLock != "lock") {
-            KanoLog.d("kano_ZTE_LOG","不需要唤醒锁，正在释放...")
+            KanoLog.d("UFI_TOOLS_LOG","不需要唤醒锁，正在释放...")
             WakeLock.releaseWakeLock()
         } else {
-            KanoLog.d("kano_ZTE_LOG","需要唤醒锁，正在执行...")
+            KanoLog.d("UFI_TOOLS_LOG","需要唤醒锁，正在执行...")
             WakeLock.execWakeLock(pm)
         }
 
@@ -73,7 +73,7 @@ class WebService : Service() {
         allowAutoReStart = true
         startWebServer()
 
-        Log.d("kano_ZTE_LOG", "WebService Init Success!")
+        Log.d("UFI_TOOLS_LOG", "WebService Init Success!")
     }
 
     private fun startWebServer() {
@@ -82,13 +82,13 @@ class WebService : Service() {
             val currentIp = prefs.getString("gateway_ip", "192.168.0.1:8080") ?: "192.168.0.1:8080"
             allowAutoStart = true
             try {
-                Log.d("kano_ZTE_LOG", "正在启动web服务，绑定地址：http://0.0.0.0:$port")
+                Log.d("UFI_TOOLS_LOG", "正在启动web服务，绑定地址：http://0.0.0.0:$port")
                 webServer = KanoWebServer(applicationContext, 2333, currentIp)
                 webServer?.start()
                 sendStickyBroadcast(Intent(SERVER_INTENT).putExtra("status", true))
-                Log.d("kano_ZTE_LOG", "启动服务成功，地址：http://0.0.0.0:$port")
+                Log.d("UFI_TOOLS_LOG", "启动服务成功，地址：http://0.0.0.0:$port")
             } catch (fallbackEx: Exception) {
-                Log.e("kano_ZTE_LOG", "服务启动失败: ${fallbackEx.message}")
+                Log.e("UFI_TOOLS_LOG", "服务启动失败: ${fallbackEx.message}")
                 sendStickyBroadcast(Intent(SERVER_INTENT).putExtra("status", false))
             }
         }.start()
@@ -100,7 +100,7 @@ class WebService : Service() {
 
         thread { webServer?.stop() }
         sendStickyBroadcast(Intent(SERVER_INTENT).putExtra("status", false))
-        Log.d("kano_ZTE_LOG", "Web server stopped")
+        Log.d("UFI_TOOLS_LOG", "Web server stopped")
     }
 
     override fun onDestroy() {
@@ -141,6 +141,6 @@ class WebService : Service() {
             .setSmallIcon(R.drawable.ic_launcher_foreground).setOngoing(true).build()
 
         startForeground(1, notification)
-        Log.d("kano_ZTE_LOG", "通知已建立")
+        Log.d("UFI_TOOLS_LOG", "通知已建立")
     }
 }

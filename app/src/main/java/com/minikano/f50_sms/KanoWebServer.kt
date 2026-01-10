@@ -27,7 +27,7 @@ class KanoWebServer(private val context: Context, port: Int, private val proxySe
                 server.start(wait = true)
                 running = true
             } catch (e: Exception) {
-                KanoLog.e("kano_ZTE_LOG", "Server failed: ${e.message}", e)
+                KanoLog.e("UFI_TOOLS_LOG", "Server failed: ${e.message}", e)
             }
         }.start()
     }

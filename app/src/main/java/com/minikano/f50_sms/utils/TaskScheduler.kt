@@ -24,7 +24,7 @@ object TaskSchedulerManager {
             scheduler!!.restoreTasks()
             scheduler!!.start()
             scheduler!!.reschedule()
-            KanoLog.d("kano_ZTE_LOG_TaskScheduler", "定时任务调度器已启动，共有 ${scheduler?.listAllTasks()?.size} 个任务")
+            KanoLog.d("UFI_TOOLS_LOG_TaskScheduler", "定时任务调度器已启动，共有 ${scheduler?.listAllTasks()?.size} 个任务")
         }
     }
 
@@ -33,7 +33,7 @@ object TaskSchedulerManager {
     fun stop() {
         scheduler?.stop()
         scheduler = null
-        KanoLog.d("kano_ZTE_LOG_TaskScheduler", "scheduler 实例已停止！")
+        KanoLog.d("UFI_TOOLS_LOG_TaskScheduler", "scheduler 实例已停止！")
     }
 }
 
@@ -113,7 +113,7 @@ class TaskScheduler(
         pollJob = scope.launch {
             while (isActive) {
                 delay(5 * 60 * 1000L) // 每 5 分钟
-                KanoLog.d("kano_ZTE_LOG_TaskScheduler", "定时轮询触发 reschedule() 更新")
+                KanoLog.d("UFI_TOOLS_LOG_TaskScheduler", "定时轮询触发 reschedule() 更新")
                 reschedule()
             }
         }
@@ -127,7 +127,7 @@ class TaskScheduler(
             resetDailyTaskFlags()
         }
         val nextTimeMillis = getNextTriggerTimeMillis() ?: return
-        KanoLog.d("kano_ZTE_LOG_TaskScheduler", "下一任务时间：${SimpleDateFormat("HH:mm", Locale.getDefault()).format(nextTimeMillis)}")
+        KanoLog.d("UFI_TOOLS_LOG_TaskScheduler", "下一任务时间：${SimpleDateFormat("HH:mm", Locale.getDefault()).format(nextTimeMillis)}")
         val delayMillis = (nextTimeMillis - System.currentTimeMillis()).coerceAtLeast(0)
 
         job = scope.launch {
@@ -147,7 +147,7 @@ class TaskScheduler(
         for ((_, task) in taskMap) {
             if (task.time == nowTimeStr && !task.hasTriggered) {
                 task.task()
-                KanoLog.d("kano_ZTE_LOG_TaskScheduler", "定时任务 ${task.id} 在 $nowTimeStr 执行了")
+                KanoLog.d("UFI_TOOLS_LOG_TaskScheduler", "定时任务 ${task.id} 在 $nowTimeStr 执行了")
                 task.lastRunTimestamp = currentMillis
                 task.hasTriggered = true
                 shouldPersist = true
@@ -175,7 +175,7 @@ class TaskScheduler(
             time.matches(Regex("\\d{2}:\\d{2}:\\d{2}")) -> time.substring(0, 5)
             time.matches(Regex("\\d{2}:\\d{2}")) -> time
             else -> {
-                KanoLog.w("kano_ZTE_LOG_TaskScheduler", "时间格式不正确: $time，默认使用原值")
+                KanoLog.w("UFI_TOOLS_LOG_TaskScheduler", "时间格式不正确: $time，默认使用原值")
                 time
             }
         }
@@ -235,11 +235,11 @@ class TaskScheduler(
                                 val result = req.postData(cookie, saved.actionMap)
                                 req.logout(cookie)
                                 if (result?.getString("result") == "success") {
-                                    KanoLog.d("kano_ZTE_LOG_TaskScheduler", "zte_web_API执行成功")
+                                    KanoLog.d("UFI_TOOLS_LOG_TaskScheduler", "zte_web_API执行成功")
                                 }
                             }
                         } catch (e: Exception) {
-                            KanoLog.e("kano_ZTE_LOG_TaskScheduler", "任务 ${saved.id} 执行失败: ${e.message}")
+                            KanoLog.e("UFI_TOOLS_LOG_TaskScheduler", "任务 ${saved.id} 执行失败: ${e.message}")
                         }
                     }
                 }

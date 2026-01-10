@@ -22,7 +22,7 @@ import io.ktor.server.plugins.defaultheaders.DefaultHeaders
 import io.ktor.server.routing.routing
 
 
-const val BASE_TAG = "kano_ZTE_LOG"
+const val BASE_TAG = "UFI_TOOLS_LOG"
 const val PREFS_NAME = "kano_ZTE_store"
 
 fun Application.mainModule(context: Context, proxyServerIp: String) {

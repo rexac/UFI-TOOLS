@@ -43,7 +43,7 @@ object UniqueDeviceIDManager {
             prefs.edit(commit = true) { putString("device_uuid", newUUID) }
             newUUID
         } catch (e: Exception) {
-            Log.e("kano_ZTE_LOG", "设备唯一标识符读取失败", e)
+            Log.e("UFI_TOOLS_LOG", "设备唯一标识符读取失败", e)
             null
         }
     }

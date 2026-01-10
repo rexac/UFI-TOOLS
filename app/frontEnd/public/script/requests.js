@@ -3,8 +3,9 @@ function gsmEncode(text) { function encodeText(text) { let encoded = []; for (le
 //注意，如果是在f50本机内发起请求，请将请求端口更改为8080
 let KANO_baseURL = '/api'
 let KANO_PASSWORD = null
-let KANO_TOKEN = null;
+let KANO_TOKEN = null
 let ACCEPT_TERMS = false
+let KANO_COOKIE = null
 
 let loginMethod = localStorage.getItem('login_method') == "1" ? "1" : "0"; //1新方法，0旧方法
 
@@ -100,7 +101,9 @@ const login1 = async () => {
         if (res_data == undefined || res_data == null || res_data.result == '3' || res_data.result == 3) {
             return null
         }
-        return res.headers.get('kano-cookie').split(';')[0]
+        const ck = res.headers.get('kano-cookie').split(';')[0]
+        KANO_COOKIE = ck
+        return ck
     }
     catch {
         return null
@@ -132,7 +135,10 @@ let login2 = async () => {
         if (res_data == undefined || res_data == null || res_data.result == '3' || res_data.result == 3) {
             return null
         }
-        return res.headers.get('kano-cookie').split(';')[0]
+        //设置全局cookie
+        const ck = res.headers.get('kano-cookie').split(';')[0]
+        KANO_COOKIE = ck
+        return ck
     }
     catch {
         return undefined
@@ -326,7 +332,8 @@ const getUFIData = async () => {
 
         const res = await fetch(`${KANO_baseURL}/goform/goform_get_cmd_process?multi_data=1&isTest=false&cmd=${cmd}&${params.toString()}`, {
             headers: {
-                ...common_headers
+                ...common_headers,
+                "kano-cookie":KANO_COOKIE
             },
             signal: controller.signal
         });

@@ -22,8 +22,7 @@ fun Route.reverseProxyModule(targetServerIP:String) {
     route("/api/goform/{...}") {
         KanoLog.d(TAG,"开始反向代理资源...")
         handle {
-            val targetServer = "http://${targetServerIP}" // 替换成你的目标服务器
-
+            val targetServer = "http://${targetServerIP}"
             val originalPath = call.request.uri.removePrefix("/api")
             val queryString = call.request.queryParameters.entries()
                 .joinToString("&") { (k, v) -> v.joinToString("&") { "$k=$it" } }
@@ -52,10 +51,17 @@ fun Route.reverseProxyModule(targetServerIP:String) {
                     doInput = true
                     setRequestProperty("Referer", null)
                     setRequestProperty("Referer", targetServer)
+                    val ck = call.request.headers["Kano-Cookie"]
+                    if(!ck.isNullOrBlank()) {
+                        setRequestProperty("Cookie", ck)
+                    }
 
                     call.request.headers.forEach { key, values ->
                         // 忽略客户端 Referer host
-                        if (!key.equals("host", ignoreCase = true) && !key.equals("referer", ignoreCase = true)) {
+                        if (!key.equals("host", ignoreCase = true) &&
+                            !key.equals("referer", ignoreCase = true) &&
+                            !key.equals("cookie", true)
+                            ) {
                             setRequestProperty(key, values.joinToString(","))
                         }
                     }

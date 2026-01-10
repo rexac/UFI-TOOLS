@@ -19,14 +19,14 @@ object SmbThrottledRunner {
 
     fun runOnceInThread(context: Context) {
         if (running.get()) {
-            KanoLog.d("kano_ZTE_LOG", "SMB 命令正在执行中，跳过")
+            KanoLog.d("UFI_TOOLS_LOG", "SMB 命令正在执行中，跳过")
             return
         }
         val sharedPrefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
         val gatewayIP = sharedPrefs.getString(PREF_GATEWAY_IP, "192.168.0.1:445")
 
-        KanoLog.d("kano_ZTE_LOG", "SMB 命令正在执行中,IP:${gatewayIP}，跳过")
+        KanoLog.d("UFI_TOOLS_LOG", "SMB 命令正在执行中,IP:${gatewayIP}，跳过")
 
         val host = gatewayIP?.substringBefore(":")
 
@@ -40,7 +40,7 @@ object SmbThrottledRunner {
             if(advancedIsEnable) {
                 try {
                     KanoLog.d(
-                        "kano_ZTE_LOG",
+                        "UFI_TOOLS_LOG",
                         "开始执行 SMB 命令,连接到：\"smb://$host/internal_storage/\""
                     )
 
@@ -48,7 +48,7 @@ object SmbThrottledRunner {
                     val smbFile = SmbFile("smb://$host/internal_storage/", ctx)
 
                     if (smbFile.exists()) {
-                        KanoLog.d("kano_ZTE_LOG", "SMB路径存在")
+                        KanoLog.d("UFI_TOOLS_LOG", "SMB路径存在")
                         if (!isExecutedSambaMount) {
                             try {
                                 val socketPath = File(context.filesDir, "kano_root_shell.sock")
@@ -81,28 +81,28 @@ done
                                     )
                                         ?: throw Exception("请检查命令输入格式")
 
-                                KanoLog.d("kano_ZTE_LOG", "smb挂载执行结果： $result")
+                                KanoLog.d("UFI_TOOLS_LOG", "smb挂载执行结果： $result")
                                 isExecutedSambaMount = true
                             } catch (e: Exception) {
-                                KanoLog.e("kano_ZTE_LOG", "smb挂载执行失败", e)
+                                KanoLog.e("UFI_TOOLS_LOG", "smb挂载执行失败", e)
                             }
                         }
                     } else {
-                        KanoLog.d("kano_ZTE_LOG", "SMB路径不存在")
+                        KanoLog.d("UFI_TOOLS_LOG", "SMB路径不存在")
                         needOpenSMB = true
                     }
                 } catch (e: Exception) {
-                    KanoLog.e("kano_ZTE_LOG", "SMB命令错误：${e.message}")
+                    KanoLog.e("UFI_TOOLS_LOG", "SMB命令错误：${e.message}")
                     needOpenSMB = true
                 } finally {
                     running.set(false)
-                    KanoLog.d("kano_ZTE_LOG", "SMB 命令执行完成")
+                    KanoLog.d("UFI_TOOLS_LOG", "SMB 命令执行完成")
                 }
                 if (needOpenSMB) {
                     openSMB(context)
                 }
             } else {
-                KanoLog.d("kano_ZTE_LOG", "没有检测到smb配置更改，高级功能未开启，无需执行")
+                KanoLog.d("UFI_TOOLS_LOG", "没有检测到smb配置更改，高级功能未开启，无需执行")
                 running.set(false)
             }
         }.start()

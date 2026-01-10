@@ -8,7 +8,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <link rel="icon" type="image/svg+xml" href="./favicon.webp">
-    <title id="TITLE">ZTE-UFI-TOOLS-WEB</title>
+    <title id="TITLE">UFI-TOOLS-WEB</title>
     <link rel="manifest" href="/manifest.json">
     <link rel="stylesheet" href="/style/style.css">
     <script src="/script/polyfill.min.js"></script>
@@ -489,7 +489,7 @@
                             <i>
                                 <span data-i18n="token_note_1">注：请填入口令和密码</span><br>
                                 <span data-i18n="token_note_2">第一个为UFI-TOOLS登录口令(默认为admin)</span><br>
-                                <span data-i18n="token_note_3">第二个为中兴后台的管理密码(在机器背面可以找到)</span><br>
+                                <span data-i18n="token_note_3">第二个为某兴后台的管理密码(在机器背面可以找到)</span><br>
                                 <span data-i18n="token_note_4">如果出现密码错误，请换一个登录方式</span>
                             </i>
                         </p>
@@ -508,7 +508,7 @@
                             data-i18n-placeholder="token_placeholder_token" placeholder="口令(UFI-TOOLS后台应用中查看)"
                             style="width: 100%;text-indent: .5em;margin:0 4px;margin-bottom: 10px;height: 30px;">
                         <div style="align-self: start;margin-bottom: 10px;font-size: .85rem;" data-i18n="token_div_2">
-                            中兴后台密码：</div>
+                            某兴后台密码：</div>
                         <input name="web_password" autocomplete="new-password" id="PWDINPUT" type="password"
                             data-i18n-placeholder="token_placeholder_pwd" placeholder="官方后台的管理密码"
                             style="width: 100%;text-indent: .5em; margin:0 4px;margin-bottom: 20px;height: 30px;">
@@ -1498,7 +1498,7 @@
             <!-- 更改密码模态框 -->
             <div class="mask" id="changePassModal" style="display: none">
                 <div class="modal">
-                    <div class="title" data-i18n="change_password_title">更改密码(中兴WEB密码)</div>
+                    <div class="title" data-i18n="change_password_title">更改密码(某兴WEB密码)</div>
                     <form onsubmit="handleChangePassword(event)" id="changePassForm">
                         <input type="text" autocomplete="username" name="username" value="admin" style="display: none;">
                         <div class="content" style="overflow-y: scroll; padding: 15px; width: 66vw; max-width: 400px;">

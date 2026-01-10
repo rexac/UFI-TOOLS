@@ -3346,7 +3346,23 @@ function main_func() {
                     common_headers.authorization = KANO_TOKEN
                     localStorage.setItem('kano_sms_token', new_token)
                     form.reset()
-                    closeModal('#changeTokenModal', 300)
+                    const md = createModal({
+                        name: "kano_token_confirm",
+                        noBlur: true,
+                        isMask: true,
+                        title: t('remind_your_token'),
+                        contentStyle: "font-size:12px",
+                        onClose: () => {
+                            return true
+                        },
+                        onConfirm: () => {
+                            return true
+                        },
+                        content: `<div><p class="title" style="margin:6px 0">${t('remind_your_token_text')}</p><h1 onclick="copyText(event)" style="text-align:center">${newToken}</h1></div>`
+                    })
+                    closeModal('#changeTokenModal', 300, () => {
+                        showModal(md.id)
+                    })
                 } else {
                     throw t('toast_change_failed')
                 }

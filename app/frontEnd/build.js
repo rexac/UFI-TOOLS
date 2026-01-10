@@ -13,7 +13,7 @@ const obfuscateOptions = {
     controlFlowFlatteningThreshold: 1.0,
     deadCodeInjection: !isDebug,
     deadCodeInjectionThreshold: 1.0,
-    disableConsoleOutput: !isDebug,
+    // disableConsoleOutput: !isDebug,
     stringArray: true,
     stringArrayThreshold: 1.0,
     transformObjectKeys: true,

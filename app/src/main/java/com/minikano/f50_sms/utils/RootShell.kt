@@ -15,12 +15,12 @@ object RootShell {
         val socketAddress = LocalSocketAddress(socketPath, LocalSocketAddress.Namespace.FILESYSTEM)
 
         try {
-            KanoLog.d("kano_ZTE_LOG", "开始发送socket,目录：${socketPath},命令:${command}")
+            KanoLog.d("UFI_TOOLS_LOG", "开始发送socket,目录：${socketPath},命令:${command}")
 
             socket.connect(socketAddress)
             socket.soTimeout = timeout // 60 秒超时
 
-            KanoLog.d("kano_ZTE_LOG", "Socket")
+            KanoLog.d("UFI_TOOLS_LOG", "Socket")
 
             val outputStream = BufferedWriter(OutputStreamWriter(socket.outputStream))
             val inputStream = BufferedReader(InputStreamReader(socket.inputStream))
@@ -30,14 +30,14 @@ object RootShell {
             outputStream.write("\n")
             outputStream.write("echo __END__\n") // 标记结尾
             outputStream.flush()
-            KanoLog.d("kano_ZTE_LOG", "Socket write")
+            KanoLog.d("UFI_TOOLS_LOG", "Socket write")
 
             // 读取响应
             val result = StringBuilder()
             while (true) {
                 val line = inputStream.readLine() ?: break
                 if (line.trim() == "__END__") break
-                KanoLog.d("kano_ZTE_LOG", "Socket : ${line.trim()}")
+                KanoLog.d("UFI_TOOLS_LOG", "Socket : ${line.trim()}")
                 result.appendLine(line)
             }
 
@@ -45,7 +45,7 @@ object RootShell {
 
         } catch (e: IOException) {
             e.printStackTrace()
-            KanoLog.d("kano_ZTE_LOG", "Socket Error: ${e.message}")
+            KanoLog.d("UFI_TOOLS_LOG", "Socket Error: ${e.message}")
             return null
         } finally {
             try {

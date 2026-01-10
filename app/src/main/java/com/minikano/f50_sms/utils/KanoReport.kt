@@ -45,7 +45,7 @@ class KanoReport {
             try {
                 val uuid = UniqueDeviceIDManager.getUUID()?.trim()
                 if (uuid.isNullOrEmpty()) {
-                    KanoLog.d("kano_ZTE_LOG_report_service","UUID 为空，跳过上报")
+                    KanoLog.d("UFI_TOOLS_LOG_report_service","UUID 为空，跳过上报")
                     return
                 }
 
@@ -77,14 +77,14 @@ class KanoReport {
                 withContext(Dispatchers.IO) {
                     client.newCall(request).execute().use { resp ->
                         if (resp.isSuccessful) {
-                            KanoLog.d("kano_ZTE_LOG_report_service","上报成功: ${resp.code}")
+                            KanoLog.d("UFI_TOOLS_LOG_report_service","上报成功: ${resp.code}")
                         } else {
-                            KanoLog.e("kano_ZTE_LOG_report_service","上报失败: ${resp.code} - ${resp.message}")
+                            KanoLog.e("UFI_TOOLS_LOG_report_service","上报失败: ${resp.code} - ${resp.message}")
                         }
                     }
                 }
             } catch (e: Exception) {
-                KanoLog.e("kano_ZTE_LOG_report_service","上报失败:",e)
+                KanoLog.e("UFI_TOOLS_LOG_report_service","上报失败:",e)
                 e.printStackTrace()
             }
         }
@@ -118,7 +118,7 @@ class KanoReport {
 
             client.newCall(request).execute().use { response ->
                 if (!response.isSuccessful) {
-                    KanoLog.e("kano_ZTE_LOG_devcheck", "请求失败，code=${response.code}")
+                    KanoLog.e("UFI_TOOLS_LOG_devcheck", "请求失败，code=${response.code}")
                     return@withContext null
                 }
                 val bodyStr = response.body?.string() ?: return@withContext null

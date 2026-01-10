@@ -15,7 +15,7 @@ jobs:
       - name: Find APK
         id: find_apk
         run: |
-          APK_FILE=$(find app/release -name "ZTE-UFI-TOOLS*.apk" | head -n 1)
+          APK_FILE=$(find app/release -name "UFI-TOOLS*.apk" | head -n 1)
           if [ -z "$APK_FILE" ]; then
             echo "APK file not found!"
             exit 1

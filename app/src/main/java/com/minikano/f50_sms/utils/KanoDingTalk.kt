@@ -24,7 +24,7 @@ class KanoDingTalk(
     fun sendMessage(content: String) {
         // 如果已经在发送中，则直接返回
         if (!isSending.compareAndSet(false, true)) {
-            KanoLog.w("kano_ZTE_LOG_DingTalk", "钉钉消息正在发送中，忽略重复发送")
+            KanoLog.w("UFI_TOOLS_LOG_DingTalk", "钉钉消息正在发送中，忽略重复发送")
             return
         }
 
@@ -63,18 +63,18 @@ class KanoDingTalk(
                     .post(body)
                     .build()
 
-                KanoLog.d("kano_ZTE_LOG_DingTalk", "开始发送钉钉消息...")
+                KanoLog.d("UFI_TOOLS_LOG_DingTalk", "开始发送钉钉消息...")
                 val response = client.newCall(request).execute()
                 
                 if (response.isSuccessful) {
-                    KanoLog.d("kano_ZTE_LOG_DingTalk", "钉钉消息发送成功")
+                    KanoLog.d("UFI_TOOLS_LOG_DingTalk", "钉钉消息发送成功")
                 } else {
-                    KanoLog.e("kano_ZTE_LOG_DingTalk", "钉钉消息发送失败: ${response.code}")
+                    KanoLog.e("UFI_TOOLS_LOG_DingTalk", "钉钉消息发送失败: ${response.code}")
                 }
                 
                 response.close()
             } catch (e: Exception) {
-                KanoLog.e("kano_ZTE_LOG_DingTalk", "钉钉消息发送异常: ${e.message}", e)
+                KanoLog.e("UFI_TOOLS_LOG_DingTalk", "钉钉消息发送异常: ${e.message}", e)
             } finally {
                 isSending.set(false)
             }

@@ -20,7 +20,7 @@ object IPManager {
 
                 // 过滤掉不太可能是热点的接口
                 if (iface.startsWith("br") || iface.startsWith("ap")) {
-                    KanoLog.d("kano_ZTE_LOG", "IPManager 获取热点IP：$ip:$setPort")
+                    KanoLog.d("UFI_TOOLS_LOG", "IPManager 获取热点IP：$ip:$setPort")
                     if(setPort != null){
                         return "$ip:$setPort" // 找到热点网关 IP
                     }

@@ -217,7 +217,7 @@ fun Route.baseDeviceInfoModule(context: Context) {
             call.response.headers.append("Access-Control-Allow-Origin", "*")
             call.respondText(jsonResult, ContentType.Application.Json)
         } catch (e: Exception) {
-            KanoLog.d("kano_ZTE_LOG", "获取用户协议信息出错：${e.message}")
+            KanoLog.d("UFI_TOOLS_LOG", "获取用户协议信息出错：${e.message}")
             call.response.headers.append("Access-Control-Allow-Origin", "*")
             call.respondText(
                 """{"error":"获取用户协议信息出错"}""",
@@ -242,7 +242,7 @@ fun Route.baseDeviceInfoModule(context: Context) {
             call.response.headers.append("Access-Control-Allow-Origin", "*")
             call.respondText(jsonResult, ContentType.Application.Json)
         } catch (e: Exception) {
-            KanoLog.d("kano_ZTE_LOG", "获取版本信息出错：${e.message}")
+            KanoLog.d("UFI_TOOLS_LOG", "获取版本信息出错：${e.message}")
             call.response.headers.append("Access-Control-Allow-Origin", "*")
             call.respondText(
                 """{"error":"获取版本信息出错"}""",
@@ -259,7 +259,7 @@ fun Route.baseDeviceInfoModule(context: Context) {
             call.response.headers.append("Access-Control-Allow-Origin", "*")
             call.respondText(jsonResult, ContentType.Application.Json)
         } catch (e: Exception) {
-            KanoLog.d("kano_ZTE_LOG", "获取设备id出错：${e.message}")
+            KanoLog.d("UFI_TOOLS_LOG", "获取设备id出错：${e.message}")
             call.response.headers.append("Access-Control-Allow-Origin", "*")
             call.respondText(
                 """{"error":"获取设备id出错"}""",
@@ -282,7 +282,7 @@ fun Route.baseDeviceInfoModule(context: Context) {
             call.response.headers.append("Access-Control-Allow-Origin", "*")
             call.respondText(jsonResult, ContentType.Application.Json)
         } catch (e: Exception) {
-            KanoLog.d("kano_ZTE_LOG", "获取selinux状态出错：${e.message}")
+            KanoLog.d("UFI_TOOLS_LOG", "获取selinux状态出错：${e.message}")
             call.response.headers.append("Access-Control-Allow-Origin", "*")
             call.respondText(
                 """{"error":"获取selinux状态出错"}""",
@@ -307,7 +307,7 @@ fun Route.baseDeviceInfoModule(context: Context) {
             call.response.headers.append("Access-Control-Allow-Origin", "*")
             call.respondText(jsonResult, ContentType.Application.Json)
         } catch (e: Exception) {
-            KanoLog.d("kano_ZTE_LOG", "获取TOKEN信息出错：${e.message}")
+            KanoLog.d("UFI_TOOLS_LOG", "获取TOKEN信息出错：${e.message}")
             call.response.headers.append("Access-Control-Allow-Origin", "*")
             call.respondText(
                 """{"error":"获取TOKEN信息出错"}""",
@@ -331,7 +331,7 @@ fun Route.baseDeviceInfoModule(context: Context) {
             call.response.headers.append("Access-Control-Allow-Origin", "*")
             call.respondText(jsonResult, ContentType.Application.Json)
         } catch (e: Exception) {
-            KanoLog.d("kano_ZTE_LOG", "获取UsbDevices信息出错：${e.message}")
+            KanoLog.d("UFI_TOOLS_LOG", "获取UsbDevices信息出错：${e.message}")
             call.response.headers.append("Access-Control-Allow-Origin", "*")
             call.respondText(
                 """{"error":"获取UsbDevices信息出错"}""",

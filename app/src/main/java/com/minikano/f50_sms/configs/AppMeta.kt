@@ -87,7 +87,7 @@ object AppMeta {
             val token = prefs.getString(PREF_LOGIN_TOKEN,"admin") ?: "admin"
             updateIsDefaultOrWeakToken(KanoUtils.isWeakToken(token))
         } catch (e: Exception) {
-            KanoLog.e("kano_ZTE_LOG","AppMeta init failed！！")
+            KanoLog.e("UFI_TOOLS_LOG","AppMeta init failed！！")
         }
     }
 }

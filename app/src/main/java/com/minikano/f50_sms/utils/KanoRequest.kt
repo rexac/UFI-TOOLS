@@ -57,19 +57,19 @@ class KanoRequest {
 
             client.newCall(request).execute().use { response ->
                 if (!response.isSuccessful) {
-                    KanoLog.d("kano_ZTE_LOG", "Download failed: ${response.code}")
+                    KanoLog.d("UFI_TOOLS_LOG", "Download failed: ${response.code}")
                     return null
                 }
 
                 val body: ResponseBody? = response.body
                 if (body == null) {
-                    KanoLog.d("kano_ZTE_LOG", "Empty response body")
+                    KanoLog.d("UFI_TOOLS_LOG", "Empty response body")
                     return null
                 }
 
                 val contentLength = body.contentLength()
                 if (contentLength <= 0) {
-                    KanoLog.d("kano_ZTE_LOG", "Invalid content length")
+                    KanoLog.d("UFI_TOOLS_LOG", "Invalid content length")
                     return null
                 }
 
@@ -97,7 +97,7 @@ class KanoRequest {
                     }
 
                     outputStream.flush()
-                    KanoLog.d("kano_ZTE_LOG", "Download complete: ${outputFile.absolutePath}")
+                    KanoLog.d("UFI_TOOLS_LOG", "Download complete: ${outputFile.absolutePath}")
                     return outputFile.absolutePath
 
                 } catch (e: Exception) {

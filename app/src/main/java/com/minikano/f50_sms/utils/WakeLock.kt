@@ -15,38 +15,38 @@ class WakeLock {
             releaseWakeLock()
             wakeLock = pm.newWakeLock(
                 PowerManager.SCREEN_DIM_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP,
-                "ZTE-UFI-TOOLS::WakeLock"
+                "UFI-TOOLS::WakeLock"
             )
             wakeLock?.acquire()
-            Log.d("kano_ZTE_LOG", "已开启唤醒锁，防止屏幕熄灭!")
+            Log.d("UFI_TOOLS_LOG", "已开启唤醒锁，防止屏幕熄灭!")
 
             wakeLock2 = pm.newWakeLock(
                 PowerManager.FULL_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP,
-                "ZTE-UFI-TOOLS::FULL_WAKE_LOCK"
+                "UFI-TOOLS::FULL_WAKE_LOCK"
             )
             wakeLock2?.acquire()
-            Log.d("kano_ZTE_LOG", "已开启更强的唤醒锁，保持屏幕常亮并唤醒!")
+            Log.d("UFI_TOOLS_LOG", "已开启更强的唤醒锁，保持屏幕常亮并唤醒!")
 
             wakeLock3 = pm.newWakeLock(
                 PowerManager.SCREEN_BRIGHT_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP,
-                "ZTE-UFI-TOOLS::BrightWakeLock"
+                "UFI-TOOLS::BrightWakeLock"
             )
             wakeLock3?.acquire()
-            Log.d("kano_ZTE_LOG", "已开启屏幕亮度唤醒锁，保持屏幕常亮并唤醒!")
+            Log.d("UFI_TOOLS_LOG", "已开启屏幕亮度唤醒锁，保持屏幕常亮并唤醒!")
         }
 
         fun releaseWakeLock() {
             wakeLock?.let {
                 if (it.isHeld) it.release()
-                Log.d("kano_ZTE_LOG", "已释放唤醒锁")
+                Log.d("UFI_TOOLS_LOG", "已释放唤醒锁")
             }
             wakeLock2?.let {
                 if (it.isHeld) it.release()
-                Log.d("kano_ZTE_LOG", "已释放FULL_WAKE_LOCK")
+                Log.d("UFI_TOOLS_LOG", "已释放FULL_WAKE_LOCK")
             }
             wakeLock3?.let {
                 if (it.isHeld) it.release()
-                Log.d("kano_ZTE_LOG", "已释放BrightWakeLock")
+                Log.d("UFI_TOOLS_LOG", "已释放BrightWakeLock")
             }
         }
     }

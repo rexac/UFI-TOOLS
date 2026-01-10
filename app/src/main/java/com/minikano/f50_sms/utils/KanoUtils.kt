@@ -214,20 +214,20 @@ class KanoUtils {
 
             // 如果是追加模式且目标文件已存在，则直接返回该文件，避免干扰可执行文件的运行
             if (skipIfExists && outFile.exists()) {
-                KanoLog.d("kano_ZTE_LOG", "文件已存在，跳过复制：${outFile.absolutePath}")
+                KanoLog.d("UFI_TOOLS_LOG", "文件已存在，跳过复制：${outFile.absolutePath}")
                 return outFile
             }
 
             val input = try {
                 assetManager.open(path)
             } catch (e: Exception) {
-                KanoLog.e("kano_ZTE_LOG", "assets 中不存在文件: $path")
+                KanoLog.e("UFI_TOOLS_LOG", "assets 中不存在文件: $path")
                 return null
             }
 
             return try {
                 KanoLog.d(
-                    "kano_ZTE_LOG",
+                    "UFI_TOOLS_LOG",
                     "开始复制 $fileName 到 ${context.filesDir}（skipIfExists？：$skipIfExists）"
                 )
                 input.use { ins ->
@@ -235,10 +235,10 @@ class KanoUtils {
                         ins.copyTo(out)
                     }
                 }
-                KanoLog.d("kano_ZTE_LOG", "复制 $fileName 成功 -> ${outFile.absolutePath}")
+                KanoLog.d("UFI_TOOLS_LOG", "复制 $fileName 成功 -> ${outFile.absolutePath}")
                 outFile
             } catch (e: Exception) {
-                KanoLog.e("kano_ZTE_LOG", "复制 $fileName 失败: ${e.message}")
+                KanoLog.e("UFI_TOOLS_LOG", "复制 $fileName 失败: ${e.message}")
                 null
             }
         }
@@ -276,19 +276,19 @@ class KanoUtils {
             val currentIp = IPManager.getHotspotGatewayIp("8080")
 
             if ((ip_add != null && need_auto_ip == "true") || userTouched) {
-                KanoLog.d("kano_ZTE_LOG", "自动检测IP网关:$currentIp")
+                KanoLog.d("UFI_TOOLS_LOG", "自动检测IP网关:$currentIp")
                 if (currentIp == null) {
-                    KanoLog.d("kano_ZTE_LOG", "自动检测IP网关失败")
+                    KanoLog.d("UFI_TOOLS_LOG", "自动检测IP网关失败")
                     Toast.makeText(context, "自动检测IP网关失败...", Toast.LENGTH_SHORT).show()
                     return
                 }
                 if ((currentIp != ip_add) || userTouched) {
                     if (userTouched) {
-                        KanoLog.d("kano_ZTE_LOG", "用户点击，自动检测IP网关")
+                        KanoLog.d("UFI_TOOLS_LOG", "用户点击，自动检测IP网关")
                         Toast.makeText(context, "自动检测IP网关~", Toast.LENGTH_SHORT).show()
                     } else {
                         KanoLog.d(
-                            "kano_ZTE_LOG",
+                            "UFI_TOOLS_LOG",
                             "检测到本地IP网关变动，自动修改IP网关为:$currentIp"
                         )
                         Toast.makeText(
@@ -305,7 +305,7 @@ class KanoUtils {
             } else if (need_auto_ip == "true") {
                 //说明可能是第一次启动
                 prefs.edit(commit = true) { putString("gateway_ip", currentIp) }
-                KanoLog.d("kano_ZTE_LOG", "可能是第一次启动，自动修改IP网关为:$currentIp")
+                KanoLog.d("UFI_TOOLS_LOG", "可能是第一次启动，自动修改IP网关为:$currentIp")
             }
         }
 
@@ -321,11 +321,11 @@ class KanoUtils {
                     val req = KanoGoformRequest("http://$ADB_IP:8080")
                     val result = req.getData(mapOf("cmd" to "usb_port_switch"))
                     val adb_enabled = result?.getString("usb_port_switch")
-                    Log.d("kano_ZTE_LOG", "查询ADB开启状态: $adb_enabled")
+                    Log.d("UFI_TOOLS_LOG", "查询ADB开启状态: $adb_enabled")
                     adb_enabled == "1"
                 }
             } catch (e: Exception) {
-                Log.e("kano_ZTE_LOG", "查询ADB开启状态执行错误: ${e.message}")
+                Log.e("UFI_TOOLS_LOG", "查询ADB开启状态执行错误: ${e.message}")
                 false
             }
         }
@@ -340,20 +340,20 @@ class KanoUtils {
 
             // 如果是追加模式且目标文件已存在，则直接返回该文件，避免干扰可执行文件的运行
             if (skipIfExists && outFile.exists()) {
-                KanoLog.d("kano_ZTE_LOG", "外部文件已存在，跳过复制：${outFile.absolutePath}")
+                KanoLog.d("UFI_TOOLS_LOG", "外部文件已存在，跳过复制：${outFile.absolutePath}")
                 return outFile
             }
 
             val input = try {
                 context.assets.open(assetPath)
             } catch (e: Exception) {
-                KanoLog.e("kano_ZTE_LOG", "assets 中不存在文件: $assetPath")
+                KanoLog.e("UFI_TOOLS_LOG", "assets 中不存在文件: $assetPath")
                 return null
             }
 
             return try {
                 KanoLog.d(
-                    "kano_ZTE_LOG",
+                    "UFI_TOOLS_LOG",
                     "开始复制 $fileName 到外部存储目录（skipIfExists?：$skipIfExists）"
                 )
                 input.use { ins ->
@@ -361,10 +361,10 @@ class KanoUtils {
                         ins.copyTo(out)
                     }
                 }
-                KanoLog.d("kano_ZTE_LOG", "复制成功 -> ${outFile.absolutePath}")
+                KanoLog.d("UFI_TOOLS_LOG", "复制成功 -> ${outFile.absolutePath}")
                 outFile
             } catch (e: Exception) {
-                KanoLog.e("kano_ZTE_LOG", "复制失败: ${e.message}")
+                KanoLog.e("UFI_TOOLS_LOG", "复制失败: ${e.message}")
                 null
             }
         }
@@ -495,7 +495,7 @@ class KanoUtils {
 
         fun disableFota(context: Context):Boolean{
             if(isExecutingDisabledFOTA){
-                KanoLog.w("kano_ZTE_LOG", "禁用FOTA操作正在执行..无需重复执行")
+                KanoLog.w("UFI_TOOLS_LOG", "禁用FOTA操作正在执行..无需重复执行")
                 return false
             }
             try {

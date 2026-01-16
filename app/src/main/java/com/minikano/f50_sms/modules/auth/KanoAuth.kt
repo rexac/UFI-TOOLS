@@ -2,6 +2,8 @@ package com.minikano.f50_sms.modules.auth
 
 import android.content.Context
 import com.minikano.f50_sms.utils.KanoUtils
+import com.minikano.f50_sms.utils.KanoUtils.Companion.normalizePath
+import com.minikano.f50_sms.utils.PassHash
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.request.httpMethod
 import io.ktor.server.request.path
@@ -14,22 +16,34 @@ object KanoAuth {
 
     fun checkAuth(call: ApplicationCall, context: Context): Boolean {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        val token = prefs.getString(PREF_LOGIN_TOKEN, "admin")
+        val tokenStored = prefs.getString(PREF_LOGIN_TOKEN, "") ?: ""
         val tokenEnabled = prefs.getString(PREF_TOKEN_ENABLED, "true")?.toBoolean() ?: true
 
-        val uri = call.request.path()
+        val rawPath = call.request.path()
         val method = call.request.httpMethod.value
 
-        val apiWhiteList: List<String> = listOf(
+        val uri = normalizePath(rawPath)
+
+        val apiWhiteListExact: Set<String> = setOf(
             "/api/get_custom_head",
             "/api/version_info",
             "/api/need_token",
             "/api/get_theme",
-            "/api/uploads",
             "/api/SELinux"
         )
 
-        val noAuthRequired = !uri.startsWith("/api/") || apiWhiteList.any { uri.startsWith(it) }
+        val apiWhiteListPrefix: List<String> = listOf(
+            "/api/uploads"
+        )
+
+        val isApi = uri == "/api" || uri.startsWith("/api/")
+
+        val noAuthRequired =
+            !isApi ||
+                    apiWhiteListExact.contains(uri) ||
+                    apiWhiteListPrefix.any { prefix ->
+                        uri == prefix || uri.startsWith("$prefix/")
+                    }
 
         if (!tokenEnabled || noAuthRequired) return true
 
@@ -38,11 +52,11 @@ object KanoAuth {
         val clientSignature = headers["kano-sign"]
         val authHeader = headers["authorization"]
 
-        if (timestampStr.isNullOrBlank() || clientSignature.isNullOrBlank() || authHeader.isNullOrBlank() || token.isNullOrBlank()) {
+        if (timestampStr.isNullOrBlank() || clientSignature.isNullOrBlank() || authHeader.isNullOrBlank() || tokenStored.isBlank()) {
             return false
         }
 
-        if ((authHeader != KanoUtils.sha256Hex(token))) {
+        if ((KanoUtils.sha256Hex(authHeader.trim()) != KanoUtils.sha256Hex(tokenStored))) {
             return false
         }
 

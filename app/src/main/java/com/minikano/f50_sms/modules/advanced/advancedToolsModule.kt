@@ -90,14 +90,22 @@ fun Route.advancedToolsModule(context: Context, targetServerIP: String) {
                 KanoLog.d(TAG, "ADB查询高级功能开启结果:$sambaAdbResult")
 
                 if( resultAdb == null && !resultShell.done){
-                    throw Exception("开启高级功能失败(Adb与Shell方式执行不成功)，请打开网络ADB后再试<br>Failed to enable advanced features (resultAdb and resultShell execution unsuccessful)")
+                    if(adbIsReady){
+                        throw Exception("开启高级功能失败(Adb与Shell方式执行不成功)，请恢复出厂后，重新安装再试<br>Failed to enable advanced features (resultAdb and resultShell execution unsuccessful)")
+                    }else {
+                        throw Exception("开启高级功能失败(Adb与Shell方式执行不成功)，请打开网络ADB后再试<br>Failed to enable advanced features (resultAdb and resultShell execution unsuccessful)")
+                    }
                 }
 
                 val queryShellIsDone = sambaResult.done && sambaResult.content.contains("samba_exec.sh")
                 val queryAdbIsDone = sambaAdbResult != null && sambaAdbResult.contains("samba_exec.sh")
 
                 if(!queryShellIsDone && !queryAdbIsDone){
-                    throw Exception("开启高级功能失败(配置文件没有更改或不存在)，请打开网络ADB后再试<br>Failed to enable advanced features (conf not changed or does not exist),please enable ADB")
+                    if(adbIsReady){
+                        throw Exception("开启高级功能失败(配置文件没有更改或不存在)，请将设备恢复出厂设置后，重新安装再试<br>Failed to enable advanced features (conf not changed or does not exist),please reset your device to factory")
+                    }else {
+                        throw Exception("开启高级功能失败(配置文件没有更改或不存在)，请打开网络ADB后再试<br>Failed to enable advanced features (conf not changed or does not exist),please enable ADB")
+                    }
                 }
 
                 jsonResult = """{"result":"执行成功，等待1-2分钟即可生效！<br>Execution successful, please wait 1–2 minutes for it to take effect!"}"""

@@ -545,7 +545,7 @@
     "error": "Error",
     "connect_update_server_failed": "Server error, check network",
     "sticky_update": "Sticky update",
-    "mew_update": "New version",
+    "new_update": "New version",
     "found": "Found",
     "toast_please_input_smtp_host": "Enter SMTP host",
     "toast_please_input_smtp_port": "Enter SMTP port",
@@ -740,5 +740,6 @@
     "three_days_later": "Remind me in three days",
     "three_days_later_info": "To ensure the user updates the passcode, this reminder will appear again in three days.",
     "remind_your_token":"Keep your password safe",
-    "remind_your_token_text":"Please take a screenshot or securely keep your password to prevent forgetting it."
+    "remind_your_token_text":"Please take a screenshot or securely keep your password to prevent forgetting it.",
+    "force_update_desc": "Note: This is a forced prompt. If you’ve updated, ignore it. It will auto-disable in a few hours."
 }

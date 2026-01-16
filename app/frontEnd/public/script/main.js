@@ -3880,7 +3880,7 @@ function main_func() {
         const changelogTextContent = document.querySelector('#ChangelogTextContent')
         const OTATextContent = document.querySelector('#OTATextContent')
         OTATextContent.innerHTML = t('checking_update')
-        changelogTextContent.innerHTML = ''
+        !silent && (changelogTextContent.innerHTML = '')
         !silent && showModal('#updateSoftwareModal')
 
         try {
@@ -4042,7 +4042,48 @@ function main_func() {
     setTimeout(() => {
         checkUpdateAction(true).then((res) => {
             if (res) {
-                createToast(`${t('found')} ${res.isForceUpdate ? t('sticky_update') : t('mew_update')}：${res.text}`)
+                const { el, close } = createFixedToast('kano_new_ota', `
+                <div style="pointer-events:all;width:80vw;max-width:300px;">
+                <div class="title" style="margin:0" data-i18n="system_notice">${t('system_notice')}</div>
+                <div class="title" id="force_update_title" style="margin-top:10px;font-size:.6rem"><i data-i18n="force_update_desc">${t("force_update_desc")}</i></div>
+                <p>${`${t('found')} ${res.isForceUpdate ? t('sticky_update') : t('new_update')}：${res.text}`}</p>
+                <div style="display:flex;gap:10px">
+                    <button id="confirm_kano_new_ota_toast_btn" style="width:100%;font-size:.64rem;margin-top:5px" data-i18n="btn_update">${t("btn_update")}</button>
+                    <button id="close_kano_new_ota_toast_btn" style="width:100%;font-size:.64rem;margin-top:5px" data-i18n="cancel_btn">${t("cancel_btn")}(8)</button>
+                </div>
+                </div>
+                `, 'red')
+                const confirmBtn = el.querySelector("#confirm_kano_new_ota_toast_btn")
+                const closeBtn = el.querySelector("#close_kano_new_ota_toast_btn")
+                const forceUpdateTitle = el.querySelector("#force_update_title")
+
+                if (forceUpdateTitle) {
+                    forceUpdateTitle.style.display = res.isForceUpdate ? "" : "none"
+                }
+
+                if (confirmBtn) {
+                    let debounceTimer = null
+                    confirmBtn.onclick = () => {
+                        close()
+                        clearTimeout(debounceTimer)
+                        debounceTimer = setTimeout(() => {
+                            checkUpdateAction()
+                        }, 500);
+                    }
+                }
+                if (closeBtn) {
+                    let times = 7
+                    let interval = setInterval(() => {
+                        closeBtn.textContent = `${t("cancel_btn")}(${times--})`
+                        if (times < 0) {
+                            clearInterval(interval)
+                            close()
+                        }
+                    }, 1000);
+                    closeBtn.onclick = () => {
+                        close()
+                    }
+                }
             }
         })
     }, 100);

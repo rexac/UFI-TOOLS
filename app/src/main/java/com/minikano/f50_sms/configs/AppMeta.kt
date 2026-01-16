@@ -11,6 +11,7 @@ import com.minikano.f50_sms.utils.getBooleanCompat
 import java.io.File
 import androidx.core.content.edit
 import com.minikano.f50_sms.utils.KanoUtils
+import com.minikano.f50_sms.utils.KanoUtils.Companion.isSha256Hex
 
 object AppMeta {
     var versionName: String = "unknown"
@@ -36,9 +37,14 @@ object AppMeta {
     private const val GLOBAL_SERVER_URL_KEY = "GLOBAL_SERVER_URL"
     private val PREF_ISDEBUG = "kano_is_debug"
 
-    private val PREF_LOGIN_TOKEN = "login_token"
+    private val PREF_IS_WEAK_TOKEN = "is_weak_token"
 
-    fun updateIsDefaultOrWeakToken(value: Boolean) {
+    fun updateIsDefaultOrWeakToken(context: Context,value: Boolean) {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        //持久化
+        prefs.edit(commit = true) {
+            putBoolean(PREF_IS_WEAK_TOKEN,value)
+        }
         isDefaultOrWeakToken = value
     }
 
@@ -64,6 +70,12 @@ object AppMeta {
         try {
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
+            val isWeak = prefs.getBoolean(PREF_IS_WEAK_TOKEN, false)
+            updateIsDefaultOrWeakToken(context,isWeak)
+
+            //预处理口令
+            KanoUtils.transformLoginToken(context, prefs)
+
             val globalServerAddress = prefs.getString(GLOBAL_SERVER_URL_KEY, null)
             if (globalServerAddress != null) {
                 GLOBAL_SERVER_URL = globalServerAddress
@@ -83,11 +95,10 @@ object AppMeta {
 
             isEnableLog = prefs.getBooleanCompat(PREF_ISDEBUG, false)
 
-            //获取口令，检查是否为弱口令
-            val token = prefs.getString(PREF_LOGIN_TOKEN,"admin") ?: "admin"
-            updateIsDefaultOrWeakToken(KanoUtils.isWeakToken(token))
+            // //获取口令，检查是否为弱口令
+            // updateIsDefaultOrWeakToken(KanoUtils.isWeakToken(token))
         } catch (e: Exception) {
-            KanoLog.e("UFI_TOOLS_LOG","AppMeta init failed！！")
+            KanoLog.e("UFI_TOOLS_LOG","AppMeta init failed！！",e)
         }
     }
 }

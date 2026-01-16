@@ -546,7 +546,7 @@
     "error": "エラー",
     "connect_update_server_failed": "更新サーバーへの接続に失敗しました。ネットワークを確認してください",
     "sticky_update": "常駐更新",
-    "mew_update": "新バージョン",
+    "new_update": "新バージョン",
     "found": "検出",
     "toast_please_input_smtp_host": "SMTPサーバーアドレスを入力してください",
     "toast_please_input_smtp_port": "SMTPサーバーポートを入力してください",
@@ -740,5 +740,6 @@
     "three_days_later": "3日後に再通知",
     "three_days_later_info": "ユーザーが口令を変更するよう促すため、3日後に再度通知します。",
     "remind_your_token":"パスワードを保存する",
-    "remind_your_token_text":"パスワードをスクリーンショットするか、忘れないようにしっかり保管してください"
+    "remind_your_token_text":"パスワードをスクリーンショットするか、忘れないようにしっかり保管してください",
+    "force_update_desc": "注意：これは強制表示です。更新済みなら無視してください。数時間後に自動で解除されます。"
 }

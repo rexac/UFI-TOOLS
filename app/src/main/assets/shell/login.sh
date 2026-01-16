@@ -9,6 +9,7 @@ MAX_RETRIES=3
 retry_count=0
 
 PASS_FILE="/data/data/com.minikano.f50_sms/shared_prefs/kano_ZTE_store.xml"
+SHA256_BIN="/data/data/com.minikano.f50_sms/files/sha256"
 BACKUP_PASS="Wa@9w+YWRtaW4="
 
 # Extract login_token from XML
@@ -39,13 +40,17 @@ read_password() {
 }
 
 while true; do
-    PASS="$(get_login_pass)"
-    if [ -z "$PASS" ]; then
-        PASS="$BACKUP_PASS"
+    hashed_pass="$(get_login_pass)"
+
+    if [ -n "$hashed_pass" ]; then
+        PASS="$hashed_pass"
+    else
+        PASS="$("$SHA256_BIN" "$BACKUP_PASS")"
         echo "Warning: Password file missing or empty, using backup password." 1>&2
     fi
 
-    input_pass="$(read_password "Password: ")"
+    input_raw_pass="$(read_password "Password: ")"
+    input_pass="$("$SHA256_BIN" "$input_raw_pass")"
 
     if [ "$input_pass" = "$PASS" ]; then
         echo "Login successful!"

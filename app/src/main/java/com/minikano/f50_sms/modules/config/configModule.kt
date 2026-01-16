@@ -63,9 +63,9 @@ fun Route.configModule(context: Context) {
 
             val pref = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             pref.edit(commit = true) {
-                putString(PREF_LOGIN_TOKEN, token)
+                putString(PREF_LOGIN_TOKEN, KanoUtils.sha256Hex(token))
             }
-            AppMeta.updateIsDefaultOrWeakToken(KanoUtils.isWeakToken(token = token))
+            AppMeta.updateIsDefaultOrWeakToken(context,KanoUtils.isWeakToken(token = token))
 
             call.response.headers.append("Access-Control-Allow-Origin", "*")
             call.respondText(

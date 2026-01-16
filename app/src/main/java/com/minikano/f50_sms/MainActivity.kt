@@ -93,10 +93,12 @@ class MainActivity : ComponentActivity() {
 
         //第一次启动初始化login_token
         val spf = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        KanoUtils.transformLoginToken(context,spf)
         val existing = spf.all
         spf.edit(commit = true) {
             if (!existing.containsKey(PREF_LOGIN_TOKEN)) {
-                putString(PREF_LOGIN_TOKEN, "admin")
+                putString(PREF_LOGIN_TOKEN, KanoUtils.sha256Hex("admin"))
+                updateIsDefaultOrWeakToken(context,true)
             }
             if (!existing.containsKey(PREF_ISDEBUG)) {
                 putBoolean(PREF_ISDEBUG, false)
@@ -273,6 +275,13 @@ class MainActivity : ComponentActivity() {
                             ) ?: "admin"
                         )
                     }
+
+                    var loginTokenInput by remember {
+                        mutableStateOf(
+                            ""
+                        )
+                    }
+
                     var isTokenEnabled by remember {
                         mutableStateOf(
                             sharedPrefs.getString(
@@ -353,10 +362,10 @@ class MainActivity : ComponentActivity() {
                         InputUI(
                             gatewayIp = gatewayIp,
                             onGatewayIpChange = { gatewayIp = it },
-                            loginToken = loginToken,
+                            loginToken = loginTokenInput,
                             versionName = versionName ?: "unknown",
                             onLoginTokenChange = {
-                                loginToken = it.ifBlank {
+                                loginTokenInput = it.ifBlank {
                                     ""
                                 }
                             },
@@ -386,13 +395,19 @@ class MainActivity : ComponentActivity() {
                             },
                             onConfirm = {
                                 // 保存并重启服务器
+
+                                if(!loginTokenInput.isBlank()){
+                                    sharedPrefs.edit(commit = true) {
+                                        putString(PREF_LOGIN_TOKEN,KanoUtils.sha256Hex(loginTokenInput.ifBlank { "admin" }) )
+                                        updateIsDefaultOrWeakToken(context,KanoUtils.isWeakToken(loginTokenInput.ifBlank { "admin" }))
+                                    }
+                                }
+
                                 sharedPrefs.edit(commit = true) {
                                     putString(PREF_GATEWAY_IP, gatewayIp)
-                                    putString(PREF_LOGIN_TOKEN, loginToken.ifBlank { "admin" })
                                     putString(PREF_TOKEN_ENABLED, isTokenEnabled)
                                     putString(PREF_AUTO_IP_ENABLED, isAutoIpEnabled)
                                     putString(PREF_WAKELOCK, wakeLock)
-                                    updateIsDefaultOrWeakToken(KanoUtils.isWeakToken(loginToken.ifBlank { "admin" }))
                                 }
                                 //更新唤醒锁
                                 if(wakeLock != "lock"){
@@ -581,7 +596,7 @@ fun InputUI(
                     singleLine = true,
                     visualTransformation = PasswordVisualTransformation(),
                     modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("admin") }
+                    placeholder = { Text("不更改/Not Change") }
                 )
                 Spacer(modifier = Modifier.height(6.dp))
                 // 开关组

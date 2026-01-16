@@ -545,7 +545,7 @@
     "error": "Lỗi",
     "connect_update_server_failed": "Lỗi máy chủ, kiểm tra mạng",
     "sticky_update": "Cập nhật cố định",
-    "mew_update": "Phiên bản mới",
+    "new_update": "Phiên bản mới",
     "found": "Đã tìm thấy",
     "toast_please_input_smtp_host": "Nhập máy chủ SMTP",
     "toast_please_input_smtp_port": "Nhập cổng SMTP",
@@ -740,5 +740,6 @@
     "three_days_later": "Nhắc lại sau 3 ngày",
     "three_days_later_info": "Để đảm bảo người dùng thay đổi mật khẩu, hệ thống sẽ tiếp tục nhắc lại sau 3 ngày.",
     "remind_your_token":"Bảo quản mật khẩu của bạn",
-    "remind_your_token_text":"Vui lòng chụp ảnh màn hình hoặc giữ kỹ mật khẩu của bạn để phòng trường hợp quên."
+    "remind_your_token_text":"Vui lòng chụp ảnh màn hình hoặc giữ kỹ mật khẩu của bạn để phòng trường hợp quên.",
+    "force_update_desc": "Lưu ý: Đây là thông báo bắt buộc. Nếu đã cập nhật, hãy bỏ qua. Sẽ tự tắt sau vài giờ."
 }

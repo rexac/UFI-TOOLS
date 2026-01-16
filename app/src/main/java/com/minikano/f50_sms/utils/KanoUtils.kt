@@ -6,6 +6,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.os.BatteryManager
@@ -27,6 +28,8 @@ import java.util.concurrent.TimeUnit
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 import androidx.core.content.edit
+import java.net.URLDecoder
+import java.nio.charset.StandardCharsets
 
 class KanoUtils {
     companion object {
@@ -548,6 +551,43 @@ class KanoUtils {
                 } catch (e: Exception) {
                     //防止权限原因读取不到，默认是Enabled
                     true
+                }
+            }
+        }
+
+        fun normalizePath(rawPath: String): String {
+            fun decodeOnce(s: String): String {
+                return try {
+                    URLDecoder.decode(s, StandardCharsets.UTF_8.name())
+                } catch (e: Exception) {
+                    s
+                }
+            }
+
+            var p = decodeOnce(rawPath)
+            p = decodeOnce(p)
+
+            p = p.replace('\\', '/')
+
+            p = p.replace(Regex("/+"), "/")
+
+            if (!p.startsWith("/")) p = "/$p"
+
+            return p
+        }
+
+        fun isSha256Hex(s: String?): Boolean {
+            return !s.isNullOrBlank() && Regex("^[a-fA-F0-9]{64}$").matches(s)
+        }
+
+        fun transformLoginToken(context: Context,prefs: SharedPreferences){
+            //预处理口令，如果口令存储为明文，则进行hash
+            val token = prefs.getString("login_token","") ?: ""
+            if(!(token.isEmpty() || token.isBlank())){
+                //如果存储的口令不是hash，则进行更改
+                if(!isSha256Hex(token) ){
+                    val hashToken = sha256Hex(token)
+                    prefs.edit(commit = true) { putString("login_token", hashToken) }
                 }
             }
         }

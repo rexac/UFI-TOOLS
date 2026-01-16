@@ -91,31 +91,8 @@ class MainActivity : ComponentActivity() {
         UniqueDeviceIDManager.init(this)
         val context = this
 
-        //第一次启动初始化login_token
-        val spf = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        KanoUtils.transformLoginToken(context,spf)
-        val existing = spf.all
-        spf.edit(commit = true) {
-            if (!existing.containsKey(PREF_LOGIN_TOKEN)) {
-                putString(PREF_LOGIN_TOKEN, KanoUtils.sha256Hex("admin"))
-                updateIsDefaultOrWeakToken(context,true)
-            }
-            if (!existing.containsKey(PREF_ISDEBUG)) {
-                putBoolean(PREF_ISDEBUG, false)
-            }
-            if (!existing.containsKey(PREF_GATEWAY_IP)) {
-                putString(PREF_GATEWAY_IP, "192.168.0.1:8080")
-            }
-            if (!existing.containsKey(PREF_TOKEN_ENABLED)) {
-                putString(PREF_TOKEN_ENABLED, true.toString())
-            }
-            if (!existing.containsKey(PREF_AUTO_IP_ENABLED)) {
-                putString(PREF_AUTO_IP_ENABLED, true.toString())
-            }
-            if (!existing.containsKey(PREF_WAKELOCK)) {
-                putString(PREF_WAKELOCK, "lock")
-            }
-        }
+        //第一次启动初始化spf
+        KanoUtils.initSharedPerfs(context)
 
         // 这里用协程异步调用
         lifecycleScope.launch {

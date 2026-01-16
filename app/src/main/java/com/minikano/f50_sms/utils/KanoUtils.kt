@@ -28,6 +28,7 @@ import java.util.concurrent.TimeUnit
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 import androidx.core.content.edit
+import com.minikano.f50_sms.configs.AppMeta.updateIsDefaultOrWeakToken
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 
@@ -595,6 +596,41 @@ class KanoUtils {
                 if(!isSha256Hex(token) ){
                     val hashToken = sha256Hex(token)
                     prefs.edit(commit = true) { putString("login_token", hashToken) }
+                }
+            }
+        }
+        private val PREFS_NAME = "kano_ZTE_store"
+        private val PREF_GATEWAY_IP = "gateway_ip"
+        private val PREF_LOGIN_TOKEN = "login_token"
+        private val PREF_TOKEN_ENABLED = "login_token_enabled"
+        private val PREF_AUTO_IP_ENABLED = "auto_ip_enabled"
+        private val PREF_ISDEBUG = "kano_is_debug"
+        private val PREF_WAKELOCK = "wakeLock"
+
+        fun initSharedPerfs(context: Context){
+            //初始化login_token
+            val spf = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            KanoUtils.transformLoginToken(context,spf)
+            val existing = spf.all
+            spf.edit(commit = true) {
+                if (!existing.containsKey(PREF_LOGIN_TOKEN)) {
+                    putString(PREF_LOGIN_TOKEN, KanoUtils.sha256Hex("admin"))
+                    updateIsDefaultOrWeakToken(context,true)
+                }
+                if (!existing.containsKey(PREF_ISDEBUG)) {
+                    putBoolean(PREF_ISDEBUG, false)
+                }
+                if (!existing.containsKey(PREF_GATEWAY_IP)) {
+                    putString(PREF_GATEWAY_IP, "192.168.0.1:8080")
+                }
+                if (!existing.containsKey(PREF_TOKEN_ENABLED)) {
+                    putString(PREF_TOKEN_ENABLED, true.toString())
+                }
+                if (!existing.containsKey(PREF_AUTO_IP_ENABLED)) {
+                    putString(PREF_AUTO_IP_ENABLED, true.toString())
+                }
+                if (!existing.containsKey(PREF_WAKELOCK)) {
+                    putString(PREF_WAKELOCK, "lock")
                 }
             }
         }

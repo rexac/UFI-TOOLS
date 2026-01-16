@@ -6,6 +6,7 @@ import android.content.Intent
 import android.util.Log
 import com.minikano.f50_sms.configs.AppMeta
 import com.minikano.f50_sms.utils.DeviceModelChecker
+import com.minikano.f50_sms.utils.KanoUtils
 import com.minikano.f50_sms.utils.ShellKano
 import com.minikano.f50_sms.utils.UniqueDeviceIDManager
 import kotlinx.coroutines.CoroutineScope
@@ -18,6 +19,8 @@ class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == Intent.ACTION_BOOT_COMPLETED) {
             Log.d("UFI_TOOLS_LOG", "开机广播接收到，准备启动服务")
+            //初始化spf
+            KanoUtils.initSharedPerfs(context)
             AppMeta.init(context)
             UniqueDeviceIDManager.init(context)
 

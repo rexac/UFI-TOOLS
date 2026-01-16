@@ -1,9 +1,10 @@
 package com.minikano.f50_sms.modules.auth
 
 import android.content.Context
+import com.minikano.f50_sms.utils.KanoLog
 import com.minikano.f50_sms.utils.KanoUtils
+import com.minikano.f50_sms.utils.KanoUtils.Companion.normalizeLeadingSlashes
 import com.minikano.f50_sms.utils.KanoUtils.Companion.normalizePath
-import com.minikano.f50_sms.utils.PassHash
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.request.httpMethod
 import io.ktor.server.request.path
@@ -22,7 +23,12 @@ object KanoAuth {
         val rawPath = call.request.path()
         val method = call.request.httpMethod.value
 
+        val uriForAuth = normalizePath(rawPath)
+        val rawPathForSign = normalizeLeadingSlashes(rawPath)
+
         val uri = normalizePath(rawPath)
+        KanoLog.d("UFI_TOOLS_LOG_KanoAuth","uri:$uri\t rawPath:$rawPath")
+
 
         val apiWhiteListExact: Set<String> = setOf(
             "/api/get_custom_head",
@@ -61,7 +67,15 @@ object KanoAuth {
         }
 
         val clientTimestamp = timestampStr.toLongOrNull() ?: return false
-        val raw = "minikano$method$uri$clientTimestamp"
+        //如果是反向代理，则不要进行path过滤
+        val signTarget =
+            if (uriForAuth == "/api/proxy" || uriForAuth.startsWith("/api/proxy/")) {
+                rawPathForSign
+            } else {
+                uriForAuth       // 其它接口继续用 normalizePath 的结果
+            }
+
+        val raw = "minikano$method$signTarget$clientTimestamp"
         val expectedSignature = KanoUtils.HmacSignature(REQUEST_SECRET_KEY, raw)
 
         return expectedSignature.equals(clientSignature, ignoreCase = true)

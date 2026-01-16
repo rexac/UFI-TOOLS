@@ -576,6 +576,13 @@ class KanoUtils {
             return p
         }
 
+        fun normalizeLeadingSlashes(p: String): String {
+            var s = p.replace('\\', '/')
+            s = s.replace(Regex("^/+"), "/")
+            if (!s.startsWith("/")) s = "/$s"
+            return s
+        }
+
         fun isSha256Hex(s: String?): Boolean {
             return !s.isNullOrBlank() && Regex("^[a-fA-F0-9]{64}$").matches(s)
         }

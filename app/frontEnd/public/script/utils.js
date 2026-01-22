@@ -886,6 +886,11 @@ const fillCurl = (kind) => {
             message = t('pushplus_sms_help')
             curl_text.value = `curl -s -X POST https://www.pushplus.plus/send/  -H "Content-Type: application/x-www-form-urlencoded" -d "token=<你的token>&title=有新消息！！&content=**【短信内容】**%0A{{sms-body}}%0A%0A**【时间】**%0A{{sms-time}}%0A%0A**【号码】**%0A{{sms-from}}&template=markdown"`
             break;
+        case 'bark':
+            message = t('bark_sms_help')
+            curl_text.value = `curl -X POST "https://api.day.app/<你的token>" -H '"Content-Type: application/x-www-form-urlencoded"' -d '"title={{sms-from}}"' -d '"body=【短信内容】{{sms-body}}【时间】{{sms-time}}"'`
+            break;
+
     }
 
     const { el, close } = createFixedToast('kano_message', `

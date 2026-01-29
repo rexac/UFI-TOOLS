@@ -5734,7 +5734,9 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
                     searchListEl.innerHTML = ''
                     if (pluginsResultRes.length > 0) {
                         pluginsResultRes.forEach(el => {
-                            if (keyword && el.name.includes(keyword)) {
+                            let name_lower = el.name.toLowerCase()
+                            let keyword_lower = keyword.toLowerCase()
+                            if (keyword_lower && name_lower.includes(keyword_lower)) {
                                 foundList.push(el)
                             }
                         })

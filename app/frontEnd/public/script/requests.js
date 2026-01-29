@@ -333,7 +333,7 @@ const getUFIData = async () => {
         const res = await fetch(`${KANO_baseURL}/goform/goform_get_cmd_process?multi_data=1&isTest=false&cmd=${cmd}&${params.toString()}`, {
             headers: {
                 ...common_headers,
-                "kano-cookie":KANO_COOKIE
+                "kano-cookie": KANO_COOKIE
             },
             signal: controller.signal
         });
@@ -484,7 +484,8 @@ const runShellWithRoot = async (cmd = '', timeout = 10000) => {
             method: "POST",
             headers: common_headers,
             body: JSON.stringify({
-                command: cmd.trim()
+                command: cmd.trim(),
+                timeout
             })
         }, timeout)
         const { result, error } = await res.json()

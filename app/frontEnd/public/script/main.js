@@ -5629,36 +5629,66 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
         })
     }
 
+    const scrollToElementWithScrollContainerAndElement = ({ scrollContainer, el, highLightKeyWord }) => {
+        // 计算 el 相对于 scrollContainer 的位置
+        const topOffset = -15
+        const elTop = el.getBoundingClientRect().top;
+        const containerTop = scrollContainer.getBoundingClientRect().top;
+        const relativeTop = elTop - containerTop + scrollContainer.scrollTop + topOffset;
+
+        // 平滑滚动到该位置
+        scrollContainer.scrollTo({
+            top: relativeTop,
+            behavior: 'smooth'
+        });
+        if (highLightKeyWord) {
+            //高亮此插件
+            let outerEl = el.parentElement
+            outerEl.style.boxShadow = '0 0 4px 1px yellow'
+            setTimeout(() => {
+                outerEl.style.boxShadow = ''
+            }, 5000);
+        }
+    }
+
     //搜索插件，滚动到合适位置
-    const scrollToElement = (elementsName = '#plugin_store .plugin-title', keyword) => {
+    const scrollToElement = (elementsName = '#plugin_store .plugin-title', keyword, highLightKeyWord = true) => {
         let found = false
+        let foundList = []
+        let scrollContainer = null
         document.querySelectorAll(elementsName).forEach(el => {
             const find = el.textContent?.toLowerCase()?.includes(keyword?.toLowerCase())
             if (find) {
                 // 找到最近的可滚动容器
-                let scrollContainer = el.parentElement;
+                scrollContainer = el.parentElement;
                 while (scrollContainer && scrollContainer.scrollHeight <= scrollContainer.clientHeight) {
                     scrollContainer = scrollContainer.parentElement;
                 }
 
                 if (scrollContainer) {
-                    // 计算 el 相对于 scrollContainer 的位置
-                    const topOffset = -15
-                    const elTop = el.getBoundingClientRect().top;
-                    const containerTop = scrollContainer.getBoundingClientRect().top;
-                    const relativeTop = elTop - containerTop + scrollContainer.scrollTop + topOffset;
-
-                    // 平滑滚动到该位置
-                    scrollContainer.scrollTo({
-                        top: relativeTop,
-                        behavior: 'smooth'
-                    });
+                    scrollToElementWithScrollContainerAndElement({
+                        scrollContainer, el, highLightKeyWord
+                    })
+                    foundList.push(el)
                     found = true
                 } else {
                     found = false
                 }
             }
         });
+
+        console.log(foundList);
+
+        if (scrollContainer) {
+            if (foundList.length > 0) {
+                scrollToElementWithScrollContainerAndElement({
+                    scrollContainer,
+                    el: foundList[0],
+                    highLightKeyWord
+                })
+            }
+        }
+
         return found
     }
 
@@ -5680,6 +5710,8 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
     }
 
     const plugin_store = document.querySelector('#plugin_store_btn')
+    const pluginsResultRes = []
+    let timer_input = null
     plugin_store.onclick = (e) => {
         //隐藏插件功能模态框
         const pluginModal = document.querySelector('#PluginModal')
@@ -5687,12 +5719,50 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
 
         const plugin_store_close_btn = document.querySelector('#plugin_store_close_btn')
         plugin_store_close_btn.onclick = () => {
-            closeModal('#plugin_store')
-            setTimeout(() => {
+            closeModal('#plugin_store', 200, () => {
                 showModal('#PluginModal')
-            }, 200);
+            })
         }
 
+        const pluginSearchInputEl = document.querySelector("#pluginSearchInput")
+        if (pluginSearchInputEl) {
+            const searchListEl = document.querySelector("#plugin_store .searchList")
+            if (searchListEl) {
+                pluginSearchInputEl.oninput = (e) => {
+                    const keyword = e.target.value.trim()
+                    const foundList = []
+                    searchListEl.innerHTML = ''
+                    if (pluginsResultRes.length > 0) {
+                        pluginsResultRes.forEach(el => {
+                            if (keyword && el.name.includes(keyword)) {
+                                foundList.push(el)
+                            }
+                        })
+                    }
+                    if (foundList.length) {
+                        searchListEl.style.display = 'block'
+                        foundList.forEach(el => {
+                            const itemEl = document.createElement("div")
+                            itemEl.className = "searchListItem"
+                            itemEl.innerHTML = el.name
+                            itemEl.onclick = (e) => {
+                                pluginSearchInputEl.value = el.name
+                            }
+                            searchListEl.appendChild(itemEl)
+                        })
+                    } else {
+                        searchListEl.style.display = 'none'
+                    }
+                }
+                pluginSearchInputEl.onblur = () => {
+                    timer_input && clearTimeout(timer_input)
+                    timer_input = setTimeout(() => {
+                        searchListEl.style.display = 'none'
+                        document.querySelector("#pluginSearchBtn").click()
+                    }, 200);
+                }
+            }
+        }
         showModal('#plugin_store')
         const items = document.querySelector('#plugin_store .plugin-items')
         //loading
@@ -5706,12 +5776,14 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
         `
         const total = document.querySelector('#plugin_store .total')
         //加载插件
+        pluginsResultRes.length = 0
         fetchWithTimeout(`${KANO_baseURL}/plugins_store`)
             .then(res => res.json())
             .then(({ res, download_url }) => {
                 const data = res.data || {}
                 items.innerHTML = ''
                 if (data && data.content && data.content.length > 0) {
+                    pluginsResultRes.push(...data.content)
                     total.innerHTML = `${t('plugin_modal_num')}: ${data.content.length}`
                     //分页
                     const pageSize = 10
@@ -5775,7 +5847,7 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
                             nextPageBtn.style.backgroundColor = ''
                             cur_page_el.innerHTML = pageNum + 1
                             renderPluginItems(data.content.slice(pageNum * pageSize, pageNum * pageSize + pageSize), download_url)
-                            scrollToElement('#plugin_store .plugin-title', data.content[0].name)
+                            scrollToElement('#plugin_store .plugin-title', data.content[0].name, false)
                         }
 
                         if (!keyword || keyword == '') {

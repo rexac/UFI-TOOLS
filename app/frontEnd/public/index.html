@@ -1202,9 +1202,11 @@
                         <span data-i18n="plugin_store_tip2">有些插件需要开启高级功能才可以使用。</span>
                     </div>
                     <div class="searchBox">
-                        <input onkeyup="handlePluginStoreSearchInput(event)" style="padding-left: 6px;width: 100%;"
-                            type="text" placeholder="搜索插件" id="pluginSearchInput"
-                            data-i18n-placeholder="plugin_search_placeholder">
+                        <div class="searchInput">
+                            <input onkeyup="handlePluginStoreSearchInput(event)" type="text" placeholder="搜索插件"
+                                id="pluginSearchInput" data-i18n-placeholder="plugin_search_placeholder">
+                            <div class="searchList"></div>
+                        </div>
                         <button id="pluginSearchResetBtn" style="width: fit-content;min-width: 50px;" class="btn"
                             data-i18n="plugin_search_reset_btn">重置</button>
                         <button id="pluginSearchBtn" style="width: fit-content;min-width: 50px;" class="btn"

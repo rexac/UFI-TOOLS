@@ -370,8 +370,16 @@ fun Route.advancedToolsModule(context: Context, targetServerIP: String) {
             }
 
             val text = json.optString("command", "").trim()
+            var timeout = json.optInt("timeout",100*1000)
 
-            KanoLog.d(TAG, "获取到的command： ${text}")
+            timeout = if(timeout > 100) {
+                KanoLog.d(TAG, "timeout大于100，将按照100s计算")
+                100
+            } else {
+                timeout
+            }
+
+            KanoLog.d(TAG, "获取到的command： ${text} timeout： ${timeout}")
 
             if (text.isNotEmpty()) {
 
@@ -383,7 +391,8 @@ fun Route.advancedToolsModule(context: Context, targetServerIP: String) {
                 val result =
                     RootShell.sendCommandToSocket(
                         text,
-                        socketPath.absolutePath
+                        socketPath.absolutePath,
+                        timeout
                     )
                         ?: throw Exception("请检查命令输入格式")
 

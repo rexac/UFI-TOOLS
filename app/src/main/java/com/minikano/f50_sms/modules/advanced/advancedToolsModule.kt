@@ -372,9 +372,9 @@ fun Route.advancedToolsModule(context: Context, targetServerIP: String) {
             val text = json.optString("command", "").trim()
             var timeout = json.optInt("timeout",100*1000)
 
-            timeout = if(timeout > 100) {
-                KanoLog.d(TAG, "timeout大于100，将按照100s计算")
-                100
+            timeout = if(timeout > 100 * 1000) {
+                KanoLog.d(TAG, "timeout大于100*1000ms，将按照100s计算")
+                100 * 1000
             } else {
                 timeout
             }

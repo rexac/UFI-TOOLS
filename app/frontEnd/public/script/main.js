@@ -5721,9 +5721,48 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
         plugin_store_close_btn.onclick = () => {
             closeModal('#plugin_store', 200, () => {
                 showModal('#PluginModal')
-            }, 200);
+            })
         }
 
+        const pluginSearchInputEl = document.querySelector("#pluginSearchInput")
+        if (pluginSearchInputEl) {
+            const searchListEl = document.querySelector("#plugin_store .searchList")
+            if (searchListEl) {
+                pluginSearchInputEl.oninput = (e) => {
+                    const keyword = e.target.value.trim()
+                    const foundList = []
+                    searchListEl.innerHTML = ''
+                    if (pluginsResultRes.length > 0) {
+                        pluginsResultRes.forEach(el => {
+                            if (keyword && el.name.includes(keyword)) {
+                                foundList.push(el)
+                            }
+                        })
+                    }
+                    if (foundList.length) {
+                        searchListEl.style.display = 'block'
+                        foundList.forEach(el => {
+                            const itemEl = document.createElement("div")
+                            itemEl.className = "searchListItem"
+                            itemEl.innerHTML = el.name
+                            itemEl.onclick = () => {
+                                pluginSearchInputEl.value = el.name
+                                document.querySelector("#pluginSearchBtn").click()
+                            }
+                            searchListEl.appendChild(itemEl)
+                        })
+                    } else {
+                        searchListEl.style.display = 'none'
+                    }
+                }
+                pluginSearchInputEl.onblur = () => {
+                    timer_input && clearTimeout(timer_input)
+                    timer_input = setTimeout(() => {
+                        searchListEl.style.display = 'none'
+                    }, 200);
+                }
+            }
+        }
         showModal('#plugin_store')
         const items = document.querySelector('#plugin_store .plugin-items')
         //loading

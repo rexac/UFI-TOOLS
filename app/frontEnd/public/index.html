@@ -1751,7 +1751,7 @@
                                         <span onclick="copyText(event)">{{sms-body}} {{sms-time}}
                                             {{sms-from}}</span>
                                     </div>
-                                    <div style="display: flex;gap: 10px;margin-top: 10px;">
+                                    <div style="display: grid;gap: 10px;margin-top: 10px;grid-template-columns: 1fr 1fr;">
                                         <button style="width: 100%;"
                                             onclick="event.preventDefault();fillCurl('tg')">Telegram</button>
                                         <button style="width: 100%;" onclick="event.preventDefault();fillCurl('wechat')"
@@ -1759,7 +1759,7 @@
                                         <button style="width: 100%;"
                                             onclick="event.preventDefault();fillCurl('pushplus')">PushPlus</button>
                                         <button style="width: 100%;"
-                                                onclick="event.preventDefault();fillCurl('bark')">Bark</button>
+                                            onclick="event.preventDefault();fillCurl('bark')">Bark</button>
                                     </div>
                                     <div class="item" style="margin: 10px auto;">
                                         <div style="

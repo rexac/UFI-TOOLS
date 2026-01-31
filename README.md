@@ -6,7 +6,7 @@
 
 > 本项目完全开源免费，如果你喜欢这个项目的话，也可以请我喝一杯咖啡~
 >
-> | ![ali_pay](./images/ali_pay.jpeg) | ![wechat_pay](./images/wechat_pay.webp) |
+> | ![ali_pay](./images/ali_pay.jpeg) | ![wechat_pay](https://api.kanokano.cn/pay/zsm.png) |
 > | ------------------------------- | ------------------------------- |
 >
 
@@ -168,3 +168,4 @@ UFI-TOOLS 内置 **插件商店**，可在线下载、安装多种功能插件�
 可自由使用、修改与分发，但请保留作者署名。
 
 欢迎提交 Issue / Pull Request 一起完善项目 💡  
+

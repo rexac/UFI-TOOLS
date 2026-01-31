@@ -13,7 +13,15 @@
 .externalNativeBuild
 .cxx
 local.properties
+app/.cxx
+app/build
 app/src/main/assets/node_modules
+app/src/main/assets/lang/*/**
+app/src/main/assets/script/*/**
+app/src/main/assets/style/*/**
+app/src/main/assets/index.html
+app/src/main/assets/manifest.json
+app/src/main/assets/service-worker.js
 app/src/main/assets/node_modules/*/**
 app/src/main/assets/dictionary.json
 app/frontEnd/node_modules/*/**

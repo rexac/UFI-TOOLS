@@ -3,7 +3,6 @@ package com.minikano.f50_sms.utils
 import android.content.Context
 import android.util.Log
 import com.minikano.f50_sms.ADBService.Companion.adbIsReady
-import com.minikano.f50_sms.modules.TAG
 import com.minikano.f50_sms.utils.KanoUtils.Companion.sendShellCmd
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
@@ -14,7 +13,6 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStreamReader
-import java.net.InetAddress
 import java.util.concurrent.TimeUnit
 import javax.xml.parsers.DocumentBuilderFactory
 
@@ -616,6 +614,7 @@ class ShellKano {
 
                         try {
                             runBlocking {
+                                //先等待最多30s，等待官方web后台完全启动
                                 val reachable = waitUntilReachable(ADB_IP, 30)
                                 if (!reachable) {
                                     KanoLog.e("UFI_TOOLS_LOG", "官方WEB服务不可达，终止执行ADB自启操作")

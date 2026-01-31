@@ -17,6 +17,7 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import java.net.InetAddress
 import java.net.URI
 import java.net.UnknownHostException
+import java.util.concurrent.TimeUnit
 
 val unsafeHeaderNames = setOf(
     "connection", "keep-alive", "proxy-authenticate", "proxy-authorization", "te", "trailers",
@@ -26,6 +27,27 @@ val unsafeHeaderNames = setOf(
     "x-forwarded-proto", "x-real-ip", "authorization", "content-security-policy",
     "content-security-policy-report-only", "clear-site-data"
 )
+
+private val proxyHttpClient: OkHttpClient = OkHttpClient.Builder()
+    .connectTimeout(5, TimeUnit.SECONDS)
+    .readTimeout(8, TimeUnit.SECONDS)
+    .writeTimeout(8, TimeUnit.SECONDS)
+    .callTimeout(10, TimeUnit.SECONDS)
+    .retryOnConnectionFailure(false)
+    .connectionPool(ConnectionPool(8, 2, TimeUnit.MINUTES))
+    .dispatcher(Dispatcher().apply {
+        maxRequests = 32
+        maxRequestsPerHost = 8
+    })
+    .addInterceptor { chain ->
+        val request = chain.request().newBuilder()
+            .removeHeader("Accept-Encoding")
+            .addHeader("Accept-Encoding", "identity")
+            .build()
+        chain.proceed(request)
+    }
+    .build()
+
 
 fun isSafeHeader(header: String): Boolean {
     return header.lowercase() !in unsafeHeaderNames
@@ -71,14 +93,7 @@ fun Route.anyProxyModule(context: Context) {
 
             val method = call.request.httpMethod.value
 
-            val okHttpClient = OkHttpClient.Builder()
-                .addInterceptor { chain ->
-                    val request = chain.request().newBuilder()
-                        .removeHeader("Accept-Encoding")
-                        .addHeader("Accept-Encoding", "identity") // 避免 GZIP 解压
-                        .build()
-                    chain.proceed(request)
-                }.build()
+            val okHttpClient = proxyHttpClient
 
             // 构建请求体（如果有）
             val requestBody = if (call.request.httpMethod in listOf(

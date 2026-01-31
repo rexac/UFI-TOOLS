@@ -5,6 +5,7 @@ import com.minikano.f50_sms.configs.AppMeta
 import com.minikano.f50_sms.configs.AppMeta.isDeviceRooted
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 import okhttp3.Dns
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -41,6 +42,14 @@ class KanoReport {
         private const val REPORT_PATH = "/report"
         private const val TOKEN = "minikano1234"
 
+        private val reportHttpClient: OkHttpClient = OkHttpClient.Builder()
+            .callTimeout(6, TimeUnit.SECONDS)
+            .connectTimeout(3, TimeUnit.SECONDS)
+            .readTimeout(3, TimeUnit.SECONDS)
+            .writeTimeout(3, TimeUnit.SECONDS)
+            .retryOnConnectionFailure(false)
+            .build()
+
         suspend fun reportToServer() {
             try {
                 val uuid = UniqueDeviceIDManager.getUUID()?.trim()
@@ -61,8 +70,6 @@ class KanoReport {
                     put("is_root", isDeviceRooted)
                 }.toString()
 
-                val client = OkHttpClient()
-
                 val url = BASE_URL + REPORT_PATH
                 val mediaType = "application/json; charset=utf-8".toMediaType()
                 val body = json.toRequestBody(mediaType)
@@ -75,17 +82,18 @@ class KanoReport {
 
                 // 切换到 IO 线程做网络请求
                 withContext(Dispatchers.IO) {
-                    client.newCall(request).execute().use { resp ->
-                        if (resp.isSuccessful) {
-                            KanoLog.d("UFI_TOOLS_LOG_report_service","上报成功: ${resp.code}")
-                        } else {
-                            KanoLog.e("UFI_TOOLS_LOG_report_service","上报失败: ${resp.code} - ${resp.message}")
+                    withTimeout(20_000) {
+                        reportHttpClient.newCall(request).execute().use { resp ->
+                            if (resp.isSuccessful) {
+                                KanoLog.d("UFI_TOOLS_LOG_report_service","上报成功: ${resp.code}")
+                            } else {
+                                KanoLog.e("UFI_TOOLS_LOG_report_service","上报失败: ${resp.code} - ${resp.message}")
+                            }
                         }
                     }
                 }
             } catch (e: Exception) {
                 KanoLog.e("UFI_TOOLS_LOG_report_service","上报失败:",e)
-                e.printStackTrace()
             }
         }
 

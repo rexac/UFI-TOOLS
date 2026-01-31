@@ -6,7 +6,7 @@
 
 > 本项目完全开源免费，如果你喜欢这个项目的话，也可以请我喝一杯咖啡~
 >
-> | ![ali_pay](./images/ali_pay.jpeg) | ![wechat_pay](https://api.kanokano.cn/pay/zsm.png) |
+> | ![ali_pay](./images/ali_pay.jpeg) | ![wechat_pay](./images/zsm.png) |
 > | ------------------------------- | ------------------------------- |
 >
 

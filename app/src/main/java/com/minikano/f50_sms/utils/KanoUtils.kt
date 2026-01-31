@@ -408,6 +408,9 @@ class KanoUtils {
             val connection = url.openConnection() as HttpURLConnection
             return try {
                 connection.requestMethod = "GET"
+                connection.connectTimeout = 1500
+                connection.readTimeout = 1500
+                connection.instanceFollowRedirects = false
                 connection.connect()
                 connection.responseCode // 返回状态码
             } catch (e: Exception) {

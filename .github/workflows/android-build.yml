@@ -7,7 +7,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    environment: ANDROID_KEYSTORE_BASE64
+    environment: BUILD_RELEASE_APK
     env:
       GRADLE_OPTS: -Dorg.gradle.jvmargs=-Xmx2g
     steps:

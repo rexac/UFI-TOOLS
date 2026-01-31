@@ -602,7 +602,7 @@
     "one_click_update": "ワンクリック更新",
     "speedtest_aborted": "スピードテストが中止されました",
     "cellular_speed_test": "通信速度テスト",
-    "cellular_speed_test_notice": "テストはプロキシ経由、参考値のみ",
+    "cellular_speed_test_notice": "テストは内網プロキシ経由で、参考値のみです。プロキシAPIの制限により、各ダウンロードは30秒のみです。",
     "cellular_speed_test_url": "テストURL：",
     "cellular_speed_test_thread": "スレッド数：",
     "cellular_speed_test_prepared": "準備完了",

@@ -602,7 +602,7 @@
     "last_exe": "Lần thực thi cuối：",
     "speedtest_aborted": "Kiểm tra tốc độ đã hủy",
     "cellular_speed_test": "Kiểm tra tốc độ di động",
-    "cellular_speed_test_notice": "Kiểm tra tốc độ qua proxy, dữ liệu chỉ mang tính tham khảo",
+    "cellular_speed_test_notice": "Kiểm tra tốc độ được chuyển tiếp qua proxy nội mạng, dữ liệu chỉ mang tính tham khảo. Do giới hạn API proxy, mỗi lần tải chỉ kéo dài 30 giây.",
     "cellular_speed_test_url": "URL kiểm tra：",
     "cellular_speed_test_thread": "Luồng：",
     "cellular_speed_test_prepared": "Sẵn sàng",

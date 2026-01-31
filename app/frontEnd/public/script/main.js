@@ -5365,8 +5365,8 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
     let loopCellularTimer = null;
     let isCellularTestLooping = false;
     let totalBytes = 0;
-    let isLoopTesting = false
     let isSingleTesting = false
+    const getCellularStartBtn = () => document.querySelector('#CellularTestModal #startSpeedBtn')
     const singleTest = debounce((e) => {
         isSingleTesting = true
         if (cellularSpeedFlag) {
@@ -5380,160 +5380,168 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
     }
 
     async function startCellularTestRealtime(e, flag = false) {
-        if (isLoopTesting) {
+        if (isCellularTestLooping && e) {
             return
         }
-        if (!cellularSpeedFlag) {
-            flag && (totalBytes = 0)
-        }
-        const resultEl = document.getElementById('CellularTestResult');
-        const url = document.getElementById('CellularTestUrl').value.trim();
-        const rawThreadNum = Number(document.querySelector('#thread_num').textContent);
-
-        if (!url) {
-            createToast(t('cellular_pls_input_url'), 'red');
-            return;
-        }
-
-        if (cellularSpeedFlag) {
-            // 停止测速
-            cellularSpeedController?.abort();
-            createToast(t('speedtest_aborted'), 'orange');
-            cellularSpeedFlag = false;
-            e && (e.target.innerText = t('speedtest_start_btn'));
-            return;
-        }
-
-        // 启动测速
-        cellularSpeedFlag = true;
-        cellularSpeedController = new AbortController();
-
-        const maxThreadNum = 5;
-        const batchSize = 8;
-        const threadNum = Math.min(rawThreadNum, maxThreadNum);
-
-        if (rawThreadNum > maxThreadNum) {
-            createToast(`${t('thread_imit')} ${maxThreadNum},${t('avoid_overload')}`, 'orange');
-        }
-
-        e && (e.target.innerText = t('speedtest_stop_btn'));
-        resultEl.innerHTML = `${t('speed_test_ing')} (${threadNum} ${t('thread')})...<br/><span>${t('preparing')}...</span>`;
-
-        let startTime = performance.now();
-        let lastUpdateTime = startTime;
-        let lastBytes = 0;
-        let firstResponseReceived = false;
-
-        const readTasks = [];
-
-        // 分批发起测速请求，并立即开始读取
-        for (let i = 0; i < threadNum; i++) {
-            const testUrl = `${KANO_baseURL}/proxy/--${url}?t=${Math.random()}`;
-
-            const task = (async () => {
-                try {
-                    const res = await fetch(testUrl, {
-                        signal: cellularSpeedController.signal,
-                        cache: 'no-store',
-                    });
-
-                    const reader = res.body?.getReader();
-                    if (!reader) return;
-
-                    while (true) {
-                        const { done, value } = await reader.read();
-                        if (done) break;
-
-                        totalBytes += value.length;
-
-                        if (!firstResponseReceived && value.length > 0) {
-                            firstResponseReceived = true;
-                        }
-                    }
-                } catch (_) {
-                    // 忽略异常
-                }
-            })();
-
-            readTasks.push(task);
-
-            // 批处理延迟，避免同时连接过多
-            if ((i + 1) % batchSize === 0) {
-                await new Promise(res => setTimeout(res, 100));
+        const isSingleRun = flag === true
+        let runBytes = 0
+        try {
+            if (!cellularSpeedFlag) {
+                flag && (totalBytes = 0)
             }
-        }
+            const resultEl = document.getElementById('CellularTestResult');
+            const url = document.getElementById('CellularTestUrl').value.trim();
+            const rawThreadNum = Number(document.querySelector('#thread_num').textContent);
 
-        // 每 100ms 更新一次速度
-        const interval = setInterval(() => {
-            const now = performance.now();
-            const deltaTime = (now - lastUpdateTime) / 1000;
-            const deltaBytes = totalBytes - lastBytes;
-            const speedMbps = (deltaBytes * 8 / 1024 / 1024) / deltaTime;
+            if (!url) {
+                createToast(t('cellular_pls_input_url'), 'red');
+                return;
+            }
 
-            resultEl.innerHTML = `
+            if (cellularSpeedFlag) {
+                // 停止测速
+                cellularSpeedController?.abort();
+                createToast(t('speedtest_aborted'), 'orange');
+                cellularSpeedFlag = false;
+                e && (e.target.innerText = t('speedtest_start_btn'));
+                return;
+            }
+
+            // 启动测速
+            cellularSpeedFlag = true;
+            cellularSpeedController = new AbortController();
+
+            const maxThreadNum = 5;
+            const batchSize = 8;
+            const threadNum = Math.min(rawThreadNum, maxThreadNum);
+
+            if (rawThreadNum > maxThreadNum) {
+                createToast(`${t('thread_imit')} ${maxThreadNum},${t('avoid_overload')}`, 'orange');
+            }
+
+            e && (e.target.innerText = t('speedtest_stop_btn'));
+            resultEl.innerHTML = `${t('speed_test_ing')} (${threadNum} ${t('thread')})...<br/><span>${t('preparing')}...</span>`;
+
+            let startTime = performance.now();
+            let lastUpdateTime = startTime;
+            let lastBytes = 0;
+            let firstResponseReceived = false;
+
+            const readTasks = [];
+
+            // 分批发起测速请求，并立即开始读取
+            for (let i = 0; i < threadNum; i++) {
+                const testUrl = `${KANO_baseURL}/proxy/--${url}?t=${Math.random()}`;
+
+                const task = (async () => {
+                    try {
+                        const res = await fetch(testUrl, {
+                            signal: cellularSpeedController.signal,
+                            cache: 'no-store',
+                        });
+
+                        const reader = res.body?.getReader();
+                        if (!reader) return;
+
+                        while (true) {
+                            const { done, value } = await reader.read();
+                            if (done) break;
+
+                            totalBytes += value.length;
+                            runBytes += value.length;
+
+                            if (!firstResponseReceived && value.length > 0) {
+                                firstResponseReceived = true;
+                            }
+                        }
+                    } catch (_) {
+                        // 忽略异常
+                    }
+                })();
+
+                readTasks.push(task);
+
+                // 批处理延迟，避免同时连接过多
+                if ((i + 1) % batchSize === 0) {
+                    await new Promise(res => setTimeout(res, 100));
+                }
+            }
+
+            // 每 100ms 更新一次速度
+            const interval = setInterval(() => {
+                const now = performance.now();
+                const deltaTime = (now - lastUpdateTime) / 1000;
+                const deltaBytes = totalBytes - lastBytes;
+                const speedMbps = (deltaBytes * 8 / 1024 / 1024) / deltaTime;
+
+                resultEl.innerHTML = `
             ${t('cellular_speed_test_thread')}${rawThreadNum}<br/>
             ${t('speedtest_current_speed')}: ${speedMbps.toFixed(2)} Mbps<br/>
             ${t('speedtest_total_download')}: ${(totalBytes / 1024 / 1024).toFixed(2)} MB
         `;
-            lastUpdateTime = now;
-            lastBytes = totalBytes;
-        }, 100);
+                lastUpdateTime = now;
+                lastBytes = totalBytes;
+            }, 100);
 
-        // 响应慢提示
-        setTimeout(() => {
-            if (!firstResponseReceived && cellularSpeedFlag) {
-                resultEl.innerHTML += `<br/><span>${t('cellular_speed_test_slow')}</span>`;
+            // 响应慢提示
+            setTimeout(() => {
+                if (!firstResponseReceived && cellularSpeedFlag) {
+                    resultEl.innerHTML += `<br/><span>${t('cellular_speed_test_slow')}</span>`;
+                }
+            }, 2000);
+
+            try {
+                await Promise.all(readTasks);
+            } catch (_) {
+                // 忽略中断异常
             }
-        }, 2000);
 
-        try {
-            await Promise.all(readTasks);
-        } catch (_) {
-            // 忽略中断异常
+            clearInterval(interval);
+            cellularSpeedFlag = false;
+            e && (e.target.innerText = t('speedtest_start_btn'));
+
+            const totalTime = (performance.now() - startTime) / 1000;
+            const avgSpeed = ((runBytes * 8) / 1024 / 1024) / totalTime;
+
+            if (runBytes === 0) {
+                resultEl.innerHTML += `<br/><span style="color:red;">${t('cellular_speed_test_failed')}</span>`;
+            } else {
+                resultEl.innerHTML += `<br/>${t('speedtest_avg_speed')}: ${avgSpeed.toFixed(2)} Mbps`;
+            }
+
+            // 循环测速
+            if (!isCellularTestLooping) return;
+            loopCellularTimer = setTimeout(() => {
+                if (isCellularTestLooping) startCellularTestRealtime(); // 不传 e
+            }, 500);
+        } finally {
+            if (isSingleRun) {
+                isSingleTesting = false
+            }
         }
-
-        clearInterval(interval);
-        cellularSpeedFlag = false;
-        e && (e.target.innerText = t('speedtest_start_btn'));
-
-        const totalTime = (performance.now() - startTime) / 1000;
-        const avgSpeed = ((totalBytes * 8) / 1024 / 1024) / totalTime;
-
-        if (totalBytes === 0) {
-            resultEl.innerHTML += `<br/><span style="color:red;">${t('cellular_speed_test_failed')}</span>`;
-        } else {
-            resultEl.innerHTML += `<br/>${t('speedtest_avg_speed')}: ${avgSpeed.toFixed(2)} Mbps`;
-        }
-
-        // 循环测速
-        if (!isCellularTestLooping) return;
-        loopCellularTimer = setTimeout(() => {
-            if (isCellularTestLooping) startCellularTestRealtime(); // 不传 e
-        }, 500);
     }
 
     const loopTest = debounce((event) => {
         const btn = event.target;
-        isCellularTestLooping = !isCellularTestLooping;
+        const startBtn = getCellularStartBtn()
 
         if (isSingleTesting) {
             return
         }
 
+        isCellularTestLooping = !isCellularTestLooping;
+
         if (isCellularTestLooping) {
             btn.innerText = t('loop_mode_stop');
             totalBytes = 0
+            startBtn && (startBtn.disabled = true)
             startCellularTestRealtime();
-            isLoopTesting = true
         } else {
             btn.innerText = t('loop_mode_start');
-            isLoopTesting = false
             clearTimeout(loopCellularTimer);
             cellularSpeedController?.abort();
             cellularSpeedFlag = false;
-            setTimeout(() => {
-                totalBytes = 0
-            }, 100);
+            startBtn && (startBtn.disabled = false)
         }
     }, 500)
 
@@ -5547,6 +5555,8 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
         clearTimeout(loopCellularTimer);
         cellularSpeedController?.abort();
         cellularSpeedFlag = false;
+        const startBtn = getCellularStartBtn()
+        startBtn && (startBtn.disabled = false)
     }
 
     const onThreadNumChange = (event) => {

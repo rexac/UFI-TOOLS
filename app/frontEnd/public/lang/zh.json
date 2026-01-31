@@ -615,7 +615,7 @@
     "one_click_update": "一键更新",
     "speedtest_aborted": "测速已终止",
     "cellular_speed_test": "流量测速",
-    "cellular_speed_test_notice": "测速经过内网代理转发，数据仅供参考",
+    "cellular_speed_test_notice": "测速经过内网代理转发，数据仅供参考, 由于代理API限制，下载时间每次只维持30秒",
     "cellular_speed_test_url": "测速地址：",
     "cellular_speed_test_thread": "线程数量：",
     "cellular_speed_test_prepared": "准备就绪",

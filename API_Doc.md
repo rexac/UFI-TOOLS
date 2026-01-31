@@ -190,6 +190,7 @@ GET /api/proxy/--http://example.com/api/xxx
 1. 该接口也需要进行auth验证
 2. 为了避免UFI-TOOLS authToken和需要转发头部冲突，代理验证token时可以以`kano-authorization`携带token进行验证(见下表)
 3. 为了避免内网服务暴露在外网，反向代理接口默认会阻止以此方式访问内网地址
+4. 该接口固定超时时间为30秒，超过时间到了会截断输出并返回不完整的数据。
 
 ------
 

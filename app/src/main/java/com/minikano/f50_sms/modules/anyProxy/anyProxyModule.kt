@@ -29,10 +29,10 @@ val unsafeHeaderNames = setOf(
 )
 
 private val proxyHttpClient: OkHttpClient = OkHttpClient.Builder()
-    .connectTimeout(5, TimeUnit.SECONDS)
+    .connectTimeout(10, TimeUnit.SECONDS)
     .readTimeout(8, TimeUnit.SECONDS)
     .writeTimeout(8, TimeUnit.SECONDS)
-    .callTimeout(10, TimeUnit.SECONDS)
+    .callTimeout(30, TimeUnit.SECONDS)
     .retryOnConnectionFailure(false)
     .connectionPool(ConnectionPool(8, 2, TimeUnit.MINUTES))
     .dispatcher(Dispatcher().apply {

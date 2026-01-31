@@ -602,7 +602,7 @@
     "last_exe": "Last execute：",
     "speedtest_aborted": "Speedtest aborted",
     "cellular_speed_test": "Cellular Speed Test",
-    "cellular_speed_test_notice": "Speed test is via proxy, data for reference only",
+    "cellular_speed_test_notice": "Speed test is relayed via the intranet proxy, for reference only. Due to proxy API limits, each download lasts only 30 seconds.",
     "cellular_speed_test_url": "Test URL：",
     "cellular_speed_test_thread": "Threads：",
     "cellular_speed_test_prepared": "Ready",

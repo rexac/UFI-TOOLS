@@ -1,35 +1,161 @@
-name: Android Release CI
+name: Build Android APK
 
 on:
-  push:
-    branches: [ "http-server-version" ]
+  repository_dispatch:
+  workflow_dispatch:
 
 jobs:
-  build-release:
+  build:
     runs-on: ubuntu-latest
-
+    environment: ANDROID_KEYSTORE_BASE64
+    env:
+      GRADLE_OPTS: -Dorg.gradle.jvmargs=-Xmx2g
     steps:
-      - name: Checkout code
+      - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Set up JDK 17
+      - name: Set Up Java
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
-          distribution: 'temurin'
+          java-version: 17
+          distribution: temurin
           cache: gradle
 
-      - name: Setup Node.js
+      - name: Set Up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: 20
+          cache: npm
+          cache-dependency-path: app/frontEnd/package-lock.json
 
-      - name: Install Node.js dependencies
+      - name: Install Frontend Dependencies
         working-directory: app/frontEnd
-        run: npm install --no-package-lock
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x ./gradlew
+      - name: Prepare Signing Configuration
+        shell: bash
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
+        run: |
+          if [ -n "$ANDROID_KEYSTORE_BASE64" ]; then
+            echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > release.keystore
+            {
+              echo "MYAPP_RELEASE_STORE_FILE=release.keystore"
+              echo "MYAPP_RELEASE_KEY_ALIAS=$ANDROID_KEY_ALIAS"
+              echo "MYAPP_RELEASE_STORE_PASSWORD=$ANDROID_STORE_PASSWORD"
+              echo "MYAPP_RELEASE_KEY_PASSWORD=$ANDROID_KEY_PASSWORD"
+            } >> local.properties
+            echo "SIGNING_PRESENT=true" >> "$GITHUB_ENV"
+          else
+            echo "SIGNING_PRESENT=false" >> "$GITHUB_ENV"
+          fi
 
-      - name: Build with tag version
-        run: ./gradlew assembleDebug
+      - name: Grant Execute Permission For Gradlew
+        run: chmod +x gradlew
+
+      - name: Build Signed Release APK
+        if: ${{ env.SIGNING_PRESENT == 'true' }}
+        run: ./gradlew assembleRelease --stacktrace
+
+      - name: Build Debug APK (fallback)
+        if: ${{ env.SIGNING_PRESENT != 'true' }}
+        run: ./gradlew assembleDebug --stacktrace
+
+      - name: Get Version Info
+        id: version_info
+        run: |
+          VERSION_NAME=$(grep 'versionName = ' app/build.gradle.kts | sed 's/.*versionName = "\(.*\)"/\1/')
+          BUILD_DATE=$(date +%Y%m%d)
+          echo "version_name=$VERSION_NAME" >> "$GITHUB_ENV"
+          echo "build_date=$BUILD_DATE" >> "$GITHUB_ENV"
+          echo "Version: $VERSION_NAME (Build: $BUILD_DATE)"
+
+      - name: Get Changelog For Current Version
+        id: changelog
+        env:
+          CHANGELOG_URL: ${{ secrets.CHANGELOG_URL }}
+        run: |
+          curl -sL "$CHANGELOG_URL" -o changelog.txt
+          VERSION_NAME="${{ env.version_name }}"
+          CHANGELOG=$(awk "/^v${VERSION_NAME}$/,/^---版本分割线----$/" changelog.txt | sed '1d;$d' | sed '/^$/d')
+          if [ -z "$CHANGELOG" ]; then
+            CHANGELOG="Please check the full changelog"
+          fi
+          echo "$CHANGELOG" > release_changelog.txt
+          echo "Found changelog for version $VERSION_NAME"
+
+      - name: Get APK Path And Info
+        id: apk_info
+        run: |
+          if [ "${{ env.SIGNING_PRESENT }}" == "true" ]; then
+            APK_PATH=$(find app/build/outputs/apk/release -name "*.apk" | head -n 1)
+          else
+            APK_PATH=$(find app/build/outputs/apk/debug -name "*.apk" | head -n 1)
+          fi
+          APK_NAME=$(basename "$APK_PATH")
+          echo "apk_path=$APK_PATH" >> "$GITHUB_ENV"
+          echo "apk_name=$APK_NAME" >> "$GITHUB_ENV"
+          echo "Found APK: $APK_NAME at $APK_PATH"
+
+      - name: Prepare Release Body
+        run: |
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          
+          cat > release_body.md << EOF
+          ## UFI-TOOLS v${{ env.version_name }}
+
+          **Build Date:** ${{ env.build_date }}
+          **Build Type:** ${{ env.SIGNING_PRESENT == 'true' && 'Release (Signed)' || 'Debug' }}
+          EOF
+
+          if [ -n "$PREV_TAG" ]; then
+            echo "**Changes:** [View commits from ${PREV_TAG} to v${{ env.version_name }}](https://github.com/${{ github.repository }}/compare/${PREV_TAG}...v${{ env.version_name }})" >> release_body.md
+          else
+            echo "**Commit:** ${{ github.sha }}" >> release_body.md
+            echo "**Note:** This is the first release" >> release_body.md
+          fi
+
+          cat >> release_body.md << EOF
+          **Branch:** ${{ github.ref_name }}
+          
+          ### 📝 更新日志 / Changelog
+          
+          EOF
+
+          cat release_changelog.txt >> release_body.md
+
+          cat >> release_body.md << EOF
+          
+          ---
+          
+          ### 📥 下载 / Download
+          Download the APK file below to install on your device.
+          EOF
+
+      - name: Upload APK To Release
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ env.version_name }}
+          name: v${{ env.version_name }}
+          body_path: release_body.md
+          draft: false
+          prerelease: false
+          files: ${{ env.apk_path }}
+
+      - name: Delete Old Workflow Runs
+        uses: Mattraks/delete-workflow-runs@v2
+        with:
+          retain_days: 1
+          keep_minimum_runs: 1

@@ -6073,6 +6073,10 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
 
     // 获取消息
     const initMessage = async () => {
+        // 已禁用：不再从 api.kanokano.cn 获取和发送消息数据
+        return null
+
+        /* 原代码已禁用
         if (!(await initRequestData())) {
             return null
         }
@@ -6125,6 +6129,7 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
                 }
             }
         } catch { }
+        */
     }
     initMessage()
 
@@ -6791,13 +6796,13 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
             if (!res) { throw new Error('No data') }
             let isGadgetMode = res.details.typec_mode == "gadget"
             el.innerHTML = `<div style="display: flex;margin-bottom:10px;flex-direction:column"><div>${t('max_speed')}：${isGadgetMode ? res.details.gadget_speed : formatSpeed(res.maxSpeed)}</div><div>${t('usb_status')}：${res.details.typec_mode}/${!isGadgetMode ? t('host_usb_exp') : t('device_usb_exp')}</div></div>
-                    <ul class="deviceList" style="display: flex;flex-direction: column;gap: 10px;">
-                        ${res.details.devices.map(device => `<li style="padding: 10px;">
-                            <div>${t('path')}：${device.path}</div>
-                            <div>${t('device_name')}： ${device.product}</div>
-                            <div>${t('speed')}：${formatSpeed(device.speed)}</div>
-                        </li>`).join('')}
-                    </ul>`.trim()
+            <ul class="deviceList" style="display: flex;flex-direction: column;gap: 10px;">
+                ${res.details.devices.map(device => `<li style="padding: 10px;">
+                    <div>${t('path')}：${device.path}</div>
+                    <div>${t('device_name')}： ${device.product}</div>
+                    <div>${t('speed')}：${formatSpeed(device.speed)}</div>
+                </li>`).join('')}
+            </ul>`.trim()
         } catch {
             el.innerHTML = `<div style="text-align:center;padding:20px 0">${t('no_usb_list')}</div>`
         }

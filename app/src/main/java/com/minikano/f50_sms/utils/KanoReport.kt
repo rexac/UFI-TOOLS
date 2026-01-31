@@ -51,6 +51,11 @@ class KanoReport {
             .build()
 
         suspend fun reportToServer() {
+            // 已禁用：不再向 api.kanokano.cn 发送数据
+            KanoLog.d("UFI_TOOLS_LOG_report_service","reportToServer 已禁用")
+            return
+            
+            /* 原代码已禁用
             try {
                 val uuid = UniqueDeviceIDManager.getUUID()?.trim()
                 if (uuid.isNullOrEmpty()) {
@@ -95,6 +100,7 @@ class KanoReport {
             } catch (e: Exception) {
                 KanoLog.e("UFI_TOOLS_LOG_report_service","上报失败:",e)
             }
+            */
         }
 
         data class Report(
@@ -109,6 +115,11 @@ class KanoReport {
         )
 
         suspend fun getRemoteDeviceRegisterItem(uuid: String): Report? = withContext(Dispatchers.IO) {
+            // 已禁用：不再从 api.kanokano.cn 获取数据
+            KanoLog.d("UFI_TOOLS_LOG_devcheck", "getRemoteDeviceRegisterItem 已禁用")
+            return@withContext null
+            
+            /* 原代码已禁用
             val client = OkHttpClient.Builder()
                 .dns(TimeoutDns(3000))
                 .callTimeout(3, TimeUnit.SECONDS)
@@ -142,6 +153,7 @@ class KanoReport {
                     isWhiteList = json.optBoolean("is_white_list", true)
                 )
             }
+            */
         }
     }
 }

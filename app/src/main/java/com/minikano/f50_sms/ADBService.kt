@@ -14,7 +14,7 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.minikano.f50_sms.utils.KanoLog
 import com.minikano.f50_sms.utils.KanoReport
-import com.minikano.f50_sms.utils.KanoReport.Companion.reportToServer
+// import com.minikano.f50_sms.utils.KanoReport.Companion.reportToServer
 import com.minikano.f50_sms.utils.KanoUtils
 import com.minikano.f50_sms.utils.KanoUtils.Companion.isUsbDebuggingEnabled
 import com.minikano.f50_sms.utils.RootShell
@@ -120,7 +120,7 @@ class ADBService : Service() {
                     rptRunning = true
                     try {
                         KanoLog.d("UFI_TOOLS_LOG", "周期性发送状态中...")
-                        reportToServer()
+                        // reportToServer() // 已禁用：不再向 api.kanokano.cn 发送数据
                     } catch (e: Exception) {
                         KanoLog.e("UFI_TOOLS_LOG", "发送状态时发生错误：", e)
                     } finally {

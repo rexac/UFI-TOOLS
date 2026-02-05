@@ -1337,9 +1337,10 @@
                                     style="text-align: center;width: 100%;flex:1;padding: 6px 10px;margin: 4px 0;">
                                 <button data-i18n="submit_btn" onclick="changeResServer(event)">提交</button>
                             </p>
-                            <div style="display: flex;flex-wrap: wrap;gap: 10px;">   
+                            <div style="display: flex;flex-wrap: wrap;gap: 10px;">
                                 <button onclick="event.preventDefault();resetTTYDPort()">RESET TTYD PORT</button>
-                                <button onclick="event.preventDefault();clearAPPUploadData()">Clear Uploaded Data</button>
+                                <button onclick="event.preventDefault();clearAPPUploadData()">Clear Uploaded
+                                    Data</button>
                                 <button class="btn" onclick="OP(event)">?</button>
                             </div>
                         </div>
@@ -1994,24 +1995,23 @@
                         </div>
                     </div>
                     <div class="title" style="font-size: 14px;display: flex;flex-direction: column;">
-                        <div style="display: flex;flex-wrap: wrap;gap: 10px;justify-content: center;">
-                            <button><a href="https://t.me/ufi_tools_chat" target="_blank" data-i18n="tg_group">点我加入TG群组:
-                                    @ufi_tools_chat</a></button>
-                            <button><a href="https://t.me/ufi_tools" target="_blank" data-i18n="tg_channel">TG频道:
-                                    @ufi_tools</a></button>
-                        </div>
-                        <button onclick="copyText(event)"><a
-                                href="https://link.trustwallet.com/send?coin=60&address=0xdf0503f26D83214d1D4895fC13E8913f52F47607&token_id=0xdAC17F958D2ee523a2206206994597C13D831ec7">USDT</a>
-                            0xdf0503f26D83214d1D4895fC13E8913f52F47607</button>
-
+                        <button style="width: 100%;"><a href="https://t.me/ufi_tools_chat" target="_blank" data-i18n="tg_group">点我加入TG群组:
+                                @ufi_tools_chat</a></button>
                     </div>
                     <div class="donate_content"
                         style="display: flex; flex-direction: row; justify-content: space-between; padding: 15px; width: 66vw; max-width: 400px; flex-wrap: wrap;">
-                        <img src="https://api.kanokano.cn/pay/zsm.png"
-                            style="width: 48%; height: auto; border-radius: 20px;"
-                            onerror="this.onerror=null; this.src='/img/zsm.png'" alt="">
-                        <img src="https://api.kanokano.cn/pay/group.png" style="width: 48%; height: auto; border-radius: 20px;"
-                            onerror="this.onerror=null; this.src='/img/zsm.webp'" alt="">
+
+                        <a href="https://api.kanokano.cn/pay/zsm.png" target="_blank"
+                            style="display:block;width: 48%; height: auto; border-radius: 20px;">
+                            <img src="https://api.kanokano.cn/pay/zsm.png"
+                                style="width: 100%; height: auto;border-radius: 20px;" alt="">
+                        </a>
+                        <a href="https://api.kanokano.cn/pay/group.png" target="_blank"
+                            style="display:block;width: 48%; height: auto; border-radius: 20px;">
+                            <img src="https://api.kanokano.cn/pay/group.png"
+                                style="width: 100%; height: auto;border-radius: 20px;" alt="">
+                        </a>
+
                     </div>
                 </div>
             </div>

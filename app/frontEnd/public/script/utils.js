@@ -13,6 +13,17 @@ const isArray = (raw) => {
     }
 }
 
+//检测是否启用高级功能
+const checkAdvancedFunc = async () => {
+    const res = await runShellWithRoot('whoami')
+    if (res.content) {
+        if (res.content.includes('root')) {
+            return true
+        }
+    }
+    return false
+}
+
 function requestInterval(callback, interval) {
     let lastTime = 0;
     let timeoutId = null;
@@ -617,7 +628,7 @@ Array.from(document.querySelectorAll('.mask'))?.forEach(el => {
         const classList = Array.from(e?.target?.classList || [])
         const id = e.target.id
         //维护一个黑名单，黑名单内的模态框不受影响
-        const blackList = ['updateSoftwareModal', "plugin_store", "APNViewModal", "APNEditModal"]
+        const blackList = ['updateSoftwareModal', "plugin_store", "APNViewModal", "APNEditModal", "advanceModal"]
         const isCloseable = !blackList.includes(id)
         if (classList && classList.includes('mask') && isCloseable) {
             if (id) {
@@ -888,7 +899,7 @@ const fillCurl = (kind) => {
             break;
         case 'bark':
             message = t('bark_sms_help')
-            curl_text.value = `curl -X POST "https://api.day.app/<你的token>" -H '"Content-Type: application/x-www-form-urlencoded"' -d '"title={{sms-from}}"' -d '"body=【短信内容】{{sms-body}}【时间】{{sms-time}}"'`
+            curl_text.value = `curl -X "POST" "https://api.day.app/<你的token>/" -H 'Content-Type: application/json; charset=utf-8' -d '{"body": "【短信内容】{{sms-body}}\\n【时间】{{sms-time}}", "title":"{{sms-from}}", "group": "UFI-TOOLS_SMS", "isArchive":1}'`
             break;
 
     }
@@ -1010,5 +1021,112 @@ const checkWeakToken = async () => {
     } catch (e) {
         console.error('checkWeakToken error:', e);
         return false;
+    }
+}
+
+const forceEnableOTABtn = (() => {
+    let count = 0
+    let timer = null
+    return () => {
+        count++
+        if (count < 5) {
+            if (timer) clearTimeout(timer)
+            timer = setTimeout(() => {
+                count = 0
+            }, 2000);
+            return
+        }
+        closeModal('#updateSoftwareModal');
+        createToast('Enabled! please reopen the update software modal again', 'pink');
+        UFI_FORCE_ENABLE_UPDATE = 1
+        count = 0
+    }
+})()
+
+
+const saveConfig = async (file, outputFile) => {
+    try {
+        const formData = new FormData();
+        formData.append("file", file);
+        const res = await (await fetch(`${KANO_baseURL}/upload_img`, {
+            method: "POST",
+            headers: common_headers,
+            body: formData,
+        })).json()
+
+        if (res.url) {
+            let foundFile = await runShellWithRoot(`
+                        ls /data/data/com.minikano.f50_sms/files/${res.url}
+                    `)
+            if (!foundFile.content) {
+                throw t('toast_upload_failed')
+            }
+            let resShell = await runShellWithRoot(`
+                        mv /data/data/com.minikano.f50_sms/files/${res.url} ${outputFile}
+                    `)
+            if (resShell.success) {
+                return true
+            }
+        }
+        else throw res.error || ''
+    }
+    catch (e) {
+        console.error(e);
+        return false
+    }
+}
+
+const handleEditBootScriptModal = async () => {
+    if (!(await checkAdvancedFunc())) {
+        createToast(t("need_advance_func"), 'pink')
+        return
+    }
+
+    const res = await runShellWithRoot(`
+        timeout 5s  awk '{print}' /sdcard/ufi_tools_boot.sh
+        `)
+    if (!res.success) return createToast(t('read_file_fail'), 'red')
+
+    closeAdvanceToolsModal()
+    const { el, close } = createFixedToast('kano_edit_ufi_boot_sh_message', `
+                <div style="pointer-events:all;width:80vw;max-width:800px;">
+                    <div class="title" style="margin:0" data-i18n="edit_boot_script">${t('edit_boot_script')}</div>
+                    <div style="margin:10px 0" class="inner"></div>
+                    <div style="text-align:right">
+                        <button style="font-size:.64rem" id="save_edit_ufi_boot_sh_message_btn" data-i18n="plugin_modal_submit_btn">${t('plugin_modal_submit_btn')}</button>
+                        <button style="font-size:.64rem" id="close_edit_ufi_boot_sh_message_btn" data-i18n="close_btn">${t('close_btn')}</button>
+                    </div>
+                </div>
+                `)
+
+    const textarea = document.createElement('textarea')
+    textarea.style.width = "100%"
+    textarea.style.height = "500px"
+    textarea.style.maxHeight = "60vh"
+    textarea.style.border = "none"
+    textarea.setAttribute('spellcheck', 'false')
+    textarea.placeholder = '#!/system/bin/sh\n# put script content here!!!\nsync\n\n'
+    textarea.value = res.content
+    el.querySelector('.inner').appendChild(textarea)
+    const btn = el.querySelector('#close_edit_ufi_boot_sh_message_btn')
+    const sbtn = el.querySelector('#save_edit_ufi_boot_sh_message_btn')
+    if (!btn) {
+        close()
+        return
+    }
+    btn.onclick = async () => {
+        close()
+    }
+    sbtn.onclick = async () => {
+        let v = textarea.value
+        if (!v || v.trim().length == 0) {
+            v = '#!/system/bin/sh\n# put script content here!!!\nsync\n\n'
+        }
+        const file = new File([v], "ufi_tools_boot.sh", { type: "text/plain" });
+        if (! await saveConfig(file, "/sdcard/ufi_tools_boot.sh")) {
+            return createToast(t('toast_save_failed'), 'pink')
+        }
+        createToast(t('toast_save_success_sync'), 'green')
+        close()
     }
 }

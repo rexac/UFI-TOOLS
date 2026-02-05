@@ -538,7 +538,7 @@
     "install_done": "安装程序运行结束",
     "reason": "原因",
     "error_please_reboot_devices": "请刷新网页或重启随身WIFI再试",
-    "adb_not_init": "ADB未初始化，请等待初始化完成",
+    "adb_not_init": "ADB未初始化，请等待初始化完成;或直接开启高级功能，享受极速安装！",
     "advanced_install": "检测到您已开启高级功能，已切换为极速更新模式",
     "fast_installing": "极速更新中",
     "download_request_failed": "下载请求失败，请检查网络连接",
@@ -684,7 +684,7 @@
     "tg_sms_help": "UFITOOLS TG机器人短信转发请求方法：<br>示例代码（CURL方式）：<br>curl -s -X POST https://api.telegram.org/bot<你的token>/sendMessage -H \"Content-Type: application/json\" -d '{\"chat_id\":你的聊天会话id,\"text\":\"{{sms-body}} {{sms-time}} {{sms-from}}\",\"parse_mode\":\"HTML\"}'<br>创建一个新 Bot<br>在 Telegram 里找 @BotFather<br>这是 Telegram 官方管理机器人的账号<br>打开搜索，输入 @BotFather，点它头像进入<br>和 BotFather 对话，先输入：/start<br>再输入：/newbot<br><br>按提示输入：<br>机器人的显示名称（随便取，比如 MyTestBot）<br>机器人的用户名（必须以 bot 结尾，比如 mytest_robot_bot）<br><br>BotFather 会返回一段信息，其中最重要的是：<br>Use this token to access the HTTP API:<br>123456789:ABCdefGhIJKlmNoPQRstuVWXyz<br>这一长串就是 Bot Token（发消息必须用它）<br><br>获取 Chat ID（收消息的人）<br>先用 Telegram 给你创建的 Bot 发送一条任意消息<br>然后访问：https://api.telegram.org/bot<你的BotToken>/getUpdates<br><br>在返回的 JSON 里找到：\"chat\": {<br>    \"id\": 987654321,<br>    \"first_name\": \"...\",<br>    ...<br>}<br>id 就是你的 chat_id",
     "wechat_sms_help": "企业微信 Webhook 短信转发教程：<br><br>获取群机器人 Key：在企业微信群里添加机器人，复制生成的 Webhook URL，形如 https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=你的key<br><br>使用 curl 发送短信，命令一行输入，不换行、不用 \\：<br>curl -X POST \"https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=<输入你的key>\" -H \"Content-Type: application/json\" -d '{\"msgtype\": \"text\", \"text\": {\"content\": \"【号码】{{sms-from}}\\n【短信内容】{{sms-body}}\\n【时间】{{sms-time}}\"}}'<br><br>参数说明：{{sms-from}} 短信来源号码，{{sms-body}} 短信内容，{{sms-time}} 接收时间。收到短信后替换变量即可发送到企业微信群。",
     "pushplus_sms_help": "PushPlus 短信转发教程：<br><br>获取 PushPlus Token：登录 https://www.pushplus.plus/ 注册账号，创建推送机器人，复制生成的 Token。<br><br>使用 curl 发送短信，命令一行输入，不换行、不用 \\：<br>curl -s -X POST https://www.pushplus.plus/send/ -H \"Content-Type: application/x-www-form-urlencoded\" -d \"token=<你的token>&title=有新消息！！&content=【短信内容】%0A{{sms-body}}%0A%0A**【时间】%0A{{sms-time}}%0A%0A【号码】**%0A{{sms-from}}&template=markdown\"<br><br>参数说明：{{sms-from}} 短信来源号码，{{sms-body}} 短信内容，{{sms-time}} 接收时间。收到短信后替换变量即可发送到 PushPlus。",
-    "bark_sms_help": "Bark 短信转发教程：<br><br>获取 Bark Token：在App Store下载Bark App，在服务器页找到自己的Token，复制Token。 <br><br> 参考：https://github.com/finb/bark<br><br>使用 curl 发送短信，命令一行输入，不换行、不用 \\：<br>curl -X POST \"https://api.day.app/<你的token>\" -H \"Content-Type: application/x-www-form-urlencoded\" -d \"title={{sms-from}}\" -d \"body=【短信内容】{{sms-body}}\\\\n【时间】{{sms-time}}\"<br><br>参数说明：{{sms-from}} 短信来源号码，{{sms-body}} 短信内容，{{sms-time}} 接收时间。收到短信后替换变量即可发送到 Bark。",
+    "bark_sms_help": "Bark 短信转发教程：<br><br>获取 Bark Token：在App Store下载Bark App，在服务器页找到自己的Token，复制Token。 <br><br> 参考：https://github.com/finb/bark<br>参数说明：{{sms-from}} 短信来源号码，{{sms-body}} 短信内容，{{sms-time}} 接收时间。收到短信后替换变量即可发送到 Bark。",
     "at_high_rail_mode": "高铁模式",
     "login_help_text": "为了保障设备安全，登录后台需要输入 口令 和 管理密码。\n1.\t口令\n•\t默认值为「admin」,为了设备安全请务必修改为复杂口令。\n•\t可以投屏进入 UFI-TOOLS_WEB 后台App 中修改口令，\n•\t点击”停止服务“后就可以看到修改口令的输入框。\n•\t也可以在网页中直接修改口令。\n\n2.\t管理密码\n•\t即设备的后台管理密码。\n•\t默认印在设备背面。\n\n3.\t登录方式\n•\t可以在下拉框选择 登录方式1 或 登录方式2。\n•\t如果一种方式提示密码错误，请尝试另一种方式。\n•\t方式 1 没有登录时效限制，性能更好，兼容性中等\n•\t方式 2 兼容性更好，但登录时效为5分钟（会自动重登，期间数据会卡顿0.5s）\n\n4.\t常见问题\n•\t如果提示“密码错误”：\n•\t确认输入是否正确（注意大小写）。\n•\t尝试切换登录方式。\n•\t如果遗忘密码，请查看设备背面的出厂信息，或恢复出厂设置。",
     "sleep_never": "不休眠",
@@ -743,5 +743,8 @@
     "three_days_later_info": "为了确保用户修改口令，三天后会继续提示",
     "remind_your_token": "保管你的口令",
     "remind_your_token_text": "请截图或妥善保管好你的口令，以防遗忘",
-    "force_update_desc": "注意：此为强显推送，即使更新过软件也会强制显示，如果你已经更新，请无视即可，一段时间后会自动关闭强显（通常在几小时后）"
+    "force_update_desc": "注意：此为强显推送，即使更新过软件也会强制显示，如果你已经更新，请无视即可，一段时间后会自动关闭强显（通常在几小时后）",
+    "read_file_fail": "读取文件失败",
+    "toast_save_failed": "保存失败",
+    "edit_boot_script": "编辑启动脚本"
 }

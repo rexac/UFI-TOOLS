@@ -13,6 +13,15 @@ const isArray = (raw) => {
     }
 }
 
+
+function openLink(link) {
+    if (!link) return
+    const a = document.createElement('a')
+    a.href = link
+    a.target = "_blank"
+    a.click()
+}
+
 //检测是否启用高级功能
 const checkAdvancedFunc = async () => {
     const res = await runShellWithRoot('whoami')
@@ -1128,5 +1137,71 @@ const handleEditBootScriptModal = async () => {
         }
         createToast(t('toast_save_success_sync'), 'green')
         close()
+    }
+}
+
+function validateAlphaAndNumber(input) {
+    const regex = /^[a-zA-Z0-9_.]+$/;
+    return regex.test(input);
+}
+
+//文件上传(100MB)
+async function uploadFileKano(file, needRename = false) {
+    if (file) {
+        console.log(file.name);
+        // 检查文件大小
+        if (file.size > 100 * 1024 * 1024) {
+            // MAX_SIZE MB
+            createToast(`${t('file_size_over_limit')} 100MB！`, 'red')
+        } else {
+            let closeFn = null
+            //上传
+            try {
+                const { el, close } = createFixedToast("uploading_file_kano", t('uploading'))
+                closeFn = close
+                const formData = new FormData();
+                formData.append("file", file);
+                const res = await (await fetch(`${KANO_baseURL}/upload_img`, {
+                    method: "POST",
+                    headers: common_headers,
+                    body: formData,
+                })).json()
+
+                if (res.url) {
+                    el.textContent = t("toast_upload_success")
+                    el.style.color = 'pink'
+                    const resFileName = res.url.replace("/uploads/", "")
+                    if (!resFileName) throw t('upload_success_but_cannot_detect_file_name')
+                    const regResult = validateAlphaAndNumber(file.name)
+                    console.log("文件名合法性测试结果：",regResult)
+                    //重命名
+                    if (needRename && regResult) {
+                        const res = await runShellWithUser(`mv /data/data/com.minikano.f50_sms/files/uploads/${resFileName} /data/data/com.minikano.f50_sms/files/uploads/${file.name}`)
+                        if (!res.success) {
+                            createToast(t('toast_oprate_failed'), 'red')
+                            return null
+                        }
+                        const res1 = await runShellWithUser(`ls /data/data/com.minikano.f50_sms/files/uploads/${file.name}`)
+                        if (!res1.success) {
+                            createToast(t('toast_oprate_failed'), 'red')
+                            return null
+                        }
+                        if (!res1.content || !res1.content.content || !res1.content.content.includes(file.name)) {
+                            createToast(t('rename_failed'), 'red')
+                            return null
+                        }
+                    }
+                    return (needRename && regResult) ? file.name : resFileName
+                }
+                else throw res.error || ''
+            }
+            catch (e) {
+                console.error(e);
+                createToast(t('toast_upload_failed'), 'red')
+                return null
+            } finally {
+                closeFn && closeFn()
+            }
+        }
     }
 }

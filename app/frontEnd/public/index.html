@@ -1072,7 +1072,7 @@
             </div>
             <!-- 主题背景模态框 -->
             <div class="modal" id="bgSettingModal"
-                style="overflow: hidden;width: 90%;max-width: 400px; display: flex;flex-direction: column;display: none;">
+                style="overflow: auto;width: 90%;max-width: 400px; display: flex;flex-direction: column;display: none;">
                 <div class="title" style="margin-bottom: 4px;" data-i18n="bg_setting_title">主题背景设置</div>
                 <div class="content" style="min-height: 450px;">
                     <div style="text-align: left;">
@@ -1145,7 +1145,7 @@
             <!-- 插件模态框 -->
             <div class="mask" id="PluginModal" style="display: none;">
                 <div class="modal" id="pluginDropZone"
-                    style="backdrop-filter: none;-webkit-backdrop-filter: none;padding: 18px;border: 2px solid transparent;overflow: hidden;width: 90%;max-width: 400px; display: flex;flex-direction: column;">
+                    style="backdrop-filter: none;-webkit-backdrop-filter: none;padding: 18px;border: 2px solid transparent;overflow: auto;width: 90%;max-width: 400px; display: flex;flex-direction: column;">
                     <div class="title" style="margin-bottom: 4px;"><span data-i18n="plugin_modal_title">插件功能</span> -
                         <span data-i18n="plugin_modal_num">插件数量</span><span id="PLUGINS_NUM">?</span>
                     </div>
@@ -1337,8 +1337,11 @@
                                     style="text-align: center;width: 100%;flex:1;padding: 6px 10px;margin: 4px 0;">
                                 <button data-i18n="submit_btn" onclick="changeResServer(event)">提交</button>
                             </p>
-                            <button onclick="event.preventDefault();resetTTYDPort()">RESET TTYD PORT</button>
-                            <button class="btn" onclick="OP(event)">?</button>
+                            <div style="display: flex;flex-wrap: wrap;gap: 10px;">   
+                                <button onclick="event.preventDefault();resetTTYDPort()">RESET TTYD PORT</button>
+                                <button onclick="event.preventDefault();clearAPPUploadData()">Clear Uploaded Data</button>
+                                <button class="btn" onclick="OP(event)">?</button>
+                            </div>
                         </div>
                         <div class="btn" style="text-align: right;margin-top: 6px;">
                             <button type="button" data-i18n="close_btn" onclick="closeModal('#TTYDModal')">关闭</button>
@@ -1459,7 +1462,7 @@
                                         </div>
                                     </div>
 
-                                    <div id="socat_status" class="title"
+                                    <div class="title socat_status"
                                         style="font-size: 12px;margin: 8px 0;margin-bottom: 0;"></div>
                                     <div class="adb_status title" style="font-size: 12px;margin: 4px 0;margin-top: 0;">
                                     </div>
@@ -1473,6 +1476,8 @@
                                         <button class="btn"
                                             onclick="disableButtonWhenExecuteFunc(event,handleDisableFOTA)"
                                             data-i18n="advance_disable_update">禁用更新</button>
+                                        <button onclick="handleEditBootScriptModal()"
+                                            data-i18n="edit_boot_script">编辑启动脚本</button>
                                         <button class="btn" onclick="disableButtonWhenExecuteFunc(event,handleShell)"
                                             data-i18n="advance_run_shell">一键执行shell脚本(非root)<br>(脚本需在/sdcard/one_click_shell.sh)</button>
                                         <button class="btn"
@@ -1638,8 +1643,11 @@
             <!-- 版本更新模态框 -->
             <div class="mask" id="updateSoftwareModal" style="display: none;">
                 <div class="modal" style="width: 90%; max-width: 800px;">
+                    <button onclick="forceEnableOTABtn()"
+                        style="opacity: 0;border-radius: 50%;position: absolute;right: 10px;top: 10px;">&nbsp;</button>
                     <div class="title" data-i18n="update_title">UFI-TOOLS 软件更新</div>
-                    <div style="font-size: 12px;margin-top: 10px;" class="adb_status title"></div>
+                    <div class="title socat_status" style="font-size: 12px;margin: 8px 0;margin-bottom: 0;"></div>
+                    <div style="font-size: 12px;margin-top: 0px;" class="adb_status title"></div>
                     <div class="title" style="font-size: 10px;margin-top: 10px;">
                         <div>
                             <i
@@ -1751,7 +1759,8 @@
                                         <span onclick="copyText(event)">{{sms-body}} {{sms-time}}
                                             {{sms-from}}</span>
                                     </div>
-                                    <div style="display: grid;gap: 10px;margin-top: 10px;grid-template-columns: 1fr 1fr;">
+                                    <div
+                                        style="display: grid;gap: 10px;margin-top: 10px;grid-template-columns: 1fr 1fr;">
                                         <button style="width: 100%;"
                                             onclick="event.preventDefault();fillCurl('tg')">Telegram</button>
                                         <button style="width: 100%;" onclick="event.preventDefault();fillCurl('wechat')"

@@ -524,7 +524,7 @@
     "install_done": "Cài đặt hoàn tất",
     "reason": "Reason",
     "error_please_reboot_devices": "Làm mới hoặc khởi động lại thiết bị",
-    "adb_not_init": "ADB chưa sẵn sàng, chờ...",
+    "adb_not_init": "ADB chưa được khởi tạo, vui lòng chờ hoàn tất khởi tạo; hoặc bật trực tiếp tính năng nâng cao để tận hưởng cài đặt siêu tốc!",
     "advanced_install": "Chế độ nâng cao, cập nhật nhanh",
     "fast_installing": "Đang cập nhật nhanh",
     "download_request_failed": "Tải xuống thất bại, kiểm tra mạng",
@@ -684,6 +684,7 @@
     "tg_sms_help": "Phương pháp chuyển tiếp SMS bằng bot TG UFITOOLS:<br>Mã ví dụ (CURL):<br>curl -s -X POST https://api.telegram.org/bot<token của bạn>/sendMessage -H \"Content-Type: application/json\" -d '{\"chat_id\":id chat của bạn,\"text\":\"{{sms-body}} {{sms-time}} {{sms-from}}\",\"parse_mode\":\"HTML\"}'<br>Tạo Bot mới<br>Tìm @BotFather trên Telegram<br>Đây là tài khoản quản lý bot chính thức của Telegram<br>Mở tìm kiếm, nhập @BotFather, nhấn vào avatar<br>Trò chuyện với BotFather, trước tiên nhập: /start<br>Sau đó nhập: /newbot<br><br>Theo hướng dẫn nhập:<br>Tên hiển thị bot (tùy ý, ví dụ MyTestBot)<br>Tên người dùng bot (phải kết thúc bằng bot, ví dụ mytest_robot_bot)<br><br>BotFather sẽ trả về thông tin, quan trọng nhất:<br>Use this token to access the HTTP API:<br>123456789:ABCdefGhIJKlmNoPQRstuVWXyz<br>Chuỗi dài này là Bot Token (bắt buộc để gửi tin nhắn)<br><br>Lấy Chat ID (người nhận)<br>Gửi một tin nhắn bất kỳ bằng Bot bạn vừa tạo<br>Sau đó truy cập: https://api.telegram.org/bot<BotToken của bạn>/getUpdates<br><br>Trong JSON trả về, tìm: \"chat\": {<br>    \"id\": 987654321,<br>    \"first_name\": \"...\",<br>    ...<br>}<br>id chính là chat_id của bạn",
     "wechat_sms_help": "Hướng dẫn chuyển tiếp SMS qua Webhook WeCom:<br><br>Lấy Key bot nhóm: Thêm bot vào nhóm WeCom và sao chép Webhook URL được tạo, ví dụ https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=key của bạn<br><br>Sử dụng curl gửi SMS, nhập trên một dòng, không xuống dòng, không cần \\:<br>curl -X POST \"https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=<nhập key của bạn>\" -H \"Content-Type: application/json\" -d '{\"msgtype\": \"text\", \"text\": {\"content\": \"【Số】{{sms-from}}\\n【Nội dung SMS】{{sms-body}}\\n【Thời gian】{{sms-time}}\"}}'<br><br>Giải thích tham số: {{sms-from}} số gửi, {{sms-body}} nội dung tin nhắn, {{sms-time}} thời gian nhận. Sau khi nhận SMS, thay biến để gửi tới nhóm WeCom.",
     "pushplus_sms_help": "Hướng dẫn chuyển tiếp SMS qua PushPlus:<br><br>Lấy Token PushPlus: Đăng nhập https://www.pushplus.plus/, đăng ký tài khoản, tạo bot push, sao chép Token tạo ra.<br><br>Sử dụng curl gửi SMS, nhập trên một dòng, không xuống dòng, không cần \\:<br>curl -s -X POST https://www.pushplus.plus/send/ -H \"Content-Type: application/x-www-form-urlencoded\" -d \"token=<token của bạn>&title=Tin nhắn mới!!&content=【Nội dung SMS】%0A{{sms-body}}%0A%0A**【Thời gian】%0A{{sms-time}}%0A%0A【Số】**%0A{{sms-from}}&template=markdown\"<br><br>Giải thích tham số: {{sms-from}} số gửi, {{sms-body}} nội dung tin nhắn, {{sms-time}} thời gian nhận. Thay biến sau khi nhận SMS để gửi tới PushPlus.",
+    "bark_sms_help": "Hướng dẫn chuyển tiếp SMS qua Bark:<br><br>Lấy Bark Token: Tải ứng dụng Bark trên App Store, vào trang máy chủ để tìm token của bạn và sao chép nó.<br><br>Tham khảo: https://github.com/finb/bark<br>Giải thích tham số: {{sms-from}} số gửi, {{sms-body}} nội dung SMS, {{sms-time}} thời gian nhận. Sau khi nhận SMS, thay các biến và gửi tới Bark.",
     "at_high_rail_mode": "Chế độ tàu cao tốc",
     "login_help_text": "Để bảo đảm an toàn cho thiết bị, khi đăng nhập vào hệ thống cần nhập Mật khẩu lệnh và Mật khẩu quản trị.\n1.\tMật khẩu lệnh\n•\tMặc định là \"admin\". Vui lòng đổi sang mật khẩu mạnh để bảo mật.\n•\tCó thể chiếu màn hình để mở ứng dụng UFI-TOOLS_WEB và đổi mật khẩu tại đó.\n•\tNhấn \"Dừng dịch vụ\" để hiển thị ô đổi mật khẩu.\n\n2.\tMật khẩu quản trị\n•\tĐây là mật khẩu quản lý hệ thống của thiết bị.\n•\tMặc định được in ở mặt sau thiết bị.\n\n3.\tPhương thức đăng nhập\n•\tCó thể chọn Phương thức 1 hoặc Phương thức 2 trong danh sách.\n•\tNếu một phương thức báo \"sai mật khẩu\", hãy thử phương thức kia.\n•\tPhương thức 1 không giới hạn thời gian, hiệu suất cao, tương thích trung bình.\n•\tPhương thức 2 tương thích tốt hơn, nhưng thời gian hiệu lực chỉ 5 phút (tự động đăng nhập lại, dữ liệu có thể bị đứng 0.5s).\n\n4.\tVấn đề thường gặp\n•\tNếu hiện \"Sai mật khẩu\":\n•\tKiểm tra nhập đúng chưa (phân biệt chữ hoa chữ thường).\n•\tThử đổi phương thức đăng nhập.\n•\tNếu quên mật khẩu, hãy xem thông tin in ở mặt sau thiết bị hoặc liên hệ quản trị viên.",
     "sleep_never": "Không",
@@ -741,5 +742,8 @@
     "three_days_later_info": "Để đảm bảo người dùng thay đổi mật khẩu, hệ thống sẽ tiếp tục nhắc lại sau 3 ngày.",
     "remind_your_token":"Bảo quản mật khẩu của bạn",
     "remind_your_token_text":"Vui lòng chụp ảnh màn hình hoặc giữ kỹ mật khẩu của bạn để phòng trường hợp quên.",
-    "force_update_desc": "Lưu ý: Đây là thông báo bắt buộc. Nếu đã cập nhật, hãy bỏ qua. Sẽ tự tắt sau vài giờ."
+    "force_update_desc": "Lưu ý: Đây là thông báo bắt buộc. Nếu đã cập nhật, hãy bỏ qua. Sẽ tự tắt sau vài giờ.",
+    "read_file_fail": "Đọc tệp thất bại",
+    "toast_save_failed": "Lưu thất bại",
+    "edit_boot_script": "Chỉnh sửa script khởi động"
 }

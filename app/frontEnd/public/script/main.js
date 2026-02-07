@@ -489,17 +489,6 @@ function main_func() {
         initTTYD()
     }
 
-    //检测是否启用高级功能
-    const checkAdvanceFunc = async () => {
-        const res = await runShellWithRoot('whoami')
-        if (res.content) {
-            if (res.content.includes('root')) {
-                return true
-            }
-        }
-        return false
-    }
-
     let toastTimer = null
     const onTokenConfirm = debounce(async () => {
         const createTimer = () => setTimeout(() => {
@@ -786,7 +775,7 @@ function main_func() {
         if (cachedDiagImeiQueryResult && cachedDiagImeiQueryResult != '') {
             return cachedDiagImeiQueryResult
         }
-        let isEnabled = await checkAdvanceFunc()
+        let isEnabled = await checkAdvancedFunc()
         if (isEnabled) {
             try {
                 const res = await runShellWithRoot(`/data/data/com.minikano.f50_sms/files/imei_reader`)
@@ -3156,14 +3145,16 @@ function main_func() {
     }
 
     const socatAlive = async () => {
-        let res = await checkAdvanceFunc()
+        let res = await checkAdvancedFunc()
         if (res) {
             let smb = document.querySelector('#SMB')
             smb && (smb.style.display = 'none')
         }
-        const socat_status = document.querySelector('#socat_status')
+        const socat_status = document.querySelectorAll('.socat_status')
         if (socat_status) {
-            socat_status.innerHTML = res ? `${t('advanced')}：🟢 ${t('advanced_tools_on')}` : `${t('advanced')}：🔴 ${t('advanced_tools_off')}`
+            socat_status.forEach(item => {
+                item.innerHTML = res ? `${t('advanced')}：🟢 ${t('advanced_tools_on')}` : `${t('advanced')}：🔴 ${t('advanced_tools_off')}`
+            })
         }
     }
     socatAlive()
@@ -3625,7 +3616,7 @@ function main_func() {
             // 检查文件大小
             if (file.size > MAX_SIZE * 1024 * 1024) {
                 // MAX_SIZE MB
-                createToast(`${t('file_size_over_limit')}${MAX_SIZE}MB！`, 'red')
+                createToast(`${t('toast_file_size_over_limit')}${MAX_SIZE}MB！`, 'red')
             } else {
 
                 //上传图片
@@ -3793,7 +3784,7 @@ function main_func() {
         doUpdateEl.innerHTML = t('one_click_update')
 
         // 是否启用高级功能
-        const isEnabledAdvanceFunc = await checkAdvanceFunc()
+        const isEnabledAdvanceFunc = await checkAdvancedFunc()
 
         if (!isEnabledAdvanceFunc) {
             let adb_status = await adbKeepAlive()
@@ -3882,6 +3873,7 @@ function main_func() {
         OTATextContent.innerHTML = t('checking_update')
         !silent && (changelogTextContent.innerHTML = '')
         !silent && showModal('#updateSoftwareModal')
+        !silent && (socatAlive())
 
         try {
             const content = await queryUpdate()
@@ -3934,6 +3926,14 @@ function main_func() {
                             doDownloadAPKEl.onclick = null
                             doUpdateEl.style.backgroundColor = 'var(--dark-btn-disabled-color)'
                             doDownloadAPKEl.style.backgroundColor = 'var(--dark-btn-disabled-color)'
+                        }
+                        //有强制更新字段，允许更新
+                        if (window.UFI_FORCE_ENABLE_UPDATE) {
+                            window.UFI_FORCE_ENABLE_UPDATE = false
+                            doUpdateEl.style.backgroundColor = 'var(--dark-btn-color)'
+                            doDownloadAPKEl.style.backgroundColor = 'var(--dark-btn-color)'
+                            doUpdateEl.onclick = () => handleUpdateSoftware(base_uri + name)
+                            doDownloadAPKEl.onclick = () => handleDownloadSoftwareLink(base_uri + name)
                         }
                     }
                     //获取changeLog
@@ -5286,7 +5286,7 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
         try {
             //看看是不是开启了高级功能
             AD_RESULT.innerHTML = `<strong class="green" style="font-size: 12px;">${t('disable_update_ing')}...</strong>`
-            if (await checkAdvanceFunc()) {
+            if (await checkAdvancedFunc()) {
                 createToast(t('toast_advanced_checked'), '')
                 let res0 = await runShellWithRoot("pm disable com.zte.zdm")
                 let res1 = await runShellWithRoot("pm uninstall -k --user 0 com.zte.zdm ")
@@ -5924,7 +5924,7 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
     }
 
     const handleForceIMEI = async () => {
-        if (!await checkAdvanceFunc()) return createToast(t("need_advance_func"), 'red')
+        if (!await checkAdvancedFunc()) return createToast(t("need_advance_func"), 'red')
         const AT_RESULT = document.querySelector('#AT_RESULT')
         if (AT_RESULT) {
             AT_RESULT.innerHTML = t('toast_running_please_wait')
@@ -6135,7 +6135,7 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
 
     const togglePort = async (port, flag, isBootup = false, v6 = false) => {
         try {
-            if (!await checkAdvanceFunc()) {
+            if (!await checkAdvancedFunc()) {
                 createToast(t("need_advance_func"), 'red');
                 return false;
             }
@@ -6205,7 +6205,7 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
     const dev_ipv6 = document.querySelector("#dev_ipv6")
 
     const toggleTTYD = async (flag) => {
-        if (!await checkAdvanceFunc()) return createToast(t("need_advance_func"), 'red')
+        if (!await checkAdvancedFunc()) return createToast(t("need_advance_func"), 'red')
         const bootUp = dev_bootup.checked
         const v6 = dev_ipv6.checked
         const res = togglePort("1146", flag, bootUp, v6)
@@ -6214,7 +6214,7 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
     }
 
     const toggleADBIP = async (flag) => {
-        if (!await checkAdvanceFunc()) return createToast(t("need_advance_func"), 'red')
+        if (!await checkAdvancedFunc()) return createToast(t("need_advance_func"), 'red')
         const bootUp = dev_bootup.checked
         const v6 = dev_ipv6.checked
         const res = togglePort("5555", flag, bootUp, v6)
@@ -6244,11 +6244,63 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
         if (port != '1146') {
             localStorage.setItem('ttyd_port', '1146')
             initTTYD && initTTYD()
+            createToast(t('toast_oprate_success'), '')
+        }
+    }
+    let clearUppBtnCounter = 0
+    let clearUppBtnTimer = null
+    const clearAPPUploadData = async () => {
+        clearUppBtnCounter++
+        if (clearUppBtnCounter <= 3) {
+            clearUppBtnTimer && clearTimeout(clearUppBtnTimer)
+            clearUppBtnTimer = setTimeout(() => {
+                clearUppBtnCounter = 0
+            }, 5000);
+            return createToast('Click {num} times to confirm'.replace('{num}', (4 - clearUppBtnCounter)), 'pink', 3000)
+        }
+        clearUppBtnCounter = 0
+
+        const res = await fetchWithTimeout(`${KANO_baseURL}/delete_all_uploads_data`, {
+            method: 'post',
+            headers: common_headers
+        })
+        const { result, deleted_list } = await res.json()
+        if (result != "success") {
+            createToast(t("toast_oprate_failed"), "red")
+            return
+        }
+        if (deleted_list) {
+            let listString = ''
+            for (let key in deleted_list) {
+                listString += `${key}: <b>${deleted_list[key] ? 'OK' : "FAILED"}</b><br>`
+            }
+            if (listString.trim() == '') {
+                createToast(t('toast_oprate_success'), '')
+                return
+            }
+            const { el, close } = createFixedToast('kano_del_appdata_success', `
+                <div style="pointer-events:all;width:80vw;max-width:400px;">
+                <div class="title" style="margin:0" data-i18n="system_notice">${t('system_notice')}</div>
+                <p>${listString}</p>
+                <div style="display:flex;gap:10px">
+                    <button id="confirm_kano_del_appdata_toast_btn" style="width:100%;font-size:.64rem;margin-top:5px" data-i18n="close_btn">${t("close_btn")}</button>
+                </div>
+                </div>
+                `, 'red')
+            const close_btn = el.querySelector("#confirm_kano_del_appdata_toast_btn")
+
+            if (close_btn) {
+                close_btn.onclick = () => {
+                    close()
+                }
+            }
+        } else {
+            createToast(t('toast_oprate_success'), '')
         }
     }
 
     const setPort = async (flag) => {
-        if (!await checkAdvanceFunc()) return createToast(t("need_advance_func"), 'red')
+        if (!await checkAdvancedFunc()) return createToast(t("need_advance_func"), 'red')
         const port = port_iptables.value
         const bootUp = dev_bootup.checked
         const v6 = dev_ipv6.checked
@@ -6937,6 +6989,7 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
     // initSimCardPin()
     //挂载方法到window
     const methods = {
+        clearAPPUploadData,
         closeUSBStatusModal,
         onCloseChangeTokenForm,
         handleChangeToken,

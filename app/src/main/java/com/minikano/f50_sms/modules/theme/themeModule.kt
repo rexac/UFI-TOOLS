@@ -7,13 +7,16 @@ import com.minikano.f50_sms.modules.auth.authenticatedRoute
 import com.minikano.f50_sms.utils.KanoLog
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.defaultForFilePath
 import io.ktor.http.content.PartData
 import io.ktor.http.content.forEachPart
 import io.ktor.http.content.streamProvider
 import io.ktor.server.application.call
-import io.ktor.server.http.content.staticFiles
+import io.ktor.server.request.path
 import io.ktor.server.request.receiveMultipart
 import io.ktor.server.request.receiveText
+import io.ktor.server.response.respond
+import io.ktor.server.response.respondBytes
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
@@ -21,8 +24,10 @@ import io.ktor.server.routing.post
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
 import org.json.JSONObject
 import java.io.File
+import java.io.FileNotFoundException
 import java.util.UUID
 
 @Serializable
@@ -48,8 +53,58 @@ val jsonFull = Json {
 
 fun Route.themeModule(context: Context) {
     val TAG = "[$BASE_TAG]_themeModule"
+    val uploadRoot = File(context.filesDir, "uploads")
+    
+    get("/api/uploads/{...}") {
+        val relativePath = (call.parameters["..."]
+        ?: call.request.path().removePrefix("/api/uploads/"))
+        .trim('/')
 
-    staticFiles("/api/uploads", File(context.filesDir, "uploads"))
+        if (relativePath.isBlank() || relativePath.startsWith("/") || relativePath.contains('\u0000')) {
+            call.respondText("403 Forbidden", status = HttpStatusCode.Forbidden)
+            return@get
+        }
+
+        val targetFile = File(uploadRoot, relativePath)
+
+        val baseCanonical = uploadRoot.canonicalFile
+        val targetCanonical = File(uploadRoot, relativePath).canonicalFile
+
+        val inRoot = targetCanonical.path == baseCanonical.path ||
+                targetCanonical.path.startsWith(baseCanonical.path + File.separator)
+
+        if (!inRoot) {
+            call.respondText("403 Forbidden", status = HttpStatusCode.Forbidden)
+            return@get
+        }
+
+        try {
+            if (!targetFile.exists() || !targetFile.isFile) {
+                call.respondText("404 Not Found", status = HttpStatusCode.NotFound)
+                return@get
+            }
+
+            val bytes = targetFile.inputStream().use { it.readBytes() }
+            val contentType = ContentType.defaultForFilePath(targetFile.name)
+            call.respondBytes(bytes, contentType = contentType)
+        } catch (e: SecurityException) {
+            KanoLog.e(TAG, "读取上传文件无权限: $relativePath", e)
+            call.respondText("403 Forbidden", status = HttpStatusCode.Forbidden)
+        } catch (e: FileNotFoundException) {
+            val rootCause = generateSequence<Throwable>(e) { it.cause }.last()
+            val isAccessDenied = rootCause.message?.contains("EACCES", ignoreCase = true) == true
+            if (isAccessDenied) {
+                KanoLog.e(TAG, "读取上传文件无权限(EACCES): $relativePath", e)
+                call.respondText("403 Forbidden", status = HttpStatusCode.Forbidden)
+            } else {
+                KanoLog.e(TAG, "上传文件不存在: $relativePath", e)
+                call.respondText("404 Not Found", status = HttpStatusCode.NotFound)
+            }
+        } catch (e: Exception) {
+            KanoLog.e(TAG, "读取上传文件失败: $relativePath", e)
+            call.respondText("500 Internal Server Error", status = HttpStatusCode.InternalServerError)
+        }
+    }
 
     authenticatedRoute(context) {
         //上传图片
@@ -105,16 +160,96 @@ fun Route.themeModule(context: Context) {
                 val body = call.receiveText()
                 val json = JSONObject(body)
 
-                val fileName = json.optString("file_name")
-                val uploadDir = File(context.filesDir, "uploads/$fileName")
-
-                if (uploadDir.exists()) {
-                    uploadDir.delete()
+                val fileName = json.optString("file_name").trim()
+                if (fileName.isBlank() || fileName.contains("..") || fileName.startsWith("/")) {
+                    call.respondText(
+                        """{"error":"非法文件名"}""",
+                        ContentType.Application.Json,
+                        HttpStatusCode.Forbidden
+                    )
+                    return@post
                 }
+
+                val baseDir = File(context.filesDir, "uploads")
+                val target = File(baseDir, fileName)
+
+                val baseCanonical = baseDir.canonicalPath.trimEnd(File.separatorChar)
+                val targetCanonical = target.canonicalPath
+                val inCanonicalRoot = targetCanonical == baseCanonical ||
+                        targetCanonical.startsWith("$baseCanonical${File.separator}")
+
+                val baseAbsolute = baseDir.absolutePath.trimEnd(File.separatorChar)
+                val targetAbsolute = target.absolutePath
+                val inAbsoluteRoot = targetAbsolute == baseAbsolute ||
+                        targetAbsolute.startsWith("$baseAbsolute${File.separator}")
+
+                if (!inCanonicalRoot && !inAbsoluteRoot) {
+                    call.respondText(
+                        """{"error":"非法路径"}""",
+                        ContentType.Application.Json,
+                        HttpStatusCode.Forbidden
+                    )
+                    return@post
+                }
+
+                if (target.exists() && target.isFile) {
+                    target.delete()
+                }
+
 
                 call.response.headers.append("Access-Control-Allow-Origin", "*")
                 call.respondText(
                     """{"result":"success"}""",
+                    ContentType.Application.Json,
+                    HttpStatusCode.OK
+                )
+
+            } catch (e: Exception) {
+                KanoLog.d(TAG, "删除出错： ${e.message}")
+                call.response.headers.append("Access-Control-Allow-Origin", "*")
+                call.respondText(
+                    """{"error":"删除出错: ${e.message}"}""",
+                    ContentType.Application.Json,
+                    HttpStatusCode.InternalServerError
+                )
+            }
+        }
+
+        //删除uploads下所有文件
+        @Serializable
+        data class DeleteAllUploadsResp(
+            val result: String,
+            val deleted_list: Map<String, Boolean>
+        )
+        post("/api/delete_all_uploads_data") {
+            try {
+                val result = mutableMapOf<String, Boolean>()
+                val baseDir = File(context.filesDir, "uploads")
+                val files = baseDir.listFiles()
+                if (files != null && files.isNotEmpty()) {
+                    files.forEach { file ->
+                        if(file.isFile){
+                            try{
+                                if(file.delete())
+                                    result[file.name] = true
+                                else {
+                                    KanoLog.d(TAG,"删除文件:${file.name}失败")
+                                    result[file.name] = false
+                                }
+                            } catch (e: Exception){
+                                KanoLog.e(TAG,"删除文件:${file.name}失败",e)
+                                result[file.name] = false
+                            }
+                        }
+                    }
+                }
+                val payload = DeleteAllUploadsResp(
+                    result = "success",
+                    deleted_list = result
+                )
+
+                call.respondText(
+                    Json.encodeToString(payload),
                     ContentType.Application.Json,
                     HttpStatusCode.OK
                 )

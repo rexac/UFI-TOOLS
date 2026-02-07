@@ -6,6 +6,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.defaultForFilePath
 import io.ktor.server.application.call
+import io.ktor.server.request.path
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondBytes
 import io.ktor.server.routing.Route
@@ -17,7 +18,10 @@ fun Route.staticFileModule(context: Context) {
     val TAG = "[$BASE_TAG]_staticFileModule"
 
     get("{...}") {
-        val rawPath = call.parameters.getAll("...")?.joinToString("/")?.trim('/') ?: ""
+        val rawPath = (
+            call.parameters["..."]
+                ?: call.request.path().removePrefix("/")
+            ).trim('/')
         val path = if (rawPath.isBlank()) "index.html" else rawPath
 
         if (path.contains("..")) {

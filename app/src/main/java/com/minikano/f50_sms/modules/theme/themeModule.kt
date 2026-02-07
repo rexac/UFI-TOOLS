@@ -16,7 +16,7 @@ import io.ktor.server.request.path
 import io.ktor.server.request.receiveMultipart
 import io.ktor.server.request.receiveText
 import io.ktor.server.response.respond
-import io.ktor.server.response.respondBytes
+import io.ktor.server.response.respondFile
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
@@ -60,12 +60,16 @@ fun Route.themeModule(context: Context) {
         ?: call.request.path().removePrefix("/api/uploads/"))
         .trim('/')
 
+        KanoLog.d(TAG, "uploads资源_relativePath: $relativePath")
+
         if (relativePath.isBlank() || relativePath.startsWith("/") || relativePath.contains('\u0000')) {
+            KanoLog.e(TAG, "读取上传文件路径测试失败: $relativePath")
             call.respondText("403 Forbidden", status = HttpStatusCode.Forbidden)
             return@get
         }
 
         val targetFile = File(uploadRoot, relativePath)
+        KanoLog.d(TAG, "uploads资源_targetFile: $targetFile")
 
         val baseCanonical = uploadRoot.canonicalFile
         val targetCanonical = File(uploadRoot, relativePath).canonicalFile
@@ -74,6 +78,7 @@ fun Route.themeModule(context: Context) {
                 targetCanonical.path.startsWith(baseCanonical.path + File.separator)
 
         if (!inRoot) {
+            KanoLog.e(TAG, "读取上传文件路径inRoot测试失败: $relativePath")
             call.respondText("403 Forbidden", status = HttpStatusCode.Forbidden)
             return@get
         }
@@ -84,9 +89,7 @@ fun Route.themeModule(context: Context) {
                 return@get
             }
 
-            val bytes = targetFile.inputStream().use { it.readBytes() }
-            val contentType = ContentType.defaultForFilePath(targetFile.name)
-            call.respondBytes(bytes, contentType = contentType)
+            call.respondFile(targetFile)
         } catch (e: SecurityException) {
             KanoLog.e(TAG, "读取上传文件无权限: $relativePath", e)
             call.respondText("403 Forbidden", status = HttpStatusCode.Forbidden)

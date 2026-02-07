@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <link rel="icon" type="image/svg+xml" href="./favicon.webp">
+    <link rel="icon" type="image/svg+xml" href="/favicon.webp">
     <title id="TITLE">UFI-TOOLS-WEB</title>
     <link rel="manifest" href="/manifest.json">
     <link rel="stylesheet" href="/style/style.css">
@@ -1285,62 +1285,70 @@
             <div class="mask" id="TTYDModal" style="display: none">
                 <div class="modal" style="width: 90%;max-width: 400px; display: flex;flex-direction: column;">
                     <form id="TTYDForm" onsubmit="handleTTYDFormSubmit(event)">
-                        <div class="title" style="margin-bottom: 4px;">Development Menu</div>
+                        <div class="title" style="margin-bottom: 4px;" data-i18n="dev_menu">开发者菜单</div>
                         <div style="text-align: left;margin-top: 10px;font-size: .8rem;">
-                            <div style="font-size: .75rem;margin-bottom: 10px;" class="title"><i>Some options need
-                                    advanced function</i>
+                            <div style="font-size: .75rem;margin-bottom: 10px;" class="title"><i
+                                    data-i18n="need_advanced_func_use_dev_menu">有些特性需要开启高级功能才能使用</i>
                             </div>
                             <div style="display: flex;gap: 10px;;">
-                                <label style="display: flex;align-items: center;">
-                                    Boot up <input type="checkbox" name="" id="dev_bootup">
+                                <label style="display: flex;align-items: center;"><span
+                                        data-i18n="auto_apply_boot">开机自动应用</span><input type="checkbox" name=""
+                                        id="dev_bootup">
                                 </label>
-                                <label style="display: flex;align-items: center;">
-                                    Also IPV6 <input type="checkbox" name="" id="dev_ipv6">
+                                <label style="display: flex;align-items: center;"><span
+                                        data-i18n="also_apply_to_ipv6">也应用到ipv6</span><input type="checkbox" name=""
+                                        id="dev_ipv6">
                                 </label>
                             </div>
-                            <div style="display: flex;gap: 10px;margin: 10px 0;">
+                            <div style="display: flex;gap: 10px;margin: 10px 0;align-items: center;">
+                                <span data-i18n="port">端口：</span>
                                 <input placeholder="1234" id="port_iptables" style="padding: 6px;flex: 1;width: 100%;"
                                     type="number">
-                                <button onclick="event.preventDefault();setPort(true)">Accept</button>
-                                <button onclick="event.preventDefault();setPort(false)">Deny</button>
+                                <button onclick="event.preventDefault();setPort(true)"
+                                    data-i18n="accept_firewall">放行</button>
+                                <button onclick="event.preventDefault();setPort(false)"
+                                    data-i18n="deny_firewall">阻止</button>
                             </div>
                             <hr style="background-color: pink;" />
                             <div style="display: flex;gap: 10px;margin: 10px 0;">
-                                <button style="width: 100%;" onclick="event.preventDefault();toggleTTYD(true)">Enable
-                                    TTYD</button>
-                                <button style="width: 100%;" onclick="event.preventDefault();toggleTTYD(false)">Disable
-                                    TTYD</button>
+                                <button style="width: 100%;" onclick="event.preventDefault();toggleTTYD(true)"
+                                    data-i18n="enable_ttyd_port">启用TTYD端口</button>
+                                <button style="width: 100%;" onclick="event.preventDefault();toggleTTYD(false)"
+                                    data-i18n="disable_ttyd_port">禁用TTYD端口</button>
                             </div>
                             <div style="display: flex;gap: 10px;margin: 10px 0;">
-                                <button style="width: 100%;" onclick="event.preventDefault();toggleADBIP(true)">Enable
-                                    ADB
-                                    5555</button>
-                                <button style="width: 100%;" onclick="event.preventDefault();toggleADBIP(false)">Disable
-                                    ADB
-                                    5555</button>
+                                <button style="width: 100%;" onclick="event.preventDefault();toggleADBIP(true)"
+                                    data-i18n="enable_adb_tcpip_port">启用无线ADB端口</button>
+                                <button style="width: 100%;" onclick="event.preventDefault();toggleADBIP(false)"
+                                    data-i18n="disable_adb_tcpip_port">禁用无线ADB端口</button>
                             </div>
                             <div style="display: flex;gap: 10px;margin: 10px 0;">
-                                <button style="width: 100%;" onclick="event.preventDefault();toggleLogCat(true)">Enable
-                                    LogCat</button>
-                                <button style="width: 100%;"
-                                    onclick="event.preventDefault();toggleLogCat(false)">Disable LogCat
-                                </button>
+                                <button style="width: 100%;" onclick="event.preventDefault();toggleLogCat(true)"
+                                    data-i18n="enable_log">启用Log</button>
+                                <button style="width: 100%;" onclick="event.preventDefault();toggleLogCat(false)"
+                                    data-i18n="disable_log">禁用Log</button>
                             </div>
-                            <p style="display: flex;flex-wrap: nowrap;align-items: center;gap: 4px;">TTYD Port
-                                (default:1146)：<input name="ttyd_port" placeholder="1145" type="number" id="TTYD_INPUT"
+                            <p style="display: flex;flex-wrap: nowrap;align-items: center;gap: 4px;">
+                                <span data-i18n="ttyd_port">TTYD 端口
+                                    (默认:1146)：</span><input name="ttyd_port" placeholder="1145" type="number"
+                                    id="TTYD_INPUT"
                                     style="text-align: center;width: 100%;;flex:1;padding: 6px 10px;margin: 4px 0;">
                                 <button type="submit" data-i18n="submit_btn">提交</button>
                             </p>
-                            <p style="display: flex;flex-wrap: nowrap;align-items: center;gap: 4px;">Res Server：<input
-                                    name="resources_server" placeholder="https://pan.rexe.cc" type="text"
-                                    id="RES_SERVER_INPUT"
+                            <p style="display: flex;flex-wrap: nowrap;align-items: center;gap: 4px;"><span
+                                    data-i18n="resources_server">资源服务器：</span><input name="resources_server"
+                                    placeholder="https://pan.rexe.cc" type="text" id="RES_SERVER_INPUT"
                                     style="text-align: center;width: 100%;flex:1;padding: 6px 10px;margin: 4px 0;">
                                 <button data-i18n="submit_btn" onclick="changeResServer(event)">提交</button>
                             </p>
-                            <div style="display: flex;flex-wrap: wrap;gap: 10px;">   
-                                <button onclick="event.preventDefault();resetTTYDPort()">RESET TTYD PORT</button>
-                                <button onclick="event.preventDefault();clearAPPUploadData()">Clear Uploaded Data</button>
-                                <button class="btn" onclick="OP(event)">?</button>
+                            <div style="display: flex;flex-wrap: wrap;gap: 10px;">
+                                <button onclick="event.preventDefault();resetTTYDPort()"
+                                    data-i18n="reset_ttyd_port">重置TTYD端口</button>
+                                <button onclick="event.preventDefault();clearAPPUploadData()"
+                                    data-i18n="clear_uploads_file">清除所有上传的文件</button>
+                                <button class="btn" onclick="event.preventDefault();handleOpenUploadFilesList()"
+                                    data-i18n="upload_file_manager">上传文件管理</button>
+                                <button class="btn" onclick="event.preventDefault();OP(event)">?</button>
                             </div>
                         </div>
                         <div class="btn" style="text-align: right;margin-top: 6px;">
@@ -1994,24 +2002,26 @@
                         </div>
                     </div>
                     <div class="title" style="font-size: 14px;display: flex;flex-direction: column;">
-                        <div style="display: flex;flex-wrap: wrap;gap: 10px;justify-content: center;">
-                            <button><a href="https://t.me/ufi_tools_chat" target="_blank" data-i18n="tg_group">点我加入TG群组:
-                                    @ufi_tools_chat</a></button>
-                            <button><a href="https://t.me/ufi_tools" target="_blank" data-i18n="tg_channel">TG频道:
-                                    @ufi_tools</a></button>
-                        </div>
-                        <button onclick="copyText(event)"><a
-                                href="https://link.trustwallet.com/send?coin=60&address=0xdf0503f26D83214d1D4895fC13E8913f52F47607&token_id=0xdAC17F958D2ee523a2206206994597C13D831ec7">USDT</a>
-                            0xdf0503f26D83214d1D4895fC13E8913f52F47607</button>
-
+                        <button style="width: 100%;"><a href="https://t.me/ufi_tools_chat" target="_blank"
+                                data-i18n="tg_group">点我加入TG群组:
+                                @ufi_tools_chat</a></button>
                     </div>
                     <div class="donate_content"
                         style="display: flex; flex-direction: row; justify-content: space-between; padding: 15px; width: 66vw; max-width: 400px; flex-wrap: wrap;">
-                        <img src="https://api.kanokano.cn/pay/zsm.png"
-                            style="width: 48%; height: auto; border-radius: 20px;"
-                            onerror="this.onerror=null; this.src='/img/zsm.png'" alt="">
-                        <img src="/img/qq_group.png" style="width: 48%; height: auto; border-radius: 20px;"
-                            onerror="this.onerror=null; this.src='/img/zsm.webp'" alt="">
+
+                        <a href="https://api.kanokano.cn/pay/zsm.png" target="_blank"
+                            style="display:flex;width: 48%; height: auto; border-radius: 20px;">
+                            <img src="https://api.kanokano.cn/pay/zsm.png"
+                                style="flex:1;width: 100%; height: auto;border-radius: 20px;" alt=""
+                                onerror="this.onerror=null; this.src='/img/zsm.png'">
+                        </a>
+                        <a href="https://api.kanokano.cn/pay/group.png" target="_blank"
+                            style="display:flex;width: 48%; height: auto; border-radius: 20px;">
+                            <img src="https://api.kanokano.cn/pay/group.png"
+                                style="flex:1;width: 100%; height: auto;border-radius: 20px;" alt=""
+                                onerror="this.onerror=null; this.src='/img/group.png'">
+                        </a>
+
                     </div>
                 </div>
             </div>

@@ -2857,10 +2857,12 @@ function main_func() {
     let ttyd_timer = null
     let enableTTYD = () => {
         click_count_ttyd++
-        if (click_count_ttyd == 4) {
+        if (click_count_ttyd >= 4) {
             // 启用ttyd弹窗
             initResServer()
             showModal('#TTYDModal')
+            ttyd_timer && clearInterval(ttyd_timer)
+            click_count_ttyd = 1
         }
         ttyd_timer && clearInterval(ttyd_timer)
         ttyd_timer = setTimeout(() => {
@@ -6887,6 +6889,107 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
         })
     }
 
+    const handleOpenUploadFilesList = async () => {
+        let res = await runShellWithUser(`ls /data/data/com.minikano.f50_sms/files/uploads/`)
+        if (!res.success) return createToast(t('read_file_fail'), 'red')
+        if (res.content && res.content.content && res.content.content.split("\n") && res.content.content.split("\n").length) {
+            let { el, close } = createFixedToast('kano_edit_ufi_media_file_list_message', `
+                <div style="pointer-events:all;width:90vw;max-width:800px;">
+                    <div class="title" style="margin:0" data-i18n="file_manager">${t("file_manager")}</div>
+                    <div style="margin:10px 0;display: flex;flex-direction: column;gap: 6px;max-height: 50vh;overflow: auto;font-size: .7rem;" class="inner">
+                      ${res.content.content.split('\n').map(item => (item.trim() ? `<div class="kano_uploads_file_item" data-item="${item}" style="padding: 10px 10px;background: var(--dark-tag-color);border-radius: 6px;display:flex;align-items: center;">
+                      <span onclick="copyText({target:{innerText:'/api/uploads/${item}'}})" style="flex:1;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;">${item}</span>
+                      <button style="margin-right:6px;padding: 0;display: flex;" onclick="downloadUrl('/api/uploads/${item}','${item}')"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" t="1770319174878" viewBox="0 0 1024 1024" version="1.1" p-id="1583" width="20" height="20"><path d="M896 672c-17.066667 0-32 14.933333-32 32v128c0 6.4-4.266667 10.666667-10.666667 10.666667H170.666667c-6.4 0-10.666667-4.266667-10.666667-10.666667v-128c0-17.066667-14.933333-32-32-32s-32 14.933333-32 32v128c0 40.533333 34.133333 74.666667 74.666667 74.666667h682.666666c40.533333 0 74.666667-34.133333 74.666667-74.666667v-128c0-17.066667-14.933333-32-32-32z" fill="var(--dark-text-color)" p-id="1584"/><path d="M488.533333 727.466667c6.4 6.4 14.933333 8.533333 23.466667 8.533333s17.066667-2.133333 23.466667-8.533333l213.333333-213.333334c12.8-12.8 12.8-32 0-44.8-12.8-12.8-32-12.8-44.8 0l-157.866667 157.866667V170.666667c0-17.066667-14.933333-32-32-32s-34.133333 14.933333-34.133333 32v456.533333L322.133333 469.333333c-12.8-12.8-32-12.8-44.8 0-12.8 12.8-12.8 32 0 44.8l211.2 213.333334z" fill="var(--dark-text-color)" p-id="1585"/></svg></button>
+                      <button style="margin-right:6px;padding: 0;display: flex;" onclick="openLink('/api/uploads/${item}')"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" t="1770319810359" viewBox="0 0 1024 1024" version="1.1" p-id="3490" width="20" height="20"><path d="M942.2 486.2C847.4 286.5 704.1 186 512 186c-192.2 0-335.4 100.5-430.2 300.3-7.7 16.2-7.7 35.2 0 51.5C176.6 737.5 319.9 838 512 838c192.2 0 335.4-100.5 430.2-300.3 7.7-16.2 7.7-35 0-51.5zM512 766c-161.3 0-279.4-81.8-362.7-254C232.6 339.8 350.7 258 512 258c161.3 0 279.4 81.8 362.7 254C791.5 684.2 673.4 766 512 766z" p-id="3491" fill="var(--dark-text-color)"/><path d="M508 336c-97.2 0-176 78.8-176 176s78.8 176 176 176 176-78.8 176-176-78.8-176-176-176z m0 288c-61.9 0-112-50.1-112-112s50.1-112 112-112 112 50.1 112 112-50.1 112-112 112z" p-id="3492" fill="var(--dark-text-color)"/></svg></button>
+                      <button class="delete_file" style="padding: 0;display: flex;"><svg width="20px" height="20px" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"><path fill="var(--dark-text-color)" d="M736 352.032L736.096 800h-0.128L288 799.968 288.032 352 736 352.032zM384 224h256v64h-256V224z m448 64h-128V202.624C704 182.048 687.232 160 640.16 160h-256.32C336.768 160 320 182.048 320 202.624V288H192a32 32 0 1 0 0 64h32V799.968C224 835.296 252.704 864 288.032 864h447.936A64.064 64.064 0 0 0 800 799.968V352h32a32 32 0 1 0 0-64z"></path><path fill="var(--dark-text-color)" d="M608 690.56a32 32 0 0 0 32-32V448a32 32 0 1 0-64 0v210.56a32 32 0 0 0 32 32M416 690.56a32 32 0 0 0 32-32V448a32 32 0 1 0-64 0v210.56a32 32 0 0 0 32 32"></path></svg></button></div>` : "")).join('')}
+                    </div>
+                    <div style="text-align:right">
+                        <button style="font-size:.64rem" id="upload_media_file_btn" data-i18n="upload_file_limit_100mb">${t('upload_file_limit_100mb')}</button>
+                        <button style="font-size:.64rem" id="close_edit_media_file_list_message_btn" data-i18n="close_btn">${t('close_btn')}</button>
+                    </div>
+                </div>
+                `)
+
+            //文件列表
+            let filesEl = document.querySelectorAll('#kano_edit_ufi_media_file_list_message .kano_uploads_file_item')
+            filesEl.forEach(el => {
+                let data = el.dataset.item
+                if (data && data.trim()) {
+                    let elBtn = el.querySelector('.delete_file')
+                    if (!elBtn) return
+                    let delCountDown = 3
+                    let delTimer = null
+                    elBtn.onclick = async () => {
+                        let delFile = data.trim()
+                        delCountDown--
+                        delTimer && clearTimeout(delTimer)
+                        delTimer = setTimeout(() => {
+                            delCountDown = 3
+                        }, 3000);
+                        if (delCountDown > 0) {
+                            createToast(t('click_times_to_delete').replaceAll("$count$", ` ${delCountDown} `))
+                            return
+                        }
+                        delCountDown = 3
+                        try {
+                            const { result, error } = await (await fetchWithTimeout(`${KANO_baseURL}/delete_img`, {
+                                method: "POST",
+                                headers: common_headers,
+                                body: JSON.stringify({
+                                    file_name: delFile
+                                })
+                            })).json()
+                            if (result == "success") {
+                                createToast(t('toast_delete_success'), "pink")
+                                el.remove()
+                            } else {
+                                createToast(t('toast_delete_failed') + error, "red")
+                            }
+                        } catch (e) {
+                            createToast(t('toast_delete_failed') + e, "red")
+                        }
+                    }
+                }
+            })
+            let btn = el.querySelector('#close_edit_media_file_list_message_btn')
+            let uploadBtn = el.querySelector('#upload_media_file_btn')
+
+            if (!btn) {
+                close()
+                return
+            }
+            btn.onclick = async () => {
+                close()
+            }
+
+            if (uploadBtn) {
+                uploadBtn.onclick = () => {
+                    let fileInput = document.createElement('input')
+                    fileInput.type = "file"
+                    const handleFileChange = async (event) => {
+                        let file = event.target.files[0];
+                        if (!file) return
+                        let url = await uploadFileKano(file, true)
+                        if (!url) return
+                        createToast(`${url} ${t('toast_upload_success')}!`, "pink", 8000)
+                        close()
+                        setTimeout(() => {
+                            handleOpenUploadFilesList()
+                        }, 400);
+                        fileInput.removeEventListener('change', handleFileChange);
+                        fileInput = null;
+                    }
+                    fileInput.addEventListener('change', handleFileChange)
+                    fileInput.click()
+                }
+            }
+
+
+        } else {
+            createToast(t('no_file'), 'pink')
+        }
+    }
+
     //官方后台貌似对PIN超出次数的判定有问题，PIN次数用完后提示输入PUK，此时换卡也不会变更状态，用户只能恢复出厂设置，所以此功能不会继续实现
     // let simCardPinDisabled = false
     // const initSimCardPin = async () => {
@@ -6989,6 +7092,7 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
     // initSimCardPin()
     //挂载方法到window
     const methods = {
+        handleOpenUploadFilesList,
         clearAPPUploadData,
         closeUSBStatusModal,
         onCloseChangeTokenForm,

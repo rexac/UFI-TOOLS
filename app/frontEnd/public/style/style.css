@@ -1036,6 +1036,13 @@ input[type="range"] {
     justify-self: start;
     margin-bottom: 10px;
     margin-top: 20px;
+    transition: all .3s;
+    padding-right: 2px;
+}
+
+.main-title:active {
+    background-color: var(--dark-btn-color);
+    border-radius: 6px;
 }
 
 .cpu-card .signal_bar {

@@ -116,7 +116,10 @@
     "carrier_telecom": "电信",
     "carrier_mobile": "移动",
     "carrier_broadcast_mobile": "广电/移动",
-    "current_cell": "当前连接",
+    "current_cell": "当前基站",
+    "no_locked_cell": "暂无被锁定的基站",
+    "no_cell_connected": "当前未连接基站",
+    "no_neighbour_cell": "暂无邻区基站",
     "select_current_cell": "选择当前基站",
     "network_status": "网络状态",
     "wifi_client_num": "WIFI连接",
@@ -771,5 +774,15 @@
     "ttyd_port":"TTYD 端口(默认:1146)：",
     "resources_server":"资源服务器：",
     "reset_ttyd_port":"重置TTYD端口",
-    "clear_uploads_file":"清除所有上传的文件"
+    "clear_uploads_file":"清除所有上传的文件",
+    "network_conn_info": "网络连接信息",
+    "total_conn_count": "总连接数(除UNIX)",
+    "tcp_conn_active": "TCP连接(活跃)",
+    "tcp_conn_other": "TCP连接(其他)",
+    "tcp_conn_total": "TCP连接",
+    "tcp6_conn_total": "TCP6连接",
+    "udp_conn_total": "UDP连接",
+    "udp6_conn_total": "UDP6连接",
+    "unix_conn_total": "UNIX连接",
+    "other_protocols":"其他协议"
 }

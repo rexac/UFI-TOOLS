@@ -117,6 +117,9 @@
     "carrier_mobile": "Mobile",
     "carrier_broadcast_mobile": "Broadcast/Mobile",
     "current_cell": "Cell hiện tại",
+    "no_locked_cell": "Không có trạm bị khóa",
+    "no_cell_connected": "Chưa kết nối trạm",
+    "no_neighbour_cell": "Không có trạm lân cận",
     "network_status": "Mạng",
     "wifi_client_num": "Số thiết bị WiFi",
     "charging": "Đang sạc",
@@ -770,5 +773,15 @@
     "ttyd_port": "Cổng TTYD (mặc định: 1146):",
     "resources_server": "Máy chủ tài nguyên:",
     "reset_ttyd_port": "Đặt lại cổng TTYD",
-    "clear_uploads_file": "Xóa tất cả tệp đã tải lên"
+    "clear_uploads_file": "Xóa tất cả tệp đã tải lên",
+    "network_conn_info": "Thông tin kết nối mạng",
+    "total_conn_count": "Tổng kết nối (trừ UNIX)",
+    "tcp_conn_active": "TCP (hoạt động)",
+    "tcp_conn_other": "TCP (khác)",
+    "tcp_conn_total": "TCP",
+    "tcp6_conn_total": "TCP6",
+    "udp_conn_total": "UDP",
+    "udp6_conn_total": "UDP6",
+    "unix_conn_total": "UNIX",
+    "other_protocols": "Giao thức khác"
 }

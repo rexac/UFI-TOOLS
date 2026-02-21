@@ -779,16 +779,16 @@ const isPromise = (obj = null) => {
     )
 }
 
-const createModal = ({ name, noBlur, isMask, title, maxWidth, content, contentStyle, confirmBtnText = t('submit_btn'), closeBtnText = t('close_btn'), onClose, onConfirm }) => {
+const createModal = ({ name, noBlur, isMask, title, titleI18nKey = "", maxWidth, content, contentStyle, showConfirm = true, confirmBtnText = t('submit_btn'), closeBtnText = t('close_btn'), onClose, onConfirm }) => {
     const html = `
     <div class="title" style="width: 100%;display: flex;justify-content:space-between;">
-    <span>${title}</span>
+    <span data-i18n="${titleI18nKey}">${title}</span>
     </div>
     <div class="content" style="${contentStyle ? contentStyle : ''};margin:10px 0;">
        ${content}
     </div>
     <div class="btn" style="text-align: right;margin-top: 6px;">
-        <button id="${name}_confirm" type="button" >${confirmBtnText}</button>
+        ${showConfirm ? `<button id="${name}_confirm" type="button" >${confirmBtnText}</button>` : ''}
         <button id="${name}_close" type="button" >${closeBtnText}</button>
     </div>
 `
@@ -816,7 +816,7 @@ const createModal = ({ name, noBlur, isMask, title, maxWidth, content, contentSt
             }
             const inner = document.createElement('div')
             inner.style.maxWidth = maxWidth ? maxWidth : '600px'
-            inner.style.width = "80%"
+            inner.style.width = "90%"
             inner.className = 'modal'
             mod.appendChild(inner)
             inner.innerHTML = html
@@ -830,8 +830,7 @@ const createModal = ({ name, noBlur, isMask, title, maxWidth, content, contentSt
 
         const confirm = mod.querySelector(`#${name}_confirm`)
         const close = mod.querySelector(`#${name}_close`)
-        const debounceRemoveEl = debounce(() => mod.remove(), 1000)
-        if (confirm) {
+        if (confirm && showConfirm) {
             confirm.onclick = async (e) => {
                 e.preventDefault()
                 if (onConfirm) {
@@ -842,8 +841,9 @@ const createModal = ({ name, noBlur, isMask, title, maxWidth, content, contentSt
                         res = onConfirm()
                     }
                     if (res) {
-                        closeModal("#" + name)
-                        debounceRemoveEl()
+                        closeModal("#" + name, 300, () => {
+                            mod.remove()
+                        })
                     }
                 }
             }
@@ -859,8 +859,9 @@ const createModal = ({ name, noBlur, isMask, title, maxWidth, content, contentSt
                         res = onClose()
                     }
                     if (res) {
-                        closeModal("#" + name)
-                        debounceRemoveEl()
+                        closeModal("#" + name, 300, () => {
+                            mod.remove()
+                        })
                     }
                 }
             }
@@ -1173,7 +1174,7 @@ async function uploadFileKano(file, needRename = false) {
                     const resFileName = res.url.replace("/uploads/", "")
                     if (!resFileName) throw t('upload_success_but_cannot_detect_file_name')
                     const regResult = validateAlphaAndNumber(file.name)
-                    console.log("文件名合法性测试结果：",regResult)
+                    console.log("文件名合法性测试结果：", regResult)
                     //重命名
                     if (needRename && regResult) {
                         const res = await runShellWithUser(`mv /data/data/com.minikano.f50_sms/files/uploads/${resFileName} /data/data/com.minikano.f50_sms/files/uploads/${file.name}`)
@@ -1203,5 +1204,92 @@ async function uploadFileKano(file, needRename = false) {
                 closeFn && closeFn()
             }
         }
+    }
+}
+
+const renderConnectStatusContent = (res) => {
+    return `
+    <div style="
+        font-size:.7rem;
+        display:flex;
+        flex-direction:column;
+        gap:10px;
+        line-height:1.4;
+    ">
+        <!-- 总览 -->
+        <div class="nc-card">
+        <div class="nc-title">
+            <span>${t('total_conn_count')}</span>
+            <span class="nc-badge">All</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;">
+            <div>
+                <div class="nc-sub">${t('tcp_conn_total')} / ${t('udp_conn_total')} / v6</div>
+                <div class="nc-strong" style="font-size:18px;font-weight:900;">
+                    ${Number(res.tcp) + Number(res.udp) + Number(res.tcp6) + Number(res.udp6)}
+                </div>
+            </div>
+            <div style="text-align:right">
+            <div class="nc-sub">${t('unix_conn_total')}</div>
+            <div class="nc-value" style="font-size:16px;font-weight:800;">${res.unix}</div>
+            </div>
+        </div>
+        </div>
+
+        <!-- TCP v4 -->
+        <div class="nc-card">
+        <div class="nc-title">
+            <span>TCP (v4)</span>
+            <span class="nc-badge">${t('tcp_conn_total')}</span>
+        </div>
+        <div class="nc-grid">
+            <div class="nc-label">${t('tcp_conn_active')}</div>
+            <div class="nc-value">${res.tcp_active}</div>
+
+            <div class="nc-label">${t('tcp_conn_other')}</div>
+            <div class="nc-value">${res.tcp_other}</div>
+
+            <div class="nc-divider" style="grid-column:1 / -1;"></div>
+
+            <div class="nc-label">${t('tcp_conn_total')}</div>
+            <div class="nc-value">${res.tcp}</div>
+        </div>
+        </div>
+
+        <!-- 其他协议 -->
+        <div class="nc-card">
+        <div class="nc-title">
+            <span>${t('other_protocols') || 'Other'}</span>
+            <span class="nc-badge">UDP / v6</span>
+        </div>
+        <div class="nc-grid">
+            <div class="nc-label">${t('tcp6_conn_total')}</div>
+            <div class="nc-value">${res.tcp6}</div>
+
+            <div class="nc-label">${t('udp_conn_total')}</div>
+            <div class="nc-value">${res.udp}</div>
+
+            <div class="nc-label">${t('udp6_conn_total')}</div>
+            <div class="nc-value">${res.udp6}</div>
+
+            <div class="nc-divider" style="grid-column:1 / -1;"></div>
+
+            <div class="nc-label">${t('unix_conn_total')}</div>
+            <div class="nc-value">${res.unix}</div>
+        </div>
+        </div>
+    </div>
+    `.trim()
+}
+
+const resetInput = (inputElId) => {
+    if (!inputElId) return
+    if (!inputElId.startsWith('#')) {
+        inputElId = `#${inputElId}`
+    }
+    const inputEl = document.querySelector(inputElId)
+    if (!inputEl) return
+    if (inputEl) {
+        inputEl.value = ''
     }
 }

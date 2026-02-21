@@ -116,7 +116,10 @@
     "carrier_telecom": "テレコム",
     "carrier_mobile": "モバイル",
     "carrier_broadcast_mobile": "広電/モバイル",
-    "current_cell": "接続中",
+    "current_cell": "接続中のセルを",
+    "no_locked_cell": "ロック中の基地局はありません",
+    "no_cell_connected": "現在接続中の基地局はありません",
+    "no_neighbour_cell": "近隣基地局はありません",
     "network_status": "ネット状態",
     "wifi_client_num": "WIFI接続",
     "charging": "充電中",
@@ -770,5 +773,15 @@
     "ttyd_port": "TTYDポート(デフォルト:1146)：",
     "resources_server": "リソースサーバー：",
     "reset_ttyd_port": "TTYDポートをリセット",
-    "clear_uploads_file": "すべてのアップロードしたファイルを削除"
+    "clear_uploads_file": "すべてのアップロードしたファイルを削除",
+    "network_conn_info": "ネットワーク接続情報",
+    "total_conn_count": "総接続数(UNIX除く)",
+    "tcp_conn_active": "TCP接続(アクティブ)",
+    "tcp_conn_other": "TCP接続(その他)",
+    "tcp_conn_total": "TCP接続",
+    "tcp6_conn_total": "TCP6接続",
+    "udp_conn_total": "UDP接続",
+    "udp6_conn_total": "UDP6接続",
+    "unix_conn_total": "UNIX接続",
+    "other_protocols": "その他プロトコル"
 }

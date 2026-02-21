@@ -1,15 +1,14 @@
 package com.minikano.f50_sms.utils
 
-import androidx.compose.ui.text.toUpperCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
+import java.io.BufferedReader
+import java.io.FileReader
 import java.util.Locale
-import java.util.Locale.getDefault
-import kotlin.math.max
 
 /*
 * 感谢群内 执念 大哥提供的思路
@@ -314,4 +313,84 @@ suspend fun readUsbDevices(): Pair<Int, String> = withContext(Dispatchers.IO) {
     jsonRoot.put("devices", jsonArray)
 
     return@withContext Pair(maxSpeed, jsonRoot.toString())
+}
+
+//连接数
+data class NetConnCount(
+    var tcp: Int = -1,
+    var tcpActive: Int = -1,   // ESTABLISHED
+    var tcpOther: Int = -1,    // 其他状态
+    var tcp6: Int = -1,
+    var udp: Int = -1,
+    var udp6: Int = -1,
+    var unix: Int = -1,
+) {
+    val total: Int
+        get() = listOf(tcp, tcp6, udp, udp6, unix).filter { it >= 0 }.sum()
+}
+
+suspend fun readNetConnCount(): NetConnCount = withContext(Dispatchers.IO) {
+    NetConnCount().apply {
+        val tcpPair = countTcpStates("/proc/net/tcp")
+        tcp = tcpPair.first
+        tcpActive = tcpPair.second
+        tcpOther = if (tcp >= 0 && tcpActive >= 0) tcp - tcpActive else -1
+
+        tcp6 = countProcNetLines("/proc/net/tcp6", skipHeader = true)
+        udp  = countProcNetLines("/proc/net/udp",  skipHeader = true)
+        udp6 = countProcNetLines("/proc/net/udp6", skipHeader = true)
+        unix = countProcNetLines("/proc/net/unix", skipHeader = true)
+    }
+}
+
+private fun countTcpStates(path: String): Pair<Int, Int> {
+    val f = File(path)
+    if (!f.exists()) return -1 to -1
+
+    var total = 0
+    var active = 0
+
+    return try {
+        BufferedReader(FileReader(f), 8 * 1024).use { br ->
+            br.readLine() // header
+            while (true) {
+                val line = br.readLine() ?: break
+                if (line.isEmpty()) continue
+
+                total++
+
+                // 第4列是状态 hex
+                // 直接取固定位置比 split 更省CPU
+                // 但为稳妥仍用轻量 split
+                val parts = line.trim().split(Regex("\\s+"))
+                if (parts.size >= 4 && parts[3] == "01") {
+                    active++ // ESTABLISHED
+                }
+            }
+            total to active
+        }
+    } catch (_: Throwable) {
+        -1 to -1
+    }
+}
+
+private fun countProcNetLines(path: String, skipHeader: Boolean): Int {
+    val f = File(path)
+    if (!f.exists()) return -1
+
+    return try {
+        BufferedReader(FileReader(f), /*bufferSize=*/ 8 * 1024).use { br ->
+            if (skipHeader) br.readLine() // 读掉表头
+            var count = 0
+            while (true) {
+                val line = br.readLine() ?: break
+                // 过滤空行
+                if (line.isNotEmpty()) count++
+            }
+            count
+        }
+    } catch (_: Throwable) {
+        // 无权限 / 读取失败
+        -1
+    }
 }

@@ -28,6 +28,9 @@ import kotlinx.serialization.json.double
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import androidx.core.content.edit
+import com.minikano.f50_sms.utils.readNetConnCount
+import kotlinx.serialization.json.JsonObject
+import org.json.JSONObject
 
 data class MyStorageInfo(
     val path: String, val totalBytes: Long, val availableBytes: Long
@@ -208,6 +211,22 @@ fun Route.baseDeviceInfoModule(context: Context) {
         call.respondText(jsonResult, ContentType.Application.Json)
     }
 
+    get("/api/connInfo"){
+        try {
+            val res = readNetConnCount()
+            val jsonResult = """{"result":"success","data":{"tcp":"${res.tcp}","tcp_active":"${res.tcpActive}","tcp_other":"${res.tcpOther}","tcp6":"${res.tcp6}","udp":"${res.udp}","udp6":"${res.udp6}","unix":"${res.unix}"}}"""
+            call.response.headers.append("Access-Control-Allow-Origin", "*")
+            call.respondText(jsonResult, ContentType.Application.Json)
+        } catch (e: Exception) {
+            KanoLog.d("UFI_TOOLS_LOG", "获取连接信息出错：${e.message}")
+            call.response.headers.append("Access-Control-Allow-Origin", "*")
+            call.respondText(
+                """{"error":"获取连接信息出错(SELINUX状态：${KanoUtils.getSELinuxStatus()})"}""",
+                ContentType.Application.Json,
+                HttpStatusCode.InternalServerError
+            )
+        }
+    }
     post("/api/accept_terms"){
         try {
             val sharedPrefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)

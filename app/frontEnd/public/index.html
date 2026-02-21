@@ -190,7 +190,8 @@
                                     style="max-width: 200px;height: 60px;">
                                     <canvas style="margin-left: -4px;" id="kanoTempChart"></canvas>
                                 </div>
-                                <div class="chart statusCard net-card" style="width: 200px;height: 60px;">
+                                <div onclick="showNetConnInfoModal()" class="chart statusCard net-card"
+                                    style="width: 200px;height: 60px;">
                                     <canvas style="margin-left: -14px;" id="kanoNetChart"></canvas>
                                 </div>
                             </div>
@@ -421,7 +422,25 @@
                                 </tr>
                             </thead>
                             <tbody>
-
+                            </tbody>
+                        </table>
+                        <div class="title" style="display: block;margin: 10px 0;">
+                            <strong data-i18n="current_cell" style="margin-right: 10px;">当前基站信息：</strong>
+                            <button id="SELECT_CURRENT_CELL_BTN" style="margin:0"
+                                data-i18n="select_current_cell">选择当前基站</button>
+                        </div>
+                        <table class="nice-table">
+                            <thead>
+                                <tr>
+                                    <th data-i18n="network_band">频段</th>
+                                    <th data-i18n="network_freq">频率</th>
+                                    <th>PCI</th>
+                                    <th>RSRP</th>
+                                    <th>SINR</th>
+                                    <th>RSRQ</th>
+                                </tr>
+                            </thead>
+                            <tbody class="blur-px" id="CURRENT_CELL">
                             </tbody>
                         </table>
                         <div class="title" style="margin: 10px 0 ;">
@@ -429,9 +448,6 @@
                             <button class="btn" data-toggle="1" id="lkCellRefreshBtn"
                                 onclick="toggleCellInfoRefresh(event)" style="padding: 4px;margin-left: 10px;"
                                 data-i18n="stop_refresh">停止刷新</button>
-                        </div>
-                        <div class="title" id="CURRENT_CELL" style="display: block;margin: 10px 0;font-size:14px">
-                            <strong>当前基站信息：</strong>
                         </div>
                         <form id="cellForm" onsubmit="submitCellForm(event)" style="overflow-x: auto;">
                             <table class="nice-table">
@@ -459,13 +475,17 @@
                                     <input style="margin: 0 0 0 8px;" checked type="radio" name="RAT" value="16" />
                                 </label>
                             </div>
-                            <div style="margin: 10px;">
-                                <input style="padding: 8px; width: 100%" id="PCI" name="PCI" type="text"
+                            <div style="margin: 10px;display: flex;gap: 10px;">
+                                <input style="padding: 8px; width: 100%;flex: 1;" id="PCI" name="PCI" type="text"
                                     placeholder="PCI">
+                                <button type="none" onclick="event.preventDefault();resetInput('PCI')"
+                                    data-i18n="plugin_search_reset_btn">重置</button>
                             </div>
-                            <div style="margin: 10px;">
-                                <input style="padding: 8px; width: 100%;" id="EARFCN" name="EARFCN" type="text"
+                            <div style="margin: 10px;display: flex;gap: 10px;">
+                                <input style="padding: 8px; width: 100%;flex: 1;" id="EARFCN" name="EARFCN" type="text"
                                     placeholder="EARFCN">
+                                <button type="none" onclick="event.preventDefault();resetInput('EARFCN')"
+                                    data-i18n="plugin_search_reset_btn">重置</button>
                             </div>
                             <button type="submit" class="btn"
                                 style="margin-top: 6px;;width: 100%;padding: 8px;font-size: 14px;"
@@ -1100,6 +1120,8 @@
                                 onchange="handleFileUpload(event)">
                             <button style="width: 100%;" onclick="document.querySelector('#fileUploader').click()"
                                 data-i18n="bg_setting_upload">上传图片(10MB内)</button>
+                            <button class="btn" style="width: 100%;margin-top: 10px;" onclick="event.preventDefault();handleOpenUploadFilesList()"
+                                data-i18n="upload_file_manager">上传文件管理</button>
                         </label>
                     </div>
 

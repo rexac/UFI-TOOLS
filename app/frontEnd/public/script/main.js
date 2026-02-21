@@ -882,22 +882,42 @@ function main_func() {
             adbQuery()
             isNotLoginOnce = false
             const current_cell = document.querySelector('#CURRENT_CELL')
+            const select_current_cell_btn = document.querySelector('#SELECT_CURRENT_CELL_BTN')
             let html = ''
 
+            const PCI = notNullOrundefinedOrIsShow(res, 'Nr_pci') ? res.Nr_pci : (notNullOrundefinedOrIsShow(res, 'Lte_pci') ? res.Lte_pci : '')
+            const FCN = notNullOrundefinedOrIsShow(res, 'Nr_fcn') ? res.Nr_fcn : (notNullOrundefinedOrIsShow(res, 'Lte_fcn') ? res.Lte_fcn : '')
+            const BAND_STR = notNullOrundefinedOrIsShow(res, 'Nr_bands') ? "N" + res.Nr_bands : (notNullOrundefinedOrIsShow(res, 'Lte_bands') ? "B" + res.Lte_bands : '')
+            const RSRP = notNullOrundefinedOrIsShow(res, 'Z5g_rsrp') ? res.Z5g_rsrp : (notNullOrundefinedOrIsShow(res, 'lte_rsrp') ? res.lte_rsrp : '')
+            const SINR = notNullOrundefinedOrIsShow(res, 'Nr_snr') ? res.Nr_snr : (notNullOrundefinedOrIsShow(res, 'Lte_snr') ? res.Lte_snr : '')
+            const RSRQ = notNullOrundefinedOrIsShow(res, 'nr_rsrq') ? res.nr_rsrq : (notNullOrundefinedOrIsShow(res, 'lte_rsrq') ? res.lte_rsrq : '')
+
+            if (!PCI || !FCN) {
+                if (current_cell) {
+                    current_cell.innerHTML = `<tr><td colspan="6" style="opacity:.66;text-align:center;color:var(--dark-text-color)">${t('no_cell_connected')}</td></tr>`
+                }
+                if (select_current_cell_btn) {
+                    select_current_cell_btn.onclick = () => {
+                        createToast(t('no_cell_connected'), 'pink')
+                    }
+                }
+                return
+            }
+
+            if (select_current_cell_btn) {
+                select_current_cell_btn.onclick = () => onSelectCellRow(PCI, FCN)
+            }
+
             if (current_cell) {
-                current_cell.innerHTML = `<i>${t('current_cell')}</i><br/>`
-                current_cell.innerHTML += `
-            ${notNullOrundefinedOrIsShow(res, 'Lte_fcn') ? `<span>${t('network_freq')}: ${res.Lte_fcn}</span>` : ''}
-            ${notNullOrundefinedOrIsShow(res, 'Lte_pci') ? `<span>&nbsp;PCI: ${res.Lte_pci}</span>` : ''}
-            ${notNullOrundefinedOrIsShow(res, 'Nr_fcn') ? `<span>${t('network_freq')}: ${res.Nr_fcn}</span>` : ''}
-            ${notNullOrundefinedOrIsShow(res, 'Nr_pci') ? `<span>&nbsp;PCI: ${res.Nr_pci}</span>` : ''}
-            ${notNullOrundefinedOrIsShow(res, 'lte_rsrp') ? `<div style="display: flex;padding-bottom:2px;align-items: center;">RSRP:&nbsp; ${kano_parseSignalBar(res.lte_rsrp)}</div>` : ''}
-            ${notNullOrundefinedOrIsShow(res, 'Lte_snr') ? `<div style="display: flex;align-items: center;">SINR:&nbsp; ${kano_parseSignalBar(res.Lte_snr, -10, 30, 13, 0)}</div>` : ''}
-            ${notNullOrundefinedOrIsShow(res, 'lte_rsrq') ? `<div style="display: flex;padding-top:2px;align-items: center;">RSRQ:&nbsp; ${kano_parseSignalBar(res.lte_rsrq, -20, -3, -9, -12)}</div>` : ''}
-            ${notNullOrundefinedOrIsShow(res, 'Z5g_rsrp') ? `<div style="display: flex;padding-bottom:2px;align-items: center;width: 114px;justify-content: space-between"><span>RSRP:</span>${kano_parseSignalBar(res.Z5g_rsrp)}</div>` : ''}
-            ${notNullOrundefinedOrIsShow(res, 'Nr_snr') ? `<div style="display: flex;align-items: center;width: 114px;justify-content: space-between"><span>SINR:</span>${kano_parseSignalBar(res.Nr_snr, -10, 30, 13, 0)}</div>` : ''}
-            ${notNullOrundefinedOrIsShow(res, 'nr_rsrq') ? `<div style="display: flex;padding-top:2px;align-items: center;width: 114px;justify-content: space-between"><span>RSRQ:</span>${kano_parseSignalBar(res.nr_rsrq, -20, -3, -9, -12)}</div>` : ''}
-            <button style="margin:4px 0" onclick="onSelectCellRow(${notNullOrundefinedOrIsShow(res, 'Nr_pci') ? res.Nr_pci : res.Lte_pci},${notNullOrundefinedOrIsShow(res, 'Nr_fcn') ? res.Nr_fcn : res.Lte_fcn})">${t('select_current_cell')}</button>
+                current_cell.innerHTML = `
+            <tr onclick="onSelectCellRow(${PCI},${FCN})" style="cursor: pointer;">
+                <td>${BAND_STR}</td>
+                <td>${FCN}</td>
+                <td>${PCI}</td>
+                <td>${kano_parseSignalBar(RSRP)}</td>
+                <td>${kano_parseSignalBar(SINR, -10, 30, 13, 0)}</td>
+                <td>${kano_parseSignalBar(RSRQ, -20, -3, -9, -12)}</td>
+            </tr>
             `
             }
 
@@ -1634,9 +1654,12 @@ function main_func() {
 
             if (neighbor_cell_info && !onlyRefreshLockedInfoList) {
                 const cellBodyEl = document.querySelector('#cellForm tbody')
-                cellBodyEl.innerHTML = neighbor_cell_info.map(item => {
-                    const { band, earfcn, pci, rsrp, rsrq, sinr } = item
-                    return `
+                if (neighbor_cell_info.length <= 0) {
+                    cellBodyEl.innerHTML = `<tr><td colspan="6" style="opacity:.66;text-align:center;color:var(--dark-text-color)">${t('no_neighbour_cell')}</td></tr>`
+                } else {
+                    cellBodyEl.innerHTML = neighbor_cell_info.map(item => {
+                        const { band, earfcn, pci, rsrp, rsrq, sinr } = item
+                        return `
                     <tr onclick="onSelectCellRow(${pci},${earfcn})">
                         <td>${band}</td>
                         <td>${earfcn}</td>
@@ -1646,20 +1669,25 @@ function main_func() {
                         <td>${kano_parseSignalBar(rsrq, -20, -3, -9, -12)}</td>
                     </tr>
                 `
-                }).join('')
+                    }).join('')
+                }
             }
             if (locked_cell_info) {
                 const lockedCellBodyEl = document.querySelector('#LOCKED_CELL_FORM tbody')
-                lockedCellBodyEl.innerHTML = locked_cell_info.map(item => {
-                    const { earfcn, pci, rat } = item
-                    return `
+                if (locked_cell_info.length <= 0) {
+                    lockedCellBodyEl.innerHTML = `<tr><td colspan="3" style="opacity:.66;text-align:center;color:var(--dark-text-color)">${t('no_locked_cell')}</td></tr>`
+                } else {
+                    lockedCellBodyEl.innerHTML = locked_cell_info.map(item => {
+                        const { earfcn, pci, rat } = item
+                        return `
                     <tr>
                         <td>${rat == '12' ? '4G' : '5G'}</td>
                         <td>${pci}</td>
                         <td>${earfcn}</td>
                     </tr>
                 `
-                }).join('')
+                    }).join('')
+                }
             }
         } catch (e) {
             // createToast(e.message)
@@ -1700,7 +1728,7 @@ function main_func() {
     let onSelectCellRow = (pci, earfcn) => {
         let pci_t = document.querySelector('#PCI')
         let earfcn_t = document.querySelector('#EARFCN')
-        if (pci_t && earfcn_t) {
+        if (pci_t && earfcn_t && isNaN(pci) == false && isNaN(earfcn) == false) {
             pci_t.value = pci
             earfcn_t.value = earfcn
             createToast(`${t('toast_has_selected')}: ${pci},${earfcn}`, 'green')
@@ -6985,6 +7013,38 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
         }
     }
 
+    const showNetConnInfoModal = async () => {
+        if (!(await initRequestData())) {
+            createToast(t('toast_please_login'), 'red')
+            return null
+        }
+        const id = "#kano_net_info_modal"
+        const res = await getNetConnInfo()
+        let intervalFn = requestInterval(() => {
+            getNetConnInfo().then(res => {
+                const contentEl = document.querySelector('#kano_net_info_modal .content')
+                if (contentEl) {
+                    contentEl.innerHTML = renderConnectStatusContent(res)
+                }
+            })
+        }, REFRESH_TIME + 114, id)
+        const md = createModal({
+            showConfirm: false,
+            name: id.replace('#', ''),
+            isMask: false,
+            titleI18nKey: 'network_conn_info',
+            title: t('network_conn_info'),
+            maxWidth: "400px",
+            contentStyle: "font-size:.7rem;line-height:1.5",
+            onClose: () => {
+                intervalFn && intervalFn()
+                return true
+            },
+            content: renderConnectStatusContent(res)
+        })
+        md.id && showModal(md.id)
+    }
+
     //官方后台貌似对PIN超出次数的判定有问题，PIN次数用完后提示输入PUK，此时换卡也不会变更状态，用户只能恢复出厂设置，所以此功能不会继续实现
     // let simCardPinDisabled = false
     // const initSimCardPin = async () => {
@@ -7087,6 +7147,7 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
     // initSimCardPin()
     //挂载方法到window
     const methods = {
+        showNetConnInfoModal,
         handleOpenUploadFilesList,
         clearAPPUploadData,
         closeUSBStatusModal,

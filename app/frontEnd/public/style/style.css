@@ -516,8 +516,9 @@ input {
 }
 
 .nice-table thead {
-    background-color: #febea361;
+    background-color: var(--dark-btn-color);
     color: var(--dark-text-color);
+    opacity: .7;
 }
 
 .nice-table th,
@@ -759,8 +760,10 @@ li.dragging {
     width: 50px;
     padding: 0;
     border-radius: 24px;
-    background-color: var(--dark-card-bg);
+    background-color: var(--dark-bgi-color);
+    border: .1rem solid var(--dark-btn-color);
     transition: all 0.3s ease;
+    box-sizing: border-box;
 }
 
 @keyframes dotAni {
@@ -1256,7 +1259,7 @@ input[type="range"] {
     border-radius: 10px;
     left: 0;
     top: 30px;
-    padding: 10px 8px; 
+    padding: 10px 8px;
     max-width: 90%;
     max-height: 400px;
     background-color: hsl(from var(--dark-btn-color) h s calc(l * 1.5));
@@ -1280,4 +1283,66 @@ input[type="range"] {
 .searchListItem:hover,
 .searchListItem:active {
     background-color: var(--dark-btn-color-active);
+}
+
+.nc-card {
+    border: 1px solid rgba(0, 0, 0, .08);
+    border-radius: 10px;
+    padding: 10px 12px;
+    background: var(--dark-card-bg);
+    user-select: none;
+}
+
+.nc-title {
+    font-size: .7rem;
+    opacity: .75;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nc-grid {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 6px 12px;
+    align-items: center;
+}
+
+.nc-label {
+    opacity: .85;
+    font-size: .75rem;
+    white-space: nowrap;
+}
+
+.nc-value {
+    font-variant-numeric: tabular-nums;
+    font-size: .75rem;
+    font-weight: 600;
+    text-align: right;
+    min-width: 72px;
+}
+
+.nc-badge {
+    font-size: .7rem;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--dark-tag-color);
+}
+
+.nc-strong {
+    font-size: .75rem;
+    font-weight: 800;
+    letter-spacing: .2px;
+}
+
+.nc-sub {
+    opacity: .7;
+    font-size: .7rem;
+}
+
+.nc-divider {
+    height: 1px;
+    background: var(--dark-tag-color);
+    margin: 8px 0;
 }

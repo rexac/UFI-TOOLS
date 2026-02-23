@@ -50,8 +50,6 @@ check_ttyd_running(){
       echo "[`date`] start ttyd..." >> "$LOG_FILE"
       export PATH="/data/data/com.termux/files/usr/bin:$PATH"
       "$TTYD_PATH" --writable --port 1146 $LOGIN_PATH &
-  else
-      echo "[`date`] ttyd already running." >> "$LOG_FILE"
   fi
 }
 
@@ -63,8 +61,6 @@ check_socat_running(){
       echo "[`date`] start socat..." >> "$LOG_FILE"
       # run socat unix socket，exec /system/bin/sh
       "$SOCAT_PATH" -d -d UNIX-LISTEN:"$SOCKET_FILE",fork,reuseaddr,unlink-early EXEC:/system/bin/sh &
-  else
-      echo "[`date`] socat already running." >> "$LOG_FILE"
   fi
 }
 
@@ -72,7 +68,38 @@ lock_smb_conf(){
     #lock samba conf
     chmod 777 /data/samba/etc/smb.conf
     chattr +i /data/samba/etc/smb.conf
-    echo "[`date`] samba_file LOCKED! to unlock samba_file run [sh /sdcard/unlock_samba.sh]" >> "$LOG_FILE"
+}
+
+permission_keep(){
+    pm grant com.minikano.f50_sms android.permission.READ_SMS >/dev/null 2>&1 || true
+    pm grant com.minikano.f50_sms android.permission.RECEIVE_SMS >/dev/null 2>&1 || true
+    pm grant com.minikano.f50_sms android.permission.SEND_SMS >/dev/null 2>&1 || true
+    pm grant com.minikano.f50_sms android.permission.READ_EXTERNAL_STORAGE >/dev/null 2>&1 || true
+    pm grant com.minikano.f50_sms android.permission.WRITE_EXTERNAL_STORAGE >/dev/null 2>&1 || true
+    pm grant com.minikano.f50_sms android.permission.READ_PHONE_STATE >/dev/null 2>&1 || true
+    pm grant com.minikano.f50_sms android.permission.POST_NOTIFICATIONS >/dev/null 2>&1 || true
+
+    appops set com.minikano.f50_sms GET_USAGE_STATS allow >/dev/null 2>&1 || true
+    appops set com.minikano.f50_sms android:get_usage_stats allow >/dev/null 2>&1 || true
+    appops set com.minikano.f50_sms POST_NOTIFICATION allow >/dev/null 2>&1 || true
+    appops set com.minikano.f50_sms AUTO_REVOKE_PERMISSIONS_IF_UNUSED ignore >/dev/null 2>&1 || true
+
+    settings put secure enabled_notification_listeners com.minikano.f50_sms/com.minikano.f50_sms.MyListenerService >/dev/null 2>&1 || true
+    dumpsys deviceidle whitelist +com.minikano.f50_sms >/dev/null 2>&1 || true
+
+    cmd app_hibernation set-state com.minikano.f50_sms false >/dev/null 2>&1 || true
+    cmd package set-hibernating com.minikano.f50_sms false >/dev/null 2>&1 || true
+    cmd package set-auto-revoke-permissions com.minikano.f50_sms false >/dev/null 2>&1 || true
+    echo "[`date`] permission_keep done!" >> "$LOG_FILE"
+}
+
+keep_ufi_running(){
+    PKG=com.minikano.f50_sms
+    ACT=com.minikano.f50_sms.MainActivity
+    if ! pidof "$PKG" >/dev/null 2>&1; then
+        echo "[`date`] UFI_TOOLS NOT START,TRY TO WAKE UP!!!" >> "$LOG_FILE"
+        am start -n "$PKG/$ACT" >/dev/null 2>&1 || true
+    fi
 }
 
 #net accelerate
@@ -161,6 +188,8 @@ boot_up_script() {
   ip6tables -A INPUT -p udp --dport 5201 -j DROP
   ip6tables -A INPUT -p udp --dport 5001 -j DROP
   ip6tables -A INPUT -p udp --dport 5002 -j DROP
+  iptables -I INPUT 1 -i lo -j ACCEPT
+  iptables -I OUTPUT 1 -i lo -j ACCEPT
 
   echo "$UNLOCK_SAMBA_CONF" > /cache/unlock_samba.sh
   echo "$UNLOCK_SAMBA_CONF" > /sdcard/unlock_samba.sh
@@ -172,12 +201,12 @@ boot_up_script() {
   check_socat_running
   net_accelerate
   disable_fota
+  permission_keep
 }
 
 #schedule_script(30s per time)
 schedule_script() {
   if [ -f "$SCHEDULE_SCRIPT_PATH" ]; then
-      echo "[`date`] exec $SCHEDULE_SCRIPT_PATH ..." >> "$LOG_FILE"
       sh "$SCHEDULE_SCRIPT_PATH"
   else
       echo "$SCHEDULE_SH" > /sdcard/ufi_tools_schedule.sh
@@ -189,14 +218,7 @@ schedule_script() {
   check_log_file
   check_ttyd_running
   check_socat_running
-
-  if ! ip6tables -C INPUT -p tcp --dport 5555 -j DROP 2>/dev/null; then
-    ip6tables -A INPUT -p tcp --dport 5555 -j DROP
-  fi
-
-  if ! ip6tables -C INPUT -p udp --dport 5555 -j DROP 2>/dev/null; then
-    ip6tables -A INPUT -p udp --dport 5555 -j DROP
-  fi
+  keep_ufi_running
 }
 
 uptime_seconds=$(cut -d. -f1 /proc/uptime)

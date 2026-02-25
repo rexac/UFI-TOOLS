@@ -94,11 +94,17 @@ permission_keep(){
 }
 
 keep_ufi_running(){
+    BOOTUP_NEED_OPEN_ACTIVITY=$1
     PKG=com.minikano.f50_sms
     ACT=com.minikano.f50_sms.MainActivity
+    if [ $BOOTUP_NEED_OPEN_ACTIVITY -eq 1 ]; then
+      echo "[`date`] BOOTUP! DO WAKE UP!!!" >> "$LOG_FILE"
+      am start -n "$PKG/$ACT" >/dev/null 2>&1 || true
+    fi
+
     if ! pidof "$PKG" >/dev/null 2>&1; then
-        echo "[`date`] UFI_TOOLS NOT START,TRY TO WAKE UP!!!" >> "$LOG_FILE"
-        am start -n "$PKG/$ACT" >/dev/null 2>&1 || true
+      echo "[`date`] UFI_TOOLS NOT START,TRY TO WAKE UP!!!" >> "$LOG_FILE"
+      am start -n "$PKG/$ACT" >/dev/null 2>&1 || true
     fi
 }
 
@@ -218,7 +224,7 @@ schedule_script() {
   check_log_file
   check_ttyd_running
   check_socat_running
-  keep_ufi_running
+  keep_ufi_running 0
 }
 
 uptime_seconds=$(cut -d. -f1 /proc/uptime)
@@ -240,6 +246,7 @@ if [ "$uptime_seconds" -lt "$THRESHOLD" ]; then
     if [ "$boot_time" -ne "$last_boot_time" ]; then
         echo "[`date`] detected new boot, running boot_up_script..." >> "$LOG_FILE"
         boot_up_script
+        keep_ufi_running 1
         echo "$boot_time" > "$FLAG_FILE"; sync
     else
         echo "[`date`] same boot_time detected, skipping boot_up_script. Running schedule_script instead..." >> "$LOG_FILE"

@@ -45,23 +45,43 @@ check_log_file(){
 }
 
 check_ttyd_running(){
-  # check ttyd running
-  if ! ps -ef | grep "ttyd --writable --port 1146 $LOGIN_PATH" | grep -v grep > /dev/null; then
-      echo "[`date`] start ttyd..." >> "$LOG_FILE"
-      export PATH="/data/data/com.termux/files/usr/bin:$PATH"
-      "$TTYD_PATH" --writable --port 1146 $LOGIN_PATH &
+  # try pgrep to check ttyd running
+  if ! pgrep -f "ttyd --writable --port 1146 $LOGIN_PATH" > /dev/null; then
+      # fallback to ps -ef if pgrep fails
+      if ! ps -ef | grep "ttyd --writable --port 1146 $LOGIN_PATH" | grep -v grep > /dev/null; then
+          echo "[`date`] start ttyd..." >> "$LOG_FILE"
+          export PATH="/data/data/com.termux/files/usr/bin:$PATH"
+          "$TTYD_PATH" --writable --port 1146 $LOGIN_PATH &
+      fi
   fi
 }
 
 check_socat_running(){
-  # check socat
+  # check socat running using pgrep
   mkdir -p "$SOCKET_DIR"
-  # check socat running
-  if ! ps -ef | grep "$SOCKET_FILE" | grep -v grep > /dev/null; then
-      echo "[`date`] start socat..." >> "$LOG_FILE"
-      # run socat unix socket，exec /system/bin/sh
-      "$SOCAT_PATH" -d -d UNIX-LISTEN:"$SOCKET_FILE",fork,reuseaddr,unlink-early EXEC:/system/bin/sh &
+  if ! pgrep -f "$SOCKET_FILE" > /dev/null; then
+      # fallback to ps -ef if pgrep fails
+      if ! ps -ef | grep "$SOCKET_FILE" | grep -v grep > /dev/null; then
+          echo "[`date`] start socat..." >> "$LOG_FILE"
+          # run socat unix socket，exec /system/bin/sh
+          "$SOCAT_PATH" -d -d UNIX-LISTEN:"$SOCKET_FILE",fork,reuseaddr,unlink-early EXEC:/system/bin/sh &
+      fi
   fi
+}
+
+keep_ufi_running(){
+    BOOTUP_NEED_OPEN_ACTIVITY=$1
+    PKG=com.minikano.f50_sms
+    ACT=com.minikano.f50_sms.MainActivity
+    if [ $BOOTUP_NEED_OPEN_ACTIVITY -eq 1 ]; then
+      echo "[`date`] BOOTUP! DO WAKE UP!!!" >> "$LOG_FILE"
+      am start -n "$PKG/$ACT" >/dev/null 2>&1 || true
+    fi
+
+    if ! pidof "$PKG" >/dev/null 2>&1; then
+      echo "[`date`] UFI_TOOLS NOT START,TRY TO WAKE UP!!!" >> "$LOG_FILE"
+      am start -n "$PKG/$ACT" >/dev/null 2>&1 || true
+    fi
 }
 
 lock_smb_conf(){
@@ -88,24 +108,7 @@ permission_keep(){
     dumpsys deviceidle whitelist +com.minikano.f50_sms >/dev/null 2>&1 || true
 
     cmd app_hibernation set-state com.minikano.f50_sms false >/dev/null 2>&1 || true
-    cmd package set-hibernating com.minikano.f50_sms false >/dev/null 2>&1 || true
-    cmd package set-auto-revoke-permissions com.minikano.f50_sms false >/dev/null 2>&1 || true
     echo "[`date`] permission_keep done!" >> "$LOG_FILE"
-}
-
-keep_ufi_running(){
-    BOOTUP_NEED_OPEN_ACTIVITY=$1
-    PKG=com.minikano.f50_sms
-    ACT=com.minikano.f50_sms.MainActivity
-    if [ $BOOTUP_NEED_OPEN_ACTIVITY -eq 1 ]; then
-      echo "[`date`] BOOTUP! DO WAKE UP!!!" >> "$LOG_FILE"
-      am start -n "$PKG/$ACT" >/dev/null 2>&1 || true
-    fi
-
-    if ! pidof "$PKG" >/dev/null 2>&1; then
-      echo "[`date`] UFI_TOOLS NOT START,TRY TO WAKE UP!!!" >> "$LOG_FILE"
-      am start -n "$PKG/$ACT" >/dev/null 2>&1 || true
-    fi
 }
 
 #net accelerate
@@ -166,6 +169,11 @@ samba_path(){
   done
 }
 
+close_thread_killer() {
+  settings put global settings_enable_monitor_phantom_procs false
+  settings put global max_phantom_processes 2147483647
+}
+
 #boot_script
 boot_up_script() {
   if [ -f "$BOOTUP_SCRIPT_PATH" ]; then
@@ -208,6 +216,7 @@ boot_up_script() {
   net_accelerate
   disable_fota
   permission_keep
+  close_thread_killer
 }
 
 #schedule_script(30s per time)

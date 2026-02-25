@@ -881,35 +881,35 @@ function main_func() {
 
             adbQuery()
             isNotLoginOnce = false
-            const current_cell = document.querySelector('#CURRENT_CELL')
-            const select_current_cell_btn = document.querySelector('#SELECT_CURRENT_CELL_BTN')
             let html = ''
+            try {
+                const current_cell = document.querySelector('#CURRENT_CELL')
+                const select_current_cell_btn = document.querySelector('#SELECT_CURRENT_CELL_BTN')
 
-            const PCI = notNullOrundefinedOrIsShow(res, 'Nr_pci') ? res.Nr_pci : (notNullOrundefinedOrIsShow(res, 'Lte_pci') ? res.Lte_pci : '')
-            const FCN = notNullOrundefinedOrIsShow(res, 'Nr_fcn') ? res.Nr_fcn : (notNullOrundefinedOrIsShow(res, 'Lte_fcn') ? res.Lte_fcn : '')
-            const BAND_STR = notNullOrundefinedOrIsShow(res, 'Nr_bands') ? "N" + res.Nr_bands : (notNullOrundefinedOrIsShow(res, 'Lte_bands') ? "B" + res.Lte_bands : '')
-            const RSRP = notNullOrundefinedOrIsShow(res, 'Z5g_rsrp') ? res.Z5g_rsrp : (notNullOrundefinedOrIsShow(res, 'lte_rsrp') ? res.lte_rsrp : '')
-            const SINR = notNullOrundefinedOrIsShow(res, 'Nr_snr') ? res.Nr_snr : (notNullOrundefinedOrIsShow(res, 'Lte_snr') ? res.Lte_snr : '')
-            const RSRQ = notNullOrundefinedOrIsShow(res, 'nr_rsrq') ? res.nr_rsrq : (notNullOrundefinedOrIsShow(res, 'lte_rsrq') ? res.lte_rsrq : '')
+                const PCI = notNullOrundefinedOrIsShow(res, 'Nr_pci') ? res.Nr_pci : (notNullOrundefinedOrIsShow(res, 'Lte_pci') ? res.Lte_pci : '')
+                const FCN = notNullOrundefinedOrIsShow(res, 'Nr_fcn') ? res.Nr_fcn : (notNullOrundefinedOrIsShow(res, 'Lte_fcn') ? res.Lte_fcn : '')
+                const BAND_STR = notNullOrundefinedOrIsShow(res, 'Nr_bands') ? "N" + res.Nr_bands : (notNullOrundefinedOrIsShow(res, 'Lte_bands') ? "B" + res.Lte_bands : '')
+                const RSRP = notNullOrundefinedOrIsShow(res, 'Z5g_rsrp') ? res.Z5g_rsrp : (notNullOrundefinedOrIsShow(res, 'lte_rsrp') ? res.lte_rsrp : '')
+                const SINR = notNullOrundefinedOrIsShow(res, 'Nr_snr') ? res.Nr_snr : (notNullOrundefinedOrIsShow(res, 'Lte_snr') ? res.Lte_snr : '')
+                const RSRQ = notNullOrundefinedOrIsShow(res, 'nr_rsrq') ? res.nr_rsrq : (notNullOrundefinedOrIsShow(res, 'lte_rsrq') ? res.lte_rsrq : '')
 
-            if (!PCI || !FCN) {
-                if (current_cell) {
-                    current_cell.innerHTML = `<tr><td colspan="6" style="opacity:.66;text-align:center;color:var(--dark-text-color)">${t('no_cell_connected')}</td></tr>`
-                }
-                if (select_current_cell_btn) {
-                    select_current_cell_btn.onclick = () => {
-                        createToast(t('no_cell_connected'), 'pink')
+                if (!PCI || !FCN) {
+                    if (current_cell) {
+                        current_cell.innerHTML = `<tr><td colspan="6" style="opacity:.66;text-align:center;color:var(--dark-text-color)">${t('no_cell_connected')}</td></tr>`
+                    }
+                    if (select_current_cell_btn) {
+                        select_current_cell_btn.onclick = () => {
+                            createToast(t('no_cell_connected'), 'pink')
+                        }
                     }
                 }
-                return
-            }
 
-            if (select_current_cell_btn) {
-                select_current_cell_btn.onclick = () => onSelectCellRow(PCI, FCN)
-            }
+                if (select_current_cell_btn) {
+                    select_current_cell_btn.onclick = () => onSelectCellRow(PCI, FCN)
+                }
 
-            if (current_cell) {
-                current_cell.innerHTML = `
+                if (current_cell) {
+                    current_cell.innerHTML = `
             <tr onclick="onSelectCellRow(${PCI},${FCN})" style="cursor: pointer;">
                 <td>${BAND_STR}</td>
                 <td>${FCN}</td>
@@ -919,6 +919,9 @@ function main_func() {
                 <td>${kano_parseSignalBar(RSRQ, -20, -3, -9, -12)}</td>
             </tr>
             `
+                }
+            } catch (e) {
+                console.error("render PCI blocks fail:", e);
             }
 
             try {

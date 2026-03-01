@@ -2,6 +2,16 @@ package com.minikano.f50_sms.utils
 
 import android.content.Context
 import android.net.Uri
+import com.minikano.f50_sms.configs.AppMeta
+import com.minikano.f50_sms.utils.KanoUtils.Companion.buildStatusSmsMsg
+import com.minikano.f50_sms.utils.KanoUtils.Companion.sendShellCmd
+import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.double
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import org.json.JSONObject
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -13,6 +23,7 @@ object SmsPoll {
 
     //store
     private val PREFS_NAME = "kano_ZTE_store"
+    private val TAG = "UFI_TOOLS_LOG_SmsPool"
 
     fun checkNewSmsAndSend(context: Context) {
         val sms = getLatestSms(context) ?: return
@@ -28,14 +39,16 @@ object SmsPoll {
             // 在这里做转发处理
             val sharedPrefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             val sms_forward_method = sharedPrefs.getString("kano_sms_forward_method", "") ?: ""
-            if(sms_forward_method =="SMTP") {
-                forwardByEmail(lastSms, context)
-            }
-            else if(sms_forward_method == "CURL"){
-                forwardSmsByCurl(lastSms,context)
-            }
-            else if(sms_forward_method == "DINGTALK"){
-                forwardSmsByDingTalk(lastSms,context)
+            when (sms_forward_method) {
+                "SMTP" -> {
+                    forwardByEmail(lastSms, context)
+                }
+                "CURL" -> {
+                    forwardSmsByCurl(lastSms, context)
+                }
+                "DINGTALK" -> {
+                    forwardSmsByDingTalk(lastSms, context)
+                }
             }
         } else {
             KanoLog.d(
@@ -57,113 +70,172 @@ object SmsPoll {
         }
 
         KanoLog.d("UFI_TOOLS_LOG", "开始转发短信...（CURL）")
-        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-            .withZone(ZoneId.systemDefault())
-        val smsText = sms_data.body.trimStart()
-        val smsFrom = sms_data.address
-        val smsTime = formatter.format(Instant.ofEpochMilli(sms_data.timestamp))
+        try {
+            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+                .withZone(ZoneId.systemDefault())
+            val smsText = JSONObject.quote(sms_data.body.trim()).removeSurrounding("\"")
+            val smsFrom = sms_data.address
+            val smsTime = formatter.format(Instant.ofEpochMilli(sms_data.timestamp))
 
-        //替换并发送
-        val replacedCurl = originalCurl
-            .replace("\n","")
-            .replace("{{sms-body}}", smsText)
-            .replace("{{sms-time}}", smsTime)
-            .replace("{{sms-from}}", smsFrom).trimIndent()
+            //替换并发送
+            var replacedCurl = originalCurl
+                .replace("{{sms-body}}", smsText)
+                .replace("{{sms-time}}", smsTime)
+                .replace("{{sms-from}}", smsFrom).trimIndent()
 
-        KanoCURL(context).send(replacedCurl)
+            //寻找可替换的其他占位符
+            replacedCurl = buildStatusSmsMsg(replacedCurl,context, TAG)
+
+            KanoCURL(context).send(replacedCurl)
+        } catch (e: Exception){
+            KanoLog.e(TAG,"短信转发(forwardSmsByCurl)出错：",e)
+        }
     }
 
     //通过SMTP邮件转发
-    fun forwardByEmail(sms_data: SmsInfo?, context: Context) {
+    fun forwardByEmail(sms_data: SmsInfo?, context: Context,notSMS: Boolean = false) {
         if (sms_data == null) return
         val sharedPrefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
         val smtpHost = sharedPrefs.getString("kano_smtp_host", null)
         if (smtpHost.isNullOrEmpty()) {
-            KanoLog.e("UFI_TOOLS_LOG", "SMTP 配置错误：kano_smtp_host 为空")
+            KanoLog.e(TAG, "SMTP 配置错误：kano_smtp_host 为空")
             return
         }
 
         val smtpTo = sharedPrefs.getString("kano_smtp_to", null)
         if (smtpTo.isNullOrEmpty()) {
-            KanoLog.e("UFI_TOOLS_LOG", "SMTP 配置错误：kano_smtp_to 为空")
+            KanoLog.e(TAG, "SMTP 配置错误：kano_smtp_to 为空")
             return
         }
 
         val smtpPort = sharedPrefs.getString("kano_smtp_port", null)
         if (smtpPort.isNullOrEmpty()) {
-            KanoLog.e("UFI_TOOLS_LOG", "SMTP 配置错误：kano_smtp_port 为空")
+            KanoLog.e(TAG, "SMTP 配置错误：kano_smtp_port 为空")
             return
         }
 
         val username = sharedPrefs.getString("kano_smtp_username", null)
         if (username.isNullOrEmpty()) {
-            KanoLog.e("UFI_TOOLS_LOG", "SMTP 配置错误：kano_smtp_username 为空")
+            KanoLog.e(TAG, "SMTP 配置错误：kano_smtp_username 为空")
             return
         }
 
         val password = sharedPrefs.getString("kano_smtp_password", null)
         if (password.isNullOrEmpty()) {
-            KanoLog.e("UFI_TOOLS_LOG", "SMTP 配置错误：kano_smtp_password 为空")
+            KanoLog.e(TAG, "SMTP 配置错误：kano_smtp_password 为空")
             return
         }
 
         val smtpClient = KanoSMTP(smtpHost, smtpPort, username, password)
 
-        KanoLog.d("UFI_TOOLS_LOG", "开始转发短信...(SMTP)")
+        KanoLog.d(TAG, "开始转发短信...(SMTP)")
 
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
             .withZone(ZoneId.systemDefault())
         val previewText = sms_data.body.trimStart().let {
             if (it.length > 37) it.take(37) + "…" else it
         }
+        val shouldForwardDeviceInfo = sharedPrefs.getString("kano_smtp_forward_device_info","0")?: "0"
+        var statusText = ""
+        if(shouldForwardDeviceInfo == "1") {
+            statusText = buildStatusSmsMsg(
+            """
+            <p><b>🌐 当日用量: </b>{{daily-flow}}</p>
+            <p><b>🔥 CPU温度: </b>{{cpu-temp}}</p>
+            <p><b>🖥️ CPU占用: </b>{{cpu-usage}}</p>
+            <p><b>🧠 内存占用: </b>{{mem-usage}}</p>
+            <p><b>🔋 电池信息: </b>{{battery-level}} {{battery-current}} {{battery-voltage}}</p>
+            <p><b>⏱️ 开机时长: </b>{{boot-time}}</p>
+            <p><b>📱 设备型号: </b>{{model}}</p>
+            <p><b>📦 APP版本: </b>{{app-ver}}</p>
+            """.trimIndent(), context, TAG
+            )
+        }
+        var body =
+        """
+        <div>
+            <p>${sms_data!!.body.trimStart()}</p>
+            <p>📩 <b>来自：</b>${sms_data.address}</p>
+            <p>⏰ <b>时间：</b>${formatter.format(Instant.ofEpochMilli(sms_data.timestamp))}</p>
+            <hr/>
+            $statusText
+            <div style="text-align: center;">
+                <i>Powered by <a href="https://github.com/kanoqwq/UFI-TOOLS" target="_blank">UFI-TOOLS</a></i>
+            </div>
+        </div>
+        """.trimIndent()
+        if(notSMS){
+            body =
+            """
+            <div>
+                $statusText
+                <div style="text-align: center;">
+                    <i>Powered by <a href="https://github.com/kanoqwq/UFI-TOOLS" target="_blank">UFI-TOOLS</a></i>
+                </div>
+            </div>
+            """.trimIndent()
+        }
         smtpClient.sendEmail(
             to = smtpTo,
             subject = previewText,
-            body = """
-                <div>
-                    <p>${sms_data!!.body.trimStart()}</p>
-                    <p>📩 <b>来自：</b>${sms_data.address}</p>
-                    <p>⏰ <b>时间：</b>${formatter.format(Instant.ofEpochMilli(sms_data.timestamp))}</p>
-                    <div style="text-align: center;">
-                        <i>Powered by <a href="https://github.com/kanoqwq/UFI-TOOLS" target="_blank">UFI-TOOLS</a></i>
-                    </div>
-                </div>
-            """.trimIndent()
+            body = body
         )
     }
 
     //通过钉钉webhook转发
-    fun forwardSmsByDingTalk(sms_data: SmsInfo?, context: Context) {
+    fun forwardSmsByDingTalk(sms_data: SmsInfo?, context: Context,notSMS: Boolean = false) {
         if (sms_data == null) return
         val sharedPrefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
         val webhookUrl = sharedPrefs.getString("kano_dingtalk_webhook", null)
         if (webhookUrl.isNullOrEmpty()) {
-            KanoLog.e("UFI_TOOLS_LOG", "钉钉配置错误：kano_dingtalk_webhook 为空")
+            KanoLog.e(TAG, "钉钉配置错误：kano_dingtalk_webhook 为空")
             return
         }
 
         val secret = sharedPrefs.getString("kano_dingtalk_secret", null)
 
-        KanoLog.d("UFI_TOOLS_LOG", "开始转发短信...（钉钉）")
+        KanoLog.d(TAG, "开始转发短信...（钉钉）")
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
             .withZone(ZoneId.systemDefault())
-        val smsText = sms_data.body.trimStart()
+        val smsText = JSONObject.quote(sms_data.body.trim()).removeSurrounding("\"")
         val smsFrom = sms_data.address
         val smsTime = formatter.format(Instant.ofEpochMilli(sms_data.timestamp))
 
-        // 构建钉钉消息内容
-        val messageContent = """
-            📱 新短信通知
+        val shouldForwardDeviceInfo = sharedPrefs.getString("kano_dingtalk_forward_device_info","0")?: "0"
+        var statusText = ""
+        if(shouldForwardDeviceInfo == "1"){
+            statusText = buildStatusSmsMsg(
+            """
+            🌐 当日用量: {{daily-flow}}
+            🔥 CPU温度: {{cpu-temp}}
+            🖥️ CPU使用: {{cpu-usage}}
+            🧠 内存使用: {{mem-usage}}
+            🔋 电池信息: {{battery-level}} {{battery-current}} {{battery-voltage}}
+            ⏱️ 开机时长: {{boot-time}}
+            📱 设备型号: {{model}}
+            📦 APP版本: {{app-ver}}
+            """.trimIndent(),context, TAG)
+        }
+        var smsTypeString =
+        """
+        📱 新短信通知
             
-            📄 内容：$smsText
-            📞 来自：$smsFrom
-            ⏰ 时间：$smsTime
-            
-            Powered by UFI-TOOLS
+        📄 内容：$smsText
+        📞 来自：$smsFrom
+        ⏰ 时间：$smsTime
         """.trimIndent()
-
+        if(notSMS){
+            smsTypeString = "📱 设备信息\n"
+        }
+        // 构建钉钉消息内容
+        val messageContent = listOf(
+            smsTypeString,
+            statusText,
+            "\nPowered by UFI-TOOLS"
+        ).filter { it.isNotBlank() }
+            .joinToString("\n")
         val dingTalkClient = KanoDingTalk(webhookUrl, secret)
         dingTalkClient.sendMessage(messageContent)
     }
@@ -184,7 +256,7 @@ object SmsPoll {
                 } else null
             }
         } catch (e: Exception) {
-            KanoLog.e("UFI_TOOLS_LOG", "没有短信权限，读不到短信呢", e)
+            KanoLog.e(TAG, "没有短信权限，读不到短信呢", e)
             null
         }
     }

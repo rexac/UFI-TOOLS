@@ -28,9 +28,17 @@ import java.util.concurrent.TimeUnit
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 import androidx.core.content.edit
+import com.minikano.f50_sms.configs.AppMeta
 import com.minikano.f50_sms.configs.AppMeta.updateIsDefaultOrWeakToken
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.double
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
+import kotlin.math.ln
+import kotlin.math.pow
 
 class KanoUtils {
     companion object {
@@ -62,6 +70,18 @@ class KanoUtils {
             val bytes = input.toByteArray(Charsets.UTF_8)
             val digest = MessageDigest.getInstance("SHA-256").digest(bytes)
             return digest.joinToString("") { "%02x".format(it) }
+        }
+
+        fun Long.toReadableSize(decimals: Int = 2): String {
+            if (this <= 0) return "0 B"
+
+            val units = arrayOf("B", "KB", "MB", "GB", "TB", "PB", "EB")
+            val base = 1024.0
+
+            val exp = (ln(this.toDouble()) / ln(base)).toInt()
+            val value = this / base.pow(exp)
+
+            return "%.${decimals}f%s".format(value, units[exp])
         }
 
         //获取电池电量
@@ -636,6 +656,102 @@ class KanoUtils {
                     putString(PREF_WAKELOCK, "lock")
                 }
             }
+        }
+
+        fun buildStatusSmsMsg(text:String,context: Context,TAG:String): String {
+            if(text.isBlank()) return text
+            var replacedCurl = text
+            runBlocking {
+                try {
+                    val templates = listOf<String>(
+                        "{{cpu-usage}}" ,
+                        "{{mem-usage}}" ,
+                        "{{app-ver}}" ,
+                        "{{battery-level}}" ,
+                        "{{battery-current}}" ,
+                        "{{battery-voltage}}" ,
+                        "{{model}}" ,
+                        "{{boot-time}}" ,
+                        "{{cpu-temp}}" ,
+                        "{{daily-flow}}" ,
+                    )
+                    if(replacedCurl.contains(templates[0])){
+                        val usage = calculateCpuUsage()
+                        val cpuUsageRes = Json.parseToJsonElement(usage)
+                            .jsonObject["cpu"]
+                            ?.jsonPrimitive
+                            ?.double
+                        replacedCurl = replacedCurl
+                            .replace(templates[0],"${cpuUsageRes}%")
+                    }
+                    if(replacedCurl.contains(templates[1])){
+                        val mem = getMemoryUsage()
+                        val memUsageRes = Json.parseToJsonElement(mem)
+                            .jsonObject["mem_usage_percent"]
+                            ?.jsonPrimitive
+                            ?.double
+                        replacedCurl = replacedCurl
+                            .replace(templates[1],"${memUsageRes}%")
+                    }
+                    if(replacedCurl.contains(templates[2])){
+                        replacedCurl = replacedCurl
+                            .replace(templates[2],AppMeta.versionName)
+                    }
+                    if(replacedCurl.contains(templates[3])){
+                        val batteryLevel: Int = KanoUtils.getBatteryPercentage(context)
+                        replacedCurl = replacedCurl
+                            .replace(templates[3],"$batteryLevel%")
+                    }
+                    if(replacedCurl.contains(templates[4]) || replacedCurl.contains(templates[5])){
+                        val batteryStatus = readBatteryStatus()
+                        if(replacedCurl.contains(templates[4])){
+                            replacedCurl = replacedCurl
+                                .replace(templates[4],"${batteryStatus.current_uA/1000}mA")
+                        }
+                        if(replacedCurl.contains(templates[5])){
+                            val text = String.format("%.2f", batteryStatus.voltage_uV / 1_000_000.0)
+                            replacedCurl = replacedCurl
+                                .replace(templates[5],"${text}V")
+                        }
+                    }
+                    if(replacedCurl.contains(templates[6])){
+                        replacedCurl = replacedCurl
+                            .replace(templates[6],"${AppMeta.model}")
+                    }
+                    if(replacedCurl.contains(templates[7])){
+                        try {
+                            val result = sendShellCmd("cut -d. -f1 /proc/uptime")
+                            if (!result.done) throw Exception(result.content)
+                            KanoLog.d(TAG, "cut -d. -f1 /proc/uptime 执行结果： $result")
+                            val time = result.content.toLongOrNull()
+                                ?.takeIf { it >= 0 }
+                                ?.let { "%.2f".format(it / 3600.0) }
+                                ?: "Unknown"
+                            replacedCurl = replacedCurl
+                                .replace(templates[7], "${time}h")
+                        } catch (e: Exception){
+                            KanoLog.e(TAG, "获取设备启动时长信息出错： ${e.message}")
+                        }
+                    }
+                    if(replacedCurl.contains(templates[8])){
+                        val (maxTemp) = readThermalZones()
+                        val temp = maxTemp
+                            .takeIf { it >= 0 }
+                            ?.let { "%.2f".format(it / 1000.0) }
+                            ?: "Unknown"
+                        replacedCurl = replacedCurl
+                            .replace(templates[8], "${temp}°C")
+                    }
+                    if(replacedCurl.contains(templates[9])){
+                        val dailyData = getCachedTodayUsage(context)
+                        replacedCurl = replacedCurl
+                            .replace(templates[9], dailyData.toReadableSize())
+                    }
+                } catch (e: Exception) {
+                    KanoLog.e(TAG, "获取设备信息出错： ${e.message}")
+                }
+            }
+            return replacedCurl
         }
     }
 }

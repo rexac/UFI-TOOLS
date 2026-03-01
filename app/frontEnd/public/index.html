@@ -1039,6 +1039,10 @@
                                 data-i18n="action_param_label">动作参数（JSON）: </span><textarea id="taskAction"
                                 style="margin-top: 10px;" name="action" rows="6"></textarea></label>
                         <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            <button class="btn" onclick="fillAction(event,'转发设备信息')"
+                                data-i18n="action_forward_dev_info">转发设备信息</button>
+                            <button class="btn" onclick="fillAction(event,'发送短信')"
+                                data-i18n="action_send_sms">发送短信</button>
                             <button class="btn" onclick="fillAction(event,'指示灯')" data-i18n="action_led">指示灯</button>
                             <button class="btn" onclick="fillAction(event,'NFC')" data-i18n="action_nfc">NFC</button>
                             <button class="btn" onclick="fillAction(event,'文件共享')"
@@ -1120,7 +1124,8 @@
                                 onchange="handleFileUpload(event)">
                             <button style="width: 100%;" onclick="document.querySelector('#fileUploader').click()"
                                 data-i18n="bg_setting_upload">上传图片(10MB内)</button>
-                            <button class="btn" style="width: 100%;margin-top: 10px;" onclick="event.preventDefault();handleOpenUploadFilesList()"
+                            <button class="btn" style="width: 100%;margin-top: 10px;"
+                                onclick="event.preventDefault();handleOpenUploadFilesList()"
                                 data-i18n="upload_file_manager">上传文件管理</button>
                         </label>
                     </div>
@@ -1722,8 +1727,9 @@
                             <form onsubmit="handleSmsForwardForm(event)" id="smsForwardForm">
                                 <div class="content" style="
                         overflow-y: scroll;
-                        padding: 15px;
-                        width: 66vw;
+                        padding: 15px 0;
+                        width: 80vw;
+                        font-size: .9rem;
                         max-width: 400px;">
                                     <div class="title" style="font-size: 12px;" data-i18n="smtp_hint">
                                         接收方邮箱也可以是转发方邮箱
@@ -1768,6 +1774,11 @@
                                                 id="smtp_to" name="smtp_to" type="email"
                                                 placeholder="to@xxx.com"></label>
                                     </div>
+                                    <div class="item" style="margin: 10px auto;">
+                                        <label style="display: flex;align-items: center;"><span
+                                                data-i18n="forward_dev_info_text">同时转发设备信息：</span><input
+                                                name="forward_dev_info" type="checkbox" class="checkbox"></label>
+                                    </div>
                                 </div>
                                 <div class="btn" style="text-align: right;">
                                     <button type="submit" data-i18n="submit_btn">提交</button>
@@ -1780,14 +1791,21 @@
                                 style="display: none;">
                                 <div class="content" style="
                                     overflow-y: scroll;
-                                    padding: 15px;
-                                    width: 66vw;
+                                    padding: 15px 0;
+                                    width: 80vw;
                                     max-width: 400px;">
-                                    <div class="title user_select" style="display:block;font-size: 12px;">
+                                    <div class="title user_select" style="display:block;font-size: .7rem;">
                                         <span data-i18n="curl_hint">注意：命令需是“一口气”输入的，不要中途按回车换行或用 \ 接续，注意参数间的空格
                                             短信内容占位符：</span>
+                                        <br>
                                         <span onclick="copyText(event)">{{sms-body}} {{sms-time}}
-                                            {{sms-from}}</span>
+                                            {{sms-from}}
+                                        </span>
+                                        <br>
+                                        <span onclick="copyText(event)">
+                                            {{daily-flow}} {{cpu-temp}} {{cpu-usage}} {{mem-usage}} {{app-ver}} {{battery-level}}
+                                            {{battery-current}} {{battery-voltage}} {{model}} {{boot-time}}
+                                        </span>
                                     </div>
                                     <div
                                         style="display: grid;gap: 10px;margin-top: 10px;grid-template-columns: 1fr 1fr;">
@@ -1821,10 +1839,10 @@
                                 style="display: none;">
                                 <div class="content" style="
                                     overflow-y: scroll;
-                                    padding: 15px;
-                                    width: 66vw;
+                                    padding: 15px 0;
+                                    width: 80vw;
                                     max-width: 400px;">
-                                    <div class="title" style="font-size: 12px;" data-i18n="dingtalk_hint">
+                                    <div class="title" style="font-size: .7rem;" data-i18n="dingtalk_hint">
                                         配置钉钉群机器人webhook地址，支持加签安全设置
                                     </div>
                                     <div class="item" style="margin: 10px auto;">
@@ -1832,7 +1850,7 @@
                                 display: flex;
                                 align-items: center;
                             "><span data-i18n="dingtalk_webhook"
-                                                style="display: inline-block; width:110px;font-size: 14px;">Webhook地址：</span><input
+                                                style="display: inline-block; width:110px;font-size: .8rem;">Webhook地址：</span><input
                                                 style="flex: 1;padding: 4px 6px;width: 100%;" id="dingtalk_webhook"
                                                 name="dingtalk_webhook" type="text"
                                                 placeholder="https://oapi.dingtalk.com/robot/send?access_token=xxx"></label>
@@ -1842,10 +1860,15 @@
                                 display: flex;
                                 align-items: center;
                             "><span data-i18n="dingtalk_secret"
-                                                style="display: inline-block; width:110px;font-size: 14px;">加签密钥：</span><input
+                                                style="display: inline-block; width:110px;font-size: .8rem;">加签密钥：</span><input
                                                 style="flex: 1;padding: 4px 6px;width: 100%;" id="dingtalk_secret"
                                                 name="dingtalk_secret" type="text"
                                                 placeholder="SEC000000000000000000000" optional></label>
+                                    </div>
+                                    <div class="item" style="margin: 10px auto;">
+                                        <label style="font-size: .8rem;display: flex;align-items: center;"><span
+                                                data-i18n="forward_dev_info_text">同时转发设备信息：</span><input
+                                                name="forward_dev_info" type="checkbox" class="checkbox"></label>
                                     </div>
                                 </div>
                                 <div class="btn" style="text-align: right;">
@@ -2029,7 +2052,7 @@
                                 @ufi_tools_chat</a></button>
                     </div>
                     <div class="donate_content"
-                        style="display: flex; flex-direction: row; justify-content: space-between; padding: 15px; width: 66vw; max-width: 400px; flex-wrap: wrap;">
+                        style="display: flex; flex-direction: row; justify-content: space-between; padding: 15px; width: 70vw; max-width: 400px; flex-wrap: wrap;">
 
                         <a href="https://api.kanokano.cn/pay/zsm.png" target="_blank"
                             style="display:flex;width: 48%; height: auto; border-radius: 20px;">

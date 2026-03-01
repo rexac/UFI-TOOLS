@@ -332,7 +332,7 @@
     "smtp_username": "用户：",
     "smtp_password": "密码：",
     "smtp_to": "发给：",
-    "curl_hint": "注意：命令需是“一口气”输入的，不要中途按回车换行或用 \\ 接续，注意参数间的空格",
+    "curl_hint": "注意：命令需是“一口气”输入的，不要中途按回车换行或用 \\ 接续，注意参数间的空格，短信内容占位符：",
     "scheduled_tasks_title": "定时任务",
     "task_list_title": "任务列表",
     "refresh_btn": "刷新",
@@ -784,5 +784,16 @@
     "udp_conn_total": "UDP连接",
     "udp6_conn_total": "UDP6连接",
     "unix_conn_total": "UNIX连接",
-    "other_protocols":"其他协议"
+    "other_protocols":"其他协议",
+    "action_send_sms":"发送短信",
+    "phone_number":"电话号码",
+    "sms_content":"短信内容",
+    "please_input_sms_body_and_phone":"输入号码与短信内容",
+    "please_input_correct_phone_number":"请输入合法手机号",
+    "sms_content_not_empty":"短信内容不能为空",
+    "forward_dev_info_text":"同时转发设备信息：",
+    "action_forward_dev_info":"转发设备信息",
+    "action_forward_dev_info_notice":"转发设备信息功能依赖短信转发功能",
+    "action_forward_dev_info_notice_fail":"短信转发未启用，请先在“短信转发”页面启用并配置后再使用。"
+
 }

@@ -10,6 +10,10 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import androidx.core.content.edit
+import com.minikano.f50_sms.utils.KanoUtils.Companion.buildStatusSmsMsg
+import com.minikano.f50_sms.utils.SmsPoll.forwardByEmail
+import com.minikano.f50_sms.utils.SmsPoll.forwardSmsByCurl
+import com.minikano.f50_sms.utils.SmsPoll.forwardSmsByDingTalk
 
 // 定时任务管理器
 object TaskSchedulerManager {
@@ -220,26 +224,77 @@ class TaskScheduler(
         if (TaskSchedulerManager.sharedPrefs == null) return
         val ADB_IP = TaskSchedulerManager.sharedPrefs!!.getString("gateway_ip", "")?.substringBefore(":").orEmpty()
         val ADMIN_PWD = TaskSchedulerManager.sharedPrefs!!.getString("ADMIN_PWD", "Wa@9w+YWRtaW4=") ?: "Wa@9w+YWRtaW4="
+        val PREFS_NAME = "kano_ZTE_store"
+        val sharedPrefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
         val jsonStr = prefs.getString("kano_scheduled_tasks", null) ?: return
+        KanoLog.d("UFI_TOOLS_LOG_TaskScheduler", "jsonStr:$jsonStr")
         try {
             val restoredList = json.decodeFromString<List<ScheduledTask>>(jsonStr)
             restoredList.forEach { saved ->
                 saved.task = {
-                    scope.launch {
-                        if (!scope.isActive) return@launch //避免任务在已停止调度器中执行
-                        try {
-                            val req = KanoGoformRequest("http://$ADB_IP:8080")
-                            val cookie = req.login(ADMIN_PWD)
-                            if (cookie != null) {
-                                val result = req.postData(cookie, saved.actionMap)
-                                req.logout(cookie)
-                                if (result?.getString("result") == "success") {
-                                    KanoLog.d("UFI_TOOLS_LOG_TaskScheduler", "zte_web_API执行成功")
+                    if (saved.actionMap.containsKey("kano_do_sms_forward_action") &&
+                        saved.actionMap.containsValue("1")
+                        ){
+                        val sms_forward_switch = sharedPrefs.getString("kano_sms_forward_enabled", "0") ?: "0"
+                        KanoLog.d("UFI_TOOLS_LOG_TaskScheduler", "kano_sms_forward_enabled:$sms_forward_switch")
+                        if(sms_forward_switch != "0") {
+                            val sms_forward_method =
+                                sharedPrefs.getString("kano_sms_forward_method", "") ?: ""
+                            when (sms_forward_method) {
+                                "SMTP" -> {
+                                    forwardByEmail(
+                                        SmsInfo(
+                                            saved.id,
+                                            saved.id,
+                                            System.currentTimeMillis()
+                                        ), context, true
+                                    )
+                                }
+
+                                "CURL" -> {
+                                    forwardSmsByCurl(
+                                        SmsInfo(
+                                            saved.id,
+                                            saved.id,
+                                            System.currentTimeMillis()
+                                        ), context
+                                    )
+                                }
+
+                                "DINGTALK" -> {
+                                    forwardSmsByDingTalk(
+                                        SmsInfo(
+                                            saved.id,
+                                            saved.id,
+                                            System.currentTimeMillis()
+                                        ), context, true
+                                    )
                                 }
                             }
-                        } catch (e: Exception) {
-                            KanoLog.e("UFI_TOOLS_LOG_TaskScheduler", "任务 ${saved.id} 执行失败: ${e.message}")
+                        }
+                    } else {
+                        scope.launch {
+                            if (!scope.isActive) return@launch //避免任务在已停止调度器中执行
+                            try {
+                                val req = KanoGoformRequest("http://$ADB_IP:8080")
+                                val cookie = req.login(ADMIN_PWD)
+                                if (cookie != null) {
+                                    val result = req.postData(cookie, saved.actionMap)
+                                    req.logout(cookie)
+                                    if (result?.getString("result") == "success") {
+                                        KanoLog.d(
+                                            "UFI_TOOLS_LOG_TaskScheduler",
+                                            "zte_web_API执行成功"
+                                        )
+                                    }
+                                }
+                            } catch (e: Exception) {
+                                KanoLog.e(
+                                    "UFI_TOOLS_LOG_TaskScheduler",
+                                    "任务 ${saved.id} 执行失败: ${e.message}"
+                                )
+                            }
                         }
                     }
                 }

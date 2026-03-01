@@ -783,5 +783,15 @@
     "udp_conn_total": "UDP",
     "udp6_conn_total": "UDP6",
     "unix_conn_total": "UNIX",
-    "other_protocols": "Giao thức khác"
+    "other_protocols": "Giao thức khác",
+    "action_send_sms": "Gửi SMS",
+    "phone_number": "Số điện thoại",
+    "sms_content": "Nội dung",
+    "please_input_sms_body_and_phone": "Nhập số & nội dung",
+    "please_input_correct_phone_number": "Số điện thoại không hợp lệ",
+    "sms_content_not_empty": "Nội dung không được trống",
+    "forward_dev_info_text": "Đồng thời chuyển tiếp thông tin thiết bị:",
+    "action_forward_dev_info": "Chuyển tiếp thông tin thiết bị",
+    "action_forward_dev_info_notice": "Chuyển tiếp thông tin thiết bị phụ thuộc vào chuyển tiếp SMS",
+    "action_forward_dev_info_notice_fail": "Chuyển tiếp SMS chưa được bật. Vui lòng bật và cấu hình trong trang \"Chuyển tiếp SMS\" trước."
 }

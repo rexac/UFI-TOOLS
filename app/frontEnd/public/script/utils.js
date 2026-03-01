@@ -13,6 +13,31 @@ const isArray = (raw) => {
     }
 }
 
+function gsmDecode(hex) {
+    // 去掉空格/换行，并校验
+    const clean = hex.replace(/\s+/g, '').toLowerCase();
+    if (clean.length % 2 !== 0) throw new Error("Invalid hex: odd length");
+
+    // hex -> bytes
+    const bytes = [];
+    for (let i = 0; i < clean.length; i += 2) {
+        const b = parseInt(clean.slice(i, i + 2), 16);
+        if (Number.isNaN(b)) throw new Error("Invalid hex: contains non-hex chars");
+        bytes.push(b);
+    }
+
+    if (bytes.length % 2 !== 0) throw new Error("Invalid data: odd byte length for UTF-16BE");
+
+    // UTF-16BE bytes -> JS string (code units)
+    const codeUnits = [];
+    for (let i = 0; i < bytes.length; i += 2) {
+        const codeUnit = (bytes[i] << 8) | bytes[i + 1];
+        codeUnits.push(codeUnit);
+    }
+
+    // 拼回字符串：代理对会自动合成
+    return String.fromCharCode(...codeUnits);
+}
 
 function openLink(link) {
     if (!link) return
@@ -637,7 +662,7 @@ Array.from(document.querySelectorAll('.mask'))?.forEach(el => {
         const classList = Array.from(e?.target?.classList || [])
         const id = e.target.id
         //维护一个黑名单，黑名单内的模态框不受影响
-        const blackList = ['updateSoftwareModal', "plugin_store", "APNViewModal", "APNEditModal", "advanceModal"]
+        const blackList = ["AddTaskModal", 'updateSoftwareModal', "plugin_store", "APNViewModal", "APNEditModal", "advanceModal"]
         const isCloseable = !blackList.includes(id)
         if (classList && classList.includes('mask') && isCloseable) {
             if (id) {

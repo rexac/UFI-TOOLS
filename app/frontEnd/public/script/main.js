@@ -4138,12 +4138,14 @@ function main_func() {
                 method: 'GET',
                 headers: common_headers
             })).json()
-            const { smtp_host, smtp_port, smtp_username, smtp_password, smtp_to } = data
+            const { smtp_host, smtp_port, smtp_username, smtp_password, smtp_to, forward_dev_info } = data
             const smtpHostEl = document.querySelector('#smtp_host')
             const smtpPortEl = document.querySelector('#smtp_port')
             const smtpToEl = document.querySelector('#smtp_to')
             const smtpUsernameEl = document.querySelector('#smtp_username')
             const smtpPasswordEl = document.querySelector('#smtp_password')
+            const forwardDevInfoEl = document.querySelector('#smsForwardForm input[name="forward_dev_info"]')
+            forwardDevInfoEl.checked = forward_dev_info == "1"
             smtpHostEl.value = smtp_host || ''
             smtpPortEl.value = smtp_port || ''
             smtpUsernameEl.value = smtp_username || ''
@@ -4166,9 +4168,11 @@ function main_func() {
                 method: 'GET',
                 headers: common_headers
             })).json()
-            const { webhook_url, secret } = data
+            const { webhook_url, secret, forward_dev_info } = data
             const webhookEl = document.querySelector('#dingtalk_webhook')
             const secretEl = document.querySelector('#dingtalk_secret')
+            const forwardDevInfoEl = document.querySelector('#smsForwardDingTalkForm input[name="forward_dev_info"]')
+            forwardDevInfoEl.checked = forward_dev_info == "1"
             webhookEl.value = webhook_url || ''
             secretEl.value = secret || ''
             needSwitch && switchSmsForwardMethodTab({ target: document.querySelector('#dingtalk_btn') })
@@ -4253,6 +4257,8 @@ function main_func() {
         const smtp_to = formData.get('smtp_to')
         const smtp_username = formData.get('smtp_username')
         const smtp_password = formData.get('smtp_password')
+        const forward_dev_info = formData.get('forward_dev_info') != null
+
 
         if (!smtp_host || smtp_host.trim() == '') return createToast(t('toast_please_input_smtp_host'), 'red')
         if (!smtp_port || smtp_port.trim() == '') return createToast(t('toast_please_input_smtp_port'), 'red')
@@ -4273,7 +4279,8 @@ function main_func() {
                     smtp_port: smtp_port.trim(),
                     smtp_username: smtp_username.trim(),
                     smtp_password: smtp_password.trim(),
-                    smtp_to: smtp_to.trim()
+                    smtp_to: smtp_to.trim(),
+                    forward_dev_info: forward_dev_info ? "1" : "0"
                 })
             })).json()
             if (res.result == 'success') {
@@ -4339,8 +4346,10 @@ function main_func() {
         const formData = new FormData(form);
         const webhook_url = formData.get('dingtalk_webhook')
         const secret = formData.get('dingtalk_secret')
+        const forward_dev_info = formData.get('forward_dev_info') != null
 
-        console.log('钉钉表单数据:', { webhook_url, secret })
+
+        console.log('钉钉表单数据:', { webhook_url, secret, forward_dev_info })
 
         if (!webhook_url || webhook_url.trim() == '') return createToast(t('no_dingtalk_url'), 'red')
 
@@ -4355,6 +4364,7 @@ function main_func() {
                 body: JSON.stringify({
                     webhook_url: webhook_url.trim(),
                     secret: secret.trim(),
+                    forward_dev_info: forward_dev_info ? "1" : "0"
                 })
             })).json()
             if (res.result == 'success') {
@@ -4771,7 +4781,8 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
             })).json()
             if (res && res.tasks && res.tasks.length > 0) {
                 SCHEDULED_TASK_LIST.innerHTML = ''
-                res.tasks.forEach((task) => {
+                //倒转
+                res.tasks.reverse().forEach((task) => {
                     appendTaskToList(task)
                 })
             } else {
@@ -4818,7 +4829,9 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
             const json = await res.json()
             if (json.result === 'success') {
                 createToast(t('toast_save_success'), 'green')
-                closeModal('#AddTaskModal')
+                closeModal('#AddTaskModal', 300, () => {
+                    showModal("#ScheduledTasksModal")
+                })
                 handleInitialScheduledTasks()
 
                 //清除字段
@@ -4844,42 +4857,52 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
         handleInitialScheduledTasks()
     }
 
-    const editTask = async (id) => {
-        clearAddTaskForm()
-        const form = document.querySelector('#AddTaskForm')
-        form.id.value = id
-        //拿取最新数据
-        try {
-            const res = await fetchWithTimeout(`${KANO_baseURL}/get_task?id=${id}`, {
-                headers: {
-                    ...common_headers,
-                    'Content-Type': 'application/json'
-                },
-            })
-            const json = await res.json()
-            //预填充表单
-            setAddTaskForm(json)
-            form.id.disabled = true // 禁止修改 ID
-            setTimeout(() => {
-                showModal('#AddTaskModal')
-            }, 100);
-        } catch (e) {
-            console.error(e)
-            createToast(t('toast_request_error'), 'red')
-        }
+    const editTask = (id) => {
+        closeModal("#ScheduledTasksModal", 300, async () => {
+            clearAddTaskForm()
+            const form = document.querySelector('#AddTaskForm')
+            form.id.value = id
+            //拿取最新数据
+            try {
+                const res = await fetchWithTimeout(`${KANO_baseURL}/get_task?id=${id}`, {
+                    headers: {
+                        ...common_headers,
+                        'Content-Type': 'application/json'
+                    },
+                })
+                const json = await res.json()
+                //预填充表单
+                setAddTaskForm(json)
+                form.id.disabled = true // 禁止修改 ID
+                setTimeout(() => {
+                    showModal('#AddTaskModal')
+                }, 100);
+            } catch (e) {
+                console.error(e)
+                createToast(t('toast_request_error'), 'red')
+            }
+        })
     }
 
     const closeAddTask = () => {
-        closeModal('#AddTaskModal')
-        setTimeout(() => {
+        closeModal('#AddTaskModal', 300, () => {
+            showModal("#ScheduledTasksModal")
             clearAddTaskForm()
-        }, 300);
+        })
     }
 
-    const fillAction = (e, actionName) => {
+    const fillAction = async (e, actionName) => {
         e.preventDefault()
         //动作列表
         const actionList = {
+            "转发设备信息": {
+                "kano_do_sms_forward_action": "1"
+            },
+            "发送短信": {
+                "goformId": "SEND_SMS",
+                "Number": t("phone_number"),
+                "MessageBody": `"${t("sms_content")}"`
+            },
             "指示灯": {
                 "goformId": "INDICATOR_LIGHT_SETTING",
                 "indicator_light_switch": `${t('one_or_zero_prompt')}`
@@ -4986,7 +5009,70 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
         if (!taskAction) return
         const action = actionList[actionName]
         if (action) {
-            taskAction.value = JSON.stringify(action, null, 2)
+            if (actionName == "发送短信") {
+                if (!action.MessageBody) return
+                const { el, close } = createFixedToast('kano_sms_body', `
+                <div style="pointer-events:all;width:80vw;max-width:300px;">
+                <div class="title" style="margin:0" data-i18n="please_input_sms_body_and_phone">${t('please_input_sms_body_and_phone')}</div>
+                <input type="text" id="KANO_SMS_PHONE_NUMBER_FORWARD" style="padding:6px;width:100%;margin:10px 0" data-i18n-placeholder="phone_number" placeholder="${t("phone_number")}" ></input>
+                <textarea data-i18n-placeholder="sms_content" placeholder="${t("sms_content")}" id="KANO_SMS_TEXT_FORWARD" style="padding:4px;width:100%;box-sizing:border-box;min-height: 10em;"></textarea>
+                <div style="display:flex;gap:10px">
+                    <button id="close_sms_body_toast_btn" style="width:100%;font-size:.64rem;margin-top:5px" data-i18n="confirm_btn">${t("confirm_btn")}</button>
+                    <button id="close_sms_body_toast_btn1" style="width:100%;font-size:.64rem;margin-top:5px" data-i18n="cancel_btn">${t("cancel_btn")}</button>
+                </div>
+                </div>
+                `, 'red')
+                const btn = el.querySelector('#close_sms_body_toast_btn')
+                const btn2 = el.querySelector('#close_sms_body_toast_btn1')
+                const phone = el.querySelector("#KANO_SMS_PHONE_NUMBER_FORWARD")
+                const text = el.querySelector("#KANO_SMS_TEXT_FORWARD")
+                const taskAction = document.querySelector("#taskAction")
+
+                if (!btn && !btn2 && !text && !phone) {
+                    close()
+                    return
+                }
+                btn2.onclick = () => {
+                    close()
+                }
+                if (taskAction) {
+                    try {
+                        const data = JSON.parse(taskAction.value.trim())
+                        phone.value = data.Number
+                        text.value = gsmDecode(data.MessageBody.trim())
+                    } catch (e) {
+                        console.log("taskAction内容解析失败", e)
+                    }
+                }
+                btn.onclick = () => {
+                    const parsedVal = gsmEncode(text.value.trim())
+                    const parsedPhone = phone.value.trim()
+                    if (isNaN(parseInt(parsedPhone))) return createToast(t("please_input_correct_phone_number"), 'pink')
+                    if (parsedVal == "" || !parsedVal) return createToast(t("sms_content_not_empty"), 'pink')
+                    action.MessageBody = parsedVal
+                    action.Number = parsedPhone
+                    taskAction.value = JSON.stringify(action, null, 2)
+                    createToast(t("toast_save_success", 'pink'))
+                    close()
+                }
+            }
+            if (actionName == "转发设备信息") {
+                try {
+                    const { enabled } = await (await fetch(`${KANO_baseURL}/sms_forward_enabled`, {
+                        method: 'GET',
+                        headers: common_headers
+                    })).json()
+                    if (enabled != "1") {
+                        return createToast(t("action_forward_dev_info_notice") + "<br>" + t("action_forward_dev_info_notice_fail"), "pink", 5000)
+                    }
+                } catch (e) {
+                    console.error("获取短信转发信息失败：", e)
+                    return createToast(t('client_mgmt_fetch_error', 'pink'))
+                }
+            }
+            if (actionName != "发送短信") {
+                taskAction.value = JSON.stringify(action, null, 2)
+            }
         }
     }
 

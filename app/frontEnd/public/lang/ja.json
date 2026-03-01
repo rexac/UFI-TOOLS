@@ -783,5 +783,15 @@
     "udp_conn_total": "UDP接続",
     "udp6_conn_total": "UDP6接続",
     "unix_conn_total": "UNIX接続",
-    "other_protocols": "その他プロトコル"
+    "other_protocols": "その他プロトコル",
+    "action_send_sms": "SMS送信",
+    "phone_number": "電話番号",
+    "sms_content": "メッセージ",
+    "please_input_sms_body_and_phone": "番号と内容を入力",
+    "please_input_correct_phone_number": "正しい番号を入力",
+    "sms_content_not_empty": "内容は必須",
+    "forward_dev_info_text": "デバイス情報も転送:",
+    "action_forward_dev_info": "デバイス情報を転送",
+    "action_forward_dev_info_notice": "デバイス情報転送はSMS転送機能に依存します",
+    "action_forward_dev_info_notice_fail": "SMS転送が未有効です。「SMS転送」画面で有効化し設定してください。"
 }

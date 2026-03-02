@@ -103,11 +103,11 @@ permission_keep(){
     appops set com.minikano.f50_sms android:get_usage_stats allow >/dev/null 2>&1 || true
     appops set com.minikano.f50_sms POST_NOTIFICATION allow >/dev/null 2>&1 || true
     appops set com.minikano.f50_sms AUTO_REVOKE_PERMISSIONS_IF_UNUSED ignore >/dev/null 2>&1 || true
-
+    appops set --uid $(dumpsys package com.minikano.f50_sms 2>/dev/null | grep -m1 userId= | cut -d= -f2) AUTO_REVOKE_PERMISSIONS_IF_UNUSED ignore
     settings put secure enabled_notification_listeners com.minikano.f50_sms/com.minikano.f50_sms.MyListenerService >/dev/null 2>&1 || true
     dumpsys deviceidle whitelist +com.minikano.f50_sms >/dev/null 2>&1 || true
-
     cmd app_hibernation set-state com.minikano.f50_sms false >/dev/null 2>&1 || true
+
     echo "[`date`] permission_keep done!" >> "$LOG_FILE"
 }
 

@@ -50,7 +50,7 @@ check_ttyd_running(){
       # fallback to ps -ef if pgrep fails
       if ! ps -ef | grep "ttyd --writable --port 1146 $LOGIN_PATH" | grep -v grep > /dev/null; then
           echo "[`date`] start ttyd..." >> "$LOG_FILE"
-          export PATH="/data/data/com.termux/files/usr/bin:$PATH"
+          export PATH="/data/data/com.minikano.f50_sms/files:/data/data/com.termux/files/usr/bin:$PATH"
           "$TTYD_PATH" --writable --port 1146 $LOGIN_PATH &
       fi
   fi

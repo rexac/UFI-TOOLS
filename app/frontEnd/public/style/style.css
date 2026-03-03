@@ -214,6 +214,8 @@ textarea::placeholder {
     margin: 0 auto;
     align-items: center;
     transition: all 0.5s;
+    padding-bottom: 40px;
+    box-sizing: border-box;
 }
 
 .actions-buttons {
@@ -1013,10 +1015,10 @@ input[type="range"] {
     overflow: hidden;
 }
 
-.freq-lock-container {
+.freq-lock-container,.band-lock-container {
     width: 100%;
     flex-shrink: 0;
-    margin-bottom: 40px;
+    margin-bottom: 0px;
     margin-top: 10px;
 }
 
@@ -1037,7 +1039,7 @@ input[type="range"] {
 .main-title {
     align-self: start;
     justify-self: start;
-    margin-bottom: 10px;
+    margin-bottom: 0px;
     margin-top: 20px;
     transition: all .3s;
     padding-right: 2px;
@@ -1357,4 +1359,8 @@ input[type="range"] {
     height: 1px;
     background: var(--dark-tag-color);
     margin: 8px 0;
+}
+
+.func_list_container{
+    margin-top: 10px;
 }

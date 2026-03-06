@@ -98,7 +98,6 @@ class MainActivity : ComponentActivity() {
         lifecycleScope.launch {
             UniqueDeviceIDManager.init(applicationContext)
 
-            Toast.makeText(applicationContext, "Loading...", Toast.LENGTH_SHORT).show()
             setContent {
                 Card(
                     shape = RoundedCornerShape(16.dp),

@@ -793,5 +793,7 @@
     "forward_dev_info_text": "Also forward device info:",
     "action_forward_dev_info": "Forward device info",
     "action_forward_dev_info_notice": "Device info forwarding depends on SMS forwarding",
-    "action_forward_dev_info_notice_fail": "SMS forwarding is not enabled. Please enable and configure it on the \"SMS Forwarding\" page first."
+    "action_forward_dev_info_notice_fail": "SMS forwarding is not enabled. Please enable and configure it on the \"SMS Forwarding\" page first.",
+    "data_manage_tips": "Tip: Please set the reminder threshold correctly.",
+    "data_manage_tips1": "When data usage reaches the set threshold percentage, the device will flash a red light to remind you that the data is running low."
 }

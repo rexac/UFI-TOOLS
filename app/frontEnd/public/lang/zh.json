@@ -794,6 +794,7 @@
     "forward_dev_info_text":"同时转发设备信息：",
     "action_forward_dev_info":"转发设备信息",
     "action_forward_dev_info_notice":"转发设备信息功能依赖短信转发功能",
-    "action_forward_dev_info_notice_fail":"短信转发未启用，请先在“短信转发”页面启用并配置后再使用。"
-
+    "action_forward_dev_info_notice_fail":"短信转发未启用，请先在“短信转发”页面启用并配置后再使用。",
+    "data_manage_tips":"提示：请正确设置提醒阈值",
+    "data_manage_tips1":"当流量到达设置的阈值百分比时机器会红灯闪烁提示您流量不足"
 }

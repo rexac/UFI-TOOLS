@@ -44,6 +44,164 @@ check_log_file(){
   fi
 }
 
+SG_MAX=20
+SG_MAX_AGE=100
+
+_sg_hz() {
+    _hz="$(getconf CLK_TCK 2>/dev/null)"
+    [ -n "$_hz" ] || _hz=100
+    echo "$_hz"
+}
+
+_sg_comm() {
+    [ -r "/proc/$1/comm" ] || return 1
+    IFS= read -r _c < "/proc/$1/comm" || return 1
+    echo "$_c"
+}
+
+_sg_ppid_start() {
+    [ -r "/proc/$1/stat" ] || return 1
+    set -- $(cat "/proc/$1/stat" 2>/dev/null) || return 1
+    echo "$4 ${22}"
+}
+
+_sg_is_child_socat() {
+    _pid="$1"
+    while :; do
+        set -- $(_sg_ppid_start "$_pid") || return 1
+        _ppid="$1"
+
+        [ -n "$_ppid" ] || return 1
+        [ "$_ppid" -gt 1 ] 2>/dev/null || return 1
+
+        _pcomm="$(_sg_comm "$_ppid" 2>/dev/null)"
+        if [ "$_pcomm" = "socat" ]; then
+            return 0
+        fi
+
+        _pid="$_ppid"
+    done
+}
+
+_sg_kill_one() {
+    _pid="$1"
+    [ -n "$_pid" ] || return 1
+
+    echo "kill pid=$_pid"
+    kill "$_pid" 2>/dev/null
+    sleep 1
+
+    if [ -d "/proc/$_pid" ]; then
+        echo "kill -9 pid=$_pid"
+        kill -9 "$_pid" 2>/dev/null
+        sleep 1
+    fi
+
+    if [ -d "/proc/$_pid" ]; then
+        echo "still alive pid=$_pid"
+        return 1
+    fi
+
+    echo "killed pid=$_pid"
+    return 0
+}
+
+socat_guard_once() {
+    echo "[`date`] ------SOCAT_CLEANER_START!!------" >> "$LOG_FILE"
+    _hz="$(_sg_hz)"
+    _uptime_ticks="$(awk '{print int($1*'"$_hz"')}' /proc/uptime 2>/dev/null)"
+    [ -n "$_uptime_ticks" ] || _uptime_ticks=0
+
+    _count=0
+    _oldest_pid=
+    _oldest_start=
+    _newest_pid=
+    _newest_start=
+    _newest_child_pid=
+    _newest_child_start=
+    _expired_child_pids=
+
+    for _d in /proc/[0-9]*; do
+        [ -r "$_d/comm" ] || continue
+        _pid="${_d#/proc/}"
+
+        IFS= read -r _name < "$_d/comm" || continue
+        [ "$_name" = "socat" ] || continue
+
+        set -- $(_sg_ppid_start "$_pid") || continue
+        _ppid="$1"
+        _start="$2"
+        [ -n "$_start" ] || continue
+
+        _count=$(( _count + 1 ))
+        _age=$(( (_uptime_ticks - _start) / _hz ))
+
+        _child=0
+        if _sg_is_child_socat "$_pid"; then
+            _child=1
+        fi
+
+        echo "found pid=$_pid ppid=$_ppid age=${_age}s child=$_child"
+
+        if [ -z "$_oldest_pid" ] || [ "$_start" -lt "$_oldest_start" ]; then
+            _oldest_pid="$_pid"
+            _oldest_start="$_start"
+        fi
+
+        if [ -z "$_newest_pid" ] || [ "$_start" -gt "$_newest_start" ]; then
+            _newest_pid="$_pid"
+            _newest_start="$_start"
+        fi
+
+        if [ "$_child" = "1" ]; then
+            if [ -z "$_newest_child_pid" ] || [ "$_start" -gt "$_newest_child_start" ]; then
+                _newest_child_pid="$_pid"
+                _newest_child_start="$_start"
+            fi
+
+            if [ "$_age" -gt "$SG_MAX_AGE" ]; then
+                _expired_child_pids="$_expired_child_pids $_pid"
+            fi
+        fi
+    done
+
+    echo "count=$_count oldest=$_oldest_pid newest=$_newest_pid newest_child=$_newest_child_pid"
+
+    # 先杀超时 child socat
+    for _pid in $_expired_child_pids; do
+        [ "$_pid" = "$_oldest_pid" ] && continue
+        _sg_kill_one "$_pid"
+    done
+
+    # 重新统计数量，避免前面已经杀掉后还按旧数量判断
+    _count2=0
+    for _d in /proc/[0-9]*; do
+        [ -r "$_d/comm" ] || continue
+        IFS= read -r _name < "$_d/comm" || continue
+        [ "$_name" = "socat" ] && _count2=$(( _count2 + 1 ))
+    done
+
+    echo "count_after_expired=$_count2"
+
+    # 如果仍然超过上限，只补杀 1 个
+    if [ "$_count2" -gt "$SG_MAX" ]; then
+        if [ -n "$_newest_child_pid" ] && [ "$_newest_child_pid" != "$_oldest_pid" ]; then
+            echo "too many, kill newest child: $_newest_child_pid"
+            _sg_kill_one "$_newest_child_pid"
+            return
+        fi
+
+        if [ -n "$_newest_pid" ] && [ "$_newest_pid" != "$_oldest_pid" ]; then
+            echo "too many, no child found, kill newest: $_newest_pid"
+            _sg_kill_one "$_newest_pid"
+            return
+        fi
+
+        echo "too many, but no safe target"
+    fi
+    echo "[`date`] ------SOCAT_CLEANER_END!!------" >> "$LOG_FILE"
+}
+
 check_ttyd_running(){
   # try pgrep to check ttyd running
   if ! pgrep -f "ttyd --writable --port 1146 $LOGIN_PATH" > /dev/null; then
@@ -234,6 +392,7 @@ schedule_script() {
   check_ttyd_running
   check_socat_running
   keep_ufi_running 0
+  socat_guard_once >> "$LOG_FILE" 2>&1 &
 }
 
 uptime_seconds=$(cut -d. -f1 /proc/uptime)

@@ -142,6 +142,8 @@ object SmsPoll {
             statusText = buildStatusSmsMsg(
             """
             <p><b>🌐 当日用量: </b>{{daily-flow}}</p>
+            <p><b>🌛 月用量(高级后台统计): </b>{{monthly-flow-count}}  </p>
+            <p><b>🌛 月用量(官方后台统计): </b>{{monthly-flow-sum}}</p>
             <p><b>🔥 CPU温度: </b>{{cpu-temp}}</p>
             <p><b>🖥️ CPU占用: </b>{{cpu-usage}}</p>
             <p><b>🧠 内存占用: </b>{{mem-usage}}</p>
@@ -209,6 +211,8 @@ object SmsPoll {
             statusText = buildStatusSmsMsg(
             """
             🌐 当日用量: {{daily-flow}}    
+            🌛 月用量(高级后台统计): {{monthly-flow-count}}    
+            🌛 月用量(官方后台统计): {{monthly-flow-sum}}    
             🔥 CPU温度: {{cpu-temp}}
             🖥️ CPU使用: {{cpu-usage}}
             🧠 内存使用: {{mem-usage}}

@@ -133,6 +133,7 @@
     "total_limit_bytes": "Total Data",
     "monthly_rx_bytes": "Monthly Data Used",
     "daily_data": "Daily Data",
+    "monthly_data": "This month",
     "battery_current": "Battery Current",
     "battery_voltage": "Battery Voltage",
     "current_network_speed": "Cellular Speed",

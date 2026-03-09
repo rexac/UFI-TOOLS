@@ -133,6 +133,7 @@
     "total_limit_bytes": "総データ量",
     "monthly_rx_bytes": "月間使用量",
     "daily_data": "今日の使用量",
+    "monthly_data": "今月",
     "battery_current": "バッテリー電流",
     "battery_voltage": "バッテリー電圧",
     "current_network_speed": "現在速度",

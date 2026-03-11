@@ -107,6 +107,7 @@ fun Route.baseDeviceInfoModule(context: Context) {
 
         //存储与日流量获取
         var dailyDataRes: Long? = null
+        var monthlyDataRes: Long? = null
         var availableSizeRes: Long? = null
         var usedSizeRes: Long? = null
         var totalSizeRes: Long? = null
@@ -121,8 +122,9 @@ fun Route.baseDeviceInfoModule(context: Context) {
             val availableSize = statFs.blockSizeLong * statFs.availableBlocksLong
             val usedSize = totalSize - availableSize
 
-            // 获取日用流量
-            val dailyData = KanoUtils.getCachedTodayUsage(context)
+            // 获取日用、月用流量
+            dailyDataRes = KanoUtils.getCachedTodayUsage(context)
+            monthlyDataRes = KanoUtils.getCachedMonthlyUsage(context)
 
             // 外部存储（可移动设备）
             val exStorageInfo = KanoUtils.getCachedRemovableStorageInfo(context)
@@ -130,11 +132,11 @@ fun Route.baseDeviceInfoModule(context: Context) {
             val externalAvailable = exStorageInfo?.availableBytes ?: 0
             val externalUsed = externalTotal - externalAvailable
 
-            KanoLog.d(TAG, "日用流量：$dailyData")
+            KanoLog.d(TAG, "日用流量：$dailyDataRes")
+            KanoLog.d(TAG, "月用流量：$monthlyDataRes")
             KanoLog.d(TAG, "内部存储：$usedSize/$totalSize")
             KanoLog.d(TAG, "外部存储：$externalAvailable/$externalTotal")
 
-            dailyDataRes = dailyData
             availableSizeRes = availableSize
             usedSizeRes = usedSize
             totalSizeRes = totalSize
@@ -189,6 +191,7 @@ fun Route.baseDeviceInfoModule(context: Context) {
                 "model": "$modelRes",
                 "battery": "$batteryLevelRes",
                 "daily_data": $dailyDataRes,
+                "monthly_data": $monthlyDataRes,
                 "internal_available_storage": $availableSizeRes,
                 "internal_used_storage": $usedSizeRes,
                 "internal_total_storage": $totalSizeRes,

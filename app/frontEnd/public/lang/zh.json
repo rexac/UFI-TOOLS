@@ -134,6 +134,7 @@
     "total_limit_bytes": "总流量",
     "monthly_rx_bytes": "已用流量",
     "daily_data": "当日流量",
+    "monthly_data": "本月已用",
     "battery_current": "电池电流",
     "battery_voltage": "电池电压",
     "current_network_speed": "当前网速",

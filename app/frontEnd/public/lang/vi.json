@@ -133,6 +133,7 @@
     "total_limit_bytes": "Tổng dữ liệu",
     "monthly_rx_bytes": "Dữ liệu tháng đã dùng",
     "daily_data": "Dữ liệu ngày",
+    "monthly_data": "Tháng này",
     "battery_current": "Dòng pin",
     "battery_voltage": "Điện áp pin",
     "current_network_speed": "Tốc độ mạng",

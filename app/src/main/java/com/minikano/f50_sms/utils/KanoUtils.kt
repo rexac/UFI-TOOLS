@@ -127,6 +127,16 @@ class KanoUtils {
             return cal.timeInMillis
         }
 
+        fun getStartOfMonthMillis(): Long {
+            val cal = Calendar.getInstance()
+            cal.set(Calendar.DAY_OF_MONTH,1)
+            cal.set(Calendar.HOUR_OF_DAY, 0)
+            cal.set(Calendar.MINUTE, 0)
+            cal.set(Calendar.SECOND, 0)
+            cal.set(Calendar.MILLISECOND, 0)
+            return cal.timeInMillis
+        }
+
         fun getTodayDataUsage(
             context: Context,
         ): Long {
@@ -134,6 +144,29 @@ class KanoUtils {
                 context.getSystemService(Context.NETWORK_STATS_SERVICE) as NetworkStatsManager
 
             val startTime = getStartOfDayMillis()
+            val endTime = System.currentTimeMillis()
+
+            var totalBytes = 0L
+
+            try {
+                val summary = networkStatsManager.querySummaryForDevice(
+                    ConnectivityManager.TYPE_MOBILE, null, startTime, endTime
+                )
+                totalBytes = summary.rxBytes + summary.txBytes
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+
+            return totalBytes
+        }
+
+        fun getMonthlyDataUsage(
+            context: Context,
+        ): Long {
+            val networkStatsManager =
+                context.getSystemService(Context.NETWORK_STATS_SERVICE) as NetworkStatsManager
+
+            val startTime = getStartOfMonthMillis()
             val endTime = System.currentTimeMillis()
 
             var totalBytes = 0L
@@ -453,6 +486,17 @@ class KanoUtils {
             return cachedTotal
         }
 
+        private var cachedMonthlyTotal = 0L
+        private var lastMonthlyUpdate = 0L
+        fun getCachedMonthlyUsage(context: Context): Long {
+            val now = System.currentTimeMillis()
+            if (now - lastMonthlyUpdate > 10_000) { // 每 10 秒更新一次
+                cachedMonthlyTotal = getMonthlyDataUsage(context)
+                lastMonthlyUpdate = now
+            }
+            return cachedMonthlyTotal
+        }
+
         fun getSELinuxStatus(): String {
             try {
                 val process = Runtime.getRuntime().exec("getenforce")
@@ -658,6 +702,39 @@ class KanoUtils {
             }
         }
 
+        private var catchedFlowMonth : Long = 0L
+        private var lastMonthlyFlowUpdate = 0L
+        fun getCatchedFlowMonth(context: Context): Long {
+            val now = System.currentTimeMillis()
+            if (now - lastMonthlyFlowUpdate > 10_000) { // 每 10 秒更新一次
+               try {
+                    runBlocking {
+                        val sharedPrefs =
+                            context.getSharedPreferences("kano_ZTE_store", Context.MODE_PRIVATE)
+                        val ADB_IP =
+                            sharedPrefs.getString("gateway_ip", "")?.substringBefore(":")
+                        val req = KanoGoformRequest("http://$ADB_IP:8080")
+                        val result = req.getData(mapOf(
+                            "cmd" to "monthly_rx_bytes,monthly_tx_bytes"
+                        ))
+
+                        val monthlyRxBytes = result?.getLong("monthly_rx_bytes")
+                        val monthlyTxBytes = result?.getLong("monthly_tx_bytes")
+
+                        if(monthlyRxBytes == null || monthlyTxBytes == null){
+                            throw Exception("monthly_rx_bytes=$monthlyRxBytes,monthly_tx_bytes:$monthlyTxBytes")
+                        }
+
+                        val summaryBytes = monthlyRxBytes + monthlyTxBytes
+                        catchedFlowMonth = summaryBytes
+                    }
+                } catch (e: Exception) {
+                    Log.e("UFI_TOOLS_LOG", "查询官方后台流量使用情况执行错误: ${e.message}")
+                }
+                lastMonthlyFlowUpdate = now
+            }
+            return catchedFlowMonth
+        }
         fun buildStatusSmsMsg(text:String,context: Context,TAG:String): String {
             if(text.isBlank()) return text
             var replacedCurl = text
@@ -674,6 +751,8 @@ class KanoUtils {
                         "{{boot-time}}" ,
                         "{{cpu-temp}}" ,
                         "{{daily-flow}}" ,
+                        "{{monthly-flow-count}}" ,
+                        "{{monthly-flow-sum}}" ,
                     )
                     if(replacedCurl.contains(templates[0])){
                         val usage = calculateCpuUsage()
@@ -746,6 +825,17 @@ class KanoUtils {
                         val dailyData = getCachedTodayUsage(context)
                         replacedCurl = replacedCurl
                             .replace(templates[9], dailyData.toReadableSize())
+                    }
+                    //月流量统计（Android）
+                    if(replacedCurl.contains(templates[10])){
+                        val dailyData = getCachedMonthlyUsage(context)
+                        replacedCurl = replacedCurl
+                            .replace(templates[10], dailyData.toReadableSize())
+                    }
+                    //月流量统计（官方后台）
+                    if(replacedCurl.contains(templates[11])){
+                        replacedCurl = replacedCurl
+                            .replace(templates[11], getCatchedFlowMonth(context).toReadableSize())
                     }
                 } catch (e: Exception) {
                     KanoLog.e(TAG, "获取设备信息出错： ${e.message}")

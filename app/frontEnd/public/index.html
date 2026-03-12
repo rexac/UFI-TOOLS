@@ -9,6 +9,15 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <link rel="icon" type="image/svg+xml" href="/favicon.webp">
     <title id="TITLE">UFI-TOOLS-WEB</title>
+    <script>
+        (() => {
+            try {
+                new Function('var obj = {}; return obj?.a;');
+            } catch (e) {
+                alert("您的浏览器版本过低，无法使用本页面，请升级浏览器版本后再试\nYour browser version is too old to use this page. Please update your browser and try again.")
+            }
+        })()
+    </script>
     <link rel="manifest" href="/manifest.json">
     <link rel="stylesheet" href="/style/style.css">
     <script src="/script/polyfill.min.js"></script>
@@ -547,9 +556,9 @@
             <!-- 短信模态框 -->
             <div class="modal" id="smsList" style="display: none;">
                 <div class="title" data-i18n="sms_modal_title" style="margin-bottom: 6px;">短信列表</div>
-                <div class="action" style="margin-top: 10px;background-color: #00ffdd17;">
+                <div class="action" style="margin-top: 10px;background-color: var(--dark-tag-color);">
                     <span data-i18n="sms_modal_recipient">收件人：</span>
-                    <input id="PhoneInput" type="number" style="flex: 1;margin-right: 6px" placeholder="手机号"
+                    <input id="PhoneInput" type="number" style="flex: 1" placeholder="手机号"
                         data-i18n-placeholder="sms_modal_input_recipient">
                 </div>
 
@@ -557,12 +566,12 @@
                     <ul id="sms-list"></ul>
                 </div>
 
-                <div class="action" style="background-color: #00ffdd17;">
+                <div class="action" style="background-color: var(--dark-tag-color);">
                     <input id="SMSInput" type="text" style="flex: 1;margin-right: 6px" placeholder="输入短信内容"
                         data-i18n-placeholder="sms_modal_input_content">
                     <div class="btn"
-                        style="height: 100%;min-width: 103px;display: flex;justify-content: center;align-items: center;">
-                        <button onclick="sendSMS()" style="margin-right: 6px;height: 100%;"
+                        style="height: 100%;min-width: 103px;display: flex;justify-content: space-between;gap: 6px;align-items: center;">
+                        <button onclick="sendSMS()" style="height: 100%;"
                             data-i18n="sms_modal_send_btn">发送</button>
                         <button onclick="closeModal('#smsList')" style="height: 100%;"
                             data-i18n="sms_modal_close_btn">关闭</button>
@@ -710,7 +719,8 @@
                 <div class="modal">
                     <div class="title" data-i18n="data_manage_modal_title">流量管理</div>
                     <form onsubmit="handleDataManagementFormSubmit(event)" id="DataManagementForm">
-                        <div class="title" style="margin-top:10px;font-size:.7rem;flex-direction: column;align-items: start;gap: 0;">
+                        <div class="title"
+                            style="margin-top:10px;font-size:.7rem;flex-direction: column;align-items: start;gap: 0;">
                             <span data-i18n="data_manage_tips">提示：请正确设置提醒阈值</span>
                             <span data-i18n="data_manage_tips1">当流量到达设置的阈值百分比时机器会红灯闪烁提示您流量不足</span>
                         </div>
@@ -1814,7 +1824,8 @@
                                         <span onclick="copyText(event)">
                                             {{daily-flow}} {{cpu-temp}} {{cpu-usage}} {{mem-usage}} {{app-ver}}
                                             {{battery-level}}
-                                            {{battery-current}} {{battery-voltage}} {{model}} {{boot-time}} {{monthly-flow-count}} {{monthly-flow-sum}}
+                                            {{battery-current}} {{battery-voltage}} {{model}} {{boot-time}}
+                                            {{monthly-flow-count}} {{monthly-flow-sum}}
                                         </span>
                                     </div>
                                     <div

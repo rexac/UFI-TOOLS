@@ -967,42 +967,40 @@ const checkBroswer = () => {
 
     if (ignoreBrowserCheckAlert != '1') {
         if (result.browser === "Chrome") {
-            //需要大于125
             const versionParts = result.version.split('.');
             const majorVersion = parseInt(versionParts[0], 10);
-            if (majorVersion <= 125) {
+            if (majorVersion <= 100) {
                 if (!isShowedBrowserCheckAlert) {
                     createToast(`${t('your')}${result.browser}${t('browser_version_low')}`, 'pink', 10000);
                 }
                 localStorage.setItem('isShowedBrowserCheckAlert', '1')
             }
-            if (majorVersion <= 105) {
+            if (majorVersion <= 92) {
                 alert(`${t('your')}${result.browser}${t('browser_version_very_low')}`);
             }
         } else if (result.browser === "Firefox") {
-            //需要大于125
             const versionParts = result.version.split('.');
             const majorVersion = parseInt(versionParts[0], 10);
-            if (majorVersion <= 125) {
+            if (majorVersion <= 100) {
                 if (!isShowedBrowserCheckAlert) {
                     createToast(`${t('your')}${result.browser}${t('browser_version_low')}`, 'pink', 10000);
                 }
                 localStorage.setItem('isShowedBrowserCheckAlert', '1')
             }
-            if (majorVersion <= 105) {
+            if (majorVersion <= 92) {
                 alert(`${t('your')}${result.browser}${t('browser_version_very_low')}`);
             }
         } else if (result.browser === "Safari") {
             //需要大于17.5
             const versionParts = result.version.split('.');
             const majorVersion = parseInt(versionParts[0], 10);
-            if (majorVersion <= 17.5) {
+            if (majorVersion <= 15.4) {
                 if (!isShowedBrowserCheckAlert) {
                     createToast(`${t('your')}${result.browser}${t('browser_version_low')}`, 'pink', 10000);
                 }
                 localStorage.setItem('isShowedBrowserCheckAlert', '1')
             }
-            if (majorVersion <= 15.6) {
+            if (majorVersion <= 14.1) {
                 alert(`${t('your')}${result.browser}${t('browser_version_very_low')}`);
             }
         }

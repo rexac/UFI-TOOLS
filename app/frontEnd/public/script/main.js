@@ -660,7 +660,7 @@ function main_func() {
     }
 
     const deleteState = new Map();
-    const deleteSMS = async (id) => {
+    const deleteSMS = async (id, flag = false) => {
         const message = document.querySelector(`#message${id}`);
         if (!message) return;
         // 获取当前 id 的删除状态
@@ -669,8 +669,9 @@ function main_func() {
         if (state.isDeleting) return; // 正在删除时禁止操作
 
         state.confirmCount += 1;
-        message.style.display = '';
-
+        if (!flag) {
+            message.style.display = '';
+        }
         // 清除之前的计时器，重新设置 2 秒后重置状态
         clearTimeout(state.timer);
         state.timer = setTimeout(() => {
@@ -681,8 +682,9 @@ function main_func() {
 
         deleteState.set(id, state);
 
-        if (state.confirmCount < 2) return; // 第一次点击时仅提示
-
+        if (!flag) {
+            if (state.confirmCount < 2) return; // 第一次点击时仅提示
+        }
         // 进入删除状态，防止重复点击
         state.isDeleting = true;
         deleteState.set(id, state);
@@ -690,8 +692,13 @@ function main_func() {
         try {
             const res = await removeSmsById(id);
             if (res?.result === 'success') {
-                createToast(t('toast_delete_success'), 'green');
-                setTimeout(() => handleSmsRender(), 300)
+                if (!flag) {
+                    createToast(t('toast_delete_success'), 'green');
+                }
+                setTimeout(() => {
+                    handleSmsRender();
+                    state.isDeleting = false;
+                }, 300)
             } else {
                 createToast(res?.message || t('toast_delete_failed'), 'red');
             }
@@ -702,6 +709,26 @@ function main_func() {
         // 删除完成后，清理状态
         deleteState.delete(id);
     };
+
+    let deleteAndReSendSms = async (id) => {
+        await deleteSMS(id, true)
+        //填充
+        let smsListEl = document.querySelectorAll("#sms-list .sms-item")
+        if (!smsListEl || !smsListEl.length) return
+        let smsList = Array.from(smsListEl)
+        for (let i in smsList) {
+            if (smsList[i].dataset.smsId == id) {
+                const PhoneInput = document.querySelector('#PhoneInput')
+                const SMSInput = document.querySelector('#SMSInput')
+                if (PhoneInput && SMSInput) {
+                    PhoneInput.value = smsList[i].dataset.smsPhone
+                    SMSInput.value = decodeBase64(smsList[i].dataset.smsContent)
+                    await sendSMS()
+                }
+                break
+            }
+        }
+    }
 
     let isFirstRender = true
     let lastRequestSmsIds = null
@@ -743,13 +770,16 @@ function main_func() {
                 date = date.map((item, index) => {
                     return item + dateStrArr[index]
                 }).join('')
-                return `<li class="sms-item" style="${item.tag != '2' ? 'background-color:#0880001f;margin-left:15px' : 'background-color:#ffc0cb63;margin-right:15px'}">
-                                        <div class="arrow" style="${item.tag == '2' ? 'right:-30px;border-color: transparent transparent transparent #ffc0cb63' : 'left:-30px;border-color: transparent #0880001f transparent transparent'}"></div>
+                return `<li class="sms-item" data-sms-id="${item.id}" data-sms-phone="${item.number}" data-sms-content="${item.content}" style="${item.tag == '3' ? 'background-color:#ffc0cb1f;margin-right:15px' : item.tag != '2' ? 'background-color:#0880001f;margin-left:15px' : 'background-color:#ffc0cb1f;margin-right:15px'}">
+                                        <div class="arrow" style="${item.tag == '3' ? 'right:-30px;border-color: transparent transparent transparent #ffc0cb1f' : item.tag == '2' ? 'right:-30px;border-color: transparent transparent transparent #ffc0cb1f' : 'left:-30px;border-color: transparent #0880001f transparent transparent'}"></div>
+                                        ${item.tag == "3" ? `<svg onclick="deleteAndReSendSms(${item.id})" class="icon" style="position: absolute;right: 50px;top: 18px;" width="14px" height="14px" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg">
+                <path fill="red" d="M815.36 184.96V128a36.48 36.48 0 0 1 10.24-26.88 37.76 37.76 0 0 1 52.48 0 40.96 40.96 0 0 1 11.52 26.88v172.16a40.32 40.32 0 0 1-37.12 37.12h-173.44a40.32 40.32 0 0 1-26.88-11.52 37.76 37.76 0 0 1 0-52.48 35.84 35.84 0 0 1 26.88-10.24h108.8a372.48 372.48 0 0 0-453.12-75.52A367.36 367.36 0 0 0 170.24 364.8a374.4 374.4 0 0 0-19.84 242.56 369.92 369.92 0 0 0 132.48 202.24A375.04 375.04 0 0 0 512 888.32a368.64 368.64 0 0 0 263.68-108.8A376.32 376.32 0 0 0 885.12 512H960A448 448 0 1 1 136.32 270.08a438.4 438.4 0 0 1 192-164.48 444.16 444.16 0 0 1 256-32 455.68 455.68 0 0 1 230.4 111.36z"></path>
+            </svg>`: ""}
                                         <div class="icon" onclick="deleteSMS(${item.id})">
-                                            <span id="message${item.id}" style="display:none;color:red;position: absolute;width: 100px;top: 6px;right: 20px;">确定要删除吗？</span>
+                                            <span id="message${item.id}" style="display:none;color:red;position: absolute;width: 100px;top: 30px;right: 0px;">确定要删除吗？</span>
                                             <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" t="1742373390977" class="icon" viewBox="0 0 1024 1024" version="1.1" p-id="2837" width="16" height="16"><path d="M848 144H608V96a48 48 0 0 0-48-48h-96a48 48 0 0 0-48 48v48H176a48 48 0 0 0-48 48v48h768v-48a48 48 0 0 0-48-48zM176 928a48 48 0 0 0 48 48h576a48 48 0 0 0 48-48V288H176v640z m480-496a48 48 0 1 1 96 0v400a48 48 0 1 1-96 0V432z m-192 0a48 48 0 1 1 96 0v400a48 48 0 1 1-96 0V432z m-192 0a48 48 0 1 1 96 0v400a48 48 0 1 1-96 0V432z" fill="" p-id="2838"/></svg>
                                         </div>
-                                        <p style="color:#adadad;font-size:16px;margin:4px 0">${item.number}</p>
+                                        <p style="color:#adadad;font-size:16px;margin:4px 0">${item.number}${item.tag == '3' ? ` <span style="font-size:.7rem;color:red">(${t("toast_sms_send_failed")})</span>` : ""}</p>
                                         <p>${decodeBase64(item.content)}</p>
                                         <p style="text-align:right;color:#adadad;margin-top:4px">${date}</p>
                                     </li > `
@@ -7304,6 +7334,7 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
         onTokenConfirm,
         sendSMS,
         deleteSMS,
+        deleteAndReSendSms,
         resetShowList,
         handleDataManagementFormSubmit,
         handleWIFIManagementFormSubmit,

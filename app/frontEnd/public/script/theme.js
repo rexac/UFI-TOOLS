@@ -139,8 +139,15 @@ function updateColor() {
     document.querySelectorAll('.statusCard,thead,tbody,input')?.forEach(el => {
         homeBlurSwitch ? el.classList.add('blur-px') : el.classList.remove('blur-px')
     })
+
+    //去除已存在的style
+    const _lastStyle = document.querySelector('#kano_filter_profile_set')
+    if(_lastStyle){
+        _lastStyle.remove()
+    }
     const _style = document.createElement('style')
-    _style.innerHTML = `.deviceList li {backdrop-filter: blur(${homeBlurSwitch ? "4px" : "0"}) !important;-webkit-backdrop-filter: blur(${homeBlurSwitch ? "4px" : "0"}) !important;}`
+    _style.id = "kano_filter_profile_set"
+    _style.innerHTML = `.deviceList li {backdrop-filter: ${homeBlurSwitch ? "blur(4px) !important" : "none !important"};-webkit-backdrop-filter:  ${homeBlurSwitch ? "blur(4px) !important;" : "none !important;"}) }`
     document.querySelector('.status-container')?.insertAdjacentElement('beforebegin', _style)
 
 

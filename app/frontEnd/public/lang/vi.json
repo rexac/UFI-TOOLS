@@ -796,5 +796,7 @@
     "action_forward_dev_info_notice": "Chuyển tiếp thông tin thiết bị phụ thuộc vào chuyển tiếp SMS",
     "action_forward_dev_info_notice_fail": "Chuyển tiếp SMS chưa được bật. Vui lòng bật và cấu hình trong trang \"Chuyển tiếp SMS\" trước.",
     "data_manage_tips": "Mẹo: Vui lòng thiết lập đúng ngưỡng nhắc nhở.",
-    "data_manage_tips1": "Khi mức sử dụng dữ liệu đạt đến phần trăm ngưỡng đã cài đặt, thiết bị sẽ nhấp nháy đèn đỏ để nhắc rằng dữ liệu sắp hết."
+    "data_manage_tips1": "Khi mức sử dụng dữ liệu đạt đến phần trăm ngưỡng đã cài đặt, thiết bị sẽ nhấp nháy đèn đỏ để nhắc rằng dữ liệu sắp hết.",
+    "please_input": "Nhập",
+    "term_confirm_text": "Đồng ý điều khoản"
 }

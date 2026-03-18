@@ -776,7 +776,7 @@ function main_func() {
                 <path fill="red" d="M815.36 184.96V128a36.48 36.48 0 0 1 10.24-26.88 37.76 37.76 0 0 1 52.48 0 40.96 40.96 0 0 1 11.52 26.88v172.16a40.32 40.32 0 0 1-37.12 37.12h-173.44a40.32 40.32 0 0 1-26.88-11.52 37.76 37.76 0 0 1 0-52.48 35.84 35.84 0 0 1 26.88-10.24h108.8a372.48 372.48 0 0 0-453.12-75.52A367.36 367.36 0 0 0 170.24 364.8a374.4 374.4 0 0 0-19.84 242.56 369.92 369.92 0 0 0 132.48 202.24A375.04 375.04 0 0 0 512 888.32a368.64 368.64 0 0 0 263.68-108.8A376.32 376.32 0 0 0 885.12 512H960A448 448 0 1 1 136.32 270.08a438.4 438.4 0 0 1 192-164.48 444.16 444.16 0 0 1 256-32 455.68 455.68 0 0 1 230.4 111.36z"></path>
             </svg>`: ""}
                                         <div class="icon" onclick="deleteSMS(${item.id})">
-                                            <span id="message${item.id}" style="display:none;color:red;position: absolute;width: 100px;top: 30px;right: 0px;">确定要删除吗？</span>
+                                            <span id="message${item.id}" style="color: red;position: absolute;width: 100px;top: 2px;right: 30px;background: var(--dark-tag-color-active);display: none;text-align: center;padding: 4px;border-radius: 8px;backdrop-filter: blur(var(--blur-rate));">确定要删除吗？</span>
                                             <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" t="1742373390977" class="icon" viewBox="0 0 1024 1024" version="1.1" p-id="2837" width="16" height="16"><path d="M848 144H608V96a48 48 0 0 0-48-48h-96a48 48 0 0 0-48 48v48H176a48 48 0 0 0-48 48v48h768v-48a48 48 0 0 0-48-48zM176 928a48 48 0 0 0 48 48h576a48 48 0 0 0 48-48V288H176v640z m480-496a48 48 0 1 1 96 0v400a48 48 0 1 1-96 0V432z m-192 0a48 48 0 1 1 96 0v400a48 48 0 1 1-96 0V432z m-192 0a48 48 0 1 1 96 0v400a48 48 0 1 1-96 0V432z" fill="" p-id="2838"/></svg>
                                         </div>
                                         <p style="color:#adadad;font-size:16px;margin:4px 0">${item.number}${item.tag == '3' ? ` <span style="font-size:.7rem;color:red">(${t("toast_sms_send_failed")})</span>` : ""}</p>
@@ -6118,9 +6118,9 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
                 return false
             },
             onConfirm: () => {
-                const scroll = md.el.querySelector('.content')
-                if ((scroll.scrollTop < scroll.clientHeight) || (scroll.scrollTop < 50)) {
-                    // 哎呀，你怎么又没认真看😯
+                const text = document.querySelector("#kano_term_confirm_text")
+                // 哎呀，你怎么又没认真看😯
+                if (text.value.trim() != t("term_confirm_text")) {
                     createToast(t('please_read_terms'))
                     return false
                 }
@@ -6137,7 +6137,7 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
                 })
                 return true
             },
-            content: t('useTerms')
+            content: `${t('useTerms')}<div style="font-size: .9rem;margin-top: 10px;"><span>${t('please_input')}:"${t('term_confirm_text')}"</span><input id="kano_term_confirm_text" type="text" style="width: 100%;margin: 6px 0;padding: 6px;"></div>`
         })
         const cache = localStorage.getItem('read_terms')
         try {

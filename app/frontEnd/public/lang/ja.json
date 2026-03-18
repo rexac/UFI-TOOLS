@@ -796,5 +796,7 @@
     "action_forward_dev_info_notice": "デバイス情報転送はSMS転送機能に依存します",
     "action_forward_dev_info_notice_fail": "SMS転送が未有効です。「SMS転送」画面で有効化し設定してください。",
     "data_manage_tips": "ヒント：通知のしきい値を正しく設定してください。",
-    "data_manage_tips1": "データ使用量が設定したしきい値の割合に達すると、データ不足を知らせるためにデバイスの赤いランプが点滅します。"
+    "data_manage_tips1": "データ使用量が設定したしきい値の割合に達すると、データ不足を知らせるためにデバイスの赤いランプが点滅します。",
+    "please_input": "入力",
+    "term_confirm_text": "規約に同意"
 }

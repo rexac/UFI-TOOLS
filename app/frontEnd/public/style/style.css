@@ -231,15 +231,12 @@ textarea::placeholder {
 .actions-buttons {
     /* display: flex; */
     /* flex-wrap: wrap; */
-    margin: 0 2px;
+    /* margin: 0 2px; */
     margin-bottom: 10px;
 }
 
 .actions-buttons button {
-    /* width: 66px; */
-    /* height: 35px; */
     margin: 4px 2px !important;
-    /* padding: 8px 0px !important; */
 }
 
 .box {
@@ -253,6 +250,11 @@ textarea::placeholder {
 
 .deviceList {
     overflow: hidden;
+}
+
+.kano_function_main {
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .deviceList li {

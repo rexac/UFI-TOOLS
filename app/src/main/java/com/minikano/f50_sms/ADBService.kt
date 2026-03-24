@@ -6,32 +6,32 @@ import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Build
 import android.os.Handler
 import android.os.HandlerThread
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import com.minikano.f50_sms.configs.AppMeta
+import com.minikano.f50_sms.utils.BatteryReceiver
 import com.minikano.f50_sms.utils.KanoLog
-import com.minikano.f50_sms.utils.KanoReport
 import com.minikano.f50_sms.utils.KanoReport.Companion.reportToServer
 import com.minikano.f50_sms.utils.KanoUtils
 import com.minikano.f50_sms.utils.KanoUtils.Companion.isUsbDebuggingEnabled
-import com.minikano.f50_sms.utils.RootShell
 import com.minikano.f50_sms.utils.ShellKano
 import com.minikano.f50_sms.utils.ShellKano.Companion.executeShellFromAssetsSubfolderWithArgs
 import com.minikano.f50_sms.utils.ShellKano.Companion.killProcessByName
 import com.minikano.f50_sms.utils.SmbThrottledRunner
+import com.minikano.f50_sms.utils.SmsInfo
 import com.minikano.f50_sms.utils.SmsPoll
 import com.minikano.f50_sms.utils.TaskSchedulerManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import java.io.File
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
-import kotlin.concurrent.thread
 
 class ADBService : Service() {
     private lateinit var runnable: Runnable
@@ -40,6 +40,9 @@ class ADBService : Service() {
     private val adbExecutor = Executors.newSingleThreadExecutor()
     private val iperfExecutor = Executors.newSingleThreadExecutor()
     private var disableFOTATimes = 3
+
+    private  val TAG = "UFI_TOOLS_LOG_ADBService"
+    private lateinit var batteryReceiver: BatteryReceiver
 
     companion object {
         @Volatile
@@ -70,8 +73,62 @@ class ADBService : Service() {
 
         //开启定时任务
         TaskSchedulerManager.init(applicationContext)
-
+        //订阅电池事件接收器
+        registerBatteryReceiver()
         return START_STICKY
+    }
+
+    private fun registerBatteryReceiver(){
+        batteryReceiver = BatteryReceiver(onLowBattery = {
+            val sharedPrefs = getSharedPreferences("kano_ZTE_store", Context.MODE_PRIVATE)
+            if (sharedPrefs.getString("kano_sms_forward_enabled", "0") == "1") {
+                //low battery
+                KanoUtils.forwardBatteryStatusMessage(this,SmsInfo("UFI-TOOLS 电源监测",
+                    """
+                    ${AppMeta.model}剩余电量低（10%），请及时充电~
+                    Battery low (10%). Please charge your device.
+                    """.trimIndent(), System.currentTimeMillis()))
+            }
+        },
+        onVeryLowBattery = {
+            val sharedPrefs = getSharedPreferences("kano_ZTE_store", Context.MODE_PRIVATE)
+            if (sharedPrefs.getString("kano_sms_forward_enabled", "0") == "1") {
+                //low battery
+                KanoUtils.forwardBatteryStatusMessage(this,SmsInfo("UFI-TOOLS 电源监测",
+                    """
+                ${AppMeta.model}剩余电量过低（5%），请及时充电~
+                Battery is very low (5%). Please charge your device.
+                """.trimIndent(), System.currentTimeMillis()))
+            }
+        },
+        onFullBattery = {
+            val sharedPrefs = getSharedPreferences("kano_ZTE_store", Context.MODE_PRIVATE)
+            if (sharedPrefs.getString("kano_sms_forward_enabled", "0") == "1") {
+                //low battery
+                KanoUtils.forwardBatteryStatusMessage(this,SmsInfo("UFI-TOOLS 电源监测",
+                    """
+                    ${AppMeta.model}电量已充满~
+                    ${AppMeta.model} is fully charged.
+                    """.trimIndent(), System.currentTimeMillis()))
+            }
+        },
+        onCharge = {
+            val sharedPrefs = getSharedPreferences("kano_ZTE_store", Context.MODE_PRIVATE)
+            if (sharedPrefs.getString("kano_sms_forward_enabled", "0") == "1") {
+                //low battery
+                KanoUtils.forwardBatteryStatusMessage(this,SmsInfo("UFI-TOOLS 电源监测",
+                    """
+                    ${AppMeta.model}已插入电源~
+                    ${AppMeta.model} power connected.
+                    """.trimIndent(), System.currentTimeMillis()))
+            }
+        },)
+
+        registerReceiver(
+            batteryReceiver,
+            IntentFilter(Intent.ACTION_BATTERY_CHANGED)
+        )
+        Log.d(TAG, "BatteryReceiver 已注册")
     }
 
     private fun resetFilesFromAssets(context: Context) {
@@ -87,9 +144,9 @@ class ADBService : Service() {
         // 复制 assets 中的所有文件
         try {
             KanoUtils.copyAssetsRecursively(context, "shell", context.filesDir)
-            Log.d("UFI_TOOLS_LOG", "已初始化 files 目录")
+            Log.d(TAG, "已初始化 files 目录")
         } catch (e: Exception) {
-            Log.e("UFI_TOOLS_LOG", "初始化 files 目录失败:${e.message}")
+            Log.e(TAG, "初始化 files 目录失败:${e.message}")
         }
     }
 
@@ -100,7 +157,7 @@ class ADBService : Service() {
                 try {
                     SmsPoll.checkNewSmsAndSend(applicationContext)
                 } catch (e: Exception) {
-                    KanoLog.e("UFI_TOOLS_LOG", "读取短信时发生错误", e)
+                    KanoLog.e(TAG, "读取短信时发生错误", e)
                 }
             }
             handler.postDelayed(this, 5000)
@@ -114,15 +171,15 @@ class ADBService : Service() {
     private val runnableRPT = object : Runnable {
         override fun run() {
             if (rptRunning) {
-                KanoLog.w("UFI_TOOLS_LOG", "上一次 RPT 还未完成，跳过本次")
+                KanoLog.w(TAG, "上一次 RPT 还未完成，跳过本次")
             } else {
                 rptScope.launch {
                     rptRunning = true
                     try {
-                        KanoLog.d("UFI_TOOLS_LOG", "周期性发送状态中...")
+                        KanoLog.d(TAG, "周期性发送状态中...")
                         reportToServer()
                     } catch (e: Exception) {
-                        KanoLog.e("UFI_TOOLS_LOG", "发送状态时发生错误：", e)
+                        KanoLog.e(TAG, "发送状态时发生错误：", e)
                     } finally {
                         rptRunning = false
                     }
@@ -135,10 +192,10 @@ class ADBService : Service() {
     private val runnableSMB = object : Runnable {
         override fun run() {
             try {
-                KanoLog.d("UFI_TOOLS_LOG", "激活SMB内置脚本中...")
+                KanoLog.d(TAG, "激活SMB内置脚本中...")
                 SmbThrottledRunner.runOnceInThread(applicationContext)
             } catch (e: Exception) {
-                KanoLog.e("UFI_TOOLS_LOG", "激活SMB内置脚本错误")
+                KanoLog.e(TAG, "激活SMB内置脚本错误")
             }
             handler.postDelayed(this, 20_000)
         }
@@ -147,7 +204,7 @@ class ADBService : Service() {
     private fun startIperfTask(context: Context){
         iperfExecutor.execute {
             try{
-                KanoLog.d("UFI_TOOLS_LOG", "iperf3启动中...")
+                KanoLog.d(TAG, "iperf3启动中...")
                 killProcessByName("iperf3")
                 val result =
                     executeShellFromAssetsSubfolderWithArgs(
@@ -157,12 +214,12 @@ class ADBService : Service() {
                         "-D",
                     )
                 if (result != null) {
-                    KanoLog.d("UFI_TOOLS_LOG", "iperf3已启动")
+                    KanoLog.d(TAG, "iperf3已启动")
                 } else {
-                    KanoLog.e("UFI_TOOLS_LOG", "iperf3启动失败(用户模式)")
+                    KanoLog.e(TAG, "iperf3启动失败(用户模式)")
                 }
             }catch (e:Exception){
-                KanoLog.e("UFI_TOOLS_LOG", "iperf3命令执行出错",e)
+                KanoLog.e(TAG, "iperf3命令执行出错",e)
             }
         }
     }
@@ -175,11 +232,11 @@ class ADBService : Service() {
                 while (!Thread.currentThread().isInterrupted) {
                     val isDebugEnabled = isUsbDebuggingEnabled(context)
                     if (!isDebugEnabled){
-                        KanoLog.d("UFI_TOOLS_LOG", "没有开启ADB，不执行ADB保活")
+                        KanoLog.d(TAG, "没有开启ADB，不执行ADB保活")
                         adbIsReady = false
                     }
                     else {
-                        KanoLog.d("UFI_TOOLS_LOG", "保活ADB服务中...")
+                        KanoLog.d(TAG, "保活ADB服务中...")
 
                         var result =
                             executeShellFromAssetsSubfolderWithArgs(context, adbPath, "devices") {
@@ -187,25 +244,25 @@ class ADBService : Service() {
                             }
 
                         if (result?.contains("localhost:5555\tdevice") == true) {
-                            KanoLog.d("UFI_TOOLS_LOG", "adb存活，无需启动")
+                            KanoLog.d(TAG, "adb存活，无需启动")
                             adbIsReady = true
                             if (!isExecutedDisabledFOTA) {
                                 disableFOTATimes--
                                 if (disableFOTATimes <= 0) {
                                     KanoLog.d(
-                                        "UFI_TOOLS_LOG",
+                                        TAG,
                                         "已连续3次尝试使用adb禁用FOTA，强制isExecutingDisabledFOTA = true"
                                     )
                                     isExecutingDisabledFOTA = true
                                 }
                                 val res = KanoUtils.disableFota(applicationContext)
                                 if (res) {
-                                    KanoLog.d("UFI_TOOLS_LOG", "使用adb禁用FOTA完成")
+                                    KanoLog.d(TAG, "使用adb禁用FOTA完成")
                                 }
                                 isExecutedDisabledFOTA = true
                             }
                         } else {
-                            KanoLog.w("UFI_TOOLS_LOG", "adb无设备或已退出，尝试启动")
+                            KanoLog.w(TAG, "adb无设备或已退出，尝试启动")
                             adbIsReady = false
 
                             ShellKano.killProcessByName("adb")
@@ -234,11 +291,11 @@ class ADBService : Service() {
                                 }
 
                                 if (result?.contains("localhost:5555\tdevice") == true) {
-                                    KanoLog.d("UFI_TOOLS_LOG", "ADB连接成功: $result")
+                                    KanoLog.d(TAG, "ADB连接成功: $result")
                                     adbIsReady = true
                                     break
                                 } else {
-                                    KanoLog.d("UFI_TOOLS_LOG", "ADB未连接: $result")
+                                    KanoLog.d(TAG, "ADB未连接: $result")
                                 }
 
                                 Thread.sleep(interval.toLong())
@@ -250,7 +307,7 @@ class ADBService : Service() {
                     Thread.sleep(11_000)
                 }
             } catch (e: Exception) {
-                KanoLog.e("UFI_TOOLS_LOG", "ADB 保活线程异常", e)
+                KanoLog.e(TAG, "ADB 保活线程异常", e)
             }
         }
     }
@@ -259,6 +316,7 @@ class ADBService : Service() {
         super.onDestroy()
         handlerThread.quitSafely()
         handler.removeCallbacks(runnable)
+        unregisterReceiver(batteryReceiver)
         TaskSchedulerManager.scheduler?.stop()
     }
 

@@ -30,7 +30,9 @@ import javax.crypto.spec.SecretKeySpec
 import androidx.core.content.edit
 import com.minikano.f50_sms.configs.AppMeta
 import com.minikano.f50_sms.configs.AppMeta.updateIsDefaultOrWeakToken
-import kotlinx.serialization.encodeToString
+import com.minikano.f50_sms.utils.SmsPoll.forwardByEmail
+import com.minikano.f50_sms.utils.SmsPoll.forwardSmsByCurl
+import com.minikano.f50_sms.utils.SmsPoll.forwardSmsByDingTalk
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.double
 import kotlinx.serialization.json.jsonObject
@@ -842,6 +844,29 @@ class KanoUtils {
                 }
             }
             return replacedCurl
+        }
+
+        //低电量转发通知
+        fun forwardBatteryStatusMessage(context: Context,smsContent: SmsInfo) {
+            try {
+                val sharedPrefs =
+                    context.getSharedPreferences("kano_ZTE_store", Context.MODE_PRIVATE)
+                val sms_forward_method = sharedPrefs.getString("kano_sms_forward_method", "") ?: ""
+                when (sms_forward_method) {
+                    "SMTP" -> {
+                        forwardByEmail(smsContent, context)
+                    }
+                    "CURL" -> {
+                        forwardSmsByCurl(smsContent, context)
+                    }
+                    "DINGTALK" -> {
+                        forwardSmsByDingTalk(smsContent, context)
+                    }
+                }
+                KanoLog.d("UFI_TOOLS_LOG_LowBatteryForward","低电量转发消息成功，转发类型:$sms_forward_method")
+            } catch (e: Exception){
+                KanoLog.e("UFI_TOOLS_LOG_LowBatteryForward","低电量转发消息(forwardLowBatteryMessage)出错：",e)
+            }
         }
     }
 }

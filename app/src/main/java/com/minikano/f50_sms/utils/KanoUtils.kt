@@ -700,6 +700,8 @@ class KanoUtils {
         private val PREF_ISDEBUG = "kano_is_debug"
         private val PREF_WAKELOCK = "wakeLock"
 
+        private val PREF_POWER_STATUS_FORWARD = "kano_power_status_forward_enabled"
+
         fun initSharedPerfs(context: Context){
             //初始化login_token
             val spf = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -725,6 +727,10 @@ class KanoUtils {
                 if (!existing.containsKey(PREF_WAKELOCK)) {
                     putString(PREF_WAKELOCK, "lock")
                 }
+                if (!existing.containsKey(PREF_POWER_STATUS_FORWARD)) {
+                    putString(PREF_POWER_STATUS_FORWARD, "1")
+                }
+
             }
         }
 

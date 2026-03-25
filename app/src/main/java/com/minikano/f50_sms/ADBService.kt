@@ -80,55 +80,51 @@ class ADBService : Service() {
 
     private fun registerBatteryReceiver(){
         batteryReceiver = BatteryReceiver(onLowBattery = {
-            val sharedPrefs = getSharedPreferences("kano_ZTE_store", Context.MODE_PRIVATE)
-            if (sharedPrefs.getString("kano_sms_forward_enabled", "0") == "1") {
-                //low battery
-                KanoUtils.forwardBatteryStatusMessage(this,SmsInfo("UFI-TOOLS 电源监测",
-                    """
-                    ${AppMeta.model}剩余电量低（10%），请及时充电~
+            forwardMessage(
+                """
+                ${AppMeta.model}剩余电量低（10%），请及时充电~
                     Battery low (10%). Please charge your device.
-                    """.trimIndent(), System.currentTimeMillis()))
-            }
+                """.trimIndent())
         },
         onVeryLowBattery = {
-            val sharedPrefs = getSharedPreferences("kano_ZTE_store", Context.MODE_PRIVATE)
-            if (sharedPrefs.getString("kano_sms_forward_enabled", "0") == "1") {
-                //low battery
-                KanoUtils.forwardBatteryStatusMessage(this,SmsInfo("UFI-TOOLS 电源监测",
-                    """
+            forwardMessage(
+                """
                 ${AppMeta.model}剩余电量过低（5%），请及时充电~
                 Battery is very low (5%). Please charge your device.
-                """.trimIndent(), System.currentTimeMillis()))
-            }
+                """.trimIndent())
         },
         onFullBattery = {
-            val sharedPrefs = getSharedPreferences("kano_ZTE_store", Context.MODE_PRIVATE)
-            if (sharedPrefs.getString("kano_sms_forward_enabled", "0") == "1") {
-                //low battery
-                KanoUtils.forwardBatteryStatusMessage(this,SmsInfo("UFI-TOOLS 电源监测",
-                    """
-                    ${AppMeta.model}电量已充满~
-                    ${AppMeta.model} is fully charged.
-                    """.trimIndent(), System.currentTimeMillis()))
-            }
+            forwardMessage(
+                """
+                ${AppMeta.model}电量已充满~
+                ${AppMeta.model} is fully charged.
+                """.trimIndent())
+
         },
         onCharge = {
-            val sharedPrefs = getSharedPreferences("kano_ZTE_store", Context.MODE_PRIVATE)
-            if (sharedPrefs.getString("kano_sms_forward_enabled", "0") == "1") {
-                //low battery
-                KanoUtils.forwardBatteryStatusMessage(this,SmsInfo("UFI-TOOLS 电源监测",
-                    """
-                    ${AppMeta.model}已插入电源~
-                    ${AppMeta.model} power connected.
-                    """.trimIndent(), System.currentTimeMillis()))
-            }
-        },)
+            forwardMessage(
+                """
+                ${AppMeta.model}已插入电源~
+                ${AppMeta.model} power connected.
+                """.trimIndent())
+        })
 
         registerReceiver(
             batteryReceiver,
             IntentFilter(Intent.ACTION_BATTERY_CHANGED)
         )
         Log.d(TAG, "BatteryReceiver 已注册")
+    }
+
+    private fun forwardMessage(message:String){
+        val sharedPrefs = getSharedPreferences("kano_ZTE_store", Context.MODE_PRIVATE)
+        val isEnabledPowerStatusForward =
+            (sharedPrefs.getString("kano_power_status_forward_enabled", "0") ?: "0") == "1"
+        val isSMSForwardEnabled = sharedPrefs.getString("kano_sms_forward_enabled", "0") == "1"
+        if (isEnabledPowerStatusForward && isSMSForwardEnabled) {
+            KanoUtils.forwardBatteryStatusMessage(this,SmsInfo("UFI-TOOLS 电源监测",
+               message , System.currentTimeMillis()))
+        }
     }
 
     private fun resetFilesFromAssets(context: Context) {

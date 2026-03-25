@@ -316,7 +316,7 @@
     "advance_enable_little_core": "Enable Little Cores",
     "advance_dump_boot": "Extract Boot",
     "advance_result": "Execution Result",
-    "sms_forward_title": "SMS Forwarding (Beta)",
+    "sms_forward_title": "SMS Forwarding",
     "sms_forward_toggle": "Main Switch",
     "smtp_method": "SMTP Mode",
     "curl_method": "CURL Mode",
@@ -798,5 +798,14 @@
     "data_manage_tips": "Tip: Please set the reminder threshold correctly.",
     "data_manage_tips1": "When data usage reaches the set threshold percentage, the device will flash a red light to remind you that the data is running low.",
     "please_input": "Enter",
-    "term_confirm_text": "Agree to terms"
+    "term_confirm_text": "Agree to terms",
+    "power_status_forward_title": "Power alert",
+    "power_status_forward": "Power status alerts",
+    "phone_param_is_invalid": "Phone list: digits only",
+    "forward_method_setting_btn": "Forward Rules",
+    "kano_sms_forward_rules_toast_title": "SMS Forward Rules",
+    "phone_black_list": "Phone Blacklist",
+    "keyword_black_list": "Keyword Blacklist",
+    "phone_black_list_placeholder": "Enter numbers, one per line. Empty = allow all",
+    "keyword_black_list_placeholder": "Enter keywords, one per line. Empty = allow all"
 }

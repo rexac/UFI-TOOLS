@@ -4260,6 +4260,31 @@ function main_func() {
         return method.toLowerCase()
     }
 
+    // 短信转发-电源转发开关
+    const collapse_smsforward_power_status_btn = document.querySelector('#collapse_smsforward_power_status_btn')
+    const collapse_smsforward_power_status_btn_component = createSwitch({
+        value: false,
+        onChange: async (checked) => {
+            if (checked != undefined) {
+                try {
+                    await (await fetch(`${KANO_baseURL}/power_status_forward_enabled?enable=${checked ? "1" : "0"}`, {
+                        method: 'post',
+                        headers: {
+                            ...common_headers,
+                            'Content-Type': 'application/json'
+                        }
+                    })).json()
+                    createToast(`${t('power_status_forward')} ${checked ? t('enabled') : t('disabled')}`, 'green')
+                } catch (e) {
+                    createToast(t('toast_oprate_failed'), 'red')
+                }
+            }
+        }
+    })
+    if (collapse_smsforward_power_status_btn && collapse_smsforward_power_status_btn_component) {
+        collapse_smsforward_power_status_btn.appendChild(collapse_smsforward_power_status_btn_component)
+    }
+
     //初始化短信转发模态框
     const initSmsForwardModal = async () => {
         const btn = document.querySelector('#smsForward')
@@ -4271,8 +4296,19 @@ function main_func() {
         btn.style.backgroundColor = 'var(--dark-btn-color)'
         btn.onclick = async () => {
             initSmsForward()
-            initSmsForwardSwitch().then(() => {
+            initSmsForwardSwitch().then(async () => {
                 showModal('#smsForwardModal')
+                if (collapse_smsforward_power_status_btn_component) {
+                    try {
+                        const { enabled } = await (await fetch(`${KANO_baseURL}/power_status_forward_enabled`, {
+                            method: 'GET',
+                            headers: common_headers
+                        })).json()
+                        collapse_smsforward_power_status_btn_component.update(enabled == "1")
+                    } catch (e) {
+                        console.error("power_status_forward_enabled request failed", e)
+                    }
+                }
             })
         }
     }
@@ -4445,13 +4481,94 @@ function main_func() {
                         'Content-Type': 'application/json'
                     }
                 })).json()
-                createToast(`${t('sms_forward')}${status == 'open' ? t('enabled') : t('disabled')}`, 'green')
-                console.log(status);
+                createToast(`${t('sms_forward')} ${status == 'open' ? t('enabled') : t('disabled')}`, 'green')
             } catch (e) {
                 createToast(t('toast_oprate_failed'), 'red')
             }
         }
     })
+
+    //短信转发规则设置
+    const forwardMethodSettingBtn = document.querySelector('#forward_method_setting_btn')
+    if (forwardMethodSettingBtn) {
+        forwardMethodSettingBtn.onclick = async () => {
+            try {
+                //获取数据
+                const { keywords, phone } = await (await fetch(`${KANO_baseURL}/sms_forward_blacklist`, {
+                    method: 'GET',
+                    headers: common_headers
+                })).json()
+
+                const { el, close } = createFixedToast('kano_sms_forward_rules_toast', `
+            <div style="pointer-events:all;width:80vw;max-width:400px">
+            <div class="title" style="margin:0" data-i18n="kano_sms_forward_rules_toast_title">${t('kano_sms_forward_rules_toast_title')}</div>
+            <p class="title" style="margin-top:10px" data-i18n="phone_black_list">${t('phone_black_list')}</p>
+            <textarea id="kano_sms_forward_rules_phone_list" style="width: 100%;box-sizing: border-box;min-height: 5em;" data-i18n-placeholder="phone_black_list_placeholder" placeholder="${t('phone_black_list_placeholder')}"></textarea>
+            <p class="title" style="margin-top:10px" data-i18n="keyword_black_list">${t('keyword_black_list')}</p>
+            <textarea id="kano_sms_forward_rules_keywords_list" style="width: 100%;box-sizing: border-box;min-height: 6em;" data-i18n-placeholder="keyword_black_list_placeholder" placeholder="${t('keyword_black_list_placeholder')}"></textarea>
+            <div style="display:flex;gap:10px">
+                <button id="confirm_forward_method_setting_btn" style="width:100%;font-size:.64rem;margin-top:5px" data-i18n="submit_btn">${t("submit_btn")}</button>
+                <button id="close_forward_method_setting_btn" style="width:100%;font-size:.64rem;margin-top:5px" data-i18n="cancel_btn">${t("cancel_btn")}</button>
+            </div>
+            </div>
+            `)
+                const confirmBtn = el.querySelector("#confirm_forward_method_setting_btn")
+                const closeBtn = el.querySelector("#close_forward_method_setting_btn")
+                const phoneListEl = el.querySelector('#kano_sms_forward_rules_phone_list')
+                const keywordsListEl = el.querySelector('#kano_sms_forward_rules_keywords_list')
+
+                if (phoneListEl) {
+                    phoneListEl.value = phone
+                }
+
+                if (keywordsListEl) {
+                    keywordsListEl.value = keywords
+                }
+
+                if (confirmBtn) {
+                    confirmBtn.onclick = async () => {
+                        //提交
+                        try {
+                            if (!/^[0-9\n]*$/.test(phoneListEl.value.trim())) {
+                                return createToast(t('phone_param_is_invalid'), 'pink');
+                            }
+                            const phoneList = phoneListEl.value.trim().split('\n')
+                            const keywordsList = keywordsListEl.value.trim().split('\n')
+                            const res = await (await fetch(`${KANO_baseURL}/sms_forward_blacklist`, {
+                                method: 'post',
+                                body: JSON.stringify({
+                                    keywords: keywordsList.join('\n'),
+                                    phone: phoneList.join('\n')
+                                }),
+                                headers: {
+                                    ...common_headers,
+                                    'Content-Type': 'application/json'
+                                }
+                            })).json()
+                            if (!res.result && res.error) {
+                                throw new Error(res.error)
+                            }
+                            if (res.result && res.result == 'success') {
+                                createToast(t('toast_save_success'), 'pink')
+                            }
+                        } catch (e) {
+                            createToast(t('toast_save_failed'), 'red')
+                        }
+                        close()
+                    }
+                }
+                if (closeBtn) {
+                    closeBtn.onclick = () => {
+                        close()
+                    }
+                }
+                showModal("#" + el.id)
+            } catch (e) {
+                createToast(t('client_mgmt_fetch_error'), 'red')
+                console.error(e)
+            }
+        }
+    }
 
     // OP
     const OP = (e) => {

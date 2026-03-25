@@ -571,8 +571,7 @@
                         data-i18n-placeholder="sms_modal_input_content">
                     <div class="btn"
                         style="height: 100%;min-width: 103px;display: flex;justify-content: space-between;gap: 6px;align-items: center;">
-                        <button onclick="sendSMS()" style="height: 100%;"
-                            data-i18n="sms_modal_send_btn">发送</button>
+                        <button onclick="sendSMS()" style="height: 100%;" data-i18n="sms_modal_send_btn">发送</button>
                         <button onclick="closeModal('#smsList')" style="height: 100%;"
                             data-i18n="sms_modal_close_btn">关闭</button>
                     </div>
@@ -1742,11 +1741,21 @@
                     </div>
                     <div id="collapse_smsforward" class="collapse">
                         <div class="collapse_box">
+                            <div style="display: flex;gap: 10px;">
+                                <!-- 电量提醒 -->
+                                <div style="padding-top: 8px;display: flex;align-items: center;"
+                                    id="collapse_smsforward_power_status_btn">
+                                    <span data-i18n="power_status_forward_title"
+                                        style="font-size: .8rem;min-width: fit-content;flex-shrink: 0;">电源状态转发</span>
+                                </div>
+                                <!-- 转发规则 -->
+                                <button style="margin-top: 8px;flex: 1;" id="forward_method_setting_btn" data-i18n="forward_method_setting_btn">转发规则</button>
+                            </div>
                             <!-- smtp转发 -->
                             <form onsubmit="handleSmsForwardForm(event)" id="smsForwardForm">
                                 <div class="content" style="
-                        overflow-y: scroll;
-                        padding: 15px 0;
+                        overflow:hidden;
+                        margin: 10px 0;
                         width: 80vw;
                         font-size: .9rem;
                         max-width: 400px;">
@@ -1809,8 +1818,8 @@
                             <form onsubmit="handleSmsForwardCurlForm(event)" id="smsForwardCurlForm"
                                 style="display: none;">
                                 <div class="content" style="
-                                    overflow-y: scroll;
-                                    padding: 15px 0;
+                                    overflow:hidden;
+                                    margin: 10px 0;
                                     width: 80vw;
                                     max-width: 400px;">
                                     <div class="title user_select" style="display:block;font-size: .7rem;">
@@ -1851,16 +1860,17 @@
                                     </div>
                                 </div>
                                 <div class="btn" style="text-align: right;">
-                                    <button type="submit">提交</button>
-                                    <button type="button" onclick="closeModal('#smsForwardModal')">关闭</button>
+                                    <button type="submit" data-i18n="submit_btn">提交</button>
+                                    <button type="button" data-i18n="close_btn"
+                                        onclick="closeModal('#smsForwardModal')">关闭</button>
                                 </div>
                             </form>
                             <!-- 钉钉webhook转发 -->
                             <form onsubmit="handleSmsForwardDingTalkForm(event)" id="smsForwardDingTalkForm"
                                 style="display: none;">
                                 <div class="content" style="
-                                    overflow-y: scroll;
-                                    padding: 15px 0;
+                                    overflow:hidden;
+                                    margin: 10px 0;
                                     width: 80vw;
                                     max-width: 400px;">
                                     <div class="title" style="font-size: .7rem;" data-i18n="dingtalk_hint">
@@ -1893,8 +1903,9 @@
                                     </div>
                                 </div>
                                 <div class="btn" style="text-align: right;">
-                                    <button type="submit">提交</button>
-                                    <button type="button" onclick="closeModal('#smsForwardModal')">关闭</button>
+                                    <button type="submit" data-i18n="submit_btn">提交</button>
+                                    <button type="button" data-i18n="close_btn"
+                                        onclick="closeModal('#smsForwardModal')">关闭</button>
                                 </div>
                             </form>
                         </div>

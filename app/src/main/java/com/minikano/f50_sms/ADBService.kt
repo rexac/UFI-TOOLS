@@ -69,12 +69,12 @@ class ADBService : Service() {
             executor.execute(runnableSMS)
             executor.execute(runnableSMB)
             executor.execute(runnableRPT)
+            //订阅电池事件接收器
+            registerBatteryReceiver()
         }
 
         //开启定时任务
         TaskSchedulerManager.init(applicationContext)
-        //订阅电池事件接收器
-        registerBatteryReceiver()
         return START_STICKY
     }
 
@@ -130,10 +130,15 @@ class ADBService : Service() {
     private fun resetFilesFromAssets(context: Context) {
         val filesDir = context.filesDir
 
+
         // 删除所有文件
         filesDir.listFiles()?.forEach { file ->
             if (file.isFile) {
-                file.delete()
+                try {
+                    file.delete()
+                } catch (e: Exception) {
+                    Log.e(TAG, "删除文件失败:${e.message}")
+                }
             }
         }
 

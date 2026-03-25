@@ -458,6 +458,30 @@ class KanoUtils {
             }
         }
 
+        fun normalizeLineEndingsInDirShallow(dir: File) {
+            if (!dir.exists() || !dir.isDirectory) return
+
+            dir.listFiles()?.forEach { file ->
+                if (file.isFile && file.extension == "sh") {
+                    try {
+                        val bytes = file.readBytes()
+
+                        // 是否包含 \r
+                        if (!bytes.contains('\r'.code.toByte())) return@forEach
+
+                        val normalized = bytes
+                            .toString(Charsets.UTF_8)
+                            .replace("\r\n", "\n")
+                            .replace("\r", "\n")
+
+                        file.writeText(normalized, Charsets.UTF_8)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+            }
+        }
+
         fun getStatusCode(urlStr: String): Int {
             val url = URL(urlStr)
             val connection = url.openConnection() as HttpURLConnection

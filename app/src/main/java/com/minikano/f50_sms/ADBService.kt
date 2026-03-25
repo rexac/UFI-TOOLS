@@ -144,6 +144,7 @@ class ADBService : Service() {
         // 复制 assets 中的所有文件
         try {
             KanoUtils.copyAssetsRecursively(context, "shell", context.filesDir)
+            KanoUtils.normalizeLineEndingsInDirShallow(context.filesDir)
             Log.d(TAG, "已初始化 files 目录")
         } catch (e: Exception) {
             Log.e(TAG, "初始化 files 目录失败:${e.message}")

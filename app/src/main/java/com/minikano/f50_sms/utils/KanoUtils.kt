@@ -30,7 +30,9 @@ import javax.crypto.spec.SecretKeySpec
 import androidx.core.content.edit
 import com.minikano.f50_sms.configs.AppMeta
 import com.minikano.f50_sms.configs.AppMeta.updateIsDefaultOrWeakToken
-import kotlinx.serialization.encodeToString
+import com.minikano.f50_sms.utils.SmsPoll.forwardByEmail
+import com.minikano.f50_sms.utils.SmsPoll.forwardSmsByCurl
+import com.minikano.f50_sms.utils.SmsPoll.forwardSmsByDingTalk
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.double
 import kotlinx.serialization.json.jsonObject
@@ -456,6 +458,30 @@ class KanoUtils {
             }
         }
 
+        fun normalizeLineEndingsInDirShallow(dir: File) {
+            if (!dir.exists() || !dir.isDirectory) return
+
+            dir.listFiles()?.forEach { file ->
+                if (file.isFile && file.extension == "sh") {
+                    try {
+                        val bytes = file.readBytes()
+
+                        // 是否包含 \r
+                        if (!bytes.contains('\r'.code.toByte())) return@forEach
+
+                        val normalized = bytes
+                            .toString(Charsets.UTF_8)
+                            .replace("\r\n", "\n")
+                            .replace("\r", "\n")
+
+                        file.writeText(normalized, Charsets.UTF_8)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+            }
+        }
+
         fun getStatusCode(urlStr: String): Int {
             val url = URL(urlStr)
             val connection = url.openConnection() as HttpURLConnection
@@ -674,6 +700,8 @@ class KanoUtils {
         private val PREF_ISDEBUG = "kano_is_debug"
         private val PREF_WAKELOCK = "wakeLock"
 
+        private val PREF_POWER_STATUS_FORWARD = "kano_power_status_forward_enabled"
+
         fun initSharedPerfs(context: Context){
             //初始化login_token
             val spf = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -699,6 +727,10 @@ class KanoUtils {
                 if (!existing.containsKey(PREF_WAKELOCK)) {
                     putString(PREF_WAKELOCK, "lock")
                 }
+                if (!existing.containsKey(PREF_POWER_STATUS_FORWARD)) {
+                    putString(PREF_POWER_STATUS_FORWARD, "1")
+                }
+
             }
         }
 
@@ -842,6 +874,29 @@ class KanoUtils {
                 }
             }
             return replacedCurl
+        }
+
+        //低电量转发通知
+        fun forwardBatteryStatusMessage(context: Context,smsContent: SmsInfo) {
+            try {
+                val sharedPrefs =
+                    context.getSharedPreferences("kano_ZTE_store", Context.MODE_PRIVATE)
+                val sms_forward_method = sharedPrefs.getString("kano_sms_forward_method", "") ?: ""
+                when (sms_forward_method) {
+                    "SMTP" -> {
+                        forwardByEmail(smsContent, context)
+                    }
+                    "CURL" -> {
+                        forwardSmsByCurl(smsContent, context)
+                    }
+                    "DINGTALK" -> {
+                        forwardSmsByDingTalk(smsContent, context)
+                    }
+                }
+                KanoLog.d("UFI_TOOLS_LOG_LowBatteryForward","低电量转发消息成功，转发类型:$sms_forward_method")
+            } catch (e: Exception){
+                KanoLog.e("UFI_TOOLS_LOG_LowBatteryForward","低电量转发消息(forwardLowBatteryMessage)出错：",e)
+            }
         }
     }
 }

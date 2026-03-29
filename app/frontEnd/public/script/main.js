@@ -972,7 +972,7 @@ function main_func() {
                 QORS_MESSAGE: `${notNullOrundefinedOrIsShow(res, "QORS_MESSAGE") ? `<strong onclick="copyText(event)"  class="green">${QORS_MESSAGE}</strong>` : ''}`,
                 network_type: `${notNullOrundefinedOrIsShow(res, 'network_type') ? `<strong onclick="copyText(event)"  class="green">${t('network_status')}：${res.network_provider} ${res.network_type == '20' ? '5G' : res.network_type == '13' ? '4G' : res.network_type}</strong>` : ''}`,
                 wifi_access_sta_num: `${notNullOrundefinedOrIsShow(res, 'wifi_access_sta_num') ? `<strong onclick="copyText(event)"  class="blue">${t('wifi_client_num')}：${res.wifi_access_sta_num}</strong>` : ''}`,
-                battery: `${notNullOrundefinedOrIsShow(res, 'battery') && (res.battery_value != '' || res.battery_vol_percent != '') ? `<strong onclick="copyText(event)"  class="green">${res.battery_charging == "1" ? `${t('charging')}` : `${t('battery_level')}`}：${res.battery} %</strong>` : ''}`,
+                battery: `${notNullOrundefinedOrIsShow(res, 'battery') && (res.battery_value != '' || res.battery_vol_percent != '') ? `<strong onclick="copyText(event)"  class="green">${res.battery_charging == "1" ? `${t('charging')}` : `${t('battery_level')}`}：${kano_parseSignalBar(res.battery, 1, 100, 50, 10, undefined, " %")}</strong>` : ''}`,
                 rssi: `${notNullOrundefinedOrIsShow(res, 'rssi') || notNullOrundefinedOrIsShow(res, 'network_signalbar', true) ? `<strong onclick="copyText(event)"  class="green">${t('rssi')}：${kano_getSignalEmoji(notNullOrundefinedOrIsShow(res, 'rssi') ? res.rssi : res.network_signalbar)}</strong>` : ''}`,
                 cpu_temp: `${notNullOrundefinedOrIsShow(res, 'cpu_temp') ? `<strong onclick="copyText(event)"  class="blue">${t('cpu_temp')}：<span style="text-align:center;display:inline-block;width: 8ch;">${String(Number(res.cpu_temp / 1000).toFixed(2)).padStart(5, ' ')} ℃</span></strong>` : ''}`,
                 cpu_usage: `${notNullOrundefinedOrIsShow(res, 'cpu_usage') ? `<strong onclick="copyText(event)"  class="blue">${t('cpu_usage')}：<span style="text-align:center;display:inline-block;width: 8ch;">${String(Number(res.cpu_usage).toFixed(2)).padStart(5, ' ')} %</span></strong>` : ''}`,
@@ -4260,6 +4260,31 @@ function main_func() {
         return method.toLowerCase()
     }
 
+    // 短信转发-电源转发开关
+    const collapse_smsforward_power_status_btn = document.querySelector('#collapse_smsforward_power_status_btn')
+    const collapse_smsforward_power_status_btn_component = createSwitch({
+        value: false,
+        onChange: async (checked) => {
+            if (checked != undefined) {
+                try {
+                    await (await fetch(`${KANO_baseURL}/power_status_forward_enabled?enable=${checked ? "1" : "0"}`, {
+                        method: 'post',
+                        headers: {
+                            ...common_headers,
+                            'Content-Type': 'application/json'
+                        }
+                    })).json()
+                    createToast(`${t('power_status_forward')} ${checked ? t('enabled') : t('disabled')}`, 'green')
+                } catch (e) {
+                    createToast(t('toast_oprate_failed'), 'red')
+                }
+            }
+        }
+    })
+    if (collapse_smsforward_power_status_btn && collapse_smsforward_power_status_btn_component) {
+        collapse_smsforward_power_status_btn.appendChild(collapse_smsforward_power_status_btn_component)
+    }
+
     //初始化短信转发模态框
     const initSmsForwardModal = async () => {
         const btn = document.querySelector('#smsForward')
@@ -4271,8 +4296,19 @@ function main_func() {
         btn.style.backgroundColor = 'var(--dark-btn-color)'
         btn.onclick = async () => {
             initSmsForward()
-            initSmsForwardSwitch().then(() => {
+            initSmsForwardSwitch().then(async () => {
                 showModal('#smsForwardModal')
+                if (collapse_smsforward_power_status_btn_component) {
+                    try {
+                        const { enabled } = await (await fetch(`${KANO_baseURL}/power_status_forward_enabled`, {
+                            method: 'GET',
+                            headers: common_headers
+                        })).json()
+                        collapse_smsforward_power_status_btn_component.update(enabled == "1")
+                    } catch (e) {
+                        console.error("power_status_forward_enabled request failed", e)
+                    }
+                }
             })
         }
     }
@@ -4445,13 +4481,94 @@ function main_func() {
                         'Content-Type': 'application/json'
                     }
                 })).json()
-                createToast(`${t('sms_forward')}${status == 'open' ? t('enabled') : t('disabled')}`, 'green')
-                console.log(status);
+                createToast(`${t('sms_forward')} ${status == 'open' ? t('enabled') : t('disabled')}`, 'green')
             } catch (e) {
                 createToast(t('toast_oprate_failed'), 'red')
             }
         }
     })
+
+    //短信转发规则设置
+    const forwardMethodSettingBtn = document.querySelector('#forward_method_setting_btn')
+    if (forwardMethodSettingBtn) {
+        forwardMethodSettingBtn.onclick = async () => {
+            try {
+                //获取数据
+                const { keywords, phone } = await (await fetch(`${KANO_baseURL}/sms_forward_blacklist`, {
+                    method: 'GET',
+                    headers: common_headers
+                })).json()
+
+                const { el, close } = createFixedToast('kano_sms_forward_rules_toast', `
+            <div style="pointer-events:all;width:80vw;max-width:400px">
+            <div class="title" style="margin:0" data-i18n="kano_sms_forward_rules_toast_title">${t('kano_sms_forward_rules_toast_title')}</div>
+            <p class="title" style="margin-top:10px" data-i18n="phone_black_list">${t('phone_black_list')}</p>
+            <textarea id="kano_sms_forward_rules_phone_list" style="width: 100%;box-sizing: border-box;min-height: 5em;" data-i18n-placeholder="phone_black_list_placeholder" placeholder="${t('phone_black_list_placeholder')}"></textarea>
+            <p class="title" style="margin-top:10px" data-i18n="keyword_black_list">${t('keyword_black_list')}</p>
+            <textarea id="kano_sms_forward_rules_keywords_list" style="width: 100%;box-sizing: border-box;min-height: 6em;" data-i18n-placeholder="keyword_black_list_placeholder" placeholder="${t('keyword_black_list_placeholder')}"></textarea>
+            <div style="display:flex;gap:10px">
+                <button id="confirm_forward_method_setting_btn" style="width:100%;font-size:.64rem;margin-top:5px" data-i18n="submit_btn">${t("submit_btn")}</button>
+                <button id="close_forward_method_setting_btn" style="width:100%;font-size:.64rem;margin-top:5px" data-i18n="cancel_btn">${t("cancel_btn")}</button>
+            </div>
+            </div>
+            `)
+                const confirmBtn = el.querySelector("#confirm_forward_method_setting_btn")
+                const closeBtn = el.querySelector("#close_forward_method_setting_btn")
+                const phoneListEl = el.querySelector('#kano_sms_forward_rules_phone_list')
+                const keywordsListEl = el.querySelector('#kano_sms_forward_rules_keywords_list')
+
+                if (phoneListEl) {
+                    phoneListEl.value = phone
+                }
+
+                if (keywordsListEl) {
+                    keywordsListEl.value = keywords
+                }
+
+                if (confirmBtn) {
+                    confirmBtn.onclick = async () => {
+                        //提交
+                        try {
+                            if (!/^[0-9\n]*$/.test(phoneListEl.value.trim())) {
+                                return createToast(t('phone_param_is_invalid'), 'pink');
+                            }
+                            const phoneList = phoneListEl.value.trim().split('\n')
+                            const keywordsList = keywordsListEl.value.trim().split('\n')
+                            const res = await (await fetch(`${KANO_baseURL}/sms_forward_blacklist`, {
+                                method: 'post',
+                                body: JSON.stringify({
+                                    keywords: keywordsList.join('\n'),
+                                    phone: phoneList.join('\n')
+                                }),
+                                headers: {
+                                    ...common_headers,
+                                    'Content-Type': 'application/json'
+                                }
+                            })).json()
+                            if (!res.result && res.error) {
+                                throw new Error(res.error)
+                            }
+                            if (res.result && res.result == 'success') {
+                                createToast(t('toast_save_success'), 'pink')
+                            }
+                        } catch (e) {
+                            createToast(t('toast_save_failed'), 'red')
+                        }
+                        close()
+                    }
+                }
+                if (closeBtn) {
+                    closeBtn.onclick = () => {
+                        close()
+                    }
+                }
+                showModal("#" + el.id)
+            } catch (e) {
+                createToast(t('client_mgmt_fetch_error'), 'red')
+                console.error(e)
+            }
+        }
+    }
 
     // OP
     const OP = (e) => {
@@ -6999,10 +7116,10 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
             el.innerHTML = `<div style="display: flex;margin-bottom:10px;flex-direction:column"><div>${t('max_speed')}：${isGadgetMode ? res.details.gadget_speed : formatSpeed(res.maxSpeed)}</div><div>${t('usb_status')}：${res.details.typec_mode}/${!isGadgetMode ? t('host_usb_exp') : t('device_usb_exp')}</div></div>
             <ul class="deviceList" style="display: flex;flex-direction: column;gap: 10px;">
                 ${res.details.devices.map(device => `<li style="padding: 10px;">
-                    <div>${t('path')}：${device.path}</div>
-                    <div>${t('device_name')}： ${device.product}</div>
-                    <div>${t('speed')}：${formatSpeed(device.speed)}</div>
-                </li>`).join('')}
+                            <div>${t('path')}：${device.path}</div>
+                            <div>${t('device_name')}： ${device.product}</div>
+                            <div>${t('speed')}：${formatSpeed(device.speed)}</div>
+                        </li>`).join('')}
             </ul>`.trim()
         } catch {
             el.innerHTML = `<div style="text-align:center;padding:20px 0">${t('no_usb_list')}</div>`

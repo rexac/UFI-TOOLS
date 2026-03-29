@@ -316,7 +316,7 @@
     "advance_enable_little_core": "小コアを有効化",
     "advance_dump_boot": "Bootを抽出",
     "advance_result": "実行結果",
-    "sms_forward_title": "SMS転送（ベータ）",
+    "sms_forward_title": "SMS転送",
     "sms_forward_toggle": "メインスイッチ",
     "smtp_method": "SMTP方式",
     "curl_method": "CURL方式",
@@ -798,5 +798,14 @@
     "data_manage_tips": "ヒント：通知のしきい値を正しく設定してください。",
     "data_manage_tips1": "データ使用量が設定したしきい値の割合に達すると、データ不足を知らせるためにデバイスの赤いランプが点滅します。",
     "please_input": "入力",
-    "term_confirm_text": "規約に同意"
+    "term_confirm_text": "規約に同意",
+    "power_status_forward_title": "電源通知",
+    "power_status_forward": "電源状態通知機能",
+    "phone_param_is_invalid": "番号は数字のみ",
+    "forward_method_setting_btn": "転送ルール",
+    "kano_sms_forward_rules_toast_title": "SMS転送ルール",
+    "phone_black_list": "番号ブラックリスト",
+    "keyword_black_list": "キーワードブラックリスト",
+    "phone_black_list_placeholder": "番号を改行で入力。空=全許可",
+    "keyword_black_list_placeholder": "キーワードを改行で入力。空=全許可"
 }

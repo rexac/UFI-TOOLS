@@ -9,6 +9,7 @@ import com.minikano.f50_sms.modules.BASE_TAG
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
+import io.ktor.server.request.receive
 import io.ktor.server.request.receiveText
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
@@ -215,6 +216,131 @@ fun Route.smsModule(context: Context) {
             call.response.headers.append("Access-Control-Allow-Origin", "*")
             call.respondText(
                 """{"enabled":"$str"}""",
+                ContentType.Application.Json,
+                HttpStatusCode.OK
+            )
+        } catch (e: Exception) {
+            KanoLog.d(TAG, "请求出错： ${e.message}")
+            call.response.headers.append("Access-Control-Allow-Origin", "*")
+            call.respondText(
+                """{"error":"请求出错"}""",
+                ContentType.Application.Json,
+                HttpStatusCode.InternalServerError
+            )
+        }
+    }
+
+    //转发电量信息总开关
+    post("/api/power_status_forward_enabled") {
+        try {
+            val enable = call.request.queryParameters["enable"]
+                ?: throw Exception("query 缺少 enable 参数")
+            KanoLog.d(TAG, "短信转发 enable 传入参数：$enable")
+
+            val sharedPrefs =
+                context.getSharedPreferences("kano_ZTE_store", Context.MODE_PRIVATE)
+            sharedPrefs.edit(commit = true) {
+                putString("kano_power_status_forward_enabled", enable)
+            }
+
+            call.response.headers.append("Access-Control-Allow-Origin", "*")
+            call.respondText(
+                """{"result":"success"}""",
+                ContentType.Application.Json,
+                HttpStatusCode.OK
+            )
+        } catch (e: Exception) {
+            KanoLog.d(TAG, "请求出错： ${e.message}")
+            call.response.headers.append("Access-Control-Allow-Origin", "*")
+            call.respondText(
+                """{"error":"请求出错"}""",
+                ContentType.Application.Json,
+                HttpStatusCode.InternalServerError
+            )
+        }
+    }
+
+    //获取电量信息转发状态
+    get("/api/power_status_forward_enabled") {
+        try {
+            val sharedPrefs =
+                context.getSharedPreferences("kano_ZTE_store", Context.MODE_PRIVATE)
+            val str = sharedPrefs.getString("kano_power_status_forward_enabled", "0") ?: "0"
+
+            call.response.headers.append("Access-Control-Allow-Origin", "*")
+            call.respondText(
+                """{"enabled":"$str"}""",
+                ContentType.Application.Json,
+                HttpStatusCode.OK
+            )
+        } catch (e: Exception) {
+            KanoLog.d(TAG, "请求出错： ${e.message}")
+            call.response.headers.append("Access-Control-Allow-Origin", "*")
+            call.respondText(
+                """{"error":"请求出错"}""",
+                ContentType.Application.Json,
+                HttpStatusCode.InternalServerError
+            )
+        }
+    }
+
+    //短信转发黑名单配置
+    post("/api/sms_forward_blacklist") {
+        try {
+            val raw = call.receiveText()
+
+            val json = JSONObject(raw)
+
+            if (!json.has("phone")) throw Exception("缺少 phone 参数")
+            if (!json.has("keywords")) throw Exception("缺少 keywords 参数")
+
+            val phone = json.optString("phone")
+            val keywords = json.optString("keywords")
+
+            if (!phone.matches(Regex("^[0-9\\n]*$"))) {
+                throw Exception("phone 参数非法")
+            }
+
+            val sharedPrefs =
+                context.getSharedPreferences("kano_ZTE_store", Context.MODE_PRIVATE)
+            sharedPrefs.edit(commit = true) {
+                putString("kano_sms_forward_blacklist_phone", phone)
+                putString("kano_sms_forward_blacklist_keywords", keywords)
+            }
+
+            call.response.headers.append("Access-Control-Allow-Origin", "*")
+            call.respondText(
+                """{"result":"success"}""",
+                ContentType.Application.Json,
+                HttpStatusCode.OK
+            )
+        } catch (e: Exception) {
+            KanoLog.d(TAG, "请求出错：${e.message}")
+            call.response.headers.append("Access-Control-Allow-Origin", "*")
+            call.respondText(
+                """{"error":"请求出错"}""",
+                ContentType.Application.Json,
+                HttpStatusCode.InternalServerError
+            )
+        }
+    }
+
+    //获取短信转发黑名单
+    get("/api/sms_forward_blacklist") {
+        try {
+            val sharedPrefs =
+                context.getSharedPreferences("kano_ZTE_store", Context.MODE_PRIVATE)
+            val keywords = sharedPrefs.getString("kano_sms_forward_blacklist_keywords", "") ?: ""
+            val phone = sharedPrefs.getString("kano_sms_forward_blacklist_phone", "") ?: ""
+
+            val json = JSONObject().apply {
+                put("keywords", keywords)
+                put("phone", phone)
+            }
+
+            call.response.headers.append("Access-Control-Allow-Origin", "*")
+            call.respondText(
+                json.toString(),
                 ContentType.Application.Json,
                 HttpStatusCode.OK
             )

@@ -114,18 +114,21 @@ function copyText(e) {
 }
 
 //按照信号dbm强度绘制信号强度栏(-113到-51)
-function kano_parseSignalBar(val, min = -125, max = -81, green_low = -90, yellow_low = -100, config = { g: 'green', o: 'orange', r: 'red' }) {
+function kano_parseSignalBar(val, min = -125, max = -81, green_low = -90, yellow_low = -100, config = { g: 'green', o: 'orange', r: 'red' }, suffix = '') {
+    if (!config) {
+        config = { g: 'green', o: 'orange', r: 'red' }
+    }
     let strength = Number(val)
     strength = strength > max ? max : strength
     strength = strength < min ? min : strength
     const bar = document.createElement('span')
     const strengths = Array.from({ length: Math.abs((min - max)) + 1 }, (_, i) => min + i);
     const index = strengths.findIndex(i => i >= strength) // 找到对应的索引
-    const percent = (index / strengths.length) * 100 // 计算百分比
+    const percent = ((index + 1) / strengths.length) * 100 // 计算百分比
     const progress = document.createElement('span')
     const text = document.createElement('span')
 
-    text.innerHTML = Number(val)
+    text.innerHTML = `${val}${suffix}`
     bar.className = 'signal_bar'
     text.className = 'text'
     progress.className = 'signal_bar_progress'

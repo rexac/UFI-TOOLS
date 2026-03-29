@@ -316,7 +316,7 @@
     "advance_enable_little_core": "Bật lõi nhỏ",
     "advance_dump_boot": "Trích xuất Boot",
     "advance_result": "Kết quả thực thi",
-    "sms_forward_title": "Chuyển tiếp SMS (Beta)",
+    "sms_forward_title": "Chuyển tiếp SMS",
     "sms_forward_toggle": "Công tắc chính",
     "smtp_method": "Chế độ SMTP",
     "curl_method": "Chế độ CURL",
@@ -798,5 +798,14 @@
     "data_manage_tips": "Mẹo: Vui lòng thiết lập đúng ngưỡng nhắc nhở.",
     "data_manage_tips1": "Khi mức sử dụng dữ liệu đạt đến phần trăm ngưỡng đã cài đặt, thiết bị sẽ nhấp nháy đèn đỏ để nhắc rằng dữ liệu sắp hết.",
     "please_input": "Nhập",
-    "term_confirm_text": "Đồng ý điều khoản"
+    "term_confirm_text": "Đồng ý điều khoản",
+    "power_status_forward_title": "Trạng thái nguồn",
+    "power_status_forward": "Thông báo nguồn",
+    "phone_param_is_invalid": "Danh sách số: chỉ số",
+    "forward_method_setting_btn": "Quy tắc chuyển tiếp",
+    "kano_sms_forward_rules_toast_title": "Quy tắc chuyển tiếp SMS",
+    "phone_black_list": "Danh sách chặn số",
+    "keyword_black_list": "Danh sách chặn từ khóa",
+    "phone_black_list_placeholder": "Nhập số, mỗi dòng một số. Để trống = cho phép",
+    "keyword_black_list_placeholder": "Nhập từ khóa, mỗi dòng một dòng. Để trống = cho phép"
 }

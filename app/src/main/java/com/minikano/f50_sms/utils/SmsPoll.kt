@@ -34,10 +34,37 @@ object SmsPoll {
         val isNew = lastSms == null || sms != lastSms
 
         if (withinMin && isNew) {
-            KanoLog.d("UFI_TOOLS_LOG", "收到新短信: ${sms.address} - ${sms.body}")
+            KanoLog.d(TAG, "收到新短信: ${sms.address} - ${sms.body}")
             lastSms = sms
-            // 在这里做转发处理
+
             val sharedPrefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+
+            // 转发预处理
+            val keywords = sharedPrefs.getString("kano_sms_forward_blacklist_keywords", "") ?: ""
+            val phone = sharedPrefs.getString("kano_sms_forward_blacklist_phone", "") ?: ""
+
+            val phoneList = phone
+                .split('\n')
+                .map { it.trim() }
+                .filter { it.isNotEmpty() }
+
+            if (phoneList.contains(sms.address)) {
+                KanoLog.d(TAG, "源手机号 ${sms.address} 在手机号黑名单内，不执行短信转发操作")
+                return
+            }
+
+            val keywordsList = keywords
+                .split('\n')
+                .map { it.trim() }
+                .filter { it.isNotEmpty() }
+
+            for (item in keywordsList) {
+                if (sms.body.contains(item)) {
+                    KanoLog.d(TAG, "短信内容命中关键词 [$item]，不执行短信转发")
+                    return
+                }
+            }
+
             val sms_forward_method = sharedPrefs.getString("kano_sms_forward_method", "") ?: ""
             when (sms_forward_method) {
                 "SMTP" -> {
@@ -52,7 +79,7 @@ object SmsPoll {
             }
         } else {
             KanoLog.d(
-                "UFI_TOOLS_LOG",
+                TAG,
                 "无新短信，短信是否${minute}分钟内：$withinMin,短信是否为新：$isNew"
             )
         }
@@ -65,11 +92,11 @@ object SmsPoll {
 
         val originalCurl = sharedPrefs.getString("kano_sms_curl", null)
         if (originalCurl.isNullOrEmpty()) {
-            KanoLog.e("UFI_TOOLS_LOG", "curl 配置错误：kano_sms_curl 为空")
+            KanoLog.e(TAG, "curl 配置错误：kano_sms_curl 为空")
             return
         }
 
-        KanoLog.d("UFI_TOOLS_LOG", "开始转发短信...（CURL）")
+        KanoLog.d(TAG, "开始转发短信...（CURL）")
         try {
             val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
                 .withZone(ZoneId.systemDefault())
@@ -210,9 +237,9 @@ object SmsPoll {
         if(shouldForwardDeviceInfo == "1"){
             statusText = buildStatusSmsMsg(
             """
-            🌐 当日用量: {{daily-flow}}
-            🌛 月用量(高级后台统计): {{monthly-flow-count}}
-            🌛 月用量(官方后台统计): {{monthly-flow-sum}} 
+            🌐 当日用量: {{daily-flow}}    
+            🌛 月用量(高级后台统计): {{monthly-flow-count}}    
+            🌛 月用量(官方后台统计): {{monthly-flow-sum}}    
             🔥 CPU温度: {{cpu-temp}}
             🖥️ CPU使用: {{cpu-usage}}
             🧠 内存使用: {{mem-usage}}

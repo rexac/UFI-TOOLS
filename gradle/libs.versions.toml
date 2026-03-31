@@ -2,6 +2,7 @@
 agp = "8.7.2"
 androidMail = "1.6.7"
 androidxLifecycleRuntimeKtx = "2.6.2"
+datastorePreferences = "1.1.1"
 jcifsNg = "2.1.8"
 kotlin = "2.0.0"
 coreKtx = "1.15.0"
@@ -24,6 +25,7 @@ firebaseCrashlyticsBuildtools = "3.0.3"
 android-activation = { module = "com.sun.mail:android-activation", version.ref = "androidMail" }
 android-mail = { module = "com.sun.mail:android-mail", version.ref = "androidMail" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 androidx-lifecycle-runtime-ktx-v262 = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "androidxLifecycleRuntimeKtx" }
 androidx-runtime-livedata = { module = "androidx.compose.runtime:runtime-livedata", version.ref = "runtimeLivedata" }
 jcifs-ng = { module = "eu.agno3.jcifs:jcifs-ng", version.ref = "jcifsNg" }

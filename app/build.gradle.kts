@@ -57,7 +57,7 @@ android {
         targetSdk = 33
         // 动态生成 versionCode 为 yyyyMMdd 格式
         versionCode = SimpleDateFormat("yyyyMMdd").format(Date()).toInt()
-        versionName = "4.0.0"
+        versionName = "4.0.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -145,6 +145,7 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.lifecycle.runtime.ktx.v262)
     implementation(libs.androidx.runtime.livedata)
+    implementation(libs.androidx.datastore.preferences)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

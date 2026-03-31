@@ -110,7 +110,7 @@ fun Route.themeModule(context: Context) {
     }
 
     authenticatedRoute(context) {
-        //上传图片
+        //上传文件（流式）
         post("/api/upload_img") {
             try {
                 val multipart = call.receiveMultipart()
@@ -119,15 +119,21 @@ fun Route.themeModule(context: Context) {
                 multipart.forEachPart { part ->
                     when (part) {
                         is PartData.FileItem -> {
-                            val originalFileName = part.originalFileName as String
-                            val ext = originalFileName.substringAfterLast('.', "jpg")  // 没有后缀默认 jpg
+                            val originalFileName = part.originalFileName ?: "file"
+                            val ext = originalFileName.substringAfterLast('.', "unknown").lowercase()
                             fileName = "${UUID.randomUUID()}.$ext"
-                            val fileBytes = part.streamProvider().readBytes()
+
                             val uploadDir = File(context.filesDir, "uploads")
                             if (!uploadDir.exists()) uploadDir.mkdirs()
-                            File(uploadDir, fileName!!).writeBytes(fileBytes)
-                        }
 
+                            val targetFile = File(uploadDir, fileName!!)
+
+                            part.streamProvider().use { input ->
+                                targetFile.outputStream().use { output ->
+                                    input.copyTo(output)
+                                }
+                            }
+                        }
                         else -> {}
                     }
                     part.dispose()
@@ -143,14 +149,14 @@ fun Route.themeModule(context: Context) {
                         HttpStatusCode.OK
                     )
                 } else {
-                    throw Exception("图片上传失败")
+                    throw Exception("文件上传失败")
                 }
 
             } catch (e: Exception) {
-                KanoLog.d(TAG, "上传图片出错： ${e.message}")
+                KanoLog.d(TAG, "上传文件出错： ${e.message}")
                 call.response.headers.append("Access-Control-Allow-Origin", "*")
                 call.respondText(
-                    """{"error":"上传图片出错: ${e.message}"}""",
+                    """{"error":"上传文件出错: ${e.message}"}""",
                     ContentType.Application.Json,
                     HttpStatusCode.InternalServerError
                 )

@@ -809,5 +809,8 @@
     "phone_black_list_placeholder": "Enter numbers, one per line. Empty = allow all",
     "keyword_black_list_placeholder": "Enter keywords, one per line. Empty = allow all",
     "forward_nickname_setting_btn": "Set alias",
-    "nickname": "Alias"
+    "nickname": "Alias",
+    "toast_no_pass_login_fill_success": "Password-free login enabled. Enter token to log in.",
+    "no_pass_login_btn": "Password-Free Login",
+    "remember-me": "Remember Me"
 }

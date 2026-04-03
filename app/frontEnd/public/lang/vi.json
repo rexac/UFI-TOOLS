@@ -80,8 +80,8 @@
     "refresh_0_2s": "0.2 giây",
     "refresh_0_1s": "0.1 giây",
     "token_title": "Nhập token và mật khẩu",
-    "login_method_1": "ログイン方式1",
-    "login_method_2": "ログイン方式2",
+    "login_method_1": "Phương thức đăng nhập 1",
+    "login_method_2": "Phương thức đăng nhập 2",
     "token_note_1": "Lưu ý: Vui lòng nhập mã token và mật khẩu (đúng vậy, cả hai đều là ô nhập mật khẩu).",
     "token_note_2": "Trường đầu tiên là token đăng nhập UFI-TOOLS (mặc định là admin).",
     "token_note_3": "Trường thứ hai là mật khẩu quản trị backend của ZXE (có thể tìm thấy ở mặt sau của thiết bị).",
@@ -809,5 +809,8 @@
     "phone_black_list_placeholder": "Nhập số, mỗi dòng một số. Để trống = cho phép",
     "keyword_black_list_placeholder": "Nhập từ khóa, mỗi dòng một dòng. Để trống = cho phép",
     "forward_nickname_setting_btn": "Đặt bí danh",
-    "nickname": "Bí danh"
+    "nickname": "Bí danh",
+    "toast_no_pass_login_fill_success": "Đã bật đăng nhập không mật khẩu. Nhập mã để đăng nhập.",
+    "no_pass_login_btn": "Đăng nhập không mật khẩu",
+    "remember-me": "Ghi nhớ"
 }

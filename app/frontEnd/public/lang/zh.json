@@ -810,5 +810,8 @@
     "phone_black_list": "号码黑名单",
     "keyword_black_list": "关键字黑名单",
     "phone_black_list_placeholder": "请输入电话号码，多个电话号码请使用换行隔开，留空则为不拦截",
-    "keyword_black_list_placeholder": "请输入短信包含的关键字，多组关键字请换行隔开，留空则为不拦截"
+    "keyword_black_list_placeholder": "请输入短信包含的关键字，多组关键字请换行隔开，留空则为不拦截",
+    "toast_no_pass_login_fill_success": "免密码登录功能应用成功，直接输入口令即可登录！",
+    "no_pass_login_btn": "免密码登录",
+    "remember-me": "记住我"
 }

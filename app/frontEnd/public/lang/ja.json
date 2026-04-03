@@ -809,5 +809,8 @@
     "phone_black_list_placeholder": "番号を改行で入力。空=全許可",
     "keyword_black_list_placeholder": "キーワードを改行で入力。空=全許可",
     "forward_nickname_setting_btn": "別名設定",
-    "nickname": "別名"
+    "nickname": "別名",
+    "toast_no_pass_login_fill_success": "パスワードなしログイン有効。口令でログインできます。",
+    "no_pass_login_btn": "パスワードなしログイン",
+    "remember-me": "記憶する"
 }

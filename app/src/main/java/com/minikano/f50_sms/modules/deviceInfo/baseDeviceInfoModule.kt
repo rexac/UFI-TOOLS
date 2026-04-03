@@ -29,6 +29,7 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import androidx.core.content.edit
 import com.minikano.f50_sms.utils.readNetConnCount
+import io.ktor.server.request.receiveText
 import kotlinx.serialization.json.JsonObject
 import org.json.JSONObject
 
@@ -230,6 +231,7 @@ fun Route.baseDeviceInfoModule(context: Context) {
             )
         }
     }
+
     post("/api/accept_terms"){
         try {
             val sharedPrefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -249,6 +251,28 @@ fun Route.baseDeviceInfoModule(context: Context) {
         }
     }
 
+    //设置昵称
+    post("/api/set_nickname"){
+        try {
+            val body = call.receiveText()
+            val json = JSONObject(body)
+            val nickname = json.optString("nickname", "").trim()
+            val sharedPrefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            AppMeta.setNickName(sharedPrefs,nickname)
+            val jsonResult = """{"result":"success"}""".trimIndent()
+            call.response.headers.append("Access-Control-Allow-Origin", "*")
+            call.respondText(jsonResult, ContentType.Application.Json)
+        } catch (e: Exception) {
+            KanoLog.d("UFI_TOOLS_LOG", "设置昵称出错：${e.message}")
+            call.response.headers.append("Access-Control-Allow-Origin", "*")
+            call.respondText(
+                """{"error":"设置昵称出错"}""",
+                ContentType.Application.Json,
+                HttpStatusCode.InternalServerError
+            )
+        }
+    }
+
     //版本信息获取
     get("/api/version_info") {
         try {
@@ -257,6 +281,7 @@ fun Route.baseDeviceInfoModule(context: Context) {
                 "app_ver": "${AppMeta.versionName}",
                 "app_ver_code": "${AppMeta.versionCode}",
                 "model":"${AppMeta.model}",
+                "nickname":"${AppMeta.nickName}",
                 "accept_terms":${AppMeta.isReadUseTerms}
             }
         """.trimIndent()

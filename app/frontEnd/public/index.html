@@ -48,10 +48,10 @@
 <body id="BG">
     <div class="bg" id="BG_OVERLAY">
         <div class="container">
-            <div class="title main-title" onclick="enableTTYD()">
-                <strong id="MAIN_TITLE">UFI-TOOLS</strong>
-                <span style="font-size: 14px;" data-i18n="device"></span>:<strong id="MODEL"
-                    style="font-size: 14px;"></strong>
+            <div class="title main-title" style="align-items: end;">
+                <strong id="MAIN_TITLE" style="flex-shrink: 0;" onclick="enableTTYD()">UFI-TOOLS</strong>
+                <strong id="MODEL"
+                    style="font-size: .8rem;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;" onclick="nicknameSettingClick()"></strong>
             </div>
             <!-- 操作按钮 -->
             <div class="kano_function_main func_list_container">
@@ -1749,7 +1749,10 @@
                                         style="font-size: .8rem;min-width: fit-content;flex-shrink: 0;">电源状态转发</span>
                                 </div>
                                 <!-- 转发规则 -->
-                                <button style="margin-top: 8px;flex: 1;" id="forward_method_setting_btn" data-i18n="forward_method_setting_btn">转发规则</button>
+                                <button style="margin-top: 8px;flex: 1;" id="forward_method_setting_btn"
+                                    data-i18n="forward_method_setting_btn">转发规则</button>
+                                <button style="margin-top: 8px;flex: 1;" id="forward_nickname_setting_btn"
+                                    data-i18n="forward_nickname_setting_btn">设置别名</button>
                             </div>
                             <!-- smtp转发 -->
                             <form onsubmit="handleSmsForwardForm(event)" id="smsForwardForm">
@@ -1833,7 +1836,7 @@
                                         <span onclick="copyText(event)">
                                             {{daily-flow}} {{cpu-temp}} {{cpu-usage}} {{mem-usage}} {{app-ver}}
                                             {{battery-level}}
-                                            {{battery-current}} {{battery-voltage}} {{model}} {{boot-time}}
+                                            {{battery-current}} {{battery-voltage}} {{model}} {{nickname}} {{boot-time}}
                                             {{monthly-flow-count}} {{monthly-flow-sum}}
                                         </span>
                                     </div>

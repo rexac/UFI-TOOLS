@@ -807,5 +807,7 @@
     "phone_black_list": "Danh sách chặn số",
     "keyword_black_list": "Danh sách chặn từ khóa",
     "phone_black_list_placeholder": "Nhập số, mỗi dòng một số. Để trống = cho phép",
-    "keyword_black_list_placeholder": "Nhập từ khóa, mỗi dòng một dòng. Để trống = cho phép"
+    "keyword_black_list_placeholder": "Nhập từ khóa, mỗi dòng một dòng. Để trống = cho phép",
+    "forward_nickname_setting_btn": "Đặt bí danh",
+    "nickname": "Bí danh"
 }

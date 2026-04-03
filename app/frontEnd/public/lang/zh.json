@@ -804,6 +804,8 @@
     "power_status_forward": "电源状态通知功能",
     "phone_param_is_invalid": "手机号列表只允许包含数字！",
     "forward_method_setting_btn": "转发规则",
+    "forward_nickname_setting_btn": "设置别名",
+    "nickname": "别名",
     "kano_sms_forward_rules_toast_title": "短信转发规则",
     "phone_black_list": "号码黑名单",
     "keyword_black_list": "关键字黑名单",

@@ -20,6 +20,8 @@ object AppMeta {
         private set
     var model: String = Build.MODEL
         private set
+    var nickName: String = Build.MODEL
+        private set
     var isDeviceRooted:Boolean = false
         private set
     var isReadUseTerms:Boolean = false
@@ -36,6 +38,8 @@ object AppMeta {
     private const val PREFS_NAME = "kano_ZTE_store"
     private const val GLOBAL_SERVER_URL_KEY = "GLOBAL_SERVER_URL"
     private val PREF_ISDEBUG = "kano_is_debug"
+
+    private val PREF_NICKNAME = "nickname"
 
     private val PREF_IS_WEAK_TOKEN = "is_weak_token"
 
@@ -64,6 +68,16 @@ object AppMeta {
     fun setIsEnableLog(prefs: SharedPreferences, flag: Boolean) {
         prefs.edit(commit = true) { putBoolean(PREF_ISDEBUG, flag) }
         isEnableLog = flag
+    }
+
+    fun setNickName (prefs: SharedPreferences, nickname: String) {
+        if(nickname.isEmpty()){
+            nickName = Build.MODEL
+
+        } else {
+            nickName = nickname
+        }
+        prefs.edit(commit = true) { putString(PREF_NICKNAME, nickName) }
     }
 
     fun init(context: Context) {
@@ -95,8 +109,7 @@ object AppMeta {
 
             isEnableLog = prefs.getBooleanCompat(PREF_ISDEBUG, false)
 
-            // //获取口令，检查是否为弱口令
-            // updateIsDefaultOrWeakToken(KanoUtils.isWeakToken(token))
+            nickName = prefs.getString("nickname",Build.MODEL) ?: Build.MODEL
         } catch (e: Exception) {
             KanoLog.e("UFI_TOOLS_LOG","AppMeta init failed！！",e)
         }

@@ -256,7 +256,10 @@ fun Route.baseDeviceInfoModule(context: Context) {
         try {
             val body = call.receiveText()
             val json = JSONObject(body)
-            val nickname = json.optString("nickname", "").trim()
+            var nickname = json.optString("nickname", "").trim()
+            if (nickname.length > 255) {
+                nickname = nickname.take(255)
+            }
             val sharedPrefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             AppMeta.setNickName(sharedPrefs,nickname)
             val jsonResult = """{"result":"success"}""".trimIndent()

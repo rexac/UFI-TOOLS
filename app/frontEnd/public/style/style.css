@@ -1383,3 +1383,7 @@ input[type='range'] {
 .func_list_container {
   margin-top: 10px;
 }
+
+.svg-icon:active {
+  fill: var(--dark-btn-color-active) !important;
+}

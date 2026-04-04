@@ -812,5 +812,8 @@
     "nickname": "Alias",
     "toast_no_pass_login_fill_success": "Password-free login enabled. Enter token to log in.",
     "no_pass_login_btn": "Password-Free Login",
-    "remember-me": "Remember Me"
+    "remember-me": "Remember Me",
+    "toast_hostname_cannot_be_empty": "Hostname cannot be empty",
+    "please_input_hostname": "Please enter hostname",
+    "hostname": "Hostname"
 }

@@ -812,5 +812,8 @@
     "nickname": "Bí danh",
     "toast_no_pass_login_fill_success": "Đã bật đăng nhập không mật khẩu. Nhập mã để đăng nhập.",
     "no_pass_login_btn": "Đăng nhập không mật khẩu",
-    "remember-me": "Ghi nhớ"
+    "remember-me": "Ghi nhớ",
+    "toast_hostname_cannot_be_empty": "Tên máy chủ không được để trống",
+    "please_input_hostname": "Vui lòng nhập tên máy chủ",
+    "hostname": "Tên máy chủ"
 }

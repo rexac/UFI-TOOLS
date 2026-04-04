@@ -1270,6 +1270,13 @@ function main_func() {
                 }
             }
         }
+        if (pwdEl && pwdEl.value.trim() == "Wa@9w+YWRtaW4=") {
+            const loginMethodEl = document.querySelector("#login_method")
+            console.log("Admin login method detected, switch to password input")
+            if (loginMethodEl) {
+                loginMethodEl.value = "0"
+            }
+        }
         createToast(t('toast_logout'), 'green')
         showModal('#tokenModal')
     }
@@ -2453,8 +2460,8 @@ function main_func() {
 
     let initClientManagementModal = async () => {
         try {
-            const { station_list, lan_station_list, BlackMacList, BlackNameList, AclMode } = await getData(new URLSearchParams({
-                cmd: 'station_list,lan_station_list,queryDeviceAccessControlList'
+            const { station_list, lan_station_list, BlackMacList, BlackNameList, AclMode, devices } = await getData(new URLSearchParams({
+                cmd: 'station_list,lan_station_list,queryDeviceAccessControlList,hostNameList'
             }))
             const blackMacList = BlackMacList ? BlackMacList.split(';') : []
             const blackNameList = BlackNameList ? BlackNameList.split(';') : []
@@ -2466,10 +2473,18 @@ function main_func() {
             let black_list_html = ''
 
             if (station_list && station_list.length) {
-                conn_client_html += station_list.map(({ hostname, ip_addr, mac_addr }) => (`
+                conn_client_html += station_list.map(({ hostname, ip_addr, mac_addr }) => {
+                    let hostname_show = hostname
+                    if (devices) {
+                        hostname_show = devices.find(i => i.mac == mac_addr)?.hostname || hostname
+                    }
+                    return `
             <div class="card-item" style="display: flex;width: 100%;margin: 10px 0;overflow: auto;">
                 <div style="margin-right: 10px;">
-                    <p><span>${t('client_mgmt_hostname')}：</span><span onclick="copyText(event)">${hostname}</span></p>
+                    <p>
+                        <span>${t('client_mgmt_hostname')}：</span><span onclick="copyText(event)">${hostname_show}</span>
+                        <svg onclick="editHostName('${hostname_show}','${mac_addr}')" class="svg-icon" style="margin-left:10px" fill="var(--dark-text-color)" stroke="currentColor" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width=".8rem" height=".8rem"><path d="M568.888889 28.444444v113.777778H142.222222v739.555556h739.555556V455.111111h113.777778v455.111111a85.333333 85.333333 0 0 1-85.333334 85.333334H113.777778A85.333333 85.333333 0 0 1 28.444444 910.222222V113.777778A85.333333 85.333 third-party libraries
+                    </p>
                     <p><span>${t('client_mgmt_mac')}：</span><span onclick="copyText(event)">${mac_addr}</span></p>
                     <p><span>${t('client_mgmt_ip')}：</span><span onclick="copyText(event)">${ip_addr}</span></p>
                     <p><span>${t('client_mgmt_conn_type')}：</span><span>${t('client_mgmt_conn_wireless')}</span></p>
@@ -2480,14 +2495,22 @@ function main_func() {
                         🚫 ${t('client_mgmt_block')}
                     </button>
                 </div>
-            </div>`)).join('')
+            </div>`}).join('')
             }
 
             if (lan_station_list && lan_station_list.length) {
-                conn_client_html += lan_station_list.map(({ hostname, ip_addr, mac_addr }) => (`
+                conn_client_html += lan_station_list.map(({ hostname, ip_addr, mac_addr }) => {
+                    let hostname_show = hostname
+                    if (devices) {
+                        hostname_show = devices.find(i => i.mac == mac_addr)?.hostname || hostname
+                    }
+                    return `
             <div class="card-item" style="display: flex;width: 100%;margin: 10px 0;overflow: auto;">
                 <div style="margin-right: 10px;">
-                    <p><span>${t('client_mgmt_hostname')}：</span><span onclick="copyText(event)">${hostname}</span></p>
+                    <p>
+                        <span>${t('client_mgmt_hostname')}：</span><span onclick="copyText(event)">${hostname_show}</span>
+                        <svg onclick="editHostName('${hostname_show}','${mac_addr}')" class="svg-icon" style="margin-left:10px" fill="var(--dark-text-color)" stroke="currentColor" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width=".8rem" height=".8rem"><path d="M568.888889 28.444444v113.777778H142.222222v739.555556h739.555556V455.111111h113.777778v455.111111a85.333333 85.333333 0 0 1-85.333334 85.333334H113.777778A85.333333 85.333333 0 0 1 28.444444 910.222222V113.777778A85.333333 85.333333 0 0 1 113.777778 28.444444h455.111111z" p-id="5380"></path><path d="M881.777778 398.222222m11.377778 0l91.022222 0q11.377778 0 11.377778 11.377778l0 91.022222q0 11.377778-11.377778 11.377778l-91.022222 0q-11.377778 0-11.377778-11.377778l0-91.022222q0-11.377778 11.377778-11.377778Z" p-id="5381"></path><path d="M475.192889 656.327111l-102.286222-4.209778-5.973334-103.537777 346.851556-347.591112a11.377778 11.377778 0 0 1 16.099555-0.056888l92.16 91.591111a11.377778 11.377778 0 0 1 0 16.156444l-346.851555 347.591111zM876.202667 238.762667l-92.16-91.648a11.377778 11.377778 0 0 1 0-16.156445L879.104 36.408889a11.377778 11.377778 0 0 1 16.042667 0l92.16 91.704889a11.377778 11.377778 0 0 1 0 16.099555l-95.004445 94.549334a11.377778 11.377778 0 0 1-16.099555 0z" p-id="5382"></path><path d="M512 28.444444m11.377778 0l91.022222 0q11.377778 0 11.377778 11.377778l0 91.022222q0 11.377778-11.377778 11.377778l-91.022222 0q-11.377778 0-11.377778-11.377778l0-91.022222q0-11.377778 11.377778-11.377778Z" p-id="5383"></path></svg>
+                    </p>
                     <p><span>${t('client_mgmt_mac')}：</span><span onclick="copyText(event)">${mac_addr}</span></p>
                     <p><span>${t('client_mgmt_ip')}：</span><span onclick="copyText(event)">${ip_addr}</span></p>
                     <p><span>${t('client_mgmt_conn_type')}：</span><span>${t('client_mgmt_conn_wired')}</span></p>
@@ -2498,7 +2521,7 @@ function main_func() {
                         🚫 ${t('client_mgmt_block')}
                     </button>
                 </div>
-            </div>`)).join('')
+            </div>`}).join('')
             }
 
             if (blackMacList.length && blackNameList.length) {
@@ -2510,7 +2533,10 @@ function main_func() {
                         return `
                     <div class="card-item" style="display: flex;width: 100%;margin: 10px 0;overflow: auto;">
                         <div style="margin-right: 10px;">
-                            <p><span>${t('client_mgmt_hostname')}：</span><span onclick="copyText(event)">${blackNameList[index] ? blackNameList[index] : t('client_mgmt_unknown')}</span></p>
+                            <p>
+                                <span>${t('client_mgmt_hostname')}：</span><span onclick="copyText(event)">${blackNameList[index] ? blackNameList[index] : t('client_mgmt_unknown')}</span>
+                                <svg onclick="editHostName('${blackNameList[index] || ''}','${item}')" class="svg-icon" style="margin-left:10px" fill="var(--dark-text-color)" stroke="currentColor" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width=".8rem" height=".8rem"><path d="M568.888889 28.444444v113.777778H142.222222v739.555556h739.555556V455.111111h113.777778v455.111111a85.333333 85.333333 0 0 1-85.333334 85.333334H113.777778A85.333333 85.333333 0 0 1 28.444444 910.222222V113.777778A85.333333 85.333333 0 0 1 113.777778 28.444444h455.111111z" p-id="5380"></path><path d="M881.777778 398.222222m11.377778 0l91.022222 0q11.377778 0 11.377778 11.377778l0 91.022222q0 11.377778-11.377778 11.377778l-91.022222 0q-11.377778 0-11.377778-11.377778l0-91.022222q0-11.377778 11.377778-11.377778Z" p-id="5381"></path><path d="M475.192889 656.327111l-102.286222-4.209778-5.973334-103.537777 346.851556-347.591112a11.377778 11.377778 0 0 1 16.099555-0.056888l92.16 91.591111a11.377778 11.377778 0 0 1 0 16.156444l-346.851555 347.591111zM876.202667 238.762667l-92.16-91.648a11.377778 11.377778 0 0 1 0-16.156445L879.104 36.408889a11.377778 11.377778 0 0 1 16.042667 0l92.16 91.704889a11.377778 11.377778 0 0 1 0 16.099555l-95.004445 94.549334a11.377778 11.377778 0 0 1-16.099555 0z" p-id="5382"></path><path d="M512 28.444444m11.377778 0l91.022222 0q11.377778 0 11.377778 11.377778l0 91.022222q0 11.377778-11.377778 11.377778l-91.022222 0q-11.377778 0-11.377778-11.377778l0-91.022222q0-11.377778 11.377778-11.377778Z" p-id="5383"></path></svg>
+                            </p>
                             <p><span>${t('client_mgmt_mac')}：</span><span onclick="copyText(event)">${item}</span></p>
                         </div>
                         <div style="flex:1;text-align: right;">
@@ -2531,6 +2557,49 @@ function main_func() {
         } catch (e) {
             console.error(e)
             createToast(t('client_mgmt_fetch_error'), 'red')
+        }
+    }
+
+    const editHostName = async (name, mac) => {
+        const { el, close } = createFixedToast('kano_edit_hostname', `
+                <div style="pointer-events:all;width:80vw;max-width:300px;">
+                <div class="title" style="margin:0" data-i18n="please_input_hostname">${t('please_input_hostname')}</div>
+                <input class="user_select_none" type="text" style="border: none;padding:6px;width:100%;margin-top:10px" disabled value="MAC: ${mac}"></input>
+                <input type="text" id="KANO_CONN_HOSTNAME" style="padding:6px;width:100%;margin:10px 0" data-i18n-placeholder="hostname" placeholder="${t("hostname")}" value="${name}"></input>
+                <div style="display:flex;gap:10px">
+                    <button id="close_kano_edit_hostname_toast_btn" style="width:100%;font-size:.64rem;margin-top:5px" data-i18n="confirm_btn">${t("confirm_btn")}</button>
+                    <button id="close_kano_edit_hostname_toast_btn1" style="width:100%;font-size:.64rem;margin-top:5px" data-i18n="cancel_btn">${t("cancel_btn")}</button>
+                </div>
+                </div>
+                `, 'red')
+        const btn = el.querySelector('#close_kano_edit_hostname_toast_btn')
+        const btn2 = el.querySelector('#close_kano_edit_hostname_toast_btn1')
+        const hostname = el.querySelector("#KANO_CONN_HOSTNAME")
+
+        if (!btn && !btn2 && !hostname) {
+            close()
+            return
+        }
+        btn2.onclick = () => {
+            close()
+        }
+        btn.onclick = async () => {
+            if (hostname.value.trim() == '') {
+                createToast(t('toast_hostname_cannot_be_empty'), 'red')
+                return
+            }
+            try {
+                const res = await seConntHostName(mac, hostname.value.trim())
+                if (res.result == 'success') {
+                    createToast(t("toast_save_success"), 'pink')
+                    initClientManagementModal()
+                } else {
+                    throw new Error(t("toast_save_failed"))
+                }
+            } catch (e) {
+                createToast(t("toast_save_failed"), 'red')
+            }
+            close()
         }
     }
 
@@ -7550,6 +7619,7 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
     // initSimCardPin()
     //挂载方法到window
     const methods = {
+        editHostName,
         switchPassInputShow,
         noPassLogin,
         showNetConnInfoModal,

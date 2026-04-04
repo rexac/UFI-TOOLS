@@ -812,5 +812,8 @@
     "nickname": "別名",
     "toast_no_pass_login_fill_success": "パスワードなしログイン有効。口令でログインできます。",
     "no_pass_login_btn": "パスワードなしログイン",
-    "remember-me": "記憶する"
+    "remember-me": "記憶する",
+    "toast_hostname_cannot_be_empty": "ホスト名を入力してください",
+    "please_input_hostname": "ホスト名を入力してください",
+    "hostname": "ホスト名"
 }

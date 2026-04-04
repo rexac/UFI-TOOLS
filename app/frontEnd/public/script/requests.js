@@ -621,3 +621,14 @@ const getNetConnInfo = async () => {
     }
     return null
 }
+
+//seConntHostName
+const seConntHostName = async (mac, hostname) => {
+    const formData = {
+        goformId: "EDIT_HOSTNAME",
+        mac,
+        hostname
+    }
+    const res = await postData(await login(), formData)
+    return res.json()
+}

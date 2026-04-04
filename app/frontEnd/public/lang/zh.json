@@ -813,5 +813,8 @@
     "keyword_black_list_placeholder": "请输入短信包含的关键字，多组关键字请换行隔开，留空则为不拦截",
     "toast_no_pass_login_fill_success": "免密码登录功能应用成功，直接输入口令即可登录！",
     "no_pass_login_btn": "免密码登录",
-    "remember-me": "记住我"
+    "remember-me": "记住我",
+    "toast_hostname_cannot_be_empty": "主机名不能为空",
+    "please_input_hostname": "请输入主机名",
+    "hostname": "主机名"
 }

@@ -82,31 +82,35 @@ class ADBService : Service() {
         batteryReceiver = BatteryReceiver(onLowBattery = {
             forwardMessage(
                 """
-                ${AppMeta.model}剩余电量低（10%），请及时充电~
+                ${AppMeta.nickName} 剩余电量低（10%），请及时充电~
                     Battery low (10%). Please charge your device.
-                """.trimIndent())
+                """.trimIndent()
+                ,"${AppMeta.nickName} 电量低（10%）")
         },
         onVeryLowBattery = {
             forwardMessage(
                 """
-                ${AppMeta.model}剩余电量过低（5%），请及时充电~
+                ${AppMeta.nickName} 剩余电量过低（5%），请及时充电~
                 Battery is very low (5%). Please charge your device.
-                """.trimIndent())
+                """.trimIndent()
+                ,"${AppMeta.nickName} 电量过低（5%）")
         },
         onFullBattery = {
             forwardMessage(
                 """
-                ${AppMeta.model}电量已充满~
-                ${AppMeta.model} is fully charged.
-                """.trimIndent())
+                ${AppMeta.nickName} 电量已充满~
+                ${AppMeta.nickName} is fully charged.
+                """.trimIndent()
+                ,"${AppMeta.nickName} 已充满~")
 
         },
         onCharge = {
             forwardMessage(
                 """
-                ${AppMeta.model}已插入电源~
-                ${AppMeta.model} power connected.
-                """.trimIndent())
+                ${AppMeta.nickName} 已插入电源~
+                ${AppMeta.nickName} power connected.
+                """.trimIndent()
+            ,"${AppMeta.nickName} 已插入电源~")
         })
 
         registerReceiver(
@@ -116,13 +120,13 @@ class ADBService : Service() {
         Log.d(TAG, "BatteryReceiver 已注册")
     }
 
-    private fun forwardMessage(message:String){
+    private fun forwardMessage(message:String,title:String){
         val sharedPrefs = getSharedPreferences("kano_ZTE_store", Context.MODE_PRIVATE)
         val isEnabledPowerStatusForward =
             (sharedPrefs.getString("kano_power_status_forward_enabled", "0") ?: "0") == "1"
         val isSMSForwardEnabled = sharedPrefs.getString("kano_sms_forward_enabled", "0") == "1"
         if (isEnabledPowerStatusForward && isSMSForwardEnabled) {
-            KanoUtils.forwardBatteryStatusMessage(this,SmsInfo("UFI-TOOLS 电源监测",
+            KanoUtils.forwardBatteryStatusMessage(this,SmsInfo(title,
                message , System.currentTimeMillis()))
         }
     }

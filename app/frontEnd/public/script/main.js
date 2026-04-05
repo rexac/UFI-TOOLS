@@ -2578,10 +2578,16 @@ function main_func() {
     // title
     const loadTitle = async () => {
         try {
-            const { app_ver, model } = await (await fetch(`${KANO_baseURL}/version_info`, { headers: common_headers })).json()
-            MODEL.innerHTML = `${model}`
-            document.querySelector('#TITLE').innerHTML = `[${model}]UFI-TOOLS-WEB Ver: ${app_ver}`
-            document.querySelector('#MAIN_TITLE').innerHTML = `UFI-TOOLS <span style="font-size:14px">Ver: ${app_ver}</span>`
+            const { app_ver, model, nickname } = await (await fetch(`${KANO_baseURL}/version_info`, { headers: common_headers })).json()
+            if (model == nickname) {
+                MODEL.innerHTML = `${model}`
+                document.querySelector('#TITLE').innerHTML = `[${model}]UFI-TOOLS v${app_ver}`
+
+            } else {
+                MODEL.innerHTML = `${model} (${nickname})`
+                document.querySelector('#TITLE').innerHTML = `[${nickname}]UFI-TOOLS v${app_ver}`
+            }
+            document.querySelector('#MAIN_TITLE').innerHTML = `UFI-TOOLS <span style="font-size:.8rem">v${app_ver}</span>`
         } catch {/*没有，不处理*/ }
     }
     loadTitle()
@@ -2922,10 +2928,10 @@ function main_func() {
             // 启用ttyd弹窗
             initResServer()
             showModal('#TTYDModal')
-            ttyd_timer && clearInterval(ttyd_timer)
+            ttyd_timer && clearTimeout(ttyd_timer)
             click_count_ttyd = 1
         }
-        ttyd_timer && clearInterval(ttyd_timer)
+        ttyd_timer && clearTimeout(ttyd_timer)
         ttyd_timer = setTimeout(() => {
             click_count_ttyd = 1
         }, 1999)
@@ -4487,6 +4493,93 @@ function main_func() {
             }
         }
     })
+
+    //别名设置
+    let click_count_nickname = 1
+    let nickname_timer = null
+    const nicknameSettingClick = () => {
+        nickname_timer && clearTimeout(nickname_timer)
+        nickname_timer = setTimeout(() => {
+            click_count_nickname = 1
+        }, 1999)
+        click_count_nickname++
+        if (click_count_nickname <= 2) {
+            return
+        }
+        click_count_nickname = 1
+        openNicknameSetting()
+    }
+
+    const openNicknameSetting = async () => {
+        try {
+            //获取数据
+            const { nickname, model } = await (await fetch(`${KANO_baseURL}/version_info`, {
+                method: 'GET',
+                headers: common_headers
+            })).json()
+
+
+            const { el, close } = createFixedToast('kano_nickname_set_toast', `
+            <div style="pointer-events:all;width:80vw;max-width:400px">
+            <div class="title" style="margin:0" data-i18n="forward_nickname_setting_btn">${t('forward_nickname_setting_btn')}</div>
+            <input id="kano_nickname_set_phone_list" class="input" style="padding:6px;margin:10px 0 5px 0;width: 100%;box-sizing: border-box;" placeholder="${model}">
+            <div style="display:flex;gap:10px">
+                <button id="confirm_nickname_set_setting_btn" style="width:100%;font-size:.64rem;margin-top:5px" data-i18n="submit_btn">${t("submit_btn")}</button>
+                <button id="close_nickname_set_setting_btn" style="width:100%;font-size:.64rem;margin-top:5px" data-i18n="cancel_btn">${t("cancel_btn")}</button>
+            </div>
+            </div>
+            `)
+            const confirmBtn = el.querySelector("#confirm_nickname_set_setting_btn")
+            const closeBtn = el.querySelector("#close_nickname_set_setting_btn")
+            const nickNameEl = el.querySelector('#kano_nickname_set_phone_list')
+
+            if (nickNameEl) {
+                nickNameEl.value = nickname || ''
+            }
+
+            if (confirmBtn) {
+                confirmBtn.onclick = async () => {
+                    //提交
+                    try {
+                        const nickName = nickNameEl.value.trim()
+                        const res = await (await fetch(`${KANO_baseURL}/set_nickname`, {
+                            method: 'post',
+                            body: JSON.stringify({
+                                nickname: nickName
+                            }),
+                            headers: {
+                                ...common_headers,
+                                'Content-Type': 'application/json'
+                            }
+                        })).json()
+                        if (!res.result && res.error) {
+                            throw new Error(res.error)
+                        }
+                        if (res.result && res.result == 'success') {
+                            createToast(t('toast_save_success'), 'pink')
+                            loadTitle()
+                        }
+                    } catch (e) {
+                        createToast(t('toast_save_failed'), 'red')
+                    }
+                    close()
+                }
+            }
+            if (closeBtn) {
+                closeBtn.onclick = () => {
+                    close()
+                }
+            }
+            showModal("#" + el.id)
+        } catch (e) {
+            createToast(t('client_mgmt_fetch_error'), 'red')
+            console.error(e)
+        }
+    }
+    const nicknameSettingBtn = document.querySelector('#forward_nickname_setting_btn')
+    if (nicknameSettingBtn) {
+        nicknameSettingBtn.onclick = openNicknameSetting
+    }
 
     //短信转发规则设置
     const forwardMethodSettingBtn = document.querySelector('#forward_method_setting_btn')
@@ -7400,6 +7493,8 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
         onViewAPNProfile,
         changeSleepTime,
         handleHighRailMode,
+        openNicknameSetting,
+        nicknameSettingClick,
         setPort,
         resetTTYDPort,
         initTTYD,

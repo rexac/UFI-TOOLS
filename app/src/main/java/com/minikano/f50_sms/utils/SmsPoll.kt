@@ -176,7 +176,7 @@ object SmsPoll {
             <p><b>🧠 内存占用: </b>{{mem-usage}}</p>
             <p><b>🔋 电池信息: </b>{{battery-level}} {{battery-current}} {{battery-voltage}}</p>
             <p><b>⏱️ 开机时长: </b>{{boot-time}}</p>
-            <p><b>📱 设备型号: </b>{{model}}</p>
+            <p><b>📱 设备名称: </b>{{model}}({{nickname}})</p>
             <p><b>📦 APP版本: </b>{{app-ver}}</p>
             """.trimIndent(), context, TAG
             )
@@ -245,7 +245,7 @@ object SmsPoll {
             🧠 内存使用: {{mem-usage}}
             🔋 电池信息: {{battery-level}} {{battery-current}} {{battery-voltage}}
             ⏱️ 开机时长: {{boot-time}}
-            📱 设备型号: {{model}}
+            📱 设备名称: {{model}}({{nickname}})
             📦 APP版本: {{app-ver}}
             """.trimIndent(),context, TAG)
         }

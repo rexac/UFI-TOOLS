@@ -785,6 +785,7 @@ class KanoUtils {
                         "{{daily-flow}}" ,
                         "{{monthly-flow-count}}" ,
                         "{{monthly-flow-sum}}" ,
+                        "{{nickname}}" ,
                     )
                     if(replacedCurl.contains(templates[0])){
                         val usage = calculateCpuUsage()
@@ -868,6 +869,11 @@ class KanoUtils {
                     if(replacedCurl.contains(templates[11])){
                         replacedCurl = replacedCurl
                             .replace(templates[11], getCatchedFlowMonth(context).toReadableSize())
+                    }
+                    //昵称
+                    if(replacedCurl.contains(templates[12])){
+                        replacedCurl = replacedCurl
+                            .replace(templates[12], AppMeta.nickName)
                     }
                 } catch (e: Exception) {
                     KanoLog.e(TAG, "获取设备信息出错： ${e.message}")

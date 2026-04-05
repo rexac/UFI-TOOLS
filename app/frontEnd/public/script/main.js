@@ -4522,7 +4522,7 @@ function main_func() {
             const { el, close } = createFixedToast('kano_nickname_set_toast', `
             <div style="pointer-events:all;width:80vw;max-width:400px">
             <div class="title" style="margin:0" data-i18n="forward_nickname_setting_btn">${t('forward_nickname_setting_btn')}</div>
-            <input id="kano_nickname_set_phone_list" class="input" style="padding:6px;margin:10px 0 5px 0;width: 100%;box-sizing: border-box;" placeholder="${model}">
+            <input maxlength="255" id="kano_nickname_set_phone_list" class="input" style="padding:6px;margin:10px 0 5px 0;width: 100%;box-sizing: border-box;" placeholder="${model}">
             <div style="display:flex;gap:10px">
                 <button id="confirm_nickname_set_setting_btn" style="width:100%;font-size:.64rem;margin-top:5px" data-i18n="submit_btn">${t("submit_btn")}</button>
                 <button id="close_nickname_set_setting_btn" style="width:100%;font-size:.64rem;margin-top:5px" data-i18n="cancel_btn">${t("cancel_btn")}</button>

@@ -39,6 +39,9 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import kotlin.math.ln
 import kotlin.math.pow
 
@@ -183,6 +186,96 @@ class KanoUtils {
             }
 
             return totalBytes
+        }
+
+        //按需获取数据使用量
+        fun getRangeDataUsage(
+            context: Context,
+            startMills:Long,
+            endMills:Long
+        ): Long {
+            val networkStatsManager =
+                context.getSystemService(Context.NETWORK_STATS_SERVICE) as NetworkStatsManager
+
+            val startTime = startMills
+            val endTime = endMills
+
+            var totalBytes = 0L
+
+            try {
+                val summary = networkStatsManager.querySummaryForDevice(
+                    ConnectivityManager.TYPE_MOBILE, null, startTime, endTime
+                )
+                totalBytes = summary.rxBytes + summary.txBytes
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+
+            return totalBytes
+        }
+
+        fun getRangeDailyDataUsage(
+            context: Context,
+            startMills: Long,
+            endMills: Long
+        ): List<Map<String, String>> {
+            val result = mutableListOf<Map<String, String>>()
+
+            if (startMills > endMills) return result
+
+            val networkStatsManager =
+                context.getSystemService(Context.NETWORK_STATS_SERVICE) as NetworkStatsManager
+
+            val calendar = Calendar.getInstance()
+            calendar.timeInMillis = startMills
+            calendar.set(Calendar.HOUR_OF_DAY, 0)
+            calendar.set(Calendar.MINUTE, 0)
+            calendar.set(Calendar.SECOND, 0)
+            calendar.set(Calendar.MILLISECOND, 0)
+
+            val endCalendar = Calendar.getInstance()
+            endCalendar.timeInMillis = endMills
+
+            val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+
+            while (calendar.timeInMillis <= endMills) {
+                val currentDayStart = calendar.timeInMillis
+
+                val dayStart = maxOf(currentDayStart, startMills)
+
+                val dayEndCalendar = calendar.clone() as Calendar
+                dayEndCalendar.set(Calendar.HOUR_OF_DAY, 23)
+                dayEndCalendar.set(Calendar.MINUTE, 59)
+                dayEndCalendar.set(Calendar.SECOND, 59)
+                dayEndCalendar.set(Calendar.MILLISECOND, 999)
+
+                val dayEnd = minOf(dayEndCalendar.timeInMillis, endMills)
+
+                var totalBytes = 0L
+
+                try {
+                    val summary = networkStatsManager.querySummaryForDevice(
+                        ConnectivityManager.TYPE_MOBILE,
+                        null,
+                        dayStart,
+                        dayEnd
+                    )
+                    totalBytes = summary.rxBytes + summary.txBytes
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+
+                result.add(
+                    mapOf(
+                        "date" to sdf.format(Date(currentDayStart)),
+                        "usage" to totalBytes.toString()
+                    )
+                )
+
+                calendar.add(Calendar.DAY_OF_MONTH, 1)
+            }
+
+            return result
         }
 
         // 解析 URL 编码的请求体

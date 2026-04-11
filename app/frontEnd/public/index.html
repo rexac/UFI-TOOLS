@@ -85,6 +85,8 @@
                                 <button id="SMS" class="btn" data-i18n="sms">短信收发</button>
                             </div>
                             <button id="DataManagement" class="btn" data-i18n="data_mgmt">流量管理</button>
+                            <button id="DataUsageHistory" onclick="openDataUsageHistory()" class="btn"
+                                data-i18n="data_usage_history_btn">流量历史</button>
                             <button id="SpeedTestBtn" class="btn" data-i18n="speed_test"
                                 onclick="showModal('#speedTestModal')">内网测速</button>
                             <button id="CellularSpeedTestBtn" class="btn" data-i18n="cellular_speed_test"
@@ -829,6 +831,61 @@
                                 data-i18n="close_btn">关闭</button>
                         </div>
                     </form>
+                </div>
+            </div>
+            <!-- 流量历史模态框 -->
+            <div class="modal" id="DataUsageHistoryModal" style="display: none">
+                <div class="title" data-i18n="data_usage_status">流量使用情况</div>
+
+                <div class="content"
+                    style="max-height: unset;font-size: .7rem;overflow-y: scroll;padding: 15px 0px; width: 80vw; max-width: 600px;">
+                    <div style="display: flex;flex-direction: column;justify-content: center;gap: 10px;">
+                        <div style="display: flex;gap: 6px;align-items: center;">
+                            <span style="flex-shrink: 0;" data-i18n="start_date">起始日期</span>:
+                            <input id="start_time_data_usage_history" class="date-time-picker" type="date"
+                                style="width: 100%;box-sizing: border-box;" />
+                        </div>
+                        <div style="display: flex;gap: 6px;align-items: center">
+                            <span style="flex-shrink: 0;" data-i18n="end_date">结束日期</span>:
+                            <input id="end_time_data_usage_history" class="date-time-picker" type="date"
+                                style="width: 100%;box-sizing: border-box;" />
+                        </div>
+                        <div style="display: flex;gap: 10px;">
+                            <button style="width: 100%;" onclick="doDataUsageHistorySearch()"
+                                data-i18n="query">查询</button>
+                            <button style="width: 100%;" onclick="resetUsageModalData()"
+                                data-i18n="plugin_search_reset_btn">重置</button>
+                        </div>
+                    </div>
+                    <div style="display: flex;gap: 10px;margin-top: 10px;justify-content: center;font-size: .8rem;">
+                        <span style="font-weight: normal;"><span data-i18n="total_usage">总用量</span>：<span
+                                style="font-weight: bold;" id="data_usage_history_sum">N/A</span></span>
+                        <span style="font-weight: normal;"><span data-i18n="avg_usage">日均使用</span>：<span
+                                style="font-weight: bold;" id="data_usage_history_avg">N/A</span></span>
+                    </div>
+                    <div class="chart" style="padding: 0;margin: 0;box-sizing: border-box;width: 100%;height: 100px;">
+                        <canvas id="kanoDataHistoryChart"></canvas>
+                    </div>
+                    <div style="max-height: 250px;overflow: auto;margin-top: 0;">
+                        <table class="nice-table" style="background: none;">
+                            <thead class="no-blur">
+                                <tr>
+                                    <th data-i18n="date_data">日期</th>
+                                    <th data-i18n="usage_data">用量</th>
+                                </tr>
+                            </thead>
+                            <tbody class="no-blur" id="DataUsageHistoryBody">
+                                <tr style="cursor: pointer;">
+                                    <td colspan="2" data-i18n="no_data">暂无数据</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="btn" style="text-align: right;">
+                    <button type="button" onclick="closeModal('#DataUsageHistoryModal')"
+                        data-i18n="close_btn">关闭</button>
                 </div>
             </div>
             <!-- WIFI设置模态框 -->

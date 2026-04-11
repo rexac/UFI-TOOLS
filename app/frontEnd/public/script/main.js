@@ -7517,6 +7517,112 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
         }
     }
 
+    const resetUsageModalData = () => {
+        const tbody = document.querySelector('#DataUsageHistoryBody')
+        if (!tbody) return
+        const sumEl = document.querySelector("#data_usage_history_sum")
+        const avgEl = document.querySelector("#data_usage_history_avg")
+        if (!sumEl) return
+        if (!avgEl) return
+        sumEl.textContent = "N/A"
+        avgEl.textContent = "N/A"
+        tbody.innerHTML = '<tr style="cursor: pointer;"><td colspan="2" data-i18n="no_data">' + t('no_data') + '</td></tr>'
+        //默认日期间隔10天
+        const startTimeEl = document.querySelector('#start_time_data_usage_history')
+        const endTimeEl = document.querySelector('#end_time_data_usage_history')
+        const today = new Date()
+        const start = new Date(today);
+        start.setDate(start.getDate() - 10);
+        if (startTimeEl) {
+            startTimeEl.value = formatLocalDate(start)
+        }
+        if (endTimeEl) {
+            endTimeEl.value = formatLocalDate(today)
+        }
+        updateDataHistoryChart({
+            items: []
+        })
+    }
+    const openDataUsageHistory = async () => {
+        if (!(await initRequestData())) {
+            createToast(t('toast_please_login'), 'red')
+            return null
+        }
+        resetUsageModalData()
+        showModal('#DataUsageHistoryModal')
+    }
+
+    const doDataUsageHistorySearch = async () => {
+        const startTimeEl = document.querySelector('#start_time_data_usage_history')
+        const endTimeEl = document.querySelector('#end_time_data_usage_history')
+        if (!startTimeEl || !endTimeEl) return
+        const startTime = startTimeEl.value
+        const endTime = endTimeEl.value
+
+        const tbody = document.querySelector('#DataUsageHistoryBody')
+        if (!tbody) return
+        const sumEl = document.querySelector("#data_usage_history_sum")
+        const avgEl = document.querySelector("#data_usage_history_avg")
+        if (!sumEl) return
+        if (!avgEl) return
+        sumEl.textContent = "N/A"
+        avgEl.textContent = "N/A"
+        tbody.innerHTML = '<tr style="cursor: pointer;"><td colspan="2" data-i18n="no_data">' + t('no_data') + '</td></tr>'
+
+        if (!startTime || !endTime) {
+            if (!startTime) createToast(t('please_input_start_date'), 'pink')
+            if (!endTime) createToast(t('please_input_end_date'), 'pink')
+            return
+        }
+
+        const end = new Date(endTime);
+        const start = new Date(startTime);
+        const today = new Date();
+
+        end.setHours(0, 0, 0, 0);
+        start.setHours(0, 0, 0, 0);
+        today.setHours(0, 0, 0, 0);
+        if (end > today) {
+            return createToast(t('please_input_correct_date'), 'pink')
+        }
+        if (start > end) {
+            return createToast(t('start_date_not_bigger_than_end_date'), 'pink')
+        }
+        const diffDays = Math.floor((end - start) / (24 * 60 * 60 * 1000));
+        if (diffDays > 400) {
+            return createToast(t('date_range_over_400'), 'pink');
+        }
+        tbody.innerHTML = '<tr style="cursor: pointer;"><td colspan="2"><strong class="green" style="display: flex;flex-direction: column;"><span style="font-size: 2rem;" class="spin">🌀</span><span style="font-size: .8rem;padding-top: 10px;">loading...</span></strong></td></tr>'
+        const res = await getDailyUsageRange(new Date(startTime), new Date(endTime))
+        tbody.innerHTML = ''
+        if (res.length == 0) {
+            tbody.innerHTML = '<tr style="cursor: pointer;"><td colspan="2" data-i18n="no_data">' + t('no_data') + '</td></tr>'
+            return
+        }
+        let sumBytes = 0
+        res.forEach(item => {
+            let tr = document.createElement('tr')
+            let dateTd = document.createElement('td')
+            let timeTd = document.createElement('td')
+            dateTd.textContent = item.date
+            timeTd.textContent = item.usage == 0 ? "0 B" : formatBytes(item.usage)
+            tr.appendChild(dateTd)
+            tr.appendChild(timeTd)
+            tbody.appendChild(tr)
+            sumBytes += parseInt(item.usage)
+        })
+
+        let avgBytes = sumBytes / res.length
+
+        sumEl.textContent = sumBytes == 0 ? '0 B' : formatBytes(sumBytes)
+        avgEl.textContent = avgBytes == 0 ? '0 B' : formatBytes(avgBytes)
+
+        //更新图表
+        updateDataHistoryChart({
+            items: res, sum: sumBytes, avg: avgBytes
+        })
+    }
+
     //官方后台貌似对PIN超出次数的判定有问题，PIN次数用完后提示输入PUK，此时换卡也不会变更状态，用户只能恢复出厂设置，所以此功能不会继续实现
     // let simCardPinDisabled = false
     // const initSimCardPin = async () => {
@@ -7619,6 +7725,9 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
     // initSimCardPin()
     //挂载方法到window
     const methods = {
+        resetUsageModalData,
+        openDataUsageHistory,
+        doDataUsageHistorySearch,
         editHostName,
         switchPassInputShow,
         noPassLogin,

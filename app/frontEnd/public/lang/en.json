@@ -815,5 +815,20 @@
     "remember-me": "Remember Me",
     "toast_hostname_cannot_be_empty": "Hostname cannot be empty",
     "please_input_hostname": "Please enter hostname",
-    "hostname": "Hostname"
+    "hostname": "Hostname",
+    "data_usage_history_btn": "Usage History",
+    "data_usage_status": "Data Usage",
+    "start_date": "Start Date",
+    "end_date": "End Date",
+    "query": "Query",
+    "total_usage": "Total Usage",
+    "avg_usage": "Daily Avg",
+    "date_data": "Date",
+    "usage_data": "Usage",
+    "no_data": "No Data",
+    "please_input_start_date": "Enter start date",
+    "please_input_end_date": "Enter end date",
+    "please_input_correct_date": "End date cannot be in future",
+    "start_date_not_bigger_than_end_date": "Start date cannot exceed end date",
+    "date_range_over_400": "Date range cannot exceed 400 days"
 }

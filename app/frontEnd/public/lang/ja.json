@@ -815,5 +815,20 @@
     "remember-me": "記憶する",
     "toast_hostname_cannot_be_empty": "ホスト名を入力してください",
     "please_input_hostname": "ホスト名を入力してください",
-    "hostname": "ホスト名"
+    "hostname": "ホスト名",
+    "data_usage_history_btn": "使用履歴",
+    "data_usage_status": "データ使用状況",
+    "start_date": "開始日",
+    "end_date": "終了日",
+    "query": "検索",
+    "total_usage": "合計使用量",
+    "avg_usage": "日平均",
+    "date_data": "日付",
+    "usage_data": "使用量",
+    "no_data": "データなし",
+    "please_input_start_date": "開始日を入力してください",
+    "please_input_end_date": "終了日を入力してください",
+    "please_input_correct_date": "未来の日付は指定できません",
+    "start_date_not_bigger_than_end_date": "開始日は終了日より後にできません",
+    "date_range_over_400": "日付範囲は400日以内にしてください"
 }

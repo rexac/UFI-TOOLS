@@ -816,5 +816,20 @@
     "remember-me": "记住我",
     "toast_hostname_cannot_be_empty": "主机名不能为空",
     "please_input_hostname": "请输入主机名",
-    "hostname": "主机名"
+    "hostname": "主机名",
+    "data_usage_history_btn": "流量历史",
+    "data_usage_status": "流量使用情况",
+    "start_date": "起始日期",
+    "end_date": "结束日期",
+    "query": "查询",
+    "total_usage": "总用量",
+    "avg_usage": "日均使用",
+    "date_data": "日期",
+    "usage_data": "用量",
+    "no_data": "暂无数据",
+    "please_input_start_date": "请输入开始日期",
+    "please_input_end_date": "请输入结束日期",
+    "please_input_correct_date": "无法前往未来，请输入正确结束日期",
+    "start_date_not_bigger_than_end_date": "起始日期不能大于结束日期",
+    "date_range_over_400": "日期范围不能超过400天"
 }

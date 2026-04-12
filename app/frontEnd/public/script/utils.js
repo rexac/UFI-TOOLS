@@ -609,7 +609,6 @@ const getTextColor = () => getComputedStyle(document.documentElement)
     .getPropertyValue('--dark-text-color')
     .trim();
 
-
 // chart.js插件合集
 const centerTextPlugin = {
     id: 'centerText',

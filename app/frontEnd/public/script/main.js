@@ -7549,6 +7549,7 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
             return null
         }
         resetUsageModalData()
+        doDataUsageHistorySearch()
         showModal('#DataUsageHistoryModal')
     }
 

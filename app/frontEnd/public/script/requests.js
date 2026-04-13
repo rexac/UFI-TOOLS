@@ -632,3 +632,45 @@ const seConntHostName = async (mac, hostname) => {
     const res = await postData(await login(), formData)
     return res.json()
 }
+
+const getDailyUsageRange = async (start, endTime, method = 'date-range') => {
+    if (method == 'date-range') {
+        const startTime = new Date(start)
+        const end = new Date(endTime)
+        startTime.setHours(0, 0, 0, 0)
+        end.setHours(23, 59, 59, 999)
+        const res = await fetchWithTimeout(
+            `${KANO_baseURL}/cellularUsage?startTime=${startTime.getTime()}&endTime=${end.getTime()}&method=${method}`
+        );
+
+        const data = await res.json();
+        return data.usage
+    }
+
+    const result = [];
+
+    for (let d = new Date(start); d <= endTime; d.setDate(d.getDate() + 1)) {
+        const dayStart = new Date(d);
+        dayStart.setHours(0, 0, 0, 0);
+
+        const dayEnd = new Date(d);
+        dayEnd.setHours(23, 59, 59, 999);
+
+        if (dayEnd > endTime) {
+            dayEnd.setTime(endTime.getTime());
+        }
+
+        const res = await fetchWithTimeout(
+            `${KANO_baseURL}/cellularUsage?startTime=${dayStart.getTime()}&endTime=${dayEnd.getTime()}&method=${method}`
+        );
+
+        const data = await res.json();
+
+        result.push({
+            date: formatLocalDate(dayStart),
+            usage: data.usage
+        });
+    }
+
+    return result;
+};

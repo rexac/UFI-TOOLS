@@ -815,5 +815,20 @@
     "remember-me": "Ghi nhớ",
     "toast_hostname_cannot_be_empty": "Tên máy chủ không được để trống",
     "please_input_hostname": "Vui lòng nhập tên máy chủ",
-    "hostname": "Tên máy chủ"
+    "hostname": "Tên máy chủ",
+    "data_usage_history_btn": "Lịch sử dữ liệu",
+    "data_usage_status": "Mức sử dụng",
+    "start_date": "Ngày bắt đầu",
+    "end_date": "Ngày kết thúc",
+    "query": "Truy vấn",
+    "total_usage": "Tổng dung lượng",
+    "avg_usage": "Trung bình/ngày",
+    "date_data": "Ngày",
+    "usage_data": "Dung lượng",
+    "no_data": "Không có dữ liệu",
+    "please_input_start_date": "Nhập ngày bắt đầu",
+    "please_input_end_date": "Nhập ngày kết thúc",
+    "please_input_correct_date": "Không thể chọn ngày tương lai",
+    "start_date_not_bigger_than_end_date": "Ngày bắt đầu không lớn hơn ngày kết thúc",
+    "date_range_over_400": "Khoảng ngày không vượt quá 400 ngày"
 }

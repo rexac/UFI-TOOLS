@@ -469,3 +469,93 @@ const updateNetworkChart = (() => {
         }
     }
 })()
+
+//流量使用情况图表
+const updateDataHistoryChart = (() => {
+    const canvas = document.getElementById('kanoDataHistoryChart');
+    const ctx = canvas.getContext('2d');
+    const labels = Array(MAX_length).fill('')
+    const data = Array(MAX_length).fill(0)
+
+    const chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels,
+            datasets: [{
+                data,
+                tension: 0.5,
+                pointRadius: 2,
+                pointBorderWidth: 2,
+                fill: true,
+                pointBackgroundColor: getTextColor(),
+                pointBorderColor: getCssVariableColor('--dark-btn-color-active'),
+                backgroundColor: getCssVariableColor('--dark-btn-color-active'),
+                borderColor: getCssVariableColor('--dark-btn-color-active'),
+                borderRadius: 3,
+                borderSkipped: false,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: {
+                duration: ANI_DURATION,    // 0.5秒动画
+                easing: 'easeOutQuad'  // 自然缓动效果
+            },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: (ctx) => {
+                            return formatBytes(ctx.raw);
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: { display: false },
+                    ticks: {
+                        maxRotation: 0,
+                        minRotation: 0,
+                        display: true,
+                        color: getTextColor(),
+                        font: {
+                            size: 10
+                        }
+                    },
+                    border: { display: false }
+                },
+                y: {
+                    grid: { display: false },
+                    ticks: { display: false },
+                    border: { display: false },
+                    max: 1024 * 1024 * 1024,
+                    min: 0
+                }
+            }
+        }
+    });
+
+    return ({ items }) => {
+        if (!items || items.length === 0) {
+            //清空数据
+            chart.data.labels = Array(MAX_length).fill('');
+            chart.data.datasets[0].data = Array(MAX_length).fill(0);
+            chart.update();
+            return;
+        }
+
+        const newLabels = items.map(({ date }) => `${date.split('-')[1]}-${date.split('-')[2]}`);
+        const newData = items.map(u => Number(u.usage) || 0);
+        const max = Math.max(...newData);
+
+        chart.data.labels = newLabels;
+        chart.data.datasets[0].data = newData;
+        chart.data.datasets[0].backgroundColor = getCssVariableColor('--dark-btn-color-active');
+        chart.data.datasets[0].borderColor = getCssVariableColor('--dark-btn-color-active');
+
+        chart.options.scales.y.max = Math.ceil(max * 1.1);
+        chart.update();
+    };
+})()

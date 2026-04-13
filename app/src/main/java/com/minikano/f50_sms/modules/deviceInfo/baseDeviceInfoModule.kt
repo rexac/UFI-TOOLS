@@ -31,6 +31,7 @@ import androidx.core.content.edit
 import com.minikano.f50_sms.utils.readNetConnCount
 import io.ktor.server.request.receiveText
 import kotlinx.serialization.json.JsonObject
+import org.json.JSONArray
 import org.json.JSONObject
 
 data class MyStorageInfo(
@@ -226,6 +227,54 @@ fun Route.baseDeviceInfoModule(context: Context) {
             call.response.headers.append("Access-Control-Allow-Origin", "*")
             call.respondText(
                 """{"error":"获取连接信息出错(SELINUX状态：${KanoUtils.getSELinuxStatus()})"}""",
+                ContentType.Application.Json,
+                HttpStatusCode.InternalServerError
+            )
+        }
+    }
+
+    //流量信息获取（时间范围）
+    get("/api/cellularUsage") {
+        try {
+            val method = call.request.queryParameters["method"] ?: "date-range"
+            val startTime = call.request.queryParameters["startTime"]?.toLongOrNull()
+            val endTime = call.request.queryParameters["endTime"]?.toLongOrNull()
+
+            if (startTime == null) {
+                throw Exception("缺少参数 startTime")
+            }
+            if (endTime == null) {
+                throw Exception("缺少参数 endTime")
+            }
+
+            KanoLog.d(TAG, "cellularUsage 传入参数：startTime：$startTime endTime：$endTime method：$method")
+
+            val jsonResult = if (method != "mills-range") {
+                val res = KanoUtils.getRangeDailyDataUsage(context, startTime, endTime)
+
+                JSONObject().apply {
+                    put("result", "success")
+                    put("usage", JSONArray(res))
+                }.toString()
+            } else {
+                val res = KanoUtils.getRangeDataUsage(context, startTime, endTime)
+
+                JSONObject().apply {
+                    put("result", "success")
+                    put("usage", res.toString())
+                }.toString()
+            }
+
+            call.response.headers.append("Access-Control-Allow-Origin", "*")
+            call.respondText(jsonResult, ContentType.Application.Json)
+
+        } catch (e: Exception) {
+            KanoLog.d("UFI_TOOLS_LOG", "获取流量使用情况出错：${e.message}")
+            call.response.headers.append("Access-Control-Allow-Origin", "*")
+            call.respondText(
+                JSONObject().apply {
+                    put("error", "获取流量使用情况出错:${e.message}")
+                }.toString(),
                 ContentType.Application.Json,
                 HttpStatusCode.InternalServerError
             )

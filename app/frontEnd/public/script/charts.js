@@ -484,8 +484,8 @@ const updateDataHistoryChart = (() => {
             datasets: [{
                 data,
                 tension: 0.5,
-                pointRadius: 2,
-                pointBorderWidth: 2,
+                pointRadius: 4,
+                pointBorderWidth: 3,
                 fill: true,
                 pointBackgroundColor: getTextColor(),
                 pointBorderColor: getCssVariableColor('--dark-btn-color-active'),
@@ -554,6 +554,16 @@ const updateDataHistoryChart = (() => {
         chart.data.datasets[0].data = newData;
         chart.data.datasets[0].backgroundColor = getCssVariableColor('--dark-btn-color-active');
         chart.data.datasets[0].borderColor = getCssVariableColor('--dark-btn-color-active');
+        chart.data.datasets[0].pointBackgroundColor = getTextColor()
+        chart.data.datasets[0].pointBorderColor = getCssVariableColor('--dark-btn-color-active')
+        //数量太密集了就缩小点点
+        if (items.length >= 15) {
+            chart.data.datasets[0].pointRadius = 0
+            chart.data.datasets[0].pointBorderWidth = 0
+        } else {
+            chart.data.datasets[0].pointRadius = 4
+            chart.data.datasets[0].pointBorderWidth = 3
+        }
 
         chart.options.scales.y.max = Math.ceil(max * 1.1);
         chart.update();

@@ -1641,6 +1641,11 @@ function main_func() {
     }
     initBandForm()
 
+    //网络协议栈开关
+    const networkStackSwitch = async (flag) => {
+        await executeATCommand(flag ? "AT+SFUN=4" : "AT+SFUN=5")
+    }
+
     const submitBandForm = async (e) => {
         e.preventDefault()
         if (!(await initRequestData())) {
@@ -1681,24 +1686,27 @@ function main_func() {
             ]))
             if (res[0].result == 'success' || res[1].result == 'success') {
                 createToast(t('toast_set_band_success'), 'green')
-                //切一下网
-                const netType = document.querySelector('#NET_TYPE')
-                if (netType) {
-                    const options = document.querySelectorAll('#NET_TYPE option')
-                    const curValue = netType.value
-                    //切到不同网络
-                    if (options.length) {
-                        const net = Array.from(options).find(el => el.value != curValue)
-                        if (net) {
-                            //切网
-                            createToast(t("toast_changing"))
-                            await changeNetwork({ target: { value: net.value } }, true)
-                            await new Promise(resolve => setTimeout(resolve, 800))
-                            //切回来
-                            await changeNetwork({ target: { value: curValue } })
-                        }
-                    }
-                }
+                //重启网络栈
+                await networkStackSwitch(false)
+                await wait(300)
+                await networkStackSwitch(true)
+                // const netType = document.querySelector('#NET_TYPE')
+                // if (netType) {
+                //     const options = document.querySelectorAll('#NET_TYPE option')
+                //     const curValue = netType.value
+                //     //切到不同网络
+                //     if (options.length) {
+                //         const net = Array.from(options).find(el => el.value != curValue)
+                //         if (net) {
+                //             //切网
+                //             createToast(t("toast_changing"))
+                //             await changeNetwork({ target: { value: net.value } }, true)
+                //             await new Promise(resolve => setTimeout(resolve, 800))
+                //             //切回来
+                //             await changeNetwork({ target: { value: curValue } })
+                //         }
+                //     }
+                // }
             }
             else {
                 createToast(t('toast_set_band_failed'), 'red')

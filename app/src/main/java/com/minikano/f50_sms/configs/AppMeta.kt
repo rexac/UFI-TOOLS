@@ -5,28 +5,36 @@ import android.content.SharedPreferences
 import android.os.Build
 import com.minikano.f50_sms.modules.PREFS_NAME
 import com.minikano.f50_sms.utils.DeviceModelChecker
-
+import android.os.PowerManager
 import com.minikano.f50_sms.utils.KanoLog
 import com.minikano.f50_sms.utils.getBooleanCompat
 import java.io.File
 import androidx.core.content.edit
 import com.minikano.f50_sms.utils.KanoUtils
 import com.minikano.f50_sms.utils.KanoUtils.Companion.isSha256Hex
+import com.minikano.f50_sms.utils.WakeLock
 
 object AppMeta {
     var versionName: String = "unknown"
         private set
+
     var versionCode: Int = 0
         private set
     var model: String = Build.MODEL
         private set
+
     var nickName: String = Build.MODEL
         private set
+
     var isDeviceRooted:Boolean = false
         private set
+
     var isReadUseTerms:Boolean = false
 
     var isEnableLog:Boolean = false
+        private set
+
+    var isEnableWakeLock:Boolean = false
         private set
 
     var GLOBAL_SERVER_URL = "https://pan.kanokano.cn"
@@ -38,9 +46,8 @@ object AppMeta {
     private const val PREFS_NAME = "kano_ZTE_store"
     private const val GLOBAL_SERVER_URL_KEY = "GLOBAL_SERVER_URL"
     private val PREF_ISDEBUG = "kano_is_debug"
-
+    private val PREF_WAKELOCK = "wakeLock"
     private val PREF_NICKNAME = "nickname"
-
     private val PREF_IS_WEAK_TOKEN = "is_weak_token"
 
     fun updateIsDefaultOrWeakToken(context: Context,value: Boolean) {
@@ -68,6 +75,19 @@ object AppMeta {
     fun setIsEnableLog(prefs: SharedPreferences, flag: Boolean) {
         prefs.edit(commit = true) { putBoolean(PREF_ISDEBUG, flag) }
         isEnableLog = flag
+    }
+
+    fun setIsEnableWakeLock(context: Context,flag: Boolean) {
+        val isLock = if(flag) "lock" else "unlock"
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        prefs.edit(commit = true) { putString(PREF_WAKELOCK, isLock)}
+        isEnableWakeLock = flag
+        //更新唤醒锁
+        if (isEnableWakeLock) {
+            WakeLock.execWakeLock(context.getSystemService(Context.POWER_SERVICE) as PowerManager)
+        } else {
+            WakeLock.releaseWakeLock()
+        }
     }
 
     fun setNickName (prefs: SharedPreferences, nickname: String) {

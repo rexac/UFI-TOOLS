@@ -830,5 +830,7 @@
     "please_input_end_date": "Enter end date",
     "please_input_correct_date": "End date cannot be in future",
     "start_date_not_bigger_than_end_date": "Start date cannot exceed end date",
-    "date_range_over_400": "Date range cannot exceed 400 days"
+    "date_range_over_400": "Date range cannot exceed 400 days",
+    "wake_lock_enabled":"wakelock on",
+    "wake_lock_disabled":"wakelock off"
 }

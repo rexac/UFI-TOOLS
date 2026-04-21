@@ -18,18 +18,15 @@ class KanoWebServer(private val context: Context, port: Int, private val proxySe
     }
 
     fun start() {
-        Thread {
-            if (!running.compareAndSet(false, true)) {
-                KanoLog.d("UFI_TOOLS_LOG", "Web server is already running.")
-                return@Thread
-            }
-            try {
-                server.start(wait = true)
-            } catch (e: Exception) {
-                KanoLog.e("UFI_TOOLS_LOG", "Server failed: ${e.message}", e)
-                running.set(false) // 启动失败，允许再次启动
-            }
-        }.start()
+        if (!running.compareAndSet(false, true)) {
+            throw IllegalStateException("Web server is already running.")
+        }
+        try {
+            server.start(wait = false)
+        } catch (e: Exception) {
+            running.set(false)
+            throw e
+        }
     }
 
     fun stop() {

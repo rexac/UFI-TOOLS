@@ -228,7 +228,7 @@ function createToast(text, color, delay = 3000, fn = null) {
         toastEl.style.opacity = `0`
         toastEl.style.transform = `scale(0)`
         toastEl.style.transformOrigin = 'top center'
-        toastEl.style.boxShadow = '0 0 10px 0 rgba(135, 207, 235, 0.24)'
+        toastEl.style.boxShadow = '0 0 10px 0 #00000076'
         toastEl.style.fontWeight = 'bold'
         toastEl.style.backdropFilter = 'blur(10px)'
         toastEl.style.borderRadius = '6px'
@@ -278,7 +278,7 @@ function createFixedToast(_id, text, style = {}) {
         toastEl.style.opacity = `0`
         toastEl.style.transform = `scale(0)`
         toastEl.style.transformOrigin = 'top center'
-        toastEl.style.boxShadow = '0 0 10px 0 rgba(135, 207, 235, 0.24)'
+        toastEl.style.boxShadow = '0 0 10px 0 #00000076'
         toastEl.style.fontWeight = 'bold'
         toastEl.style.backdropFilter = 'blur(10px)'
         toastEl.style.borderRadius = '6px'
@@ -1327,3 +1327,133 @@ const formatLocalDate = (date) => {
 };
 
 const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+const createFormToast = ({ title, id, fields }, cb = async () => { }) => {
+    // fields: [
+    //     {
+    //         name: 'rat',
+    //         label: t('rat'),
+    //         type: 'select',
+    //         options: [
+    //             { value: 'GSM', label: t('gsm') },
+    //             { value: 'UMTS', label: t('umts') },
+    //             { value: 'LTE', label: t('lte') }
+    //         ]
+    //     }
+    // ]
+    if (!fields || !Array.isArray(fields)) {
+        console.error('Invalid fields provided for createFormToast')
+        return null
+    }
+    if (!id) {
+        console.error('ID is required for createFormToast')
+        return null
+    }
+
+    const fieldHtml = fields.map((field, index) => {
+        if (field.type === 'select' && Array.isArray(field.options)) {
+            const optionsHtml = field.options.map(opt => `<option value="${opt.value}">${opt.label}</option>`).join('')
+            return `
+                <div>
+                    <div style="margin-bottom:5px;">${field.label}:</div>
+                    <select class="select" style="width:100%;padding:5px;margin: 0 !important;" id="${id}_input_${index}">
+                        ${optionsHtml}
+                    </select>
+                </div>
+            `
+        } else if (field.type === 'textarea') {
+            return `
+                <div>
+                    <div style="margin-bottom:5px;">${field.label}:</div>
+                    <textarea style="width:100%;padding:5px;" id="${id}_input_${index}" placeholder="${field.placeholder || ''}"></textarea>
+                </div>
+            `
+        } else if (field.type === "checkbox") {
+            return `
+                <div class="user_select_none" style="display:flex;align-items:center;gap:0px;">
+                    <input type="checkbox" id="${id}_input_${index}"/>
+                    <label style="padding-left:5px;" for="${id}_input_${index}">${field.label}</label>
+                </div>
+            `
+        } else if (field.type === "checkbox-group") {
+            if (!Array.isArray(field.options)) {
+                console.error(`Invalid options for checkbox-group field: ${field.name}`)
+                return ''
+            }
+            const checkboxesHtml = field.options.map(opt => `
+                <div class="user_select_none" style="display:flex;align-items:center;gap:0px;">
+                    <input type="checkbox" id="${id}_input_group_item_${index}_${field.name}_${opt.value}" value="${opt.value}"/>
+                    <label style="padding-left:5px;" for="${id}_input_group_item_${index}_${field.name}_${opt.value}">${opt.label}</label>
+                </div>
+            `).join('')
+            return `
+                <div>
+                    <div style="margin-bottom:5px;">${field.label}:</div>
+                    <div style="display:flex;gap:5px;flex-wrap: wrap;" id="${id}_input_group_${index}">
+                        ${checkboxesHtml}
+                    </div>
+                </div>
+            `
+        } else {
+            return `
+                <div>
+                    <div style="margin-bottom:5px;">${field.label}:</div>
+                    <input style="width:100%;padding:5px;" type="text" id="${id}_input_${index}" placeholder="${field.placeholder || ''}"/>
+                </div>
+            `
+        }
+    }).join('')
+
+    const { el, close } = createFixedToast(id, `
+                <div style="pointer-events:all;width:80vw;max-width:300px;">
+                <div class="title" style="margin:0" data-i18n="${title}">${t(title)}</div>
+                <div class="form-group" style="display:flex;flex-direction:column;gap:6px;margin:10px 0;">
+                    ${fieldHtml}
+                </div>
+                <div style="display:flex;gap:10px">
+                    <button id="close_${id}_toast_btn" style="width:100%;font-size:.64rem;margin-top:5px" data-i18n="confirm_btn">${t("confirm_btn")}</button>
+                    <button id="close_${id}_toast_btn1" style="width:100%;font-size:.64rem;margin-top:5px" data-i18n="cancel_btn">${t("cancel_btn")}</button>
+                </div>
+                </div>
+                `, 'red')
+    const btn = el.querySelector(`#close_${id}_toast_btn`)
+    const btn2 = el.querySelector(`#close_${id}_toast_btn1`)
+
+    const getFormValues = () => {
+        const fieldValues = {}
+        fields.forEach((field, index) => {
+            const inputEl = el.querySelector(`#${id}_input_${index}`)
+            const inputGroupEl = el.querySelector(`#${id}_input_group_${index}`)
+            if (inputEl) {
+                if (field.type === 'checkbox') {
+                    fieldValues[field.name] = inputEl.checked
+                } else {
+                    fieldValues[field.name] = inputEl.value
+                }
+            } else if (inputGroupEl) {
+                if (field.type === 'checkbox-group') {
+                    fieldValues[field.name] = Array.from(inputGroupEl.querySelectorAll('input[type="checkbox"]'))
+                        .filter(checkbox => checkbox.checked)
+                        .map(checkbox => checkbox.value)
+                }
+            }
+        })
+        return fieldValues
+    }
+
+    if (!btn && !btn2) {
+        close()
+        return
+    }
+    btn2.onclick = () => {
+        close()
+    }
+    btn.onclick = async () => {
+        try {
+            await cb(getFormValues(), close)
+        } catch (error) {
+            console.error('Error occurred while submitting form:', error)
+        }
+    }
+
+}

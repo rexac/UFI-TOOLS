@@ -76,36 +76,62 @@ class WebService : Service() {
         Log.d("UFI_TOOLS_LOG", "WebService Init Success!")
     }
 
+    private val serverLock = Any()
+
     private fun startWebServer() {
         val prefs = getSharedPreferences("kano_ZTE_store", Context.MODE_PRIVATE)
         Thread {
-            val currentIp = prefs.getString("gateway_ip", "192.168.0.1:8080") ?: "192.168.0.1:8080"
-            allowAutoStart = true
-            try {
-                Log.d("UFI_TOOLS_LOG", "正在启动web服务，绑定地址：http://0.0.0.0:$port")
-                webServer = KanoWebServer(applicationContext, 2333, currentIp)
-                webServer?.start()
-                sendStickyBroadcast(Intent(SERVER_INTENT).putExtra("status", true))
-                Log.d("UFI_TOOLS_LOG", "启动服务成功，地址：http://0.0.0.0:$port")
-            } catch (fallbackEx: Exception) {
-                Log.e("UFI_TOOLS_LOG", "服务启动失败: ${fallbackEx.message}")
-                sendStickyBroadcast(Intent(SERVER_INTENT).putExtra("status", false))
+            synchronized(serverLock) {
+                if (webServer != null) {
+                    sendStickyBroadcast(Intent(SERVER_INTENT).putExtra("status", true))
+                    return@synchronized
+                }
+
+                val currentIp = prefs.getString("gateway_ip", "0.0.0.0:8080") ?: "0.0.0.0:8080"
+                allowAutoStart = true
+                try {
+                    Log.d("UFI_TOOLS_LOG", "正在启动web服务，绑定地址：http://0.0.0.0:$port")
+                    val server = KanoWebServer(applicationContext, 2333, currentIp)
+                    server.start()
+                    webServer = server
+                    sendStickyBroadcast(Intent(SERVER_INTENT).putExtra("status", true))
+                    Log.d("UFI_TOOLS_LOG", "启动服务成功，地址：http://0.0.0.0:$port")
+                } catch (fallbackEx: Exception) {
+                    webServer = null
+                    Log.e("UFI_TOOLS_LOG", "服务启动失败: ${fallbackEx.message}")
+                    sendStickyBroadcast(Intent(SERVER_INTENT).putExtra("status", false))
+                }
             }
         }.start()
     }
 
     private fun stopWebServer() {
-        allowAutoStart = false  // 禁止自动重试
-        allowAutoReStart = false  // 禁止自动重启
+        Thread {
+            synchronized(serverLock) {
+                allowAutoStart = false
+                allowAutoReStart = false
 
-        thread { webServer?.stop() }
-        sendStickyBroadcast(Intent(SERVER_INTENT).putExtra("status", false))
-        Log.d("UFI_TOOLS_LOG", "Web server stopped")
+                val server = webServer ?: run {
+                    sendStickyBroadcast(Intent(SERVER_INTENT).putExtra("status", false))
+                    return@synchronized
+                }
+
+                try {
+                    server.stop()
+                    webServer = null
+                    sendStickyBroadcast(Intent(SERVER_INTENT).putExtra("status", false))
+                    Log.d("UFI_TOOLS_LOG", "Web server stopped")
+                } catch (e: Exception) {
+                    Log.e("UFI_TOOLS_LOG", "停止服务失败: ${e.message}", e)
+                }
+            }
+        }.start()
     }
 
     override fun onDestroy() {
-        super.onDestroy()
+        unregisterReceiver(statusReceiver)
         stopWebServer()
+        super.onDestroy()
     }
 
     private fun createNotification(): Notification {

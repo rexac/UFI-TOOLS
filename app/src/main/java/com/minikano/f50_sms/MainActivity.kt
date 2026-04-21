@@ -90,6 +90,8 @@ class MainActivity : ComponentActivity() {
         AppMeta.init(this)
         UniqueDeviceIDManager.init(this)
         val context = this
+        val intent = getIntent()
+        val isSilentStart = intent.getBooleanExtra("silent",false)
 
         //第一次启动初始化spf
         KanoUtils.initSharedPerfs(context)
@@ -401,6 +403,11 @@ class MainActivity : ComponentActivity() {
                 }
 
                 runADB()
+
+                if(isSilentStart) {
+                    Toast.makeText(context, "UFI-TOOLS静默启动完成", Toast.LENGTH_SHORT).show()
+                    moveTaskToBack(true);
+                }
             }
         }
 

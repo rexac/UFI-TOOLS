@@ -6715,6 +6715,23 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
         }
     }
 
+    const toggleWakeLock = async (flag) => {
+        try {
+            const { result } = await (await fetchWithTimeout(`${KANO_baseURL}/set_wakelock_status`, {
+                method: "POST",
+                headers: common_headers,
+                body: JSON.stringify({ wakelock_enabled: flag ? true : false })
+            })).json()
+            if (result.success) {
+                throw new Error('Failed to set_wakelock_status')
+            }
+            createToast(t("toast_oprate_success"), 'green')
+        }
+        catch {
+            if (!res) createToast(t("toast_oprate_failed"), "red")
+        }
+    }
+
     const resetTTYDPort = () => {
         const port = localStorage.getItem('ttyd_port')
         if (port != '1146') {
@@ -7752,6 +7769,7 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
         onCloseChangeTokenForm,
         handleChangeToken,
         toggleLogCat,
+        toggleWakeLock,
         changeResServer,
         onChangeIsAutoFrofile,
         onViewAPNProfile,

@@ -186,4 +186,33 @@ fun Route.configModule(context: Context) {
             )
         }
     }
+
+    //设置唤醒锁开关状态
+    post("/api/set_wakelock_status") {
+        try {
+            val body = call.receiveText()
+            val json = JSONObject(body)
+
+            val wakeLockEnabled = json.optBoolean("wakelock_enabled", false)
+
+            KanoLog.d(TAG, "接收到 wakelock_enabled=$wakeLockEnabled")
+
+            AppMeta.setIsEnableWakeLock(context, wakeLockEnabled)
+
+            call.response.headers.append("Access-Control-Allow-Origin", "*")
+            call.respondText(
+                """{"result":"success"}""",
+                ContentType.Application.Json,
+                HttpStatusCode.OK
+            )
+        } catch (e: Exception) {
+            KanoLog.d(TAG, "设置wakelock_enabled出错：${e.message}")
+            call.response.headers.append("Access-Control-Allow-Origin", "*")
+            call.respondText(
+                """{"error":"${e.message ?: "未知错误"}"}""",
+                ContentType.Application.Json,
+                HttpStatusCode.InternalServerError
+            )
+        }
+    }
 }

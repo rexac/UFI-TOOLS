@@ -1443,7 +1443,6 @@
                                 <button onclick="event.preventDefault();setPort(false)"
                                     data-i18n="deny_firewall">阻止</button>
                             </div>
-                            <hr style="background-color: pink;" />
                             <div style="display: flex;gap: 10px;margin: 10px 0;">
                                 <button style="width: 100%;" onclick="event.preventDefault();toggleTTYD(true)"
                                     data-i18n="enable_ttyd_port">启用TTYD端口</button>
@@ -1456,11 +1455,18 @@
                                 <button style="width: 100%;" onclick="event.preventDefault();toggleADBIP(false)"
                                     data-i18n="disable_adb_tcpip_port">禁用无线ADB端口</button>
                             </div>
+                            <hr style="background-color: pink;" />
                             <div style="display: flex;gap: 10px;margin: 10px 0;">
                                 <button style="width: 100%;" onclick="event.preventDefault();toggleLogCat(true)"
                                     data-i18n="enable_log">启用Log</button>
                                 <button style="width: 100%;" onclick="event.preventDefault();toggleLogCat(false)"
                                     data-i18n="disable_log">禁用Log</button>
+                            </div>
+                            <div style="display: flex;gap: 10px;margin: 10px 0;">
+                                <button style="width: 100%;" onclick="event.preventDefault();toggleWakeLock(true)"
+                                    data-i18n="wake_lock_enabled">启用唤醒锁</button>
+                                <button style="width: 100%;" onclick="event.preventDefault();toggleWakeLock(false)"
+                                    data-i18n="wake_lock_disabled">禁用唤醒锁</button>
                             </div>
                             <p style="display: flex;flex-wrap: nowrap;align-items: center;gap: 4px;">
                                 <span data-i18n="ttyd_port">TTYD 端口

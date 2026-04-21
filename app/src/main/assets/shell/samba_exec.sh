@@ -233,12 +233,12 @@ keep_ufi_running(){
     ACT=com.minikano.f50_sms.MainActivity
     if [ $BOOTUP_NEED_OPEN_ACTIVITY -eq 1 ]; then
       echo "[`date`] BOOTUP! DO WAKE UP!!!" >> "$LOG_FILE"
-      am start -n "$PKG/$ACT" >/dev/null 2>&1 || true
+      am start -n "$PKG/$ACT" --ez silent true >/dev/null 2>&1 || true
     fi
 
     if ! pidof "$PKG" >/dev/null 2>&1; then
       echo "[`date`] UFI_TOOLS NOT START,TRY TO WAKE UP!!!" >> "$LOG_FILE"
-      am start -n "$PKG/$ACT" >/dev/null 2>&1 || true
+      am start -n "$PKG/$ACT" --ez silent true >/dev/null 2>&1 || true
     fi
 }
 

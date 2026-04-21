@@ -830,5 +830,7 @@
     "please_input_end_date": "終了日を入力してください",
     "please_input_correct_date": "未来の日付は指定できません",
     "start_date_not_bigger_than_end_date": "開始日は終了日より後にできません",
-    "date_range_over_400": "日付範囲は400日以内にしてください"
+    "date_range_over_400": "日付範囲は400日以内にしてください",
+    "wake_lock_enabled":"wakelock on",
+    "wake_lock_disabled":"wakelock off"
 }

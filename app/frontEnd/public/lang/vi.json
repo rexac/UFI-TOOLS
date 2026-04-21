@@ -830,5 +830,7 @@
     "please_input_end_date": "Nhập ngày kết thúc",
     "please_input_correct_date": "Không thể chọn ngày tương lai",
     "start_date_not_bigger_than_end_date": "Ngày bắt đầu không lớn hơn ngày kết thúc",
-    "date_range_over_400": "Khoảng ngày không vượt quá 400 ngày"
+    "date_range_over_400": "Khoảng ngày không vượt quá 400 ngày",
+    "wake_lock_enabled":"wakelock on",
+    "wake_lock_disabled":"wakelock off"
 }

@@ -17,9 +17,11 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -38,7 +40,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.TextUnit
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -302,8 +303,7 @@ class MainActivity : ComponentActivity() {
                             versionName = versionName ?: "unknown",
                             onStopServer = {
                                 sendBroadcast(Intent(UI_INTENT).putExtra("status", false))
-                                serverStatusLiveData.postValue(false)
-
+                                Toast.makeText(context, "Stoping...", Toast.LENGTH_SHORT).show()
                                 gatewayIp = sharedPrefs.getString(
                                             PREF_GATEWAY_IP,
                                             "192.168.0.1:8080"
@@ -394,7 +394,6 @@ class MainActivity : ComponentActivity() {
                                     WakeLock.execWakeLock(getSystemService(Context.POWER_SERVICE) as PowerManager)
                                 }
                                 sendBroadcast(Intent(UI_INTENT).putExtra("status", true))
-                                serverStatusLiveData.postValue(true)
                                 KanoLog.d("UFI_TOOLS_LOG", "user touched start btn")
                                 runADB()
                             }
@@ -536,6 +535,7 @@ fun InputUI(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
                     .padding(horizontal = 24.dp, vertical = 24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -638,18 +638,19 @@ fun InputUI(
                     Text("启动/Start", textAlign = TextAlign.Center)
                 }
                 Spacer(modifier = Modifier.height(10.dp))
-                Text(
-                    text = "Created by Minikano with ❤️ ver: $versionName",
+                HyperlinkText(
+                    fullText = "Created by Minikano with ❤️ ver: $versionName",
+                    linkText = "Minikano",
                     fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
+                    "https://github.com/kanoqwq",
                     modifier = Modifier.fillMaxWidth()
                 )
                 HyperlinkText(
                     "View source code on Github(Minikano)",
                     "Github(Minikano)",
                     fontSize = 12.sp,
-                    "https://github.com/kanoqwq/F50-SMS"
+                    "https://github.com/kanoqwq/F50-SMS",
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
         }
@@ -675,6 +676,7 @@ fun ServerUI(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
                     .padding(horizontal = 24.dp, vertical = 24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -690,14 +692,16 @@ fun ServerUI(
                     "前端地址/Link: $serverAddress",
                     serverAddress,
                     fontSize = 16.sp,
-                    url = serverAddress
+                    url = serverAddress,
+                    modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 HyperlinkText(
                     "网关地址/Gateway: $gatewayIP",
                     gatewayIP,
                     fontSize = 16.sp,
-                    url = "http://$gatewayIP"
+                    url = "http://$gatewayIP",
+                    modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(20.dp))
                 Text("点击停止服务更改网关和口令密码(默认admin)\nClick to stop the service and change the gateway and password (default: admin)",
@@ -710,13 +714,20 @@ fun ServerUI(
                     Text("停止服务/Stop Server")
                 }
                 Spacer(modifier = Modifier.height(32.dp))
-                Text("Created by Minikano with ❤️ ver: ${versionName}", fontSize = 12.sp)
+                HyperlinkText(
+                    fullText = "Created by Minikano with ❤️ ver: $versionName",
+                    linkText = "Minikano",
+                    fontSize = 12.sp,
+                    "https://github.com/kanoqwq",
+                    modifier = Modifier.fillMaxWidth()
+                )
                 Spacer(modifier = Modifier.height(10.dp))
                 HyperlinkText(
                     "View source code on Github(Minikano)",
                     "Github(Minikano)",
                     fontSize = 12.sp,
-                    "https://github.com/kanoqwq/F50-SMS"
+                    "https://github.com/kanoqwq/F50-SMS",
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
         }
@@ -729,19 +740,17 @@ fun HyperlinkText(
     linkText: String,
     fontSize: TextUnit,
     url: String,
+    modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
+
     val annotatedText = buildAnnotatedString {
-        // 整段默认字体大小
-        withStyle(style = SpanStyle(fontSize = fontSize)) {
-            append(fullText)
-        }
+        append(fullText)
 
         val startIndex = fullText.indexOf(linkText)
         val endIndex = startIndex + linkText.length
 
         if (startIndex >= 0) {
-            // 链接部分样式（覆盖字体大小、颜色、下划线）
             addStyle(
                 style = SpanStyle(
                     color = Color(0xFF1E88E5),
@@ -763,7 +772,11 @@ fun HyperlinkText(
 
     ClickableText(
         text = annotatedText,
-        style = TextStyle(fontSize = fontSize), // 控制整体字体大小
+        modifier = modifier.fillMaxWidth(),
+        style = TextStyle(
+            fontSize = fontSize,
+            textAlign = TextAlign.Center
+        ),
         onClick = { offset ->
             annotatedText.getStringAnnotations("URL", offset, offset)
                 .firstOrNull()?.let {

@@ -20,6 +20,7 @@ appcompat = "1.7.0"
 okhttp = "4.12.0"
 runtimeLivedata = "<latest_version>"
 firebaseCrashlyticsBuildtools = "3.0.3"
+foundation = "1.10.6"
 
 [libraries]
 android-activation = { module = "com.sun.mail:android-activation", version.ref = "androidMail" }

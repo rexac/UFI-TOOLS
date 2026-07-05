@@ -1,6 +1,8 @@
 import com.android.build.gradle.internal.api.BaseVariantOutputImpl
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
@@ -47,6 +49,28 @@ tasks.register<Delete>("deleteDumpSymsFromApk") {
     delete(file("${layout.buildDirectory}/dump_syms"))
 }
 
+val localProperties = Properties().apply {
+    val file = rootProject.file("local.properties")
+    if (file.exists()) {
+        file.inputStream().use { load(it) }
+    }
+}
+
+val releaseStoreFile = localProperties.getProperty("MYAPP_RELEASE_STORE_FILE")?.takeIf { it.isNotBlank() }
+val releaseStorePassword = localProperties.getProperty("MYAPP_RELEASE_STORE_PASSWORD")?.takeIf { it.isNotBlank() }
+val releaseKeyAlias = localProperties.getProperty("MYAPP_RELEASE_KEY_ALIAS")?.takeIf { it.isNotBlank() }
+val releaseKeyPassword = localProperties.getProperty("MYAPP_RELEASE_KEY_PASSWORD")?.takeIf { it.isNotBlank() }
+val releaseStoreFilePath = releaseStoreFile?.let { path ->
+    val candidate = File(path)
+    if (candidate.isAbsolute) candidate else rootProject.file(path)
+}
+val hasReleaseSigningConfig = listOf(
+    releaseStoreFilePath?.takeIf { it.exists() },
+    releaseStorePassword,
+    releaseKeyAlias,
+    releaseKeyPassword,
+).all { it != null }
+
 android {
     namespace = "com.minikano.f50_sms"
     compileSdk = 35
@@ -61,6 +85,17 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        if (hasReleaseSigningConfig) {
+            create("release") {
+                storeFile = releaseStoreFilePath
+                storePassword = releaseStorePassword
+                keyAlias = releaseKeyAlias
+                keyPassword = releaseKeyPassword
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
@@ -68,6 +103,9 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            if (hasReleaseSigningConfig) {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
     }
     compileOptions {

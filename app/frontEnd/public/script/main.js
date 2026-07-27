@@ -6751,6 +6751,10 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
 
     // 获取消息
     const initMessage = async () => {
+        // 已禁用：不再从 api.kanokano.cn 获取和发送消息数据
+        return null
+
+        /* 原代码已禁用
         if (!(await initRequestData())) {
             return null
         }
@@ -6803,6 +6807,7 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
                 }
             }
         } catch { }
+        */
     }
     initMessage()
 

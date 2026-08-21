@@ -21,7 +21,7 @@ import com.minikano.f50_sms.configs.AppMeta
 import com.minikano.f50_sms.modules.PREFS_NAME
 import com.minikano.f50_sms.utils.BatteryReceiver
 import com.minikano.f50_sms.utils.KanoLog
-import com.minikano.f50_sms.utils.KanoReport.Companion.reportToServer
+// import com.minikano.f50_sms.utils.KanoReport.Companion.reportToServer
 import com.minikano.f50_sms.utils.KanoUtils
 import com.minikano.f50_sms.utils.KanoUtils.Companion.getVoLteState
 import com.minikano.f50_sms.utils.KanoUtils.Companion.isADBAutoBootUpEnabled
@@ -288,7 +288,7 @@ class ADBService : Service() {
                     rptRunning = true
                     try {
                         KanoLog.d(TAG, "周期性发送状态中...")
-                        reportToServer()
+                        // reportToServer() // 已禁用：不再向 api.kanokano.cn 发送数据
                     } catch (e: Exception) {
                         KanoLog.e(TAG, "发送状态时发生错误：", e)
                     } finally {

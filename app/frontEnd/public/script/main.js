@@ -307,6 +307,10 @@ function main_func() {
             }],
         propsShowList: [
             {
+                "name": "boot_time",
+                "isShow": true
+            },
+            {
                 "name": "client_ip",
                 "isShow": true
             },
@@ -798,6 +802,8 @@ function main_func() {
                 date = date.map((item, index) => {
                     return item + dateStrArr[index]
                 }).join('')
+                const contentEl = document.createElement('p')
+                contentEl.innerText = escapeHtml(decodeBase64(item.content))
                 return `<li class="sms-item" data-sms-id="${item.id}" data-sms-phone="${item.number}" data-sms-content="${item.content}" style="${item.tag == '3' ? 'background-color:#ffc0cb1f;margin-right:15px' : item.tag != '2' ? 'background-color:#0880001f;margin-left:15px' : 'background-color:#ffc0cb1f;margin-right:15px'}">
                                         <div class="arrow" style="${item.tag == '3' ? 'right:-30px;border-color: transparent transparent transparent #ffc0cb1f' : item.tag == '2' ? 'right:-30px;border-color: transparent transparent transparent #ffc0cb1f' : 'left:-30px;border-color: transparent #0880001f transparent transparent'}"></div>
                                         ${item.tag == "3" ? `<svg fill="var(--dark-text-color)" stroke="currentColor"  onclick="deleteAndReSendSms(${item.id})" class="icon" style="position: absolute;right: 50px;top: 18px;" width="14px" height="14px" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg">
@@ -808,7 +814,7 @@ function main_func() {
                                             <svg fill="var(--dark-text-color)" stroke="currentColor"  xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" t="1742373390977" class="icon" viewBox="0 0 1024 1024" version="1.1" p-id="2837" width="16" height="16"><path d="M848 144H608V96a48 48 0 0 0-48-48h-96a48 48 0 0 0-48 48v48H176a48 48 0 0 0-48 48v48h768v-48a48 48 0 0 0-48-48zM176 928a48 48 0 0 0 48 48h576a48 48 0 0 0 48-48V288H176v640z m480-496a48 48 0 1 1 96 0v400a48 48 0 1 1-96 0V432z m-192 0a48 48 0 1 1 96 0v400a48 48 0 1 1-96 0V432z m-192 0a48 48 0 1 1 96 0v400a48 48 0 1 1-96 0V432z" p-id="2838"/></svg>
                                         </div>
                                         <p style="color:#adadad;font-size:16px;margin:4px 0">${item.number}${item.tag == '3' ? ` <span style="font-size:.7rem;color:red">(${t("toast_sms_send_failed")})</span>` : ""}</p>
-                                        <p>${decodeBase64(item.content)}</p>
+                                        <p>${contentEl.innerText}</p>
                                         <p style="text-align:right;color:#adadad;margin-top:4px">${date}</p>
                                     </li > `
             }).join('')
@@ -1064,6 +1070,7 @@ function main_func() {
                 msisdn: notNullOrundefinedOrIsShow(res, 'msisdn') ? `<strong onclick="copyText(event)" class="blue">${t('msisdn')}：${res.msisdn}</strong>` : '',
                 internal_available_storage: (notNullOrundefinedOrIsShow(res, 'internal_available_storage') || notNullOrundefinedOrIsShow(res, 'internal_total_storage')) ? `<strong onclick="copyText(event)" class="blue">${t('internal_storage')}：${formatBytes(res.internal_used_storage)} ${t('used_storage')} / ${formatBytes(res.internal_total_storage)} ${t('total_storage')}</strong>` : '',
                 external_available_storage: (notNullOrundefinedOrIsShow(res, 'external_available_storage') || notNullOrundefinedOrIsShow(res, 'external_total_storage')) ? `<strong onclick="copyText(event)" class="blue">${t('sd_storage')}：${formatBytes(res.external_used_storage)} ${t('used_storage')} / ${formatBytes(res.external_total_storage)} ${t('total_storage')}</strong>` : '',
+                boot_time: notNullOrundefinedOrIsShow(res, 'boot_time') ? `<strong onclick="copyText(event)" class="blue">${t('boot_time')}：${formatBootTime(res.boot_time)}</strong>` : '',
             };
 
             html += `<li style="padding-top: 15px;"><p>`
@@ -2584,7 +2591,7 @@ function main_func() {
 
             if (station_list && station_list.length) {
                 conn_client_html += station_list.map(({ hostname, ip_addr, mac_addr }) => {
-                    let hostname_show = hostname
+                    let hostname_show = escapeHtml(hostname)
                     if (devices) {
                         hostname_show = devices.find(i => i.mac == mac_addr)?.hostname || hostname
                     }
@@ -2601,7 +2608,7 @@ function main_func() {
                 </div>
                 <div style="flex:1;text-align: right;">
                     <button class="btn" style="padding: 20px 4px;" 
-                        onclick="setOrRemoveDeviceFromBlackList('${[mac_addr, ...blackMacList].join(';')}','${[hostname, ...blackNameList].join(';')}','${AclMode}')">
+                        onclick="setOrRemoveDeviceFromBlackList('${[mac_addr, ...blackMacList].join(';')}','${[escapeHtml(hostname), ...blackNameList].join(';')}','${AclMode}')">
                         🚫 ${t('client_mgmt_block')}
                     </button>
                 </div>
@@ -2610,7 +2617,7 @@ function main_func() {
 
             if (lan_station_list && lan_station_list.length) {
                 conn_client_html += lan_station_list.map(({ hostname, ip_addr, mac_addr }) => {
-                    let hostname_show = hostname
+                    let hostname_show = escapeHtml(hostname)
                     if (devices) {
                         hostname_show = devices.find(i => i.mac == mac_addr)?.hostname || hostname
                     }
@@ -2627,7 +2634,7 @@ function main_func() {
                 </div>
                 <div style="flex:1;text-align: right;">
                     <button class="btn" style="padding: 20px 4px;" 
-                        onclick="setOrRemoveDeviceFromBlackList('${[mac_addr, ...blackMacList].join(';')}','${[hostname, ...blackNameList].join(';')}','${AclMode}')">
+                        onclick="setOrRemoveDeviceFromBlackList('${[mac_addr, ...blackMacList].join(';')}','${[escapeHtml(hostname), ...blackNameList].join(';')}','${AclMode}')">
                         🚫 ${t('client_mgmt_block')}
                     </button>
                 </div>
@@ -4587,18 +4594,22 @@ function main_func() {
                 method: 'GET',
                 headers: common_headers
             })).json()
-            const { smtp_host, smtp_port, smtp_username, smtp_password, smtp_to, forward_dev_info } = data
+            const { smtp_host, smtp_port, smtp_username, smtp_password, smtp_from, smtp_from_name, smtp_to, forward_dev_info } = data
             const smtpHostEl = document.querySelector('#smtp_host')
             const smtpPortEl = document.querySelector('#smtp_port')
             const smtpToEl = document.querySelector('#smtp_to')
             const smtpUsernameEl = document.querySelector('#smtp_username')
             const smtpPasswordEl = document.querySelector('#smtp_password')
+            const smtpFromEl = document.querySelector('#smtp_from')
+            const smtpFromNameEl = document.querySelector('#smtp_from_name')
             const forwardDevInfoEl = document.querySelector('#smsForwardForm input[name="forward_dev_info"]')
             forwardDevInfoEl.checked = forward_dev_info == "1"
             smtpHostEl.value = smtp_host || ''
             smtpPortEl.value = smtp_port || ''
             smtpUsernameEl.value = smtp_username || ''
             smtpPasswordEl.value = smtp_password || ''
+            smtpFromEl.value = smtp_from || ''
+            smtpFromNameEl.value = smtp_from_name || ''
             smtpToEl.value = smtp_to || ''
             needSwitch && switchSmsForwardMethodTab({ target: document.querySelector('#smtp_btn') })
         } else if (method.toLowerCase() == 'curl') {
@@ -4742,6 +4753,8 @@ function main_func() {
         const smtp_to = formData.get('smtp_to')
         const smtp_username = formData.get('smtp_username')
         const smtp_password = formData.get('smtp_password')
+        const smtp_from = formData.get('smtp_from')
+        const smtp_from_name = formData.get('smtp_from_name')
         const forward_dev_info = formData.get('forward_dev_info') != null
 
 
@@ -4749,6 +4762,8 @@ function main_func() {
         if (!smtp_port || smtp_port.trim() == '') return createToast(t('toast_please_input_smtp_port'), 'red')
         if (!smtp_username || smtp_username.trim() == '') return createToast(t('toast_please_input_smtp_username'), 'red')
         if (!smtp_password || smtp_password.trim() == '') return createToast(t('toast_please_input_smtp_pwd'), 'red')
+        // 发件邮箱可留空（回退为用户名），但填了就必须是邮箱，否则服务商必拒收
+        if (smtp_from && smtp_from.trim() != '' && !smtp_from.includes('@')) return createToast(t('toast_please_input_smtp_from'), 'red')
         if (!smtp_to || smtp_to.trim() == '') return createToast(t('toast_please_input_smtp_receive'), 'red')
 
         //请求
@@ -4764,6 +4779,8 @@ function main_func() {
                     smtp_port: smtp_port.trim(),
                     smtp_username: smtp_username.trim(),
                     smtp_password: smtp_password.trim(),
+                    smtp_from: smtp_from ? smtp_from.trim() : '',
+                    smtp_from_name: smtp_from_name ? smtp_from_name.trim() : '',
                     smtp_to: smtp_to.trim(),
                     forward_dev_info: forward_dev_info ? "1" : "0"
                 })
@@ -8135,7 +8152,7 @@ echo ${flag ? '1' : '0'} > /sys/devices/system/cpu/cpu3/online
 
             const res = await (await fetchWithTimeout(`${KANO_baseURL}/vonr_status`, {
                 method: "POST",
-                body: JSON.stringify({ enabled: voNRSwitchBtn1.dataset.enabled == "1" ? "0" : "1" , slot: 1 }),
+                body: JSON.stringify({ enabled: voNRSwitchBtn1.dataset.enabled == "1" ? "0" : "1", slot: 1 }),
                 headers: common_headers
             })).json()
             if (res.result == "success") {

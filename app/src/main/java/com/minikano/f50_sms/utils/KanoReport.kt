@@ -27,6 +27,11 @@ class KanoReport {
             .build()
 
         suspend fun reportToServer() {
+            // 已禁用：不再向 api.kanokano.cn 发送数据
+            KanoLog.d("UFI_TOOLS_LOG_report_service","reportToServer 已禁用")
+            return
+
+            /* 原代码已禁用
             try {
                 val uuid = UniqueDeviceIDManager.getUUID()?.trim()
                 if (uuid.isNullOrEmpty()) {
@@ -71,6 +76,7 @@ class KanoReport {
             } catch (e: Exception) {
                 KanoLog.e("UFI_TOOLS_LOG_report_service","上报失败:",e)
             }
+            */
         }
     }
 }

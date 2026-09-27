@@ -37,7 +37,7 @@ object AppMeta {
     var isEnableWakeLock:Boolean = false
         private set
 
-    var GLOBAL_SERVER_URL = "https://pan.kanokano.cn"
+    var GLOBAL_SERVER_URL = "https://pan.rexe.cc"
         private set
 
     var isDefaultOrWeakToken = false
